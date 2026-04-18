@@ -115,7 +115,7 @@ export default function SavedScholarshipsPage() {
 
   useEffect(() => {
     async function loadMe() {
-      const { res, data } = await apiFetchJson<MeResponse>("/auth/me", { method: "GET" })
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
       if (res.ok && data) setMe(data)
     }
     void loadMe()

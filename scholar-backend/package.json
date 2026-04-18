@@ -11,7 +11,12 @@
     "migrate:bookmarks": "node scripts/migrate-bookmarks-table.js",
     "migrate:documents": "node scripts/migrate-documents-table.js",
     "migrate:community": "node scripts/migrate-community-tables.js",
-    "migrate:scholarship-sources": "node scripts/migrate-scholarship-sources.js"
+    "migrate:scholarship-sources": "node scripts/migrate-scholarship-sources.js",
+    "db:reset": "node scripts/db-reset-local.js",
+    "seed:test-roles": "node scripts/seed-role-test-users.js",
+    "verify:role-routing": "node scripts/verify-role-routing.js",
+    "verify:milestone2": "node scripts/verify-milestone2-api.js",
+    "test": "node --test \"tests/*.test.js\""
   },
   "keywords": [
     "express",
@@ -34,6 +39,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
+    "nodemailer": "^8.0.5",
     "pg": "^8.13.1"
   },
   "devDependencies": {

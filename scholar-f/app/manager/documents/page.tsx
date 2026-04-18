@@ -36,7 +36,7 @@ export default function ManagerDocumentsPage() {
   })
 
   async function loadMeAndDocs() {
-    const meRes = await apiFetchJson<MeResponse>("/auth/me", { method: "GET" })
+    const meRes = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
     if (meRes.res.status === 401 || meRes.res.status === 403 || !meRes.data?.id) {
       clearToken()
       router.replace("/signin")

@@ -10,6 +10,7 @@ const userRoutes = require("./routes/user.routes");
 const profileRoutes = require("./routes/profile.routes");
 const adminRoutes = require("./routes/admin.routes");
 const managerRoutes = require("./routes/manager.routes");
+const ownerRoutes = require("./routes/owner.routes");
 const scholarshipsRoutes = require("./routes/scholarships.routes");
 const bookmarksRoutes = require("./routes/bookmarks.routes");
 const documentsRoutes = require("./routes/documents.routes");
@@ -37,11 +38,13 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/api", userRoutes);
 app.use("/api", profileRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/manager", managerRoutes);
+app.use("/api/owner", ownerRoutes);
 app.use("/api/scholarships", scholarshipsRoutes);
 app.use("/api/bookmarks", bookmarksRoutes);
 app.use("/api/documents", documentsRoutes);

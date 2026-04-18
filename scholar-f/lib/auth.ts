@@ -15,3 +15,18 @@ export function clearToken() {
   window.localStorage.removeItem(TOKEN_STORAGE_KEY)
 }
 
+export async function logoutFromServer() {
+  if (typeof window === "undefined") return
+  const token = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
+  try {
+    await fetch(`${baseUrl}/api/auth/logout`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      credentials: "include",
+    })
+  } catch {
+    // Ignore network issues; local logout should still proceed.
+  }
+}
+

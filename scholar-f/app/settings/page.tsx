@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
+import { clearToken, logoutFromServer } from "@/lib/auth"
 import {
   loadNotificationPreferences,
   saveNotificationPreferences,
@@ -79,7 +79,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function load() {
-      const { res, data } = await apiFetchJson<MeResponse>("/auth/me", { method: "GET" })
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
       if (res.status === 401) {
         clearToken()
         router.replace("/signin")
@@ -152,6 +152,7 @@ export default function SettingsPage() {
               variant="outline"
               size="sm"
               onClick={() => {
+                void logoutFromServer()
                 clearToken()
                 router.push("/signin")
               }}
@@ -315,6 +316,7 @@ export default function SettingsPage() {
               <Button
                 variant="destructive"
                 onClick={() => {
+                void logoutFromServer()
                   clearToken()
                   router.push("/signin")
                 }}

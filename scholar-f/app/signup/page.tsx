@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { apiFetchJson, API_BASE_URL } from "@/lib/api"
+import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { setToken } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -65,7 +66,7 @@ export default function SignUpPage() {
     setFormError(null)
 
     try {
-      const { res, data, errorMessage } = await apiFetchJson<SignupResponse>("/auth/signup", {
+      const { res, data, errorMessage } = await apiFetchJson<SignupResponse>("/api/auth/register", {
         method: "POST",
         auth: false,
         headers: { "Content-Type": "application/json" },
@@ -84,14 +85,7 @@ export default function SignUpPage() {
 
       setToken(data.token)
 
-      const role = data.user?.role
-      if (role === "manager") {
-        router.push("/manager")
-      } else if (role === "admin") {
-        router.push("/admin")
-      } else {
-        router.push("/dashboard")
-      }
+      router.push(getPostAuthPath(data.user?.role))
     } finally {
       setIsLoading(false)
     }
@@ -99,7 +93,7 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     // Backend will redirect back to `/auth/callback?token=...`
-    window.location.href = `${API_BASE_URL}/auth/google`
+    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`
   }
 
   return (

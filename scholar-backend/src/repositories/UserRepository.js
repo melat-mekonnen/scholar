@@ -80,7 +80,7 @@ class UserRepository {
     return result.rows[0] || null;
   }
 
-  async listUsers({ page = 1, pageSize = 20, search, role }) {
+  async listUsers({ page = 1, pageSize = 20, search, role, roles }) {
     const offset = (page - 1) * pageSize;
     const params = [];
     const conditions = [];
@@ -90,7 +90,10 @@ class UserRepository {
       conditions.push("(LOWER(full_name) LIKE $"+params.length+" OR LOWER(email) LIKE $"+params.length+")");
     }
 
-    if (role) {
+    if (roles && roles.length > 0) {
+      params.push(roles);
+      conditions.push(`role = ANY($${params.length}::text[])`);
+    } else if (role) {
       params.push(role);
       conditions.push(`role = $${params.length}`);
     }
@@ -161,6 +164,49 @@ class UserRepository {
       [id, role]
     );
     return result.rows[0] || null;
+  }
+
+  async updatePasswordById(id, passwordHash) {
+    const result = await query(
+      `UPDATE users
+       SET password_hash = $2,
+           auth_provider = 'local',
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id`,
+      [id, passwordHash]
+    );
+    return result.rows[0] || null;
+  }
+
+  async createPasswordResetToken({ userId, tokenHash, expiresAt }) {
+    const result = await query(
+      `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+       VALUES ($1, $2, $3)
+       RETURNING id`,
+      [userId, tokenHash, expiresAt]
+    );
+    return result.rows[0] || null;
+  }
+
+  async findValidPasswordResetToken(tokenHash) {
+    const result = await query(
+      `SELECT id, user_id, token_hash, expires_at
+       FROM password_reset_tokens
+       WHERE token_hash = $1
+         AND expires_at > NOW()
+       LIMIT 1`,
+      [tokenHash]
+    );
+    return result.rows[0] || null;
+  }
+
+  async deletePasswordResetToken(id) {
+    await query("DELETE FROM password_reset_tokens WHERE id = $1", [id]);
+  }
+
+  async deletePasswordResetTokensByUser(userId) {
+    await query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);
   }
 }
 

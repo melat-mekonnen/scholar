@@ -23,9 +23,10 @@ const upload = multer({
   },
 });
 
-function requireAdminOrManager(req, res, next) {
-  if (!req.user || (req.user.role !== "admin" && req.user.role !== "manager")) {
-    return res.status(403).json({ message: "Admin or manager access required" });
+function requireAdminManagerOrOwner(req, res, next) {
+  const r = req.user?.role;
+  if (!req.user || (r !== "admin" && r !== "manager" && r !== "owner")) {
+    return res.status(403).json({ message: "Admin, owner, or manager access required" });
   }
   return next();
 }
@@ -37,12 +38,12 @@ router.get("/:id/download", documentsController.download);
 router.post(
   "/",
   authMiddleware,
-  requireAdminOrManager,
+  requireAdminManagerOrOwner,
   upload.single("file"),
   documentsController.upload
 );
-router.put("/:id", authMiddleware, requireAdminOrManager, documentsController.update);
-router.delete("/:id", authMiddleware, requireAdminOrManager, documentsController.remove);
+router.put("/:id", authMiddleware, requireAdminManagerOrOwner, documentsController.update);
+router.delete("/:id", authMiddleware, requireAdminManagerOrOwner, documentsController.remove);
 
 module.exports = router;
 

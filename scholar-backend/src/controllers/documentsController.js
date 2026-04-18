@@ -70,10 +70,10 @@ async function upload(req, res, next) {
       throw err;
     }
 
-    if (role === "manager") {
+    if (role === "manager" || role === "owner") {
       if (!scholarshipId) {
         fs.unlink(file.path, () => {});
-        const err = new Error("Managers must provide scholarshipId for document upload");
+        const err = new Error("Managers and owners must provide scholarshipId for document upload");
         err.statusCode = 400;
         throw err;
       }

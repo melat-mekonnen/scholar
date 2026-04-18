@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { apiFetchJson, API_BASE_URL } from "@/lib/api"
+import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { setToken } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -51,7 +52,7 @@ export default function SignInPage() {
     setFormError(null)
 
     try {
-      const { res, data, errorMessage } = await apiFetchJson<LoginResponse>("/auth/login", {
+      const { res, data, errorMessage } = await apiFetchJson<LoginResponse>("/api/auth/login", {
         method: "POST",
         auth: false,
         headers: { "Content-Type": "application/json" },
@@ -69,14 +70,7 @@ export default function SignInPage() {
 
       setToken(data.token)
 
-      const role = data.user?.role
-      if (role === "manager") {
-        router.push("/manager")
-      } else if (role === "admin") {
-        router.push("/admin")
-      } else {
-        router.push("/dashboard")
-      }
+      router.push(getPostAuthPath(data.user?.role))
     } finally {
       setIsLoading(false)
     }
@@ -84,7 +78,7 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     // Backend will redirect back to `/auth/callback?token=...`
-    window.location.href = `${API_BASE_URL}/auth/google`
+    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`
   }
 
   return (
@@ -143,6 +137,11 @@ export default function SignInPage() {
                   aria-invalid={!!errors.password}
                 />
                 {errors.password && <FieldError>{errors.password}</FieldError>}
+                <div className="mt-2 text-right">
+                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </Field>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

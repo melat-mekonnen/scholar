@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { setToken } from "@/lib/auth"
+import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AuthCallbackPage() {
@@ -19,14 +20,7 @@ export default function AuthCallbackPage() {
           payloadPart.replace(/-/g, "+").replace(/_/g, "/"),
         )
         const payload = JSON.parse(payloadJson) as { role?: string }
-        const role = payload.role
-        if (role === "manager") {
-          router.replace("/manager")
-        } else if (role === "admin") {
-          router.replace("/admin")
-        } else {
-          router.replace("/dashboard")
-        }
+        router.replace(getPostAuthPath(payload.role))
       } catch {
         // Fallback if decoding fails for any reason.
         router.replace("/dashboard")

@@ -1,11 +1,20 @@
 const { Pool } = require("pg");
 const { env } = require("../../config/env");
 
+const localDbPattern = /(localhost|127\.0\.0\.1)/i;
+const disableSslPattern = /sslmode=disable/i;
+const shouldUseSsl =
+  !localDbPattern.test(env.databaseUrl) && !disableSslPattern.test(env.databaseUrl);
+
 const pool = new Pool({
   connectionString: env.databaseUrl,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ...(shouldUseSsl
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+    : {}),
 });
 
 pool.on("error", (err) => {

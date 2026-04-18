@@ -1,20 +1,19 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const { requireAdmin } = require("../middleware/requireAdmin");
+const { requireAdminOrOwner } = require("../middleware/requireAdminOrOwner");
+const { allowAdminSelfOrOwner } = require("../middleware/allowAdminSelfOrOwner");
 const userController = require("../controllers/userController");
 
 const router = express.Router();
 
-// IMPORTANT: Admin guard must only apply to /users routes,
-// otherwise it blocks other /api routes like /api/profile.
-router.use("/users", authMiddleware, requireAdmin);
+router.use(authMiddleware);
 
-router.get("/users", userController.list);
-router.get("/users/:id", userController.getById);
-router.put("/users/:id", userController.update);
-router.delete("/users/:id", userController.remove);
-router.put("/users/:id/activate", userController.activate);
-router.put("/users/:id/role", userController.changeRole);
+router.get("/users", requireAdminOrOwner, userController.list);
+router.get("/users/:id", allowAdminSelfOrOwner(), userController.getById);
+router.put("/users/:id", allowAdminSelfOrOwner(), userController.update);
+router.delete("/users/:id", requireAdmin, userController.remove);
+router.put("/users/:id/activate", requireAdmin, userController.activate);
+router.put("/users/:id/role", requireAdminOrOwner, userController.changeRole);
 
 module.exports = router;
-

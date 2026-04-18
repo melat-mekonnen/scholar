@@ -86,7 +86,7 @@ export default function CommunityPage() {
 
   useEffect(() => {
     async function loadMe() {
-      const { res, data } = await apiFetchJson<MeResponse>("/auth/me", { method: "GET", auth: true })
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET", auth: true })
       if (res.ok && data) setMe(data)
     }
     void loadMe()
