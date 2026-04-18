@@ -18,7 +18,7 @@ export function clearToken() {
 export async function logoutFromServer() {
   if (typeof window === "undefined") return
   const token = window.localStorage.getItem(TOKEN_STORAGE_KEY)
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
   try {
     await fetch(`${baseUrl}/api/auth/logout`, {
       method: "POST",

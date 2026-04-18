@@ -1,5 +1,5 @@
 import { ScholarshipDocumentsPage } from "@/components/scholarship-workspace/scholarship-documents-page"
 
-export default function ManagerDocumentsPage() {
-  return <ScholarshipDocumentsPage workspace="manager" />
+export default function OwnerDocumentsPage() {
+  return <ScholarshipDocumentsPage workspace="owner" />
 }

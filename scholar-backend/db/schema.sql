@@ -91,12 +91,28 @@ CREATE TABLE IF NOT EXISTS user_activity (
 CREATE TABLE IF NOT EXISTS student_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
-  field_of_study TEXT NOT NULL,
-  gpa NUMERIC(3, 2) NOT NULL CHECK (gpa >= 0.0 AND gpa <= 4.0),
-  degree_level TEXT NOT NULL CHECK (degree_level IN ('high_school', 'bachelor', 'master', 'phd')),
+  field_of_study TEXT,
+  gpa NUMERIC(3, 2) CHECK (gpa IS NULL OR (gpa >= 0.0 AND gpa <= 4.0)),
+  degree_level TEXT CHECK (degree_level IS NULL OR degree_level IN ('high_school', 'bachelor', 'master', 'phd')),
   preferred_country TEXT,
   interests TEXT[] NOT NULL DEFAULT '{}',
   completeness_score INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ---------------------------------------------------------------------------
+-- manager_profiles (posting / public-facing context for scholarship managers & owners)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS manager_profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
+  job_title TEXT,
+  organization_name TEXT,
+  bio TEXT,
+  public_contact_email TEXT,
+  website_url TEXT,
+  phone TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

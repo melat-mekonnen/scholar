@@ -4,7 +4,7 @@ const profileController = require("../controllers/profileController");
 
 const router = express.Router();
 
-// Only protect /profile routes, do not force auth on other /api/* routes
+// Authenticated users only (students, managers, owners, admins) — each user’s own profile row.
 router.use("/profile", authMiddleware);
 
 router.post("/profile", profileController.create);

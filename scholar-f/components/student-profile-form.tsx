@@ -117,39 +117,62 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
   useEffect(() => {
     async function loadExisting() {
       setLoadingExisting(true)
-      const { res, data } = await apiFetchJson<ProfileApiResponse>("/api/profile", { method: "GET" })
-      if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (!res.ok || !data) {
-        // No profile yet is OK (404), just start blank.
-        setLoadingExisting(false)
+      try {
+        const { res, data } = await apiFetchJson<ProfileApiResponse>("/api/profile", {
+          method: "GET",
+        })
+        if (res.status === 401 || res.status === 403) {
+          clearToken()
+          router.replace("/signin")
+          return
+        }
+        if (res.status === 404) {
+          setProfileId(null)
+          setIsEditing(true)
+          return
+        }
+        if (!res.ok || !data) {
+          toast({
+            title: "Could not load profile",
+            description:
+              (data as { message?: string } | null)?.message ||
+              `Something went wrong (${res.status}).`,
+            variant: "destructive",
+          })
+          setIsEditing(true)
+          return
+        }
+
+        setProfileId(data.id || null)
+        if (data.gpa != null) {
+          const parsed = typeof data.gpa === "number" ? data.gpa : Number(String(data.gpa))
+          if (!Number.isNaN(parsed)) setGpa(String(parsed))
+        }
+        const dl = (data.degreeLevel ?? data.degree_level) as string | undefined
+        if (dl) setDegreeLevel(dl)
+        const fos = (data.fieldOfStudy ?? data.field_of_study) as string | undefined
+        if (fos) setFieldOfStudy(fos)
+        const pc = (data.preferredCountry ?? data.preferred_country) as string | undefined
+        if (pc) setPreferredCountry(pc)
+        if (Array.isArray(data.interests)) setInterests(data.interests)
+
+        // Existing profile starts in read-only mode until user clicks Edit.
+        setIsEditing(false)
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Network error"
+        toast({
+          title: "Could not load profile",
+          description: message,
+          variant: "destructive",
+        })
         setIsEditing(true)
-        return
+      } finally {
+        setLoadingExisting(false)
       }
-
-      setProfileId(data.id || null)
-      if (data.gpa != null) {
-        const parsed = typeof data.gpa === "number" ? data.gpa : Number(String(data.gpa))
-        if (!Number.isNaN(parsed)) setGpa(String(parsed))
-      }
-      const dl = (data.degreeLevel ?? data.degree_level) as string | undefined
-      if (dl) setDegreeLevel(dl)
-      const fos = (data.fieldOfStudy ?? data.field_of_study) as string | undefined
-      if (fos) setFieldOfStudy(fos)
-      const pc = (data.preferredCountry ?? data.preferred_country) as string | undefined
-      if (pc) setPreferredCountry(pc)
-      if (Array.isArray(data.interests)) setInterests(data.interests)
-
-      // Existing profile starts in read-only mode until user clicks Edit.
-      setIsEditing(false)
-      setLoadingExisting(false)
     }
 
     void loadExisting()
-  }, [router])
+  }, [router, toast])
 
   const toggleInterest = (interest: string) => {
     setInterests((prev) =>
@@ -193,7 +216,14 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
         return
       }
 
-      if (!res.ok || !data) {
+      if (!res.ok) {
+        throw new Error(
+          (data as { message?: string } | null)?.message ||
+            errorMessage ||
+            "Failed to save profile",
+        )
+      }
+      if (data == null) {
         throw new Error(errorMessage || "Failed to save profile")
       }
 
@@ -276,7 +306,7 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>GPA</CardTitle>
-          <CardDescription>Your current Grade Point Average (0.0 - 4.0)</CardDescription>
+          <CardDescription>Optional — add when you know it (0.0 - 4.0)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
@@ -300,10 +330,14 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Degree Level</CardTitle>
-          <CardDescription>Select your current or target degree</CardDescription>
+          <CardDescription>Optional — select your current or target degree</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={degreeLevel} onValueChange={setDegreeLevel} disabled={inputsDisabled}>
+          <Select
+            value={degreeLevel || undefined}
+            onValueChange={setDegreeLevel}
+            disabled={inputsDisabled}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select degree level" />
             </SelectTrigger>
@@ -322,7 +356,7 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Field of Study</CardTitle>
-          <CardDescription>Your major or focus area</CardDescription>
+          <CardDescription>Optional — your major or focus area</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <Input
@@ -344,7 +378,7 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Areas of Interest</CardTitle>
-          <CardDescription>Select up to 10 areas</CardDescription>
+          <CardDescription>Optional — select up to 10 areas</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">

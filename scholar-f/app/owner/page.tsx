@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, LayoutDashboard, LogOut, Users } from "lucide-react"
+import { Building2, IdCard, LayoutDashboard, LogOut, Users } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
@@ -57,7 +57,8 @@ export default function OwnerDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold">Owner dashboard</h1>
               <p className="text-sm text-muted-foreground">
-                Business-level oversight. Day-to-day scholarship work uses the manager tools.
+                Posting profile and user roles live here; open <strong>Scholarship operations</strong> for
+                listings, deadlines, and documents under your owner account.
               </p>
             </div>
           </div>
@@ -69,9 +70,15 @@ export default function OwnerDashboardPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/manager">
+              <Link href="/owner/posting-profile">
+                <IdCard className="mr-2 h-4 w-4" />
+                Posting profile
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/owner/scholarships">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
-                Manager tools
+                Scholarship operations
               </Link>
             </Button>
             <Button

@@ -66,11 +66,11 @@ class StudentProfileRepository {
 
     const result = await query(
       `UPDATE student_profiles
-       SET field_of_study = COALESCE($2, field_of_study),
-           gpa = COALESCE($3, gpa),
-           degree_level = COALESCE($4, degree_level),
-           preferred_country = COALESCE($5, preferred_country),
-           interests = COALESCE($6, interests),
+       SET field_of_study = $2,
+           gpa = $3,
+           degree_level = $4,
+           preferred_country = $5,
+           interests = $6,
            completeness_score = $7,
            updated_at = NOW()
        WHERE user_id = $1
@@ -79,11 +79,11 @@ class StudentProfileRepository {
                  created_at, updated_at`,
       [
         userId,
-        fieldOfStudy || null,
-        gpa != null ? gpa : null,
-        degreeLevel || null,
-        preferredCountry || null,
-        interests || null,
+        fieldOfStudy ?? null,
+        gpa ?? null,
+        degreeLevel ?? null,
+        preferredCountry ?? null,
+        Array.isArray(interests) ? interests : [],
         completenessScore,
       ]
     );

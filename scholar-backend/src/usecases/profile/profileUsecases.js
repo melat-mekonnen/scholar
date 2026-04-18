@@ -6,8 +6,43 @@ const {
 
 const repo = new StudentProfileRepository();
 
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function mergeOptionalTrimmed(v) {
+  if (v == null || v === "") return null;
+  const s = String(v).trim();
+  return s === "" ? null : s;
+}
+
+function mergeOptionalGpa(v) {
+  if (v == null || v === "") return null;
+  return v;
+}
+
+function mergeProfileUpdate(existing, input) {
+  return {
+    fieldOfStudy: hasOwn(input, "fieldOfStudy")
+      ? mergeOptionalTrimmed(input.fieldOfStudy)
+      : existing.field_of_study ?? null,
+    gpa: hasOwn(input, "gpa") ? mergeOptionalGpa(input.gpa) : existing.gpa,
+    degreeLevel: hasOwn(input, "degreeLevel")
+      ? input.degreeLevel === null || input.degreeLevel === ""
+        ? null
+        : input.degreeLevel
+      : existing.degree_level,
+    preferredCountry: hasOwn(input, "preferredCountry")
+      ? mergeOptionalTrimmed(input.preferredCountry)
+      : existing.preferred_country ?? null,
+    interests: hasOwn(input, "interests")
+      ? input.interests
+      : existing.interests,
+  };
+}
+
 async function createProfile(userId, input) {
-  const validated = validateProfileInput(input);
+  const validated = validateProfileInput(input || {});
   const completenessScore = calculateProfileCompleteness(validated);
   const profile = await repo.createProfile(userId, {
     ...validated,
@@ -25,10 +60,6 @@ async function getProfile(userId) {
 }
 
 async function updateProfile(userId, input) {
-  // Support partial updates:
-  // - Load existing profile
-  // - Merge incoming fields
-  // - Validate the final shape using the same rules as create
   const existing = await repo.findByUserId(userId);
   if (!existing) {
     const err = new Error("Profile not found");
@@ -36,20 +67,8 @@ async function updateProfile(userId, input) {
     throw err;
   }
 
-  const mergedInput = {
-    fieldOfStudy:
-      input.fieldOfStudy != null ? input.fieldOfStudy : existing.field_of_study,
-    gpa: input.gpa != null ? input.gpa : existing.gpa,
-    degreeLevel:
-      input.degreeLevel != null ? input.degreeLevel : existing.degree_level,
-    preferredCountry:
-      input.preferredCountry != null
-        ? input.preferredCountry
-        : existing.preferred_country,
-    interests: input.interests != null ? input.interests : existing.interests,
-  };
-
-  const validated = validateProfileInput(mergedInput);
+  const mergedRaw = mergeProfileUpdate(existing, input || {});
+  const validated = validateProfileInput(mergedRaw);
   const completenessScore = calculateProfileCompleteness(validated);
   const updated = await repo.updateProfile(userId, {
     ...validated,
@@ -63,4 +82,3 @@ module.exports = {
   getProfile,
   updateProfile,
 };
-

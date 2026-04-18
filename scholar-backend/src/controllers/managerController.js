@@ -4,6 +4,10 @@ const {
   getManagerScholarshipAnalytics,
   getManagerStatistics,
 } = require("../usecases/manager/managerDashboard");
+const {
+  getManagerProfile,
+  upsertManagerProfile,
+} = require("../usecases/manager/managerProfileUsecases");
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -63,10 +67,30 @@ async function statistics(req, res, next) {
   }
 }
 
+async function profileGet(req, res, next) {
+  try {
+    const data = await getManagerProfile(req.user.id);
+    return res.json(data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function profilePut(req, res, next) {
+  try {
+    const data = await upsertManagerProfile(req.user.id, req.body || {});
+    return res.json(data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   dashboard,
   scholarships,
   scholarshipAnalytics,
   statistics,
+  profileGet,
+  profilePut,
 };
 

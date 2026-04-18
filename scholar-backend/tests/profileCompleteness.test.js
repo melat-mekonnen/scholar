@@ -20,8 +20,8 @@ describe("calculateProfileCompleteness", () => {
     assert.equal(
       calculateProfileCompleteness({
         gpa: null,
-        degreeLevel: "",
-        fieldOfStudy: "",
+        degreeLevel: null,
+        fieldOfStudy: null,
         interests: [],
       }),
       0
@@ -30,31 +30,27 @@ describe("calculateProfileCompleteness", () => {
 });
 
 describe("validateProfileInput", () => {
-  test("rejects GPA above 4.0", () => {
-    assert.throws(
-      () =>
-        validateProfileInput({
-          fieldOfStudy: "x",
-          gpa: 4.1,
-          degreeLevel: "bachelor",
-        }),
-      /GPA must be between/
-    );
+  test("allows empty / all-null profile", () => {
+    const v = validateProfileInput({});
+    assert.equal(v.fieldOfStudy, null);
+    assert.equal(v.gpa, null);
+    assert.equal(v.degreeLevel, null);
+    assert.equal(v.preferredCountry, null);
+    assert.deepEqual(v.interests, []);
   });
 
-  test("rejects invalid degree level", () => {
+  test("rejects GPA above 4.0 when provided", () => {
+    assert.throws(() => validateProfileInput({ gpa: 4.1 }), /between 0.0 and 4.0/);
+  });
+
+  test("rejects invalid degree level when provided", () => {
     assert.throws(
-      () =>
-        validateProfileInput({
-          fieldOfStudy: "x",
-          gpa: 3,
-          degreeLevel: "mba",
-        }),
+      () => validateProfileInput({ degreeLevel: "mba" }),
       /Degree level must be one of/
     );
   });
 
-  test("accepts valid payload", () => {
+  test("accepts valid partial payload", () => {
     const v = validateProfileInput({
       fieldOfStudy: " Physics ",
       gpa: 2.5,
@@ -62,9 +58,10 @@ describe("validateProfileInput", () => {
       preferredCountry: "DE",
       interests: ["grants"],
     });
-    assert.equal(v.fieldOfStudy, " Physics ");
+    assert.equal(v.fieldOfStudy, "Physics");
     assert.equal(v.gpa, 2.5);
     assert.equal(v.degreeLevel, "master");
+    assert.equal(v.preferredCountry, "DE");
     assert.deepEqual(v.interests, ["grants"]);
   });
 });

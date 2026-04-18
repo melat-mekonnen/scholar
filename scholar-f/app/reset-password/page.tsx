@@ -1,14 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { apiFetchJson } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams()
   const initialToken = useMemo(() => params.get("token") ?? "", [params])
   const [token, setToken] = useState(initialToken)
@@ -77,5 +77,19 @@ export default function ResetPasswordPage() {
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center p-4 bg-background">
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </main>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   )
 }

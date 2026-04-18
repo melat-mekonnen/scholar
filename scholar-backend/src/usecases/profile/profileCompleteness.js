@@ -1,4 +1,53 @@
-const REQUIRED_FIELDS = ["fieldOfStudy", "gpa", "degreeLevel"];
+const ALLOWED_DEGREES = ["high_school", "bachelor", "master", "phd"];
+
+function optionalTrimmedString(v) {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s === "" ? null : s;
+}
+
+function normalizeGpa(v) {
+  if (v == null || v === "") return null;
+  const n = Number(v);
+  if (Number.isNaN(n)) {
+    const err = new Error("GPA must be a valid number when provided");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (n < 0.0 || n > 4.0) {
+    const err = new Error("GPA must be between 0.0 and 4.0");
+    err.statusCode = 400;
+    throw err;
+  }
+  return n;
+}
+
+function normalizeDegreeLevel(v) {
+  if (v == null || v === "") return null;
+  if (!ALLOWED_DEGREES.includes(v)) {
+    const err = new Error(
+      "Degree level must be one of: high_school, bachelor, master, phd"
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+  return v;
+}
+
+function normalizeInterests(interests) {
+  if (interests == null) return [];
+  if (!Array.isArray(interests)) {
+    const err = new Error("Interests must be an array");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (interests.length > 10) {
+    const err = new Error("Interests cannot have more than 10 items");
+    err.statusCode = 400;
+    throw err;
+  }
+  return interests;
+}
 
 function calculateProfileCompleteness(profile) {
   let score = 0;
@@ -11,46 +60,23 @@ function calculateProfileCompleteness(profile) {
   return score;
 }
 
+/**
+ * All core fields are optional — students may save partial profiles anytime.
+ * Values that are present are validated; empty / null clears optional fields.
+ */
 function validateProfileInput(input) {
-  const errors = [];
-
-  const { fieldOfStudy, gpa, degreeLevel, preferredCountry, interests } = input;
-
-  if (!fieldOfStudy || !fieldOfStudy.trim()) {
-    errors.push("Field of study is required");
-  }
-
-  if (gpa == null || Number.isNaN(Number(gpa))) {
-    errors.push("GPA is required and must be a number");
-  } else if (gpa < 0.0 || gpa > 4.0) {
-    errors.push("GPA must be between 0.0 and 4.0");
-  }
-
-  const allowedDegrees = ["high_school", "bachelor", "master", "phd"];
-  if (!degreeLevel || !allowedDegrees.includes(degreeLevel)) {
-    errors.push("Degree level must be one of: high_school, bachelor, master, phd");
-  }
-
-  if (interests) {
-    if (!Array.isArray(interests)) {
-      errors.push("Interests must be an array");
-    } else if (interests.length > 10) {
-      errors.push("Interests cannot have more than 10 items");
-    }
-  }
-
-  if (errors.length) {
-    const err = new Error(errors.join("; "));
-    err.statusCode = 400;
-    throw err;
-  }
+  const fieldOfStudy = optionalTrimmedString(input.fieldOfStudy);
+  const gpa = normalizeGpa(input.gpa);
+  const degreeLevel = normalizeDegreeLevel(input.degreeLevel);
+  const preferredCountry = optionalTrimmedString(input.preferredCountry);
+  const interests = normalizeInterests(input.interests);
 
   return {
     fieldOfStudy,
     gpa,
     degreeLevel,
-    preferredCountry: preferredCountry || null,
-    interests: interests || [],
+    preferredCountry,
+    interests,
   };
 }
 
@@ -58,4 +84,3 @@ module.exports = {
   calculateProfileCompleteness,
   validateProfileInput,
 };
-

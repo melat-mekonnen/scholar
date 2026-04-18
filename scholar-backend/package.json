@@ -11,6 +11,8 @@
     "migrate:bookmarks": "node scripts/migrate-bookmarks-table.js",
     "migrate:documents": "node scripts/migrate-documents-table.js",
     "migrate:community": "node scripts/migrate-community-tables.js",
+    "migrate:profile-nullable": "node scripts/migrate-student-profiles-nullable.js",
+    "migrate:manager-profiles": "node scripts/migrate-manager-profiles-table.js",
     "migrate:scholarship-sources": "node scripts/migrate-scholarship-sources.js",
     "db:reset": "node scripts/db-reset-local.js",
     "seed:test-roles": "node scripts/seed-role-test-users.js",

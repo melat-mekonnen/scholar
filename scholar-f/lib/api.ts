@@ -1,7 +1,10 @@
 import { getToken } from "@/lib/auth"
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
+/**
+ * Empty = same-origin (`/api/...`), proxied to the backend by `next.config.mjs` rewrites (avoids CORS in dev).
+ * Set `NEXT_PUBLIC_API_BASE_URL` when the API is on another origin (e.g. production).
+ */
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 
 type Json = Record<string, unknown> | unknown[] | null
 

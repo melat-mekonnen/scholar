@@ -19,7 +19,8 @@
   --accent: oklch(0.85 0.08 85);
   --accent-foreground: oklch(0.2 0.02 150);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
+  /* Must contrast with --destructive (same hue was invisible on toasts/buttons). */
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.9 0.02 120);
   --input: oklch(0.92 0.01 120);
   --ring: oklch(0.5 0.15 145);

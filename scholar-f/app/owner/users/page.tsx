@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Building2, LogOut } from "lucide-react"
+import { ArrowLeft, Building2, IdCard, LogOut } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
@@ -238,12 +238,18 @@ export default function OwnerUsersPage() {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
               <Link href="/owner">Dashboard</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/manager">Manager tools</Link>
+              <Link href="/owner/posting-profile">
+                <IdCard className="mr-2 h-4 w-4" />
+                Posting profile
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/owner/scholarships">Scholarship operations</Link>
             </Button>
             <Button
               variant="outline"
