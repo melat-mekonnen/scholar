@@ -332,6 +332,73 @@ POST   /api/scholarships/:id/documents (manager/owner/admin)
 
 ---
 
+### Milestone 4.1: Independent Scholarship Source Ingestion Module
+**Duration:** 1 week (can run in parallel with M5 readiness work)
+
+#### Purpose
+Add real scholarship data sources as an isolated module so ingestion failures never break existing platform features.
+
+#### Scope & Boundaries (must-have)
+1. Build a standalone ingestion module under `src/modules/scholarship-ingestion/`
+2. Run ingestion as a separate worker/cron process (never inside request handlers)
+3. Write incoming records to staging/import tables first
+4. Publish to `scholarships` only through controlled validation/moderation rules
+5. Keep all existing scholarship endpoints backward compatible
+6. Keep student apply flow external (`application_url` redirect) without changing existing UX contracts
+
+#### Data Governance Rules
+- Use only public/allowed sources (respect source ToS and robots rules)
+- Keep attribution for each scholarship (`source_name`, `source_url`)
+- Prefer official application URLs (`application_url`) for outbound apply
+- Do not auto-publish low-quality or incomplete records
+
+#### Module Components
+- Connectors: source-specific collectors (API/feed/HTML/PDF/manual import)
+- Normalizer: map source payloads into canonical scholarship shape
+- Validator: required fields, URL validity, deadline parsing, enum mapping
+- Dedupe: `source_url`/`external_id`/fingerprint checks
+- Publisher: controlled upsert into live scholarships
+- Observability: run logs, parse errors, per-source health
+
+#### Data Tables (recommended)
+- `scholarship_import_runs` (job metadata and counters)
+- `scholarship_raw_imports` (raw payload + normalized snapshot)
+- `scholarship_import_errors` (validation/parse/publish failures)
+
+#### API & Endpoint Alignment
+No breaking API changes to planned milestones:
+- Keep existing M4/M5/M6 endpoints unchanged
+- Optional additive endpoint for analytics tracking:
+  - `POST /api/scholarships/:id/apply-click` (student)
+- Student apply action remains external redirect to `application_url`
+
+#### Deliverables
+- [ ] Ingestion module scaffold created and isolated from delivery/controllers
+- [ ] At least one source connector implemented (e.g., DAAD)
+- [ ] Staging/import persistence and publish pipeline working
+- [ ] Feature flags per source and global ingestion toggle added
+- [ ] Admin moderation/publish flow validated with imported records
+- [ ] Existing M2/M4 behavior unchanged (regression checks pass)
+
+#### Testing
+**Unit Tests:**
+- Normalization mapping rules
+- Validation and enum coercion
+- Deduplication logic
+
+**Integration Tests:**
+- Ingestion run writes to staging tables
+- Invalid records are rejected and logged
+- Valid pending records can be published to `scholarships`
+- Existing `/api/scholarships` responses remain stable after ingestion enablement
+
+**Operational Checks:**
+- Source run success/failure metrics visible
+- Per-source disable/enable flags work without deploy
+- Ingestion worker failure does not impact API uptime
+
+---
+
 ### Milestone 5: Scholarship Verification & Moderation
 **Duration:** 4 days
 
