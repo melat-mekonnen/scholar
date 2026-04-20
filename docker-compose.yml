@@ -1,0 +1,57 @@
+# Scholar stack: Next.js (web) + Express API (api)
+# Run from this directory: docker compose up --build
+#
+# Copy .env.docker.example -> .env and fill secrets (or export vars in the shell).
+
+services:
+  api:
+    build:
+      context: ./scholar-backend
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-4000}:4000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:4000/health',(r)=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    environment:
+      PORT: "4000"
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_APP_URL: ${FRONTEND_APP_URL:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:4000/auth/google/callback}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://127.0.0.1:8010}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./scholar-f
+      dockerfile: Dockerfile
+      args:
+        BACKEND_URL: http://api:4000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

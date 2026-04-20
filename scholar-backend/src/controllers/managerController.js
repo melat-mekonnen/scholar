@@ -28,10 +28,12 @@ async function scholarships(req, res, next) {
       scholarships: rows.map((r) => ({
         id: r.id,
         title: r.title,
+        organizationName: r.organization_name,
         status: r.status,
         country: r.country,
         degreeLevel: r.degree_level,
         deadline: r.deadline,
+        rejectionReason: r.rejection_reason,
         createdAt: r.created_at,
         applicationsCount: r.applications_count,
         bookmarkCount: r.bookmark_count,

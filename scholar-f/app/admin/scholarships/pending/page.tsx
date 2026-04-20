@@ -155,13 +155,17 @@ export default function PendingScholarshipsPage() {
               Review and moderate scholarships before they go live to students.
             </p>
           </div>
-
-          <Input
-            placeholder="Search by title or country"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-72"
-          />
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Button asChild>
+              <Link href="/admin/scholarships/new">Create scholarship</Link>
+            </Button>
+            <Input
+              placeholder="Search by title or country"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+          </div>
         </header>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

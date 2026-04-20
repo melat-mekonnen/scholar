@@ -287,23 +287,27 @@ Allow managers to create and maintain scholarship listings
 
 #### API Endpoints
 ```
-POST   /api/scholarships (manager/admin)
+POST   /api/scholarships (manager/owner/admin)
 GET    /api/scholarships
 GET    /api/scholarships/:id
-PUT    /api/scholarships/:id (manager-own/admin)
-DELETE /api/scholarships/:id (manager-own/admin)
+PUT    /api/scholarships/:id (manager-own/owner/admin)
+DELETE /api/scholarships/:id (manager-own/owner/admin)
 GET    /api/scholarships/my-scholarships (manager)
-POST   /api/scholarships/:id/documents (manager/admin)
+POST   /api/scholarships/:id/documents (manager/owner/admin)
 ```
 
 #### Deliverables
-- [ ] Scholarship CRUD complete
-- [ ] File upload working
-- [ ] Ownership validation implemented
-- [ ] Pagination working
-- [ ] API documentation updated
+- [x] Scholarship CRUD complete
+- [x] File upload working (`POST /api/scholarships/:id/documents` + existing `/api/documents`)
+- [x] Ownership validation implemented (manager-own; owner/admin all)
+- [x] Pagination working (`GET /api/scholarships`, `GET /api/scholarships/my-scholarships`)
+- [x] API documentation updated (this milestone doc + `verify:milestone4` script)
 
 #### Testing
+**Automated (this repo):**
+- `npm test` (backend) — includes scholarship rule tests
+- `npm run verify:milestone4` — CRUD + ownership + pagination + upload + delete-relations checks
+
 **Unit Tests:**
 - Scholarship validation logic
 - Deadline validation (future dates only)

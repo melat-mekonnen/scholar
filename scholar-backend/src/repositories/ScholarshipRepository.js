@@ -1,8 +1,21 @@
 const { query } = require("../infra/db/neonClient");
 
 class ScholarshipRepository {
-  async createByManager({
+  async expirePastDeadline() {
+    await query(
+      `UPDATE scholarships
+       SET status = 'expired',
+           updated_at = NOW()
+       WHERE deadline IS NOT NULL
+         AND deadline < CURRENT_DATE
+         AND status IN ('verified', 'pending')`,
+      [],
+    );
+  }
+
+  async createScholarship({
     title,
+    organizationName,
     country,
     degreeLevel,
     fieldOfStudy,
@@ -12,10 +25,12 @@ class ScholarshipRepository {
     description,
     applicationUrl,
     postedByUserId,
+    status,
   }) {
     const result = await query(
       `INSERT INTO scholarships (
          title,
+         organization_name,
          country,
          degree_level,
          field_of_study,
@@ -27,9 +42,10 @@ class ScholarshipRepository {
          status,
          posted_by_user_id
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING id,
                  title,
+                 organization_name,
                  country,
                  degree_level,
                  field_of_study,
@@ -43,6 +59,7 @@ class ScholarshipRepository {
                  created_at`,
       [
         title,
+        organizationName,
         country,
         degreeLevel,
         fieldOfStudy,
@@ -51,11 +68,95 @@ class ScholarshipRepository {
         amount,
         description,
         applicationUrl,
+        status,
         postedByUserId,
       ]
     );
 
     return result.rows[0];
+  }
+
+  async listMine({ userId, page = 1, pageSize = 20, search, status }) {
+    const offset = (page - 1) * pageSize;
+    const params = [userId];
+    const where = ["posted_by_user_id = $1"];
+
+    if (search) {
+      params.push(`%${String(search).toLowerCase()}%`);
+      where.push(`(LOWER(title) LIKE $${params.length} OR LOWER(country) LIKE $${params.length})`);
+    }
+    if (status && status !== "all") {
+      params.push(String(status));
+      where.push(`status = $${params.length}`);
+    }
+
+    const whereClause = `WHERE ${where.join(" AND ")}`;
+    const countResult = await query(
+      `SELECT COUNT(*)::int AS total FROM scholarships ${whereClause}`,
+      params,
+    );
+
+    params.push(pageSize);
+    params.push(offset);
+    const listResult = await query(
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason, created_at
+       FROM scholarships
+       ${whereClause}
+       ORDER BY created_at DESC
+       LIMIT $${params.length - 1} OFFSET $${params.length}`,
+      params,
+    );
+
+    return {
+      scholarships: listResult.rows,
+      total: Number(countResult.rows[0]?.total || 0),
+      page,
+      pageSize,
+    };
+  }
+
+  async updateScholarshipById(id, patch) {
+    const result = await query(
+      `UPDATE scholarships
+       SET title = COALESCE($2, title),
+           organization_name = COALESCE($3, organization_name),
+           country = COALESCE($4, country),
+           degree_level = COALESCE($5, degree_level),
+           field_of_study = COALESCE($6, field_of_study),
+           funding_type = COALESCE($7, funding_type),
+           deadline = COALESCE($8, deadline),
+           amount = COALESCE($9, amount),
+           description = COALESCE($10, description),
+           application_url = COALESCE($11, application_url),
+           status = COALESCE($12, status),
+           rejection_reason = COALESCE($13, rejection_reason),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
+                 amount, description, application_url, status, rejection_reason, posted_by_user_id, updated_at`,
+      [
+        id,
+        patch.title ?? null,
+        patch.organizationName ?? null,
+        patch.country ?? null,
+        patch.degreeLevel ?? null,
+        patch.fieldOfStudy ?? null,
+        patch.fundingType ?? null,
+        patch.deadline ?? null,
+        patch.amount ?? null,
+        patch.description ?? null,
+        patch.applicationUrl ?? null,
+        patch.status ?? null,
+        patch.rejectionReason ?? null,
+      ],
+    );
+    return result.rows[0] || null;
+  }
+
+  async deleteScholarshipCascade(id) {
+    await query("DELETE FROM documents WHERE scholarship_id = $1", [id]);
+    const result = await query("DELETE FROM scholarships WHERE id = $1 RETURNING id", [id]);
+    return result.rows[0] || null;
   }
 
   async getDefaultRecommended(limit = 3) {
@@ -74,7 +175,7 @@ class ScholarshipRepository {
     const countriesResult = await query(
       `SELECT DISTINCT country
        FROM scholarships
-       WHERE status = 'verified' AND country IS NOT NULL
+       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE) AND country IS NOT NULL
        ORDER BY country ASC`,
       []
     );
@@ -82,7 +183,7 @@ class ScholarshipRepository {
     const degreeLevelsResult = await query(
       `SELECT DISTINCT degree_level
        FROM scholarships
-       WHERE status = 'verified' AND degree_level IS NOT NULL
+       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE) AND degree_level IS NOT NULL
        ORDER BY degree_level ASC`,
       []
     );
@@ -90,7 +191,7 @@ class ScholarshipRepository {
     const fieldsResult = await query(
       `SELECT DISTINCT field_of_study
        FROM scholarships
-       WHERE status = 'verified' AND field_of_study IS NOT NULL
+       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE) AND field_of_study IS NOT NULL
        ORDER BY field_of_study ASC`,
       []
     );
@@ -98,7 +199,7 @@ class ScholarshipRepository {
     const fundingTypesResult = await query(
       `SELECT DISTINCT funding_type
        FROM scholarships
-       WHERE status = 'verified' AND funding_type IS NOT NULL
+       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE) AND funding_type IS NOT NULL
        ORDER BY funding_type ASC`,
       []
     );
@@ -131,6 +232,7 @@ class ScholarshipRepository {
     const effectiveStatus = status || "verified";
     params.push(effectiveStatus);
     where.push(`s.status = $${params.length}`);
+    where.push(`(s.deadline IS NULL OR s.deadline >= CURRENT_DATE)`);
 
     if (q) {
       params.push(`%${q.toLowerCase()}%`);
@@ -225,6 +327,7 @@ class ScholarshipRepository {
     const listResult = await query(
       `SELECT s.id,
               s.title,
+              s.organization_name,
               s.country,
               s.degree_level,
               s.field_of_study,
@@ -261,6 +364,7 @@ class ScholarshipRepository {
     const result = await query(
       `SELECT s.id,
               s.title,
+              s.organization_name,
               s.country,
               s.degree_level,
               s.field_of_study,
@@ -276,9 +380,23 @@ class ScholarshipRepository {
               u.full_name AS posted_by_full_name
        FROM scholarships s
        LEFT JOIN users u ON s.posted_by_user_id = u.id
-       WHERE s.id = $1 AND s.status = 'verified'
+       WHERE s.id = $1
+         AND s.status = 'verified'
+         AND (s.deadline IS NULL OR s.deadline >= CURRENT_DATE)
        LIMIT 1`,
       params
+    );
+    return result.rows[0] || null;
+  }
+
+  async findById(id) {
+    const result = await query(
+      `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
+              amount, description, application_url, status, rejection_reason, posted_by_user_id, created_at, updated_at
+       FROM scholarships
+       WHERE id = $1
+       LIMIT 1`,
+      [id],
     );
     return result.rows[0] || null;
   }
