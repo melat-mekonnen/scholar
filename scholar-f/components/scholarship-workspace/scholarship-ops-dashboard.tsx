@@ -117,6 +117,12 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
               New scholarship
             </Link>
             <Link
+              href={cfg.manageScholarshipsPath}
+              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
+            >
+              Manage scholarships
+            </Link>
+            <Link
               href={cfg.documentsPath}
               className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
             >
@@ -294,6 +300,9 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
               </Button>
               <Button asChild>
                 <Link href={cfg.newScholarshipPath}>Post new scholarship</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={cfg.manageScholarshipsPath}>Manage scholarships</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href={cfg.documentsPath}>Documents</Link>

@@ -30,6 +30,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
   const [formError, setFormError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
+    organizationName: "",
     country: "",
     degreeLevel: "",
     fieldOfStudy: "",
@@ -65,8 +66,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
         setFormError(errorMessage || "Failed to create scholarship")
         return
       }
-
-      router.push(cfg.basePath)
+      router.push(cfg.manageScholarshipsPath)
     } finally {
       setIsSubmitting(false)
     }
@@ -113,6 +113,12 @@ export function ScholarshipNewForm({ workspace }: Props) {
                 placeholder="Title"
                 value={formData.title}
                 onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
+                required
+              />
+              <Input
+                placeholder="Organization"
+                value={formData.organizationName}
+                onChange={(e) => setFormData((p) => ({ ...p, organizationName: e.target.value }))}
                 required
               />
               <Input

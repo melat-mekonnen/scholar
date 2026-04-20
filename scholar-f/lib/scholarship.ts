@@ -5,6 +5,7 @@ export type DegreeLevel = "high_school" | "bachelor" | "master" | "phd"
 export type ScholarshipPublic = {
   id: string
   title: string
+  organizationName?: string
   country: string
   degreeLevel: DegreeLevel
   fieldOfStudy?: string
@@ -65,6 +66,7 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
   return {
     id: String(r.id ?? ""),
     title: String(r.title ?? ""),
+    organizationName: str(r.organizationName) ?? str(r.organization_name),
     country: String(r.country ?? ""),
     degreeLevel: dl,
     fieldOfStudy: str(r.fieldOfStudy) ?? str(r.field_of_study),
@@ -119,6 +121,7 @@ export function mergeScholarshipDetail(
     ...list,
     ...detail,
     title: detail.title || list.title,
+    organizationName: detail.organizationName ?? list.organizationName,
     country: detail.country || list.country,
     description: detail.description ?? list.description,
     applicationUrl: detail.applicationUrl ?? list.applicationUrl,

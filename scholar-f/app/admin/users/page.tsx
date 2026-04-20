@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -69,7 +70,7 @@ export default function AdminUsersPage() {
           search: search.trim(),
         })
         const { res, data, errorMessage } = await apiFetchJson<UsersResponse>(
-          `/api/users?${params.toString()}`,
+          `/api/admin/users?${params.toString()}`,
           { method: "GET" },
         )
         if (!res.ok || !data) {
@@ -219,6 +220,12 @@ export default function AdminUsersPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/admin/audit-logs">Audit logs</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/admin">Dashboard</Link>
+            </Button>
             <Input
               placeholder="Search by name or email"
               value={search}

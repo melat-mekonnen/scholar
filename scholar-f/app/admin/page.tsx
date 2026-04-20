@@ -8,6 +8,7 @@ import {
   Check,
   Eye,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Search,
   Settings,
@@ -199,6 +200,13 @@ export default function AdminDashboardPage() {
               Manage Users
             </Link>
             <Link
+              href="/admin/audit-logs"
+              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
+            >
+              <ListChecks className="h-4 w-4" />
+              Audit Logs
+            </Link>
+            <Link
               href="/admin/documents"
               className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
             >
@@ -303,16 +311,21 @@ export default function AdminDashboardPage() {
               )}
             </section>
 
-            {/* Scholarship management */}
+            {/* Scholarships needing approval */}
             <section className="rounded-lg border bg-white">
               <div className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3">
-                <h2 className="text-lg font-semibold">Scholarship Management</h2>
+                <h2 className="text-lg font-semibold">Needs Approval / Unverified</h2>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" className="rounded-md">
-                    Scholarship Listings
+                  <Button asChild variant="outline" className="rounded-md">
+                    <Link href="/admin/scholarships/pending">Scholarship Listings</Link>
                   </Button>
-                  <Button className="rounded-md">Create/Edit Scholarship</Button>
+                  <Button asChild className="rounded-md">
+                    <Link href="/admin/scholarships/new">Create Scholarship</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-md">
+                    <Link href="/admin/audit-logs">View Audit Logs</Link>
+                  </Button>
                 </div>
               </div>
 

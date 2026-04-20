@@ -27,7 +27,7 @@ class AdminScholarshipRepository {
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     const result = await query(
-      `SELECT id, title, country, degree_level, funding_type, deadline, status
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason
        FROM scholarships
        ${whereClause}
        ORDER BY created_at DESC`,
@@ -47,7 +47,7 @@ class AdminScholarshipRepository {
     }
 
     const result = await query(
-      `SELECT id, title, country, degree_level, funding_type, deadline, status
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason
        FROM scholarships
        ${where}
        ORDER BY deadline ASC NULLS LAST`,

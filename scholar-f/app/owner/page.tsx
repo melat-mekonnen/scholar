@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, IdCard, LayoutDashboard, LogOut, Users } from "lucide-react"
+import { Building2, Check, IdCard, LayoutDashboard, LogOut, Users, X } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
@@ -16,11 +16,21 @@ type OwnerDashboard = {
   links?: { managerDashboard?: string; managerScholarships?: string }
 }
 
+type PendingScholarship = {
+  id: string
+  title: string
+  country?: string
+  status: "pending" | "verified" | "rejected" | "draft" | "expired"
+  deadline?: string
+}
+
 export default function OwnerDashboardPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<OwnerDashboard | null>(null)
+  const [pending, setPending] = useState<PendingScholarship[]>([])
+  const [busyIds, setBusyIds] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     async function load() {
@@ -41,10 +51,42 @@ export default function OwnerDashboardPage() {
         return
       }
       setData(json)
+
+      const pendingRes = await apiFetchJson<{ scholarships: PendingScholarship[] }>(
+        "/api/admin/scholarships/pending",
+        { method: "GET" },
+      )
+      if (pendingRes.res.ok && pendingRes.data?.scholarships) {
+        setPending(pendingRes.data.scholarships)
+      }
       setLoading(false)
     }
     void load()
   }, [router])
+
+  async function approve(id: string) {
+    setBusyIds((p) => ({ ...p, [id]: true }))
+    try {
+      const { res } = await apiFetchJson(`/api/admin/scholarships/${id}/verify`, { method: "PUT" })
+      if (res.ok) {
+        setPending((prev) => prev.filter((s) => s.id !== id))
+      }
+    } finally {
+      setBusyIds((p) => ({ ...p, [id]: false }))
+    }
+  }
+
+  async function reject(id: string) {
+    setBusyIds((p) => ({ ...p, [id]: true }))
+    try {
+      const { res } = await apiFetchJson(`/api/admin/scholarships/${id}/reject`, { method: "PUT" })
+      if (res.ok) {
+        setPending((prev) => prev.filter((s) => s.id !== id))
+      }
+    } finally {
+      setBusyIds((p) => ({ ...p, [id]: false }))
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -99,21 +141,69 @@ export default function OwnerDashboardPage() {
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         {data && !loading && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Overview</CardTitle>
-              <CardDescription>{data.message}</CardDescription>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <p className="mb-2">
-                API: <code className="rounded bg-muted px-1">GET /api/owner/dashboard</code>
-              </p>
-              <p>
-                Use <strong>Students & managers</strong> to promote students to manager (or revert).
-                Later milestones: audit logs and cross-manager analytics.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Overview</CardTitle>
+                <CardDescription>{data.message}</CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                <p className="mb-2">
+                  API: <code className="rounded bg-muted px-1">GET /api/owner/dashboard</code>
+                </p>
+                <p>
+                  Use <strong>Students & managers</strong> to promote students to manager (or revert).
+                  Later milestones: audit logs and cross-manager analytics.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Needs approval ({pending.length})</CardTitle>
+                <CardDescription>Manager posts waiting for owner/admin verification.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {pending.length ? (
+                  pending.map((s) => (
+                    <div key={s.id} className="rounded border p-3 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{s.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {s.country || "N/A"} · deadline {s.deadline || "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => void approve(s.id)}
+                          disabled={!!busyIds[s.id]}
+                        >
+                          <Check className="mr-1 h-4 w-4" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => void reject(s.id)}
+                          disabled={!!busyIds[s.id]}
+                        >
+                          <X className="mr-1 h-4 w-4" />
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No scholarships waiting for approval.</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 const { query } = require("../../infra/db/neonClient");
 
-async function getAdminDashboard() {
+async function getAdminStatistics() {
   // Users totals
   const usersTotalResult = await query(
     "SELECT COUNT(*) AS total FROM users",
@@ -84,5 +84,10 @@ async function getAdminDashboard() {
   };
 }
 
-module.exports = { getAdminDashboard };
+async function getAdminDashboard() {
+  const stats = await getAdminStatistics();
+  return stats;
+}
+
+module.exports = { getAdminDashboard, getAdminStatistics };
 
