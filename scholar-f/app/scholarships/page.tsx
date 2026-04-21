@@ -543,6 +543,7 @@ export default function ScholarshipsPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-base font-semibold">{s.title}</p>
                           <p className="mt-1 text-sm text-muted-foreground">
+                            {s.organizationName ? `${s.organizationName} · ` : ""}
                             {s.country} · {s.degreeLevel.replace("_", " ")}
                             {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>

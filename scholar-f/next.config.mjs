@@ -1,8 +1,17 @@
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 /** Express API (see scholar-backend). Used only for dev rewrites — not exposed to the client. */
 const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:4000"
 
 const nextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
+  output: "standalone",
   typescript: {
     ignoreBuildErrors: true,
   },

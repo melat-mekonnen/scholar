@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS scholarships (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
+  organization_name TEXT,
   country TEXT NOT NULL,
   deadline DATE,
   degree_level TEXT,
@@ -124,10 +125,23 @@ CREATE TABLE IF NOT EXISTS applications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   scholarship_id UUID NOT NULL REFERENCES scholarships (id) ON DELETE CASCADE,
-  status TEXT NOT NULL CHECK (status IN ('pending', 'submitted', 'accepted', 'rejected')),
+  status TEXT NOT NULL CHECK (status IN ('saved', 'preparing', 'submitted', 'accepted', 'rejected')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS application_notes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  application_id UUID NOT NULL REFERENCES applications (id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  note TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_application_notes_application
+  ON application_notes (application_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_application_notes_user
+  ON application_notes (user_id, created_at DESC);
 
 -- ---------------------------------------------------------------------------
 -- bookmarks
@@ -189,3 +203,66 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens (user_id);
+
+-- ---------------------------------------------------------------------------
+-- admin_audit_logs
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  actor_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  action TEXT NOT NULL,
+  target_type TEXT,
+  target_id UUID,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created_at
+  ON admin_audit_logs (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_actor
+  ON admin_audit_logs (actor_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action
+  ON admin_audit_logs (action);
+
+-- ---------------------------------------------------------------------------
+-- scholarship moderation (milestone 5)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS scholarship_flags (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  scholarship_id UUID NOT NULL REFERENCES scholarships (id) ON DELETE CASCADE,
+  flagged_by_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scholarship_flags_scholarship
+  ON scholarship_flags (scholarship_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scholarship_flags_actor
+  ON scholarship_flags (flagged_by_user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS scholarship_notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  scholarship_id UUID REFERENCES scholarships (id) ON DELETE SET NULL,
+  type TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scholarship_notifications_user
+  ON scholarship_notifications (user_id, is_read, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- scholarship search indexes (milestone 6)
+-- ---------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_scholarships_status ON scholarships (status);
+CREATE INDEX IF NOT EXISTS idx_scholarships_deadline ON scholarships (deadline);
+CREATE INDEX IF NOT EXISTS idx_scholarships_created_at ON scholarships (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scholarships_country ON scholarships (country);
+CREATE INDEX IF NOT EXISTS idx_scholarships_degree_level ON scholarships (degree_level);
+CREATE INDEX IF NOT EXISTS idx_scholarships_field_of_study ON scholarships (field_of_study);
+CREATE INDEX IF NOT EXISTS idx_scholarships_funding_type ON scholarships (funding_type);
+CREATE INDEX IF NOT EXISTS idx_scholarships_posted_by ON scholarships (posted_by_user_id);
+CREATE INDEX IF NOT EXISTS idx_scholarships_title_lower ON scholarships (LOWER(title));
+CREATE INDEX IF NOT EXISTS idx_scholarships_description_lower ON scholarships (LOWER(description));

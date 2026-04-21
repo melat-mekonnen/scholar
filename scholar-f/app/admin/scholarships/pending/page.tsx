@@ -40,6 +40,7 @@ export default function PendingScholarshipsPage() {
 
   const [scholarships, setScholarships] = useState<PendingScholarship[]>([])
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"all" | VerificationStatus>("all")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,8 +60,10 @@ export default function PendingScholarshipsPage() {
 
         const params = new URLSearchParams()
         if (trimmedSearch) params.set("search", trimmedSearch)
+        if (statusFilter !== "all") params.set("status", statusFilter)
+        else params.set("status", "all")
 
-        const url = `/api/admin/scholarships/pending${params.toString() ? `?${params.toString()}` : ""}`
+        const url = `/api/admin/scholarships${params.toString() ? `?${params.toString()}` : ""}`
 
         const { res, data, errorMessage } =
           await apiFetchJson<PendingResponse>(url, { method: "GET" })
@@ -74,20 +77,20 @@ export default function PendingScholarshipsPage() {
         }
 
         if (!res.ok || !data) {
-          throw new Error(errorMessage || "Failed to load pending scholarships")
+          throw new Error(errorMessage || "Failed to load scholarships")
         }
 
         setScholarships(data.scholarships ?? [])
       } catch (err) {
         if (requestIdRef.current !== currentRequestId) return
-        setError(err instanceof Error ? err.message : "Failed to load pending scholarships")
+        setError(err instanceof Error ? err.message : "Failed to load scholarships")
       } finally {
         if (requestIdRef.current === currentRequestId) setLoading(false)
       }
     }
 
     load()
-  }, [router, trimmedSearch])
+  }, [router, statusFilter, trimmedSearch])
 
   async function quickApprove(id: string) {
     setError(null)
@@ -150,25 +153,41 @@ export default function PendingScholarshipsPage() {
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Pending Scholarships</h1>
+            <h1 className="text-2xl font-bold">Scholarship Listings</h1>
             <p className="text-sm text-muted-foreground">
-              Review and moderate scholarships before they go live to students.
+              Review scholarships across all statuses and moderate pending ones.
             </p>
           </div>
-
-          <Input
-            placeholder="Search by title or country"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-72"
-          />
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Button asChild>
+              <Link href="/admin/scholarships/new">Create scholarship</Link>
+            </Button>
+            <Input
+              placeholder="Search by title or country"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+            <select
+              className="h-10 rounded-md border bg-background px-3 text-sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as "all" | VerificationStatus)}
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="rejected">Rejected</option>
+              <option value="expired">Expired</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
         </header>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Scholarships awaiting review</CardTitle>
+            <CardTitle className="text-base">Scholarships</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -188,7 +207,7 @@ export default function PendingScholarshipsPage() {
                 {scholarships.length === 0 && !loading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
-                      No pending scholarships at the moment.
+                      No scholarships found.
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -219,23 +238,27 @@ export default function PendingScholarshipsPage() {
                         <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
                       </Button>
 
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => quickApprove(s.id)}
-                        disabled={isMutating(s.id)}
-                      >
-                        Approve
-                      </Button>
+                      {s.status === "pending" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => quickApprove(s.id)}
+                            disabled={isMutating(s.id)}
+                          >
+                            Approve
+                          </Button>
 
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => quickReject(s.id)}
-                        disabled={isMutating(s.id)}
-                      >
-                        Reject
-                      </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => quickReject(s.id)}
+                            disabled={isMutating(s.id)}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -26,6 +26,7 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
       profilePath: "/owner/posting-profile",
       documentsPath: "/owner/documents",
       newScholarshipPath: "/owner/scholarships/new",
+      manageScholarshipsPath: "/owner/scholarships/manage",
       ownerHomePath: "/owner",
       /** Standalone ops pages (new scholarship, documents) — subtle owner tint */
       standaloneSurfaceClass:
@@ -52,6 +53,7 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
     profilePath: "/manager/profile",
     documentsPath: "/manager/documents",
     newScholarshipPath: "/manager/scholarships/new",
+    manageScholarshipsPath: "/manager/scholarships",
     ownerHomePath: "/owner",
     standaloneSurfaceClass: "min-h-screen bg-background",
   }

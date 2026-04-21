@@ -63,9 +63,14 @@ export default function AdminDocumentsPage() {
       <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Admin Document Management</h1>
-          <Button asChild variant="outline">
-            <Link href="/admin">Back to Admin</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/admin/notifications">Notifications</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin">Back to Admin</Link>
+            </Button>
+          </div>
         </div>
 
         <Input placeholder="Search by title..." value={q} onChange={(e) => setQ(e.target.value)} />

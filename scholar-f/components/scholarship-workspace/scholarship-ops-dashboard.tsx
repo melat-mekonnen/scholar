@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { BarChart3, CalendarClock, Eye, IdCard, LayoutDashboard, LogOut, User } from "lucide-react"
+import { BarChart3, Bell, CalendarClock, Eye, IdCard, LayoutDashboard, LogOut, User } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -33,6 +33,10 @@ type Props = {
   workspace: ScholarshipWorkspace
 }
 
+type NotificationResponse = {
+  notifications: Array<{ isRead: boolean }>
+}
+
 export function ScholarshipOpsDashboard({ workspace }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
   const router = useRouter()
@@ -40,6 +44,7 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     if (gate !== "ready") return
@@ -47,10 +52,11 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
     async function loadDashboard() {
       setLoading(true)
       setError(null)
-      const { res, data, errorMessage } = await apiFetchJson<DashboardResponse>(
-        "/api/manager/dashboard",
-        { method: "GET" },
-      )
+      const [dashboardRes, notificationsRes] = await Promise.all([
+        apiFetchJson<DashboardResponse>("/api/manager/dashboard", { method: "GET" }),
+        apiFetchJson<NotificationResponse>("/api/notifications/mine?unread=true&limit=100", { method: "GET" }),
+      ])
+      const { res, data, errorMessage } = dashboardRes
       if (res.status === 401 || res.status === 403) {
         clearToken()
         router.replace("/signin")
@@ -62,6 +68,9 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
         return
       }
       setDashboard(data)
+      if (notificationsRes.res.ok && notificationsRes.data?.notifications) {
+        setUnreadCount(notificationsRes.data.notifications.length)
+      }
       setLoading(false)
     }
     void loadDashboard()
@@ -117,10 +126,30 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
               New scholarship
             </Link>
             <Link
+              href={cfg.manageScholarshipsPath}
+              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
+            >
+              Manage scholarships
+            </Link>
+            <Link
               href={cfg.documentsPath}
               className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
             >
               Documents
+            </Link>
+            <Link
+              href={workspace === "owner" ? "/owner/notifications" : "/manager/notifications"}
+              className={`flex items-center justify-between gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Notifications
+              </span>
+              {unreadCount > 0 ? (
+                <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                  {unreadCount}
+                </Badge>
+              ) : null}
             </Link>
             {workspace === "owner" ? (
               <Link
@@ -153,8 +182,16 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
                 <h1 className="text-xl font-semibold">{cfg.dashboardHeading}</h1>
                 <p className="text-sm text-gray-500">{cfg.dashboardTagline}</p>
               </div>
-              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <User className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={workspace === "owner" ? "/owner/notifications" : "/manager/notifications"}>
+                    <Bell className="mr-1 h-4 w-4" />
+                    Notifications {unreadCount > 0 ? `(${unreadCount})` : ""}
+                  </Link>
+                </Button>
+                <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <User className="h-4 w-4" />
+                </div>
               </div>
             </div>
           </header>
@@ -294,6 +331,9 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
               </Button>
               <Button asChild>
                 <Link href={cfg.newScholarshipPath}>Post new scholarship</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={cfg.manageScholarshipsPath}>Manage scholarships</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href={cfg.documentsPath}>Documents</Link>

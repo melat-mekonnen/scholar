@@ -8,6 +8,7 @@ import {
   Check,
   Eye,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Search,
   Settings,
@@ -60,6 +61,10 @@ type PendingResponse = {
   scholarships: AdminScholarship[]
 }
 
+type NotificationsResponse = {
+  notifications: Array<{ isRead: boolean }>
+}
+
 function getStatusBadge(status: AdminScholarship["status"]) {
   if (status === "verified") return <Badge className="bg-green-600 text-white">Verified</Badge>
   if (status === "pending") return <Badge className="bg-yellow-500 text-white">Pending</Badge>
@@ -75,6 +80,7 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [dashboard, setDashboard] = useState<AdminDashboardResponse | null>(null)
   const [scholarships, setScholarships] = useState<AdminScholarship[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const [query, setQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -87,9 +93,10 @@ export default function AdminDashboardPage() {
       setLoading(true)
       setError(null)
 
-      const [dashboardRes, pendingRes] = await Promise.all([
+      const [dashboardRes, pendingRes, notificationsRes] = await Promise.all([
         apiFetchJson<AdminDashboardResponse>("/api/admin/dashboard", { method: "GET" }),
         apiFetchJson<PendingResponse>("/api/admin/scholarships?status=all", { method: "GET" }),
+        apiFetchJson<NotificationsResponse>("/api/notifications/mine?unread=true&limit=100", { method: "GET" }),
       ])
 
       if (
@@ -113,6 +120,9 @@ export default function AdminDashboardPage() {
 
       if (pendingRes.res.ok && pendingRes.data) {
         setScholarships(pendingRes.data.scholarships ?? [])
+      }
+      if (notificationsRes.res.ok && notificationsRes.data?.notifications) {
+        setUnreadCount(notificationsRes.data.notifications.length)
       }
 
       setLoading(false)
@@ -199,11 +209,32 @@ export default function AdminDashboardPage() {
               Manage Users
             </Link>
             <Link
+              href="/admin/audit-logs"
+              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
+            >
+              <ListChecks className="h-4 w-4" />
+              Audit Logs
+            </Link>
+            <Link
               href="/admin/documents"
               className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
             >
               <Eye className="h-4 w-4" />
               Manage Documents
+            </Link>
+            <Link
+              href="/admin/notifications"
+              className="flex items-center justify-between gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Notifications
+              </span>
+              {unreadCount > 0 ? (
+                <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                  {unreadCount}
+                </Badge>
+              ) : null}
             </Link>
           </nav>
 
@@ -239,7 +270,12 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5 text-muted-foreground" />
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/admin/notifications">
+                    <Bell className="mr-1 h-4 w-4 text-muted-foreground" />
+                    Notifications {unreadCount > 0 ? `(${unreadCount})` : ""}
+                  </Link>
+                </Button>
                 <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                   <User className="h-4 w-4" />
                 </div>
@@ -303,16 +339,21 @@ export default function AdminDashboardPage() {
               )}
             </section>
 
-            {/* Scholarship management */}
+            {/* Scholarships needing approval */}
             <section className="rounded-lg border bg-white">
               <div className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3">
-                <h2 className="text-lg font-semibold">Scholarship Management</h2>
+                <h2 className="text-lg font-semibold">Needs Approval / Unverified</h2>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" className="rounded-md">
-                    Scholarship Listings
+                  <Button asChild variant="outline" className="rounded-md">
+                    <Link href="/admin/scholarships/pending">Scholarship Listings</Link>
                   </Button>
-                  <Button className="rounded-md">Create/Edit Scholarship</Button>
+                  <Button asChild className="rounded-md">
+                    <Link href="/admin/scholarships/new">Create Scholarship</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-md">
+                    <Link href="/admin/audit-logs">View Audit Logs</Link>
+                  </Button>
                 </div>
               </div>
 

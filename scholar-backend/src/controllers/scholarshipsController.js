@@ -1,7 +1,16 @@
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { ApplicationRepository } = require("../repositories/ApplicationRepository");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
+const {
+  initialStatusForCreator,
+  nextStatusAfterUpdate,
+  assertCanMutateScholarship,
+  parseDeadline,
+} = require("../usecases/scholarships/scholarshipCrudRules");
+const { validateSearchInputs } = require("../usecases/scholarships/searchValidation");
 
 const repo = new ScholarshipRepository();
+const applicationRepo = new ApplicationRepository();
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -17,8 +26,14 @@ function isValidUrl(value) {
 
 async function create(req, res, next) {
   try {
+    if (!req.user || !["manager", "owner", "admin"].includes(req.user.role)) {
+      const err = new Error("Manager, owner, or admin access required");
+      err.statusCode = 403;
+      throw err;
+    }
     const {
       title,
+      organizationName,
       country,
       degreeLevel,
       fieldOfStudy,
@@ -31,6 +46,11 @@ async function create(req, res, next) {
 
     if (!title || !title.trim()) {
       const err = new Error("Title is required");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!organizationName || !organizationName.trim()) {
+      const err = new Error("Organization is required");
       err.statusCode = 400;
       throw err;
     }
@@ -54,17 +74,7 @@ async function create(req, res, next) {
       err.statusCode = 400;
       throw err;
     }
-    if (!deadline) {
-      const err = new Error("Deadline is required");
-      err.statusCode = 400;
-      throw err;
-    }
-    const parsedDeadline = new Date(deadline);
-    if (Number.isNaN(parsedDeadline.getTime())) {
-      const err = new Error("Deadline must be a valid date");
-      err.statusCode = 400;
-      throw err;
-    }
+    const parsedDeadline = parseDeadline(deadline, { required: true });
     if (!description || !description.trim()) {
       const err = new Error("Description is required");
       err.statusCode = 400;
@@ -76,22 +86,25 @@ async function create(req, res, next) {
       throw err;
     }
 
-    const created = await repo.createByManager({
+    const created = await repo.createScholarship({
       title: title.trim(),
+      organizationName: organizationName.trim(),
       country: country.trim(),
       degreeLevel: degreeLevel.trim(),
       fieldOfStudy: fieldOfStudy.trim(),
       fundingType: fundingType.trim(),
-      deadline: parsedDeadline.toISOString().slice(0, 10),
+      deadline: parsedDeadline,
       amount: amount ? String(amount).trim() : null,
       description: description.trim(),
       applicationUrl: applicationUrl ? applicationUrl.trim() : null,
       postedByUserId: req.user.id,
+      status: initialStatusForCreator(req.user.role),
     });
 
     return res.status(201).json({
       id: created.id,
       title: created.title,
+      organizationName: created.organization_name,
       country: created.country,
       degreeLevel: created.degree_level,
       fieldOfStudy: created.field_of_study,
@@ -104,6 +117,16 @@ async function create(req, res, next) {
       postedByUserId: created.posted_by_user_id,
       createdAt: created.created_at,
     });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function list(req, res, next) {
+  try {
+    await repo.expirePastDeadline();
+    const result = await search(req, { json: (payload) => payload }, next);
+    return res.json(result);
   } catch (err) {
     return next(err);
   }
@@ -131,6 +154,7 @@ function normalizeMulti(value) {
 
 async function search(req, res, next) {
   try {
+    await repo.expirePastDeadline();
     const {
       q,
       deadline_from: deadlineFrom,
@@ -151,6 +175,17 @@ async function search(req, res, next) {
 
     const bookmarkUserId = getBookmarkUserId(req);
 
+    const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
+    validateSearchInputs({
+      sort,
+      degreeLevels,
+      fundingTypes,
+      deadlineFrom,
+      deadlineTo,
+      status,
+      isPrivileged,
+    });
+
     const result = await repo.searchPublic({
       q,
       countries,
@@ -162,7 +197,7 @@ async function search(req, res, next) {
       sort,
       page: parsedPage,
       limit: parsedLimit,
-      status,
+      status: isPrivileged ? status : undefined,
       bookmarkUserId,
     });
 
@@ -170,6 +205,7 @@ async function search(req, res, next) {
       results: result.results.map((r) => ({
         id: r.id,
         title: r.title,
+        organizationName: r.organization_name,
         country: r.country,
         degreeLevel: r.degree_level,
         fieldOfStudy: r.field_of_study,
@@ -194,6 +230,7 @@ async function search(req, res, next) {
 
 async function getById(req, res, next) {
   try {
+    await repo.expirePastDeadline();
     const { id } = req.params;
     if (!id || !UUID_V4.test(id)) {
       const err = new Error("Invalid scholarship id");
@@ -204,6 +241,33 @@ async function getById(req, res, next) {
     const bookmarkUserId = getBookmarkUserId(req);
 
     const row = await repo.findPublicById(id, { bookmarkUserId });
+    if (!row && req.user && ["manager", "owner", "admin"].includes(req.user.role)) {
+      const anyRow = await repo.findById(id);
+      if (anyRow) {
+        if (
+          req.user.role === "owner" ||
+          req.user.role === "admin" ||
+          String(anyRow.posted_by_user_id) === String(req.user.id)
+        ) {
+          return res.json({
+            id: anyRow.id,
+            title: anyRow.title,
+            organizationName: anyRow.organization_name,
+            country: anyRow.country,
+            degreeLevel: anyRow.degree_level,
+            fieldOfStudy: anyRow.field_of_study,
+            fundingType: anyRow.funding_type,
+            deadline: anyRow.deadline,
+            amount: anyRow.amount,
+            description: anyRow.description,
+            applicationUrl: anyRow.application_url,
+            status: anyRow.status,
+            rejectionReason: anyRow.rejection_reason,
+            createdAt: anyRow.created_at,
+          });
+        }
+      }
+    }
     if (!row) {
       const err = new Error("Scholarship not found");
       err.statusCode = 404;
@@ -213,6 +277,7 @@ async function getById(req, res, next) {
     return res.json({
       id: row.id,
       title: row.title,
+      organizationName: row.organization_name,
       country: row.country,
       degreeLevel: row.degree_level,
       fieldOfStudy: row.field_of_study,
@@ -235,10 +300,187 @@ async function getById(req, res, next) {
   }
 }
 
+async function update(req, res, next) {
+  try {
+    const { id } = req.params;
+    if (!id || !UUID_V4.test(id)) {
+      const err = new Error("Invalid scholarship id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const current = await repo.findById(id);
+    if (!current) {
+      const err = new Error("Scholarship not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    assertCanMutateScholarship(req.user, current);
+
+    const patch = {};
+    const body = req.body || {};
+    if (body.title != null) {
+      if (!String(body.title).trim()) {
+        const err = new Error("Title cannot be empty");
+        err.statusCode = 400;
+        throw err;
+      }
+      patch.title = String(body.title).trim();
+    }
+    if (body.organizationName != null) {
+      if (!String(body.organizationName).trim()) {
+        const err = new Error("Organization cannot be empty");
+        err.statusCode = 400;
+        throw err;
+      }
+      patch.organizationName = String(body.organizationName).trim();
+    }
+    if (body.country != null) patch.country = String(body.country).trim();
+    if (body.degreeLevel != null) patch.degreeLevel = String(body.degreeLevel).trim();
+    if (body.fieldOfStudy != null) patch.fieldOfStudy = String(body.fieldOfStudy).trim();
+    if (body.fundingType != null) patch.fundingType = String(body.fundingType).trim();
+    if (body.deadline != null) patch.deadline = parseDeadline(body.deadline, { required: true });
+    if (body.amount != null) patch.amount = String(body.amount).trim();
+    if (body.description != null) patch.description = String(body.description).trim();
+    if (body.applicationUrl != null) {
+      const v = String(body.applicationUrl).trim();
+      if (v && !isValidUrl(v)) {
+        const err = new Error("Valid application URL is required");
+        err.statusCode = 400;
+        throw err;
+      }
+      patch.applicationUrl = v || null;
+    }
+    patch.status = nextStatusAfterUpdate(req.user.role);
+    patch.rejectionReason = null;
+
+    const updated = await repo.updateScholarshipById(id, patch);
+    return res.json({
+      id: updated.id,
+      title: updated.title,
+      organizationName: updated.organization_name,
+      country: updated.country,
+      degreeLevel: updated.degree_level,
+      fieldOfStudy: updated.field_of_study,
+      fundingType: updated.funding_type,
+      deadline: updated.deadline,
+      amount: updated.amount,
+      description: updated.description,
+      applicationUrl: updated.application_url,
+      status: updated.status,
+      rejectionReason: updated.rejection_reason,
+      postedByUserId: updated.posted_by_user_id,
+      updatedAt: updated.updated_at,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function remove(req, res, next) {
+  try {
+    const { id } = req.params;
+    if (!id || !UUID_V4.test(id)) {
+      const err = new Error("Invalid scholarship id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const current = await repo.findById(id);
+    if (!current) {
+      const err = new Error("Scholarship not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    assertCanMutateScholarship(req.user, current);
+    await repo.deleteScholarshipCascade(id);
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function myScholarships(req, res, next) {
+  try {
+    if (!req.user || req.user.role !== "manager") {
+      const err = new Error("Manager access required");
+      err.statusCode = 403;
+      throw err;
+    }
+    await repo.expirePastDeadline();
+    const parsedPage = req.query?.page ? Math.max(parseInt(req.query.page, 10), 1) : 1;
+    const parsedPageSize = req.query?.pageSize
+      ? Math.min(Math.max(parseInt(req.query.pageSize, 10), 1), 100)
+      : 20;
+
+    const data = await repo.listMine({
+      userId: req.user.id,
+      page: parsedPage,
+      pageSize: parsedPageSize,
+      search: req.query?.search,
+      status: req.query?.status,
+    });
+
+    return res.json({
+      scholarships: data.scholarships.map((r) => ({
+        id: r.id,
+        title: r.title,
+        organizationName: r.organization_name,
+        country: r.country,
+        degreeLevel: r.degree_level,
+        fundingType: r.funding_type,
+        deadline: r.deadline,
+        status: r.status,
+        rejectionReason: r.rejection_reason,
+        createdAt: r.created_at,
+      })),
+      total: data.total,
+      page: data.page,
+      pageSize: data.pageSize,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function applicationsCount(req, res, next) {
+  try {
+    if (!req.user || !["manager", "admin"].includes(req.user.role)) {
+      const err = new Error("Manager or admin access required");
+      err.statusCode = 403;
+      throw err;
+    }
+    const { id } = req.params;
+    if (!id || !UUID_V4.test(id)) {
+      const err = new Error("Invalid scholarship id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const scholarship = await repo.findById(id);
+    if (!scholarship) {
+      const err = new Error("Scholarship not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    if (req.user.role === "manager" && String(scholarship.posted_by_user_id) !== String(req.user.id)) {
+      const err = new Error("Forbidden");
+      err.statusCode = 403;
+      throw err;
+    }
+    const total = await applicationRepo.countForScholarship(id);
+    return res.json({ scholarshipId: id, totalApplications: total });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   create,
+  list,
   getFilters,
   search,
   getById,
+  update,
+  remove,
+  myScholarships,
+  applicationsCount,
 };
 

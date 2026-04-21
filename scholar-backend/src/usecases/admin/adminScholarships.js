@@ -1,6 +1,8 @@
 const { AdminScholarshipRepository } = require("../../repositories/AdminScholarshipRepository");
+const { ScholarshipModerationRepository } = require("../../repositories/ScholarshipModerationRepository");
 
 const repo = new AdminScholarshipRepository();
+const moderationRepo = new ScholarshipModerationRepository();
 
 async function listScholarships({ search, status }) {
   const scholarships = await repo.list({ search, status });
@@ -42,11 +44,27 @@ async function rejectScholarship(id, reason) {
   return updated;
 }
 
+async function flagScholarship(id, actorUserId, reason) {
+  const existing = await repo.findById(id);
+  if (!existing) {
+    const err = new Error("Scholarship not found");
+    err.statusCode = 404;
+    throw err;
+  }
+  const flag = await moderationRepo.createFlag({
+    scholarshipId: id,
+    flaggedByUserId: actorUserId,
+    reason: reason || null,
+  });
+  return flag;
+}
+
 module.exports = {
   listScholarships,
   listPendingScholarships,
   getScholarshipById,
   verifyScholarship,
   rejectScholarship,
+  flagScholarship,
 };
 

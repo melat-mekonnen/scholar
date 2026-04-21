@@ -287,23 +287,27 @@ Allow managers to create and maintain scholarship listings
 
 #### API Endpoints
 ```
-POST   /api/scholarships (manager/admin)
+POST   /api/scholarships (manager/owner/admin)
 GET    /api/scholarships
 GET    /api/scholarships/:id
-PUT    /api/scholarships/:id (manager-own/admin)
-DELETE /api/scholarships/:id (manager-own/admin)
+PUT    /api/scholarships/:id (manager-own/owner/admin)
+DELETE /api/scholarships/:id (manager-own/owner/admin)
 GET    /api/scholarships/my-scholarships (manager)
-POST   /api/scholarships/:id/documents (manager/admin)
+POST   /api/scholarships/:id/documents (manager/owner/admin)
 ```
 
 #### Deliverables
-- [ ] Scholarship CRUD complete
-- [ ] File upload working
-- [ ] Ownership validation implemented
-- [ ] Pagination working
-- [ ] API documentation updated
+- [x] Scholarship CRUD complete
+- [x] File upload working (`POST /api/scholarships/:id/documents` + existing `/api/documents`)
+- [x] Ownership validation implemented (manager-own; owner/admin all)
+- [x] Pagination working (`GET /api/scholarships`, `GET /api/scholarships/my-scholarships`)
+- [x] API documentation updated (this milestone doc + `verify:milestone4` script)
 
 #### Testing
+**Automated (this repo):**
+- `npm test` (backend) — includes scholarship rule tests
+- `npm run verify:milestone4` — CRUD + ownership + pagination + upload + delete-relations checks
+
 **Unit Tests:**
 - Scholarship validation logic
 - Deadline validation (future dates only)
@@ -357,15 +361,20 @@ PUT    /api/admin/scholarships/:id/verify
 PUT    /api/admin/scholarships/:id/reject
 POST   /api/admin/scholarships/:id/flag
 GET    /api/scholarships (add ?status=verified filter)
+GET    /api/notifications/mine
+PUT    /api/notifications/mine/read
 ```
 
 #### Deliverables
-- [ ] Verification workflow complete
-- [ ] Admin moderation panel ready
-- [ ] Automated expiry system working
-- [ ] Verification badges displayed
+- [x] Verification workflow complete
+- [x] Admin moderation panel ready
+- [x] Automated expiry system working (daily background sweep + read-time expiry)
+- [x] Verification badges displayed
 
 #### Testing
+**Automated (this repo):**
+- `npm run verify:milestone5` — moderation workflow, pending queue, approve/reject, flag, notifications, status visibility
+
 **Integration Tests:**
 - Manager submits scholarship → Status: pending
 - Admin approves scholarship → Status: verified
@@ -418,13 +427,17 @@ GET    /api/scholarships/filters (returns available filter options)
 ```
 
 #### Deliverables
-- [ ] Search functionality working
-- [ ] All filters implemented
-- [ ] Sorting options functional
-- [ ] Pagination optimized
-- [ ] Search performance acceptable (<500ms)
+- [x] Search functionality working
+- [x] All filters implemented
+- [x] Sorting options functional
+- [x] Pagination optimized
+- [x] Search performance acceptable (<500ms) *(indexed query path + verification script)*
 
 #### Testing
+**Automated (this repo):**
+- `npm test` (includes search validation unit tests)
+- `npm run verify:milestone6` (keyword, filters, sort, pagination, no results, invalid filters/date range)
+
 **Unit Tests:**
 - Query builder logic
 - Filter combination logic
@@ -476,12 +489,15 @@ GET    /api/scholarships (add is_bookmarked field for logged-in student)
 ```
 
 #### Deliverables
-- [ ] Bookmark system complete
-- [ ] Duplicate prevention working
-- [ ] Bookmark list with pagination
-- [ ] Integration with scholarship list
+- [x] Bookmark system complete
+- [x] Duplicate prevention working
+- [x] Bookmark list with pagination
+- [x] Integration with scholarship list
 
 #### Testing
+**Automated (this repo):**
+- `npm run verify:milestone7` — bookmark create/remove, duplicate prevention, pagination list, list integration fields, delete-cascade behavior
+
 **Integration Tests:**
 - Student bookmarks scholarship → Success (201)
 - Student bookmarks same scholarship again → Error (409)
@@ -535,13 +551,16 @@ GET    /api/scholarships/:id/applications/count (manager-own/admin)
 ```
 
 #### Deliverables
-- [ ] Application tracking complete
-- [ ] Status management working
-- [ ] Notes system functional
-- [ ] Manager view implemented
-- [ ] Application statistics ready
+- [x] Application tracking complete
+- [x] Status management working
+- [x] Notes system functional
+- [x] Manager view implemented
+- [x] Application statistics ready
 
 #### Testing
+**Automated (this repo):**
+- `npm run verify:milestone8` — create/list/get/update/status/notes/delete flows + manager/admin access + count endpoint
+
 **Integration Tests:**
 - Student creates application → Success
 - Student updates application status → Success

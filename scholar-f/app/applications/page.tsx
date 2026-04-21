@@ -4,18 +4,26 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { getMyApplications, updateApplicationStatus, type ApplicationStatus, type StudentApplication } from "@/lib/applications"
+import {
+  addApplicationNote,
+  getMyApplications,
+  updateApplicationStatus,
+  type ApplicationStatus,
+  type StudentApplication,
+} from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ApplicationsPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [items, setItems] = useState<StudentApplication[]>([])
+  const [noteById, setNoteById] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -63,7 +71,34 @@ export default function ApplicationsPage() {
     if (status === "accepted") return <Badge className="bg-green-600 text-white">Accepted</Badge>
     if (status === "rejected") return <Badge variant="destructive">Rejected</Badge>
     if (status === "submitted") return <Badge className="bg-blue-600 text-white">Submitted</Badge>
-    return <Badge variant="secondary">Pending</Badge>
+    if (status === "preparing") return <Badge className="bg-amber-600 text-white">Preparing</Badge>
+    return <Badge variant="secondary">Saved</Badge>
+  }
+
+  async function addNote(id: string) {
+    const note = (noteById[id] || "").trim()
+    if (!note) return
+    const { res, errorMessage } = await addApplicationNote(id, note)
+    if (!res.ok) {
+      toast({
+        title: "Could not add note",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    setItems((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              notes: [...(a.notes || []), { id: `${Date.now()}`, userId: "", note, createdAt: new Date().toISOString() }],
+            }
+          : a
+      )
+    )
+    setNoteById((prev) => ({ ...prev, [id]: "" }))
+    toast({ title: "Note added", description: "Application note saved." })
   }
 
   return (
@@ -124,7 +159,8 @@ export default function ApplicationsPage() {
                       <SelectValue placeholder="Update status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="saved">Saved</SelectItem>
+                      <SelectItem value="preparing">Preparing</SelectItem>
                       <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="accepted">Accepted</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
@@ -133,6 +169,31 @@ export default function ApplicationsPage() {
                   <Button asChild variant="outline" size="sm">
                     <Link href="/scholarships">View scholarship</Link>
                   </Button>
+                </div>
+
+                <div className="space-y-2 border-t pt-3">
+                  <p className="text-xs font-medium text-muted-foreground">Notes</p>
+                  {a.notes?.length ? (
+                    <div className="space-y-1">
+                      {a.notes.slice(-3).map((n) => (
+                        <p key={n.id} className="text-xs text-muted-foreground">
+                          {new Date(n.createdAt).toLocaleDateString()}: {n.note}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No notes yet.</p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Add a note..."
+                      value={noteById[a.id] || ""}
+                      onChange={(e) => setNoteById((prev) => ({ ...prev, [a.id]: e.target.value }))}
+                    />
+                    <Button size="sm" variant="outline" onClick={() => void addNote(a.id)}>
+                      Add
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

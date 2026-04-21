@@ -77,10 +77,12 @@ async function getManagerScholarships(managerId) {
   const result = await query(
     `SELECT s.id,
             s.title,
+            s.organization_name,
             s.status,
             s.country,
             s.degree_level,
             s.deadline,
+            s.rejection_reason,
             s.created_at,
             (SELECT COUNT(*)::int FROM applications a WHERE a.scholarship_id = s.id) AS applications_count,
             (SELECT COUNT(*)::int FROM bookmarks b WHERE b.scholarship_id = s.id) AS bookmark_count
