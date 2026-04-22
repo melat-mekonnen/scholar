@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 import { apiFetchJson, API_BASE_URL } from "@/lib/api"
 import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { setToken } from "@/lib/auth"
@@ -20,6 +21,7 @@ export default function SignInPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   type LoginResponse = {
     token: string
@@ -128,14 +130,29 @@ export default function SignInPage() {
 
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  aria-invalid={!!errors.password}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    aria-invalid={!!errors.password}
+                    className="pr-16"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground sm:w-11"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                    ) : (
+                      <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && <FieldError>{errors.password}</FieldError>}
                 <div className="mt-2 text-right">
                   <Link href="/forgot-password" className="text-xs text-primary hover:underline">
