@@ -115,7 +115,10 @@ export default function ApplicationsPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   {statusBadge(a.status)}
                   {a.scholarship.country ? <Badge variant="outline">{a.scholarship.country}</Badge> : null}
-                  {a.scholarship.deadline ? <Badge variant="outline">Deadline: {String(a.scholarship.deadline)}</Badge> : null}
+                  {a.scholarship.startDate ? <Badge variant="outline">Start: {String(a.scholarship.startDate)}</Badge> : null}
+                  {a.scholarship.endDate || a.scholarship.deadline ? (
+                    <Badge variant="outline">End: {String(a.scholarship.endDate || a.scholarship.deadline)}</Badge>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">

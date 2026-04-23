@@ -55,6 +55,8 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
+      INGESTION_ENABLED: ${INGESTION_ENABLED:-false}
+      INGEST_DAAD_ENABLED: ${INGEST_DAAD_ENABLED:-false}
     depends_on:
       db:
         condition: service_healthy

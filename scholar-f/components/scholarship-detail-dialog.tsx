@@ -105,8 +105,14 @@ export function ScholarshipDetailDialog({
                   <Badge variant="secondary">Verified</Badge>
                   {merged.fundingType && <Badge variant="outline">{merged.fundingType}</Badge>}
                   {merged.amount && <Badge variant="outline">{merged.amount}</Badge>}
-                  {merged.deadline && (
-                    <Badge variant="outline">Deadline: {merged.deadline}</Badge>
+                  {merged.startDate && <Badge variant="outline">Start: {merged.startDate}</Badge>}
+                  {(merged.endDate || merged.deadline) && (
+                    <Badge variant="outline">End: {merged.endDate || merged.deadline}</Badge>
+                  )}
+                  {!merged.startDate && !(merged.endDate || merged.deadline) && (
+                    <span className="text-xs text-muted-foreground self-center">
+                      Dates not specified
+                    </span>
                   )}
                 </div>
 

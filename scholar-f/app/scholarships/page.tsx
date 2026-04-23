@@ -12,7 +12,7 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication } from "@/lib/applications"
+import { createApplication, getMyApplications } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -76,6 +76,7 @@ type SortOption =
   | "deadline_desc"
   | "funding_amount"
   | "recent"
+type ApplicationFilter = "all" | "applied" | "not_applied"
 
 function toggleInList(list: string[], value: string) {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -133,8 +134,17 @@ export default function ScholarshipsPage() {
   const [results, setResults] = useState<ScholarshipPublic[]>([])
   const [total, setTotal] = useState(0)
   const [viewScholarship, setViewScholarship] = useState<ScholarshipPublic | null>(null)
+  const [appliedScholarshipIds, setAppliedScholarshipIds] = useState<Set<string>>(new Set())
+  const [applicationFilter, setApplicationFilter] = useState<ApplicationFilter>("all")
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
+  const visibleResults = useMemo(() => {
+    if (applicationFilter === "all") return results
+    return results.filter((s) => {
+      const applied = appliedScholarshipIds.has(s.id)
+      return applicationFilter === "applied" ? applied : !applied
+    })
+  }, [results, appliedScholarshipIds, applicationFilter])
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -229,6 +239,15 @@ export default function ScholarshipsPage() {
     }
     search()
   }, [params, urlSynced])
+
+  useEffect(() => {
+    async function loadApplied() {
+      const { res, data } = await getMyApplications()
+      if (res.status === 401 || res.status === 403 || !res.ok || !data) return
+      setAppliedScholarshipIds(new Set((data.applications || []).map((a) => a.scholarshipId)))
+    }
+    void loadApplied()
+  }, [])
 
   function updateScholarshipBookmark(scholarshipId: string, isBookmarked: boolean) {
     const patch = (row: ScholarshipPublic): ScholarshipPublic => {
@@ -478,7 +497,11 @@ export default function ScholarshipsPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm text-muted-foreground">
-                {loading ? "Loading..." : `${total.toLocaleString()} results`}
+                {loading
+                  ? "Loading..."
+                  : applicationFilter === "all"
+                    ? `${total.toLocaleString()} results`
+                    : `${visibleResults.length.toLocaleString()} shown on this page`}
               </p>
               <div className="md:hidden">
                 <Select
@@ -501,6 +524,29 @@ export default function ScholarshipsPage() {
                 </Select>
               </div>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant={applicationFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("all")}
+              >
+                All
+              </Button>
+              <Button
+                variant={applicationFilter === "applied" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("applied")}
+              >
+                Applied
+              </Button>
+              <Button
+                variant={applicationFilter === "not_applied" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("not_applied")}
+              >
+                Not Applied
+              </Button>
+            </div>
 
             {loading ? (
               <div className="grid gap-4">
@@ -517,7 +563,7 @@ export default function ScholarshipsPage() {
                   </Card>
                 ))}
               </div>
-            ) : results.length === 0 ? (
+            ) : visibleResults.length === 0 ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -536,7 +582,7 @@ export default function ScholarshipsPage() {
               </Empty>
             ) : (
               <div className="grid gap-4">
-                {results.map((s) => (
+                {visibleResults.map((s) => (
                   <Card key={s.id} className="rounded-2xl">
                     <CardContent className="p-6 space-y-3">
                       <div className="flex items-start justify-between gap-3">
@@ -548,6 +594,11 @@ export default function ScholarshipsPage() {
                             {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
+                        {!s.startDate && !(s.endDate || s.deadline) && (
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            Dates not specified
+                          </span>
+                        )}
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked={s.isBookmarked ?? false}
@@ -559,12 +610,18 @@ export default function ScholarshipsPage() {
 
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="secondary">Verified</Badge>
+                        {appliedScholarshipIds.has(s.id) && (
+                          <Badge className="bg-blue-600 text-white">Applied</Badge>
+                        )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline">{s.bookmarkCount} saved</Badge>
                         )}
                         {s.fundingType && <Badge variant="outline">{s.fundingType}</Badge>}
                         {s.amount && <Badge variant="outline">{s.amount}</Badge>}
-                        {s.deadline && <Badge variant="outline">Deadline: {s.deadline}</Badge>}
+                        {s.startDate && <Badge variant="outline">Start: {s.startDate}</Badge>}
+                        {(s.endDate || s.deadline) && (
+                          <Badge variant="outline">End: {s.endDate || s.deadline}</Badge>
+                        )}
                       </div>
 
                       <div className="pt-2 flex gap-2">
@@ -579,6 +636,17 @@ export default function ScholarshipsPage() {
                           size="sm"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
+                            const ok = await openScholarshipApplication(s)
+                            if (!ok) {
+                              toast({
+                                title: "Application link unavailable",
+                                description:
+                                  "This scholarship does not have an official application URL yet.",
+                                variant: "destructive",
+                              })
+                              return
+                            }
+
                             const created = await createApplication(s.id)
                             if (created.res.status === 401 || created.res.status === 403) {
                               clearToken()
@@ -592,21 +660,16 @@ export default function ScholarshipsPage() {
                                   created.errorMessage || "Failed to save this application in your tracker.",
                                 variant: "destructive",
                               })
-                              return
-                            }
-
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
                             } else {
+                              if (created.res.status === 201) {
+                                setAppliedScholarshipIds((prev) => new Set(prev).add(s.id))
+                              }
                               toast({
                                 title: "Application started",
-                                description: "Saved to your application tracker.",
+                                description:
+                                  created.res.status === 409
+                                    ? "Already in your application tracker."
+                                    : "Saved to your application tracker.",
                               })
                             }
                           }}

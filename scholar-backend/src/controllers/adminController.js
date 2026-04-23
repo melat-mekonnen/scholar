@@ -8,6 +8,9 @@ const {
   getScholarshipById,
   verifyScholarship,
   rejectScholarship,
+  listImportRuns,
+  listImportErrors,
+  runImport,
 } = require("../usecases/admin/adminScholarships");
 
 const adminAuditRepo = new AdminAuditLogRepository();
@@ -144,6 +147,42 @@ async function reject(req, res, next) {
   }
 }
 
+async function getImportRuns(req, res, next) {
+  try {
+    const runs = await listImportRuns({ limit: req.query.limit });
+    return res.json({ runs });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getImportErrors(req, res, next) {
+  try {
+    const errors = await listImportErrors({ limit: req.query.limit });
+    return res.json({ errors });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function triggerImport(req, res, next) {
+  try {
+    const { source, publishStatus } = req.body || {};
+    const result = await runImport({ source, publishStatus });
+    await logAdminAction(req.user, "scholarship.import.run", "system", "scholarship-ingestion", {
+      source: result.sourceName,
+      fetched: result.fetched,
+      upserted: result.upserted,
+      failed: result.failed,
+      publishStatus: result.publishStatus,
+      runId: result.runId,
+    });
+    return res.status(201).json(result);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   getDashboard,
   getStatistics,
@@ -154,5 +193,8 @@ module.exports = {
   getScholarship,
   verify,
   reject,
+  getImportRuns,
+  getImportErrors,
+  triggerImport,
 };
 

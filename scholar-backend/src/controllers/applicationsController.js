@@ -70,6 +70,8 @@ async function listMine(req, res, next) {
         scholarship: {
           title: a.scholarship_title,
           country: a.scholarship_country,
+          startDate: a.scholarship_start_date,
+          endDate: a.scholarship_end_date,
           deadline: a.scholarship_deadline,
           applicationUrl: a.scholarship_application_url,
         },

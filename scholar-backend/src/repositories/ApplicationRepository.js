@@ -43,6 +43,8 @@ class ApplicationRepository {
               a.updated_at,
               s.title AS scholarship_title,
               s.country AS scholarship_country,
+              s.application_start_date AS scholarship_start_date,
+              s.application_end_date AS scholarship_end_date,
               s.deadline AS scholarship_deadline,
               s.application_url AS scholarship_application_url
        FROM applications a

@@ -11,6 +11,8 @@ export type StudentApplication = {
   scholarship: {
     title: string
     country?: string
+    startDate?: string
+    endDate?: string
     deadline?: string
     applicationUrl?: string
   }
