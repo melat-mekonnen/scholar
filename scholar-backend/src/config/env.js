@@ -15,6 +15,12 @@ function optional(name, fallback) {
   return value == null || value === "" ? fallback : value;
 }
 
+function optionalBool(name, fallback = false) {
+  const value = process.env[name];
+  if (value == null || value === "") return fallback;
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
 const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: parseInt(process.env.PORT || "4000", 10),
@@ -30,6 +36,8 @@ const env = {
   smtpUser: optional("SMTP_USER", ""),
   smtpPass: optional("SMTP_PASS", ""),
   smtpFrom: optional("SMTP_FROM", ""),
+  ingestionEnabled: optionalBool("INGESTION_ENABLED", false),
+  ingestDaadEnabled: optionalBool("INGEST_DAAD_ENABLED", false),
 };
 
 module.exports = { env };

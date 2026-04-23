@@ -1,6 +1,9 @@
 const { AdminScholarshipRepository } = require("../../repositories/AdminScholarshipRepository");
+const { ScholarshipIngestionRepository } = require("../../repositories/ScholarshipIngestionRepository");
+const { runScholarshipIngestion } = require("../../modules/scholarship-ingestion/runScholarshipIngestion");
 
 const repo = new AdminScholarshipRepository();
+const ingestionRepo = new ScholarshipIngestionRepository();
 
 async function listScholarships({ search, status }) {
   const scholarships = await repo.list({ search, status });
@@ -42,11 +45,29 @@ async function rejectScholarship(id, reason) {
   return updated;
 }
 
+async function listImportRuns({ limit }) {
+  return ingestionRepo.listRuns({ limit: limit ? Number(limit) : 50 });
+}
+
+async function listImportErrors({ limit }) {
+  return ingestionRepo.listErrors({ limit: limit ? Number(limit) : 100 });
+}
+
+async function runImport({ source, publishStatus }) {
+  return runScholarshipIngestion({
+    source: source || "daad",
+    publishStatus: publishStatus || "verified",
+  });
+}
+
 module.exports = {
   listScholarships,
   listPendingScholarships,
   getScholarshipById,
   verifyScholarship,
   rejectScholarship,
+  listImportRuns,
+  listImportErrors,
+  runImport,
 };
 

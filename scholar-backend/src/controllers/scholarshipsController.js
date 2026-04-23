@@ -36,6 +36,8 @@ async function create(req, res, next) {
       fieldOfStudy,
       fundingType,
       deadline,
+      applicationStartDate,
+      applicationEndDate,
       amount,
       description,
       applicationUrl,
@@ -91,6 +93,8 @@ async function create(req, res, next) {
       fieldOfStudy: fieldOfStudy.trim(),
       fundingType: fundingType.trim(),
       deadline: parsedDeadline,
+      applicationStartDate: applicationStartDate || null,
+      applicationEndDate: applicationEndDate || null,
       amount: amount ? String(amount).trim() : null,
       description: description.trim(),
       applicationUrl: applicationUrl ? applicationUrl.trim() : null,
@@ -107,6 +111,8 @@ async function create(req, res, next) {
       fieldOfStudy: created.field_of_study,
       fundingType: created.funding_type,
       deadline: created.deadline,
+      startDate: created.application_start_date,
+      endDate: created.application_end_date,
       amount: created.amount,
       description: created.description,
       applicationUrl: created.application_url,
@@ -198,6 +204,8 @@ async function search(req, res, next) {
         fieldOfStudy: r.field_of_study,
         fundingType: r.funding_type,
         deadline: r.deadline,
+        startDate: r.application_start_date,
+        endDate: r.application_end_date,
         amount: r.amount,
         applicationUrl: r.application_url,
         bookmark_count: r.bookmark_count,
@@ -245,6 +253,8 @@ async function getById(req, res, next) {
             fieldOfStudy: anyRow.field_of_study,
             fundingType: anyRow.funding_type,
             deadline: anyRow.deadline,
+            startDate: anyRow.application_start_date,
+            endDate: anyRow.application_end_date,
             amount: anyRow.amount,
             description: anyRow.description,
             applicationUrl: anyRow.application_url,
@@ -270,6 +280,8 @@ async function getById(req, res, next) {
       fieldOfStudy: row.field_of_study,
       fundingType: row.funding_type,
       deadline: row.deadline,
+      startDate: row.application_start_date,
+      endDate: row.application_end_date,
       amount: row.amount,
       description: row.description,
       applicationUrl: row.application_url,
@@ -326,6 +338,8 @@ async function update(req, res, next) {
     if (body.fieldOfStudy != null) patch.fieldOfStudy = String(body.fieldOfStudy).trim();
     if (body.fundingType != null) patch.fundingType = String(body.fundingType).trim();
     if (body.deadline != null) patch.deadline = parseDeadline(body.deadline, { required: true });
+    if (body.applicationStartDate != null) patch.applicationStartDate = body.applicationStartDate || null;
+    if (body.applicationEndDate != null) patch.applicationEndDate = body.applicationEndDate || null;
     if (body.amount != null) patch.amount = String(body.amount).trim();
     if (body.description != null) patch.description = String(body.description).trim();
     if (body.applicationUrl != null) {
@@ -350,6 +364,8 @@ async function update(req, res, next) {
       fieldOfStudy: updated.field_of_study,
       fundingType: updated.funding_type,
       deadline: updated.deadline,
+      startDate: updated.application_start_date,
+      endDate: updated.application_end_date,
       amount: updated.amount,
       description: updated.description,
       applicationUrl: updated.application_url,
@@ -415,6 +431,8 @@ async function myScholarships(req, res, next) {
         degreeLevel: r.degree_level,
         fundingType: r.funding_type,
         deadline: r.deadline,
+        startDate: r.application_start_date,
+        endDate: r.application_end_date,
         status: r.status,
         rejectionReason: r.rejection_reason,
         createdAt: r.created_at,
