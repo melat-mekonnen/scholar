@@ -115,6 +115,9 @@ export default function DashboardPage() {
           <Link href="/saved" className="block text-sm font-medium hover:text-primary">
             Saved Scholarships
           </Link>
+          <Link href="/ai-matches" className="block text-sm font-medium hover:text-primary">
+            AI Matches
+          </Link>
           <Link href="/profile" className="block text-sm font-medium hover:text-primary">
             Profile
           </Link>

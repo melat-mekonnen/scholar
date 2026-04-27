@@ -5,6 +5,25 @@ const { StudentProfileRepository } = require("../../repositories/StudentProfileR
 
 const scholarshipRepo = new ScholarshipRepository();
 const profileRepo = new StudentProfileRepository();
+const recommendationCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getCached(key) {
+  const hit = recommendationCache.get(key);
+  if (!hit) return null;
+  if (hit.expiresAt < Date.now()) {
+    recommendationCache.delete(key);
+    return null;
+  }
+  return hit.value;
+}
+
+function setCached(key, value) {
+  recommendationCache.set(key, {
+    expiresAt: Date.now() + CACHE_TTL_MS,
+    value,
+  });
+}
 
 function buildStudentText(profile) {
   const parts = [];
@@ -31,6 +50,15 @@ async function getRecommendations({ userId, topN = 10 }) {
     err.statusCode = 400;
     throw err;
   }
+  const effectiveTopN = Math.min(Math.max(Number(topN) || 10, 1), 20);
+  const cacheKey = JSON.stringify({
+    userId,
+    topN: effectiveTopN,
+    profileUpdatedAt: String(profile?.updated_at || ""),
+    studentText,
+  });
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
 
   // Candidate pool: take a reasonable slice of verified scholarships.
   // (simple first version; later you can prefilter by country/degree, or paginate)
@@ -61,7 +89,7 @@ async function getRecommendations({ userId, topN = 10 }) {
     {
       student: { id: userId, text: studentText },
       scholarships: candidates,
-      topN: Math.min(Math.max(Number(topN) || 10, 1), 20),
+      topN: effectiveTopN,
       includeMatchedTerms: true,
     },
     { timeout: 8000 }
@@ -70,7 +98,7 @@ async function getRecommendations({ userId, topN = 10 }) {
   const byId = new Map((search.results || []).map((s) => [s.id, s]));
   const results = Array.isArray(data?.results) ? data.results : [];
 
-  return {
+  const response = {
     studentText,
     results: results
       .map((r) => {
@@ -84,6 +112,8 @@ async function getRecommendations({ userId, topN = 10 }) {
       })
       .filter(Boolean),
   };
+  setCached(cacheKey, response);
+  return response;
 }
 
 module.exports = { getRecommendations };
