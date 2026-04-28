@@ -29,12 +29,24 @@ import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic }
 type RecommendationItem = {
   scholarship: ScholarshipPublic
   matchPercentage: number
+  matchedInterests?: string[]
 }
 
 type RecommendationsResponse = {
-  source?: "ai" | "fallback"
+  source?: "ai" | "fallback" | "weighted"
   cached?: boolean
   results?: RecommendationItem[]
+}
+
+function formatDate(date?: string) {
+  if (!date) return ""
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 }
 
 export default function AiMatchesPage() {
@@ -43,10 +55,12 @@ export default function AiMatchesPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<RecommendationItem[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
+      setError(null)
       const { res, data } = await apiFetchJson<RecommendationsResponse>("/api/recommendations?topN=20", {
         method: "GET",
         auth: true,
@@ -61,6 +75,7 @@ export default function AiMatchesPage() {
         setItems(data.results)
       } else {
         setItems([])
+        setError("Could not load AI matches right now. Please try again.")
       }
       setLoading(false)
     }
@@ -142,9 +157,14 @@ export default function AiMatchesPage() {
                 </div>
               )}
               {!loading && items.length === 0 && (
-                <p className="text-sm text-slate-500">
-                  {t("dashboard.noAiMatches", "No AI matches available yet. Complete your profile and try again.")}
-                </p>
+                <div className="space-y-2">
+                  {error ? <p className="text-sm text-red-600">{error}</p> : null}
+                  {!error ? (
+                    <p className="text-sm text-slate-500">
+                      {t("dashboard.noAiMatches", "No AI matches available yet. Complete your profile and try again.")}
+                    </p>
+                  ) : null}
+                </div>
               )}
               {!loading && items.length > 0 && (
                 <ul className="space-y-2">
@@ -158,11 +178,23 @@ export default function AiMatchesPage() {
                           <p className="text-sm font-semibold text-slate-900">{item.scholarship.title}</p>
                           <p className="text-xs text-slate-500">
                             {item.scholarship.country || "N/A"}
-                            {item.scholarship.deadline ? ` · ${item.scholarship.deadline}` : ""}
+                            {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
                           </p>
                         </div>
                         <span className="text-sm font-semibold text-primary">{item.matchPercentage}%</span>
                       </div>
+                      {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.matchedInterests.slice(0, 6).map((interest) => (
+                            <span
+                              key={`${item.scholarship.id}-${interest}`}
+                              className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                            >
+                              {interest}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="flex flex-wrap gap-2">
                         <Button size="sm" variant="outline" asChild>
                           <Link href={`/scholarships?q=${encodeURIComponent(item.scholarship.title)}`}>

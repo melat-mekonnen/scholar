@@ -11,8 +11,11 @@ router.get("/dashboard", adminController.getDashboard);
 router.get("/scholarships", adminController.listScholarships);
 router.get("/scholarships/pending", adminController.getPendingScholarships);
 router.get("/scholarships/:id", adminController.getScholarship);
+router.post("/verify-scholarship/:id", adminController.verifyScholarshipAnalysis);
 router.put("/scholarships/:id/verify", adminController.verify);
 router.put("/scholarships/:id/reject", adminController.reject);
+router.post("/approve/:id", adminController.verify);
+router.post("/reject/:id", adminController.reject);
 
 module.exports = router;
 

@@ -29,6 +29,11 @@ type PendingScholarship = {
   degreeLevel?: "high_school" | "bachelor" | "master" | "phd" // <-- make optional
   deadline: string
   status: VerificationStatus
+  aiVerification?: {
+    aiStatus: "clear" | "review_recommended" | "needs_manual_review"
+    riskScore: number
+    riskLevel: "low" | "medium" | "high"
+  }
 }
 
 type PendingResponse = {
@@ -145,6 +150,14 @@ export default function PendingScholarshipsPage() {
     }
   }
 
+  function renderAiBadge(scholarship: PendingScholarship) {
+    const ai = scholarship.aiVerification
+    if (!ai) return <Badge variant="outline">Not analyzed</Badge>
+    if (ai.aiStatus === "clear") return <Badge className="bg-green-600 text-white">AI Clear</Badge>
+    if (ai.aiStatus === "review_recommended") return <Badge className="bg-yellow-500 text-white">AI Review</Badge>
+    return <Badge variant="destructive">Manual Review</Badge>
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
@@ -179,6 +192,7 @@ export default function PendingScholarshipsPage() {
                   <TableHead>Country</TableHead>
                   <TableHead>Degree level</TableHead>
                   <TableHead>Deadline</TableHead>
+                  <TableHead>AI Risk</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -187,7 +201,7 @@ export default function PendingScholarshipsPage() {
               <TableBody>
                 {scholarships.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
                       No pending scholarships at the moment.
                     </TableCell>
                   </TableRow>
@@ -211,6 +225,13 @@ export default function PendingScholarshipsPage() {
                     </TableCell>
 
                     <TableCell>{s.deadline}</TableCell>
+
+                    <TableCell>
+                      <div className="space-y-1">
+                        {renderAiBadge(s)}
+                        <p className="text-xs text-muted-foreground">Risk {s.aiVerification?.riskScore ?? 0}/100</p>
+                      </div>
+                    </TableCell>
 
                     <TableCell>{renderStatusBadge(s.status)}</TableCell>
 
@@ -242,7 +263,7 @@ export default function PendingScholarshipsPage() {
 
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
                       Loading...
                     </TableCell>
                   </TableRow>

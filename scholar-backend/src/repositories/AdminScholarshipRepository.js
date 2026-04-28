@@ -1,6 +1,19 @@
 const { query } = require("../infra/db/neonClient");
 
 class AdminScholarshipRepository {
+  async runScholarshipListQuery(sql, params) {
+    try {
+      return await query(sql, params);
+    } catch (err) {
+      const isMissingOrgColumn =
+        err?.code === "42703" && String(err?.message || "").includes("organization_name");
+      if (!isMissingOrgColumn) throw err;
+
+      const fallbackSql = sql.replace(/\borganization_name\b/g, "NULL::TEXT AS organization_name");
+      return query(fallbackSql, params);
+    }
+  }
+
   async list({ search, status }) {
     const params = [];
     const where = [];
@@ -26,8 +39,8 @@ class AdminScholarshipRepository {
 
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-    const result = await query(
-      `SELECT id, title, country, degree_level, funding_type, deadline, status
+    const result = await this.runScholarshipListQuery(
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason, application_url, description
        FROM scholarships
        ${whereClause}
        ORDER BY created_at DESC`,
@@ -46,8 +59,8 @@ class AdminScholarshipRepository {
       where += ` AND (LOWER(title) LIKE $${params.length} OR LOWER(country) LIKE $${params.length})`;
     }
 
-    const result = await query(
-      `SELECT id, title, country, degree_level, funding_type, deadline, status
+    const result = await this.runScholarshipListQuery(
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason, application_url, description
        FROM scholarships
        ${where}
        ORDER BY deadline ASC NULLS LAST`,
@@ -83,6 +96,16 @@ class AdminScholarshipRepository {
       [id]
     );
     return result.rows[0] || null;
+  }
+
+  async listForVerificationSignals() {
+    const result = await query(
+      `SELECT id, title, description
+       FROM scholarships
+       ORDER BY created_at DESC`,
+      []
+    );
+    return result.rows;
   }
 
   async updateStatus(id, status, rejectionReason = null) {

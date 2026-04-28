@@ -8,6 +8,7 @@ import {
   Check,
   Eye,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Search,
   Settings,
@@ -54,6 +55,15 @@ type AdminScholarship = {
   status: "pending" | "verified" | "rejected" | "draft" | "expired"
   fundingType?: string
   deadline?: string
+  aiVerification?: {
+    sourceStatus: "trusted" | "untrusted" | "invalid" | "missing"
+    deadlineStatus: "active" | "expired" | "invalid" | "missing"
+    riskScore: number
+    riskLevel: "low" | "medium" | "high"
+    reasons: string[]
+    aiStatus: "clear" | "review_recommended" | "needs_manual_review"
+    finalDecision: "admin_decision_required" | "manual_review_required"
+  }
 }
 
 type PendingResponse = {
@@ -66,6 +76,14 @@ function getStatusBadge(status: AdminScholarship["status"]) {
   if (status === "rejected") return <Badge variant="destructive">Rejected</Badge>
   if (status === "expired") return <Badge variant="secondary">Expired</Badge>
   return <Badge variant="outline">Draft</Badge>
+}
+
+function getAiBadge(ai: AdminScholarship["aiVerification"]) {
+  if (!ai) return <Badge variant="outline">Not analyzed</Badge>
+  if (ai.aiStatus === "clear") return <Badge className="bg-green-600 text-white">AI Clear</Badge>
+  if (ai.aiStatus === "review_recommended")
+    return <Badge className="bg-yellow-500 text-white">AI Review</Badge>
+  return <Badge variant="destructive">Manual Review</Badge>
 }
 
 export default function AdminDashboardPage() {
@@ -158,6 +176,29 @@ export default function AdminDashboardPage() {
     }
   }
 
+  async function viewAiReport(id: string) {
+    const { res, data } = await apiFetchJson<{ report?: AdminScholarship["aiVerification"] }>(
+      `/api/admin/verify-scholarship/${id}`,
+      { method: "POST" },
+    )
+    if (!res.ok || !data?.report) return
+
+    const reasons = data.report.reasons?.length
+      ? data.report.reasons.map((reason) => `- ${reason}`).join("\n")
+      : "- No major risk signal detected."
+    window.alert(
+      [
+        `AI Status: ${data.report.aiStatus}`,
+        `Risk Score: ${data.report.riskScore}/100 (${data.report.riskLevel})`,
+        `Source: ${data.report.sourceStatus}`,
+        `Deadline: ${data.report.deadlineStatus}`,
+        "",
+        "Reasons:",
+        reasons,
+      ].join("\n"),
+    )
+  }
+
   const totals = dashboard?.totals
 
   return (
@@ -180,7 +221,7 @@ export default function AdminDashboardPage() {
               className="flex items-center gap-2 w-full rounded-md bg-primary/10 px-3 py-2 font-medium text-primary"
             >
               <LayoutDashboard className="h-4 w-4" />
-              Dashboard
+              AI Verification
             </Link>
 
             <Link
@@ -197,6 +238,13 @@ export default function AdminDashboardPage() {
             >
               <Users className="h-4 w-4" />
               Manage Users
+            </Link>
+            <Link
+              href="/admin/audit-logs"
+              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
+            >
+              <ListChecks className="h-4 w-4" />
+              Audit Logs
             </Link>
             <Link
               href="/admin/documents"
@@ -234,7 +282,7 @@ export default function AdminDashboardPage() {
               <div>
                 <h1 className="text-xl font-semibold">Admin Dashboard</h1>
                 <p className="text-sm text-gray-500">
-                  Manage scholarships, users, and platform operations for EthioScholar.
+                  AI evaluates risk, but admins keep final verification decision.
                 </p>
               </div>
 
@@ -352,7 +400,8 @@ export default function AdminDashboardPage() {
                     <TableHeader className="bg-gray-50">
                       <TableRow>
                         <TableHead>Scholarship Title</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>AI Status</TableHead>
+                        <TableHead>Admin Status</TableHead>
                         <TableHead>Funding</TableHead>
                         <TableHead>Deadline</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -363,7 +412,7 @@ export default function AdminDashboardPage() {
                       {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
                           <TableRow key={i}>
-                            <TableCell colSpan={5}>
+                            <TableCell colSpan={6}>
                               <Skeleton className="h-6 w-full" />
                             </TableCell>
                           </TableRow>
@@ -374,6 +423,14 @@ export default function AdminDashboardPage() {
                             <TableCell className="font-medium text-indigo-700">
                               {s.title}
                             </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {getAiBadge(s.aiVerification)}
+                                <p className="text-xs text-gray-500">
+                                  Risk: {s.aiVerification?.riskScore ?? 0}/100
+                                </p>
+                              </div>
+                            </TableCell>
                             <TableCell>{getStatusBadge(s.status)}</TableCell>
                             <TableCell>{s.fundingType ?? "N/A"}</TableCell>
                             <TableCell>{s.deadline ?? "N/A"}</TableCell>
@@ -383,6 +440,10 @@ export default function AdminDashboardPage() {
                                   <Link href={`/admin/scholarships/${s.id}`}>
                                     <Eye className="h-4 w-4" />
                                   </Link>
+                                </Button>
+
+                                <Button size="sm" variant="outline" onClick={() => viewAiReport(s.id)}>
+                                  AI Report
                                 </Button>
 
                                 <Button
@@ -414,7 +475,7 @@ export default function AdminDashboardPage() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="py-10 text-center text-gray-500">
+                          <TableCell colSpan={6} className="py-10 text-center text-gray-500">
                             No scholarships found.
                           </TableCell>
                         </TableRow>

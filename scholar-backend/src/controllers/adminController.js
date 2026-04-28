@@ -3,6 +3,7 @@ const {
   listPendingScholarships,
   listScholarships: listScholarshipsUsecase,
   getScholarshipById,
+  analyzeScholarshipVerification,
   verifyScholarship,
   rejectScholarship,
 } = require("../usecases/admin/adminScholarships");
@@ -20,7 +21,19 @@ async function getPendingScholarships(req, res, next) {
   try {
     const { search } = req.query;
     const scholarships = await listPendingScholarships({ search });
-    return res.json({ scholarships });
+    return res.json({
+      scholarships: scholarships.map((row) => ({
+        id: row.id,
+        title: row.title,
+        country: row.country,
+        degreeLevel: row.degree_level,
+        fundingType: row.funding_type,
+        deadline: row.deadline,
+        status: row.status,
+        rejectionReason: row.rejection_reason,
+        aiVerification: row.aiVerification,
+      })),
+    });
   } catch (err) {
     return next(err);
   }
@@ -30,7 +43,19 @@ async function listScholarships(req, res, next) {
   try {
     const { search, status } = req.query;
     const scholarships = await listScholarshipsUsecase({ search, status });
-    return res.json({ scholarships });
+    return res.json({
+      scholarships: scholarships.map((row) => ({
+        id: row.id,
+        title: row.title,
+        country: row.country,
+        degreeLevel: row.degree_level,
+        fundingType: row.funding_type,
+        deadline: row.deadline,
+        status: row.status,
+        rejectionReason: row.rejection_reason,
+        aiVerification: row.aiVerification,
+      })),
+    });
   } catch (err) {
     return next(err);
   }
@@ -76,6 +101,15 @@ async function verify(req, res, next) {
   }
 }
 
+async function verifyScholarshipAnalysis(req, res, next) {
+  try {
+    const report = await analyzeScholarshipVerification(req.params.id);
+    return res.json({ scholarshipId: req.params.id, report });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function reject(req, res, next) {
   try {
     const { reason } = req.body || {};
@@ -95,6 +129,7 @@ module.exports = {
   listScholarships,
   getPendingScholarships,
   getScholarship,
+  verifyScholarshipAnalysis,
   verify,
   reject,
 };

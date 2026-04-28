@@ -81,6 +81,17 @@ function toggleInList(list: string[], value: string) {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
+function formatDate(date?: string) {
+  if (!date) return ""
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+}
+
 function buildParams(options: {
   q: string
   countries: string[]
@@ -563,7 +574,7 @@ export default function ScholarshipsPage() {
                         )}
                         {s.fundingType && <Badge variant="outline">{s.fundingType}</Badge>}
                         {s.amount && <Badge variant="outline">{s.amount}</Badge>}
-                        {s.deadline && <Badge variant="outline">Deadline: {s.deadline}</Badge>}
+                        {s.deadline && <Badge variant="outline">Deadline: {formatDate(s.deadline)}</Badge>}
                       </div>
 
                       <div className="pt-2 flex gap-2">
