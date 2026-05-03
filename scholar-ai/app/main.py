@@ -14,8 +14,10 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from app.api.chat_router import router as chat_router
 
 app = FastAPI(title="Scholar AI Service", version="0.1.0")
+app.include_router(chat_router)
 
 
 class StudentIn(BaseModel):

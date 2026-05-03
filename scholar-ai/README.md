@@ -55,6 +55,43 @@ Response:
 - **`score`**: raw similarity (0–1) from TF‑IDF / fallbacks.
 - **`matchPercent`**: **100 × (score / best score in this request)** — the top match is **100%**; others scale down (e.g. half the similarity ≈ **50%**). You only see **0%** when similarity is ~0, not because another card “took” 100%.
 
+### `POST /ai/chat/query`
+
+Hybrid RAG chatbot endpoint for:
+
+- `find_scholarship`
+- `eligibility_check`
+- `deadline_check`
+
+Request example:
+
+```json
+{
+  "message": "Find fully funded AI masters in Germany with near deadlines",
+  "topK": 5,
+  "profile": {
+    "fieldOfStudy": "Computer Science",
+    "degreeLevel": "master",
+    "gpa": 3.6,
+    "interests": ["ai", "data science"],
+    "preferredCountry": "Germany"
+  },
+  "scholarships": [],
+  "includePublicDataset": true
+}
+```
+
+Response shape:
+
+```json
+{
+  "intent": "find_scholarship",
+  "recommendations": [],
+  "eligibility": "",
+  "deadlines": []
+}
+```
+
 ### Trusted RSS / Atom ingestion
 
 - **`POST /ai/feeds/fetch`** — body `{ "feed_urls": ["https://…"] }` (max 20). Returns normalized `{ items: [{ title, description, sourceUrl, sourceName, published }] }` for the backend to store as **pending** scholarships. No web scraping of arbitrary pages; only **feeds you configure**.
@@ -67,4 +104,18 @@ Only add feed URLs you are **allowed** to use (terms of service, robots.txt wher
 - Token overlap uses **Unicode** word characters (not ASCII-only), so non‑Latin profiles still score. If token overlap is still empty, the service falls back to **character bigrams** so narrow profiles (e.g. `cs`, `bachelor`) are not stuck at 0% on every card.
 - This is **not neural-network training**. It **fits** a TF‑IDF vectorizer on the scholarship texts in the request, then scores similarity.
 - In production you’ll typically precompute scholarship vectors and refresh on schedule. This “fit per request” version is ideal for your first milestone demo.
+
+## Intent model training (PyTorch)
+
+Train a simple intent classifier with your labeled dataset:
+
+```bash
+python -m app.models.train_intent --data app/data/intent_train.csv --output app/models/artifacts --epochs 30
+```
+
+This generates:
+
+- `app/models/artifacts/intent_model.pt`
+- `app/models/artifacts/label_encoder.pkl`
+- `app/models/artifacts/tfidf_vectorizer.pkl`
 

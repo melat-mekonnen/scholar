@@ -6,4 +6,8 @@ scipy
 numpy
 httpx
 feedparser
+pandas
+torch
+sentence-transformers
+faiss-cpu
 

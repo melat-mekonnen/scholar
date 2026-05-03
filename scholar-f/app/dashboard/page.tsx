@@ -118,6 +118,9 @@ export default function DashboardPage() {
           <Link href="/ai-matches" className="block text-sm font-medium hover:text-primary">
             AI Matches
           </Link>
+          <Link href="/ai-chat" className="block text-sm font-medium hover:text-primary">
+            AI Chatbot
+          </Link>
           <Link href="/profile" className="block text-sm font-medium hover:text-primary">
             Profile
           </Link>

@@ -1,0 +1,7 @@
+# Python
+scholar-ai/.venv/
+**/__pycache__/
+*.pyc
+
+# TS/Next cache
+*.tsbuildinfo

@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Settings,
   Sparkles,
+  Bot,
   User,
   Users,
 } from "lucide-react"
@@ -92,6 +93,7 @@ export default function AiMatchesPage() {
     { href: "/community", label: t("nav.community", "Community"), icon: Users, active: false },
     { href: "/saved", label: t("nav.saved", "Saved Scholarships"), icon: Bookmark, active: false },
     { href: "/ai-matches", label: t("dashboard.aiMatches", "AI Matches"), icon: Sparkles, active: true },
+    { href: "/ai-chat", label: t("nav.aiChat", "AI Chatbot"), icon: Bot, active: false },
     { href: "/profile", label: t("nav.profile", "Profile"), icon: User, active: false },
     { href: "/settings", label: t("nav.settings", "Settings"), icon: Settings, active: false },
     { href: "/documents", label: t("nav.documents", "Document Resources"), icon: FolderOpen, active: false },
