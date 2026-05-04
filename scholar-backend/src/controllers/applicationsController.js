@@ -10,7 +10,9 @@ const ALLOWED_STATUS = new Set(["pending", "submitted", "accepted", "rejected"])
 async function create(req, res, next) {
   try {
     const userId = req.user?.id;
-    const scholarshipId = String(req.body?.scholarshipId || "");
+    const scholarshipId = String(
+      req.body?.scholarshipId || req.body?.scholarship_id || ""
+    );
     const status = req.body?.status ? String(req.body.status) : "submitted";
 
     if (!UUID_V4.test(scholarshipId)) {
@@ -118,9 +120,46 @@ async function updateStatus(req, res, next) {
   }
 }
 
+async function listByUser(req, res, next) {
+  try {
+    const requestedUserId = String(req.params?.userId || "");
+    const actor = req.user;
+    if (!actor) {
+      const err = new Error("Authentication required");
+      err.statusCode = 401;
+      throw err;
+    }
+    if (actor.role !== "admin" && String(actor.id) !== requestedUserId) {
+      const err = new Error("Forbidden");
+      err.statusCode = 403;
+      throw err;
+    }
+    const rows = await repo.listByUserId(requestedUserId);
+    return res.json({
+      applications: rows.map((a) => ({
+        id: a.id,
+        userId: a.user_id,
+        scholarshipId: a.scholarship_id,
+        status: a.status,
+        createdAt: a.created_at,
+        updatedAt: a.updated_at,
+        scholarship: {
+          title: a.scholarship_title,
+          country: a.scholarship_country,
+          deadline: a.scholarship_deadline,
+          applicationUrl: a.scholarship_application_url,
+        },
+      })),
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   create,
   listMine,
+  listByUser,
   updateStatus,
 };
 

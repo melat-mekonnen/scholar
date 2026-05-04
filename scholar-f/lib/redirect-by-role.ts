@@ -5,9 +5,12 @@ export function getPostAuthPath(role: string | undefined): string {
       return "/admin"
     case "owner":
       return "/owner"
-    case "manager":
+    case "university_representative":
       return "/manager"
+    case "student":
+      return "/dashboard"
     default:
+      // Fallback for missing or invalid role
       return "/dashboard"
   }
 }

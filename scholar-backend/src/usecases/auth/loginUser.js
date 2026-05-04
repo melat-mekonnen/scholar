@@ -15,16 +15,22 @@ function validateLoginInput({ email, password }) {
 async function loginUser({ email, password }) {
   validateLoginInput({ email, password });
 
-  const user = await userRepo.findByEmail(email.toLowerCase());
+  const normalizedEmail = String(email).toLowerCase();
+  console.log(`[@auth] loginUser email received: ${normalizedEmail}`);
+
+  const user = await userRepo.findByEmail(normalizedEmail);
+  console.log("[@auth] loginUser user found:", !!user, user ? { email: user.email, role: user.role } : null);
   if (!user || !user.password_hash) {
     throw Object.assign(new Error("Invalid credentials"), { statusCode: 401 });
   }
 
   const match = await bcrypt.compare(password, user.password_hash);
+  console.log(`[@auth] loginUser password match: ${match}`);
   if (!match) {
     throw Object.assign(new Error("Invalid credentials"), { statusCode: 401 });
   }
 
+  console.log(`[@auth] loginUser returning role: ${user.role}`);
   return user;
 }
 

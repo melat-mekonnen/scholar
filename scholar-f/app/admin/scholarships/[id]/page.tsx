@@ -23,6 +23,10 @@ type ScholarshipDetail = {
   fieldOfStudy?: string
   amount?: string
   description?: string
+  sourceName?: string
+  sourceUrl?: string
+  aiConfidence?: number
+  discoveredAt?: string
   createdAt?: string
   updatedAt?: string
   postedBy?: {
@@ -192,7 +196,31 @@ export default function ScholarshipReviewPage() {
                       </p>
                       <p className="font-medium">{scholarship.deadline}</p>
                     </div>
+                    {typeof scholarship.aiConfidence === "number" && (
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                          AI confidence
+                        </p>
+                        <p className="font-medium">{Math.round(scholarship.aiConfidence * 100)}%</p>
+                      </div>
+                    )}
                   </div>
+
+                  {scholarship.sourceUrl ? (
+                    <div className="pt-2">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        Source
+                      </p>
+                      <a
+                        href={scholarship.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm underline"
+                      >
+                        {scholarship.sourceName || scholarship.sourceUrl}
+                      </a>
+                    </div>
+                  ) : null}
 
                   {scholarship.description && (
                     <div className="pt-2">

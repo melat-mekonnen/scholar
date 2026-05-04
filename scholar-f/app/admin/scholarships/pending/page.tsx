@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -15,133 +15,189 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
+import { apiFetchJson } from "@/lib/api";
+import { clearToken } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 
-type VerificationStatus = "draft" | "pending" | "verified" | "rejected" | "expired"
+type VerificationStatus =
+  | "draft"
+  | "pending"
+  | "verified"
+  | "rejected"
+  | "expired";
 
 type PendingScholarship = {
-  id: string
-  title: string
-  country: string
-  degreeLevel?: "high_school" | "bachelor" | "master" | "phd" // <-- make optional
-  deadline: string
-  status: VerificationStatus
-}
+  id: string;
+  title: string;
+  country: string;
+  degreeLevel?: "high_school" | "bachelor" | "master" | "phd";
+  degree_level?: "high_school" | "bachelor" | "master" | "phd";
+  deadline: string;
+  status: VerificationStatus;
+  source_name?: string;
+  source_url?: string;
+  ai_confidence?: number;
+};
 
 type PendingResponse = {
-  scholarships: PendingScholarship[]
-}
+  scholarships: PendingScholarship[];
+};
 
 export default function PendingScholarshipsPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
 
-  const [scholarships, setScholarships] = useState<PendingScholarship[]>([])
-  const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // All hooks must be called before any conditional returns
+  const [scholarships, setScholarships] = useState<PendingScholarship[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mutatingIds, setMutatingIds] = useState<Record<string, boolean>>({});
 
-  const [mutatingIds, setMutatingIds] = useState<Record<string, boolean>>({})
-  const isMutating = (id: string) => !!mutatingIds[id]
+  const requestIdRef = useRef(0);
+  const trimmedSearch = useMemo(() => search.trim(), [search]);
 
-  const requestIdRef = useRef(0)
-  const trimmedSearch = useMemo(() => search.trim(), [search])
+  // Check if user has admin role
+  const isAdmin = user?.role === "admin";
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        clearToken();
+        router.replace("/signin");
+        return;
+      }
+      if (!isAdmin) {
+        // Redirect students to their dashboard
+        router.replace("/unauthorized");
+        return;
+      }
+    }
+  }, [authLoading, isAuthenticated, isAdmin, router]);
+
+  // Don't render anything while checking authentication
+  if (authLoading || !isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     async function load() {
-      const currentRequestId = ++requestIdRef.current
+      const currentRequestId = ++requestIdRef.current;
 
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
 
-        const params = new URLSearchParams()
-        if (trimmedSearch) params.set("search", trimmedSearch)
+        const params = new URLSearchParams();
+        if (trimmedSearch) params.set("search", trimmedSearch);
 
-        const url = `/api/admin/scholarships/pending${params.toString() ? `?${params.toString()}` : ""}`
+        const url = `/api/admin/scholarships/pending${params.toString() ? `?${params.toString()}` : ""}`;
 
-        const { res, data, errorMessage } =
-          await apiFetchJson<PendingResponse>(url, { method: "GET" })
+        const { res, data, errorMessage } = await apiFetchJson<PendingResponse>(
+          url,
+          { method: "GET" },
+        );
 
-        if (requestIdRef.current !== currentRequestId) return
+        if (requestIdRef.current !== currentRequestId) return;
 
         if (res.status === 401 || res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
+          console.log("Admin access denied");
+          // Since we check roles upfront, this shouldn't happen, but handle gracefully
+          router.replace("/unauthorized");
+          return;
         }
 
         if (!res.ok || !data) {
-          throw new Error(errorMessage || "Failed to load pending scholarships")
+          throw new Error(
+            errorMessage || "Failed to load pending scholarships",
+          );
         }
 
-        setScholarships(data.scholarships ?? [])
+        setScholarships(data.scholarships ?? []);
       } catch (err) {
-        if (requestIdRef.current !== currentRequestId) return
-        setError(err instanceof Error ? err.message : "Failed to load pending scholarships")
+        if (requestIdRef.current !== currentRequestId) return;
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load pending scholarships",
+        );
       } finally {
-        if (requestIdRef.current === currentRequestId) setLoading(false)
+        if (requestIdRef.current === currentRequestId) setLoading(false);
       }
     }
 
-    load()
-  }, [router, trimmedSearch])
+    load();
+  }, [router, trimmedSearch]);
 
   async function quickApprove(id: string) {
-    setError(null)
-    setMutatingIds((prev) => ({ ...prev, [id]: true }))
+    setError(null);
+    setMutatingIds((prev) => ({ ...prev, [id]: true }));
 
     try {
       const { res, errorMessage } = await apiFetchJson(
         `/api/admin/scholarships/${id}/verify`,
         { method: "PUT" },
-      )
+      );
 
-      if (!res.ok) throw new Error(errorMessage || "Failed to approve scholarship")
+      if (!res.ok)
+        throw new Error(errorMessage || "Failed to approve scholarship");
 
-      setScholarships((prev) => prev.filter((s) => s.id !== id))
+      setScholarships((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to approve scholarship")
+      setError(
+        err instanceof Error ? err.message : "Failed to approve scholarship",
+      );
     } finally {
-      setMutatingIds((prev) => ({ ...prev, [id]: false }))
+      setMutatingIds((prev) => ({ ...prev, [id]: false }));
     }
   }
 
   async function quickReject(id: string) {
-    setError(null)
-    setMutatingIds((prev) => ({ ...prev, [id]: true }))
+    setError(null);
+    setMutatingIds((prev) => ({ ...prev, [id]: true }));
 
     try {
       const { res, errorMessage } = await apiFetchJson(
         `/api/admin/scholarships/${id}/reject`,
         { method: "PUT" },
-      )
+      );
 
-      if (!res.ok) throw new Error(errorMessage || "Failed to reject scholarship")
+      if (!res.ok)
+        throw new Error(errorMessage || "Failed to reject scholarship");
 
-      setScholarships((prev) => prev.filter((s) => s.id !== id))
+      setScholarships((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reject scholarship")
+      setError(
+        err instanceof Error ? err.message : "Failed to reject scholarship",
+      );
     } finally {
-      setMutatingIds((prev) => ({ ...prev, [id]: false }))
+      setMutatingIds((prev) => ({ ...prev, [id]: false }));
     }
   }
 
   function renderStatusBadge(status: VerificationStatus) {
     switch (status) {
       case "verified":
-        return <Badge className="bg-green-600 text-white">Verified</Badge>
+        return <Badge className="bg-green-600 text-white">Verified</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>
+        return <Badge variant="destructive">Rejected</Badge>;
       case "expired":
-        return <Badge variant="secondary">Expired</Badge>
+        return <Badge variant="secondary">Expired</Badge>;
       case "draft":
-        return <Badge variant="outline">Draft</Badge>
+        return <Badge variant="outline">Draft</Badge>;
       case "pending":
       default:
-        return <Badge variant="outline">Pending</Badge>
+        return <Badge variant="outline">Pending</Badge>;
     }
   }
 
@@ -172,7 +228,9 @@ export default function PendingScholarshipsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Scholarships awaiting review</CardTitle>
+            <CardTitle className="text-base">
+              Scholarships awaiting review
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -182,6 +240,7 @@ export default function PendingScholarshipsPage() {
                   <TableHead>Title</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Degree level</TableHead>
+                  <TableHead>AI score</TableHead>
                   <TableHead>Deadline</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -191,7 +250,10 @@ export default function PendingScholarshipsPage() {
               <TableBody>
                 {scholarships.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell
+                      colSpan={7}
+                      className="py-6 text-center text-sm text-muted-foreground"
+                    >
                       No pending scholarships at the moment.
                     </TableCell>
                   </TableRow>
@@ -211,7 +273,15 @@ export default function PendingScholarshipsPage() {
                     <TableCell>{s.country}</TableCell>
 
                     <TableCell className="capitalize">
-                      {s.degreeLevel ? s.degreeLevel.replace("_", " ") : "N/A"}
+                      {s.degreeLevel || s.degree_level
+                        ? (s.degreeLevel || s.degree_level)?.replace("_", " ")
+                        : "N/A"}
+                    </TableCell>
+
+                    <TableCell>
+                      {typeof s.ai_confidence === "number"
+                        ? `${Math.round(s.ai_confidence * 100)}%`
+                        : "N/A"}
                     </TableCell>
 
                     <TableCell>{s.deadline}</TableCell>
@@ -246,7 +316,10 @@ export default function PendingScholarshipsPage() {
 
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell
+                      colSpan={7}
+                      className="py-6 text-center text-sm text-muted-foreground"
+                    >
                       Loading...
                     </TableCell>
                   </TableRow>
@@ -257,5 +330,5 @@ export default function PendingScholarshipsPage() {
         </Card>
       </div>
     </main>
-  )
+  );
 }

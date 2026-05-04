@@ -10,13 +10,13 @@ const {
 
 test("initialStatusForCreator maps roles to expected workflow", () => {
   assert.equal(initialStatusForCreator("manager"), "pending");
-  assert.equal(initialStatusForCreator("owner"), "verified");
-  assert.equal(initialStatusForCreator("admin"), "verified");
+  assert.equal(initialStatusForCreator("owner"), "pending");
+  assert.equal(initialStatusForCreator("admin"), "pending");
 });
 
-test("nextStatusAfterUpdate keeps owner/admin direct publish", () => {
+test("nextStatusAfterUpdate requires re-review for non-admin edits", () => {
   assert.equal(nextStatusAfterUpdate("manager"), "pending");
-  assert.equal(nextStatusAfterUpdate("owner"), "verified");
+  assert.equal(nextStatusAfterUpdate("owner"), "pending");
   assert.equal(nextStatusAfterUpdate("admin"), "verified");
 });
 

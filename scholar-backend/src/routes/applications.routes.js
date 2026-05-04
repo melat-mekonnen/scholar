@@ -9,6 +9,7 @@ router.use(authMiddleware, requireStudent);
 
 router.post("/", applicationsController.create);
 router.get("/", applicationsController.listMine);
+router.get("/user/:userId", applicationsController.listByUser);
 router.put("/:id/status", applicationsController.updateStatus);
 
 module.exports = router;

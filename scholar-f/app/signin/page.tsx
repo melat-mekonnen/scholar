@@ -1,85 +1,113 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { apiFetchJson, API_BASE_URL } from "@/lib/api"
-import { getPostAuthPath } from "@/lib/redirect-by-role"
-import { setToken } from "@/lib/auth"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Field, FieldGroup, FieldLabel, FieldError, FieldSeparator } from "@/components/ui/field"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { apiFetchJson, API_BASE_URL } from "@/lib/api";
+import { getPostAuthPath } from "@/lib/redirect-by-role";
+import { setToken } from "@/lib/auth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldSeparator,
+} from "@/components/ui/field";
 
 export default function SignInPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [formError, setFormError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   type LoginResponse = {
-    token: string
-    user: { id: string; fullName: string; email: string; role: string }
-  }
+    token: string;
+    user: { id: string; fullName: string; email: string; role: string };
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = "Password is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
 
-    setIsLoading(true)
-    setFormError(null)
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setFormError(null);
 
     try {
-      const { res, data, errorMessage } = await apiFetchJson<LoginResponse>("/api/auth/login", {
-        method: "POST",
-        auth: false,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+      };
+      console.log("[Signin] request payload", payload);
+      const endpoint = "/api/auth/login";
+      console.log("[Signin] request URL", endpoint);
+      const { res, data, errorMessage } = await apiFetchJson<LoginResponse>(
+        endpoint,
+        {
+          method: "POST",
+          auth: false,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      console.log(
+        "[Signin] backend response status",
+        res.status,
+        "data",
+        data,
+        "error",
+        errorMessage,
+      );
 
       if (!res.ok || !data?.token) {
-        setErrors((prev) => ({ ...prev, password: "Invalid credentials" }))
-        setFormError(errorMessage || "Sign in failed")
-        return
+        setErrors((prev) => ({ ...prev, password: "Invalid credentials" }));
+        setFormError(errorMessage || "Sign in failed");
+        return;
       }
 
-      setToken(data.token)
-
-      router.push(getPostAuthPath(data.user?.role))
+      setToken(data.token);
+      console.log("[Signin] stored token and returning response", data);
+      router.push(getPostAuthPath(data.user.role));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
     // Backend will redirect back to `/auth/callback?token=...`
-    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`
-  }
+    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`;
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -120,7 +148,9 @@ export default function SignInPage() {
                   type="email"
                   placeholder="Enter your email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   aria-invalid={!!errors.email}
                 />
                 {errors.email && <FieldError>{errors.email}</FieldError>}
@@ -133,18 +163,28 @@ export default function SignInPage() {
                   type="password"
                   placeholder="Enter your password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   aria-invalid={!!errors.password}
                 />
                 {errors.password && <FieldError>{errors.password}</FieldError>}
                 <div className="mt-2 text-right">
-                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-primary hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
               </Field>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={isLoading}
+              >
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
 
@@ -183,12 +223,15 @@ export default function SignInPage() {
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {"Don't have an account?"}{" "}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
+            <Link
+              href="/signup"
+              className="text-primary font-medium hover:underline"
+            >
               Sign Up
             </Link>
           </p>
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

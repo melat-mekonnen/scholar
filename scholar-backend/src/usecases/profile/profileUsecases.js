@@ -38,6 +38,21 @@ function mergeProfileUpdate(existing, input) {
     interests: hasOwn(input, "interests")
       ? input.interests
       : existing.interests,
+    financialNeed: hasOwn(input, "financialNeed")
+      ? input.financialNeed
+      : existing.financial_need ?? false,
+    preferredFundingType: hasOwn(input, "preferredFundingType")
+      ? mergeOptionalTrimmed(input.preferredFundingType)
+      : existing.preferred_funding_type ?? null,
+    languageProficiency: hasOwn(input, "languageProficiency")
+      ? input.languageProficiency
+      : existing.language_proficiency ?? [],
+    preferredScholarshipType: hasOwn(input, "preferredScholarshipType")
+      ? mergeOptionalTrimmed(input.preferredScholarshipType)
+      : existing.preferred_scholarship_type ?? null,
+    goals: hasOwn(input, "goals")
+      ? mergeOptionalTrimmed(input.goals)
+      : existing.goals ?? null,
   };
 }
 

@@ -1,100 +1,128 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { apiFetchJson, API_BASE_URL } from "@/lib/api"
-import { getPostAuthPath } from "@/lib/redirect-by-role"
-import { setToken } from "@/lib/auth"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Field, FieldGroup, FieldLabel, FieldError, FieldSeparator } from "@/components/ui/field"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { apiFetchJson, API_BASE_URL } from "@/lib/api";
+import { getPostAuthPath } from "@/lib/redirect-by-role";
+import { setToken } from "@/lib/auth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldSeparator,
+} from "@/components/ui/field";
 
 export default function SignUpPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [formError, setFormError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   type SignupResponse = {
-    token: string
-    user: { id: string; fullName: string; email: string; role: string }
-  }
+    token: string;
+    user: { id: string; fullName: string; email: string; role: string };
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required"
+      newErrors.fullName = "Full name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password"
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
 
-    setIsLoading(true)
-    setFormError(null)
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setFormError(null);
 
     try {
-      const { res, data, errorMessage } = await apiFetchJson<SignupResponse>("/api/auth/register", {
-        method: "POST",
-        auth: false,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
+      const payload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      };
+      console.log("[Signup] request payload", payload);
+      const endpoint = "/api/auth/signup";
+      console.log("[Signup] request URL", endpoint);
+      const { res, data, errorMessage } = await apiFetchJson<SignupResponse>(
+        endpoint,
+        {
+          method: "POST",
+          auth: false,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      console.log(
+        "[Signup] backend response status",
+        res.status,
+        "data",
+        data,
+        "error",
+        errorMessage,
+      );
 
       if (!res.ok || !data?.token) {
-        setErrors((prev) => ({ ...prev, email: "" }))
-        setFormError(errorMessage || "Sign up failed")
-        return
+        setErrors((prev) => ({ ...prev, email: "" }));
+        setFormError(errorMessage || "Sign up failed");
+        return;
       }
 
-      setToken(data.token)
-
-      router.push(getPostAuthPath(data.user?.role))
+      setToken(data.token);
+      console.log("[Signup] stored token and returning response", data);
+      router.push(getPostAuthPath(data.user.role));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignUp = async () => {
     // Backend will redirect back to `/auth/callback?token=...`
-    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`
-  }
+    window.location.href = `${API_BASE_URL}/api/auth/oauth/google`;
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -135,7 +163,9 @@ export default function SignUpPage() {
                   type="text"
                   placeholder="Enter your full name"
                   value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fullName: e.target.value })
+                  }
                   aria-invalid={!!errors.fullName}
                 />
                 {errors.fullName && <FieldError>{errors.fullName}</FieldError>}
@@ -148,7 +178,9 @@ export default function SignUpPage() {
                   type="email"
                   placeholder="Enter your email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   aria-invalid={!!errors.email}
                 />
                 {errors.email && <FieldError>{errors.email}</FieldError>}
@@ -161,26 +193,42 @@ export default function SignUpPage() {
                   type="password"
                   placeholder="Create a password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   aria-invalid={!!errors.password}
                 />
                 {errors.password && <FieldError>{errors.password}</FieldError>}
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm Password
+                </FieldLabel>
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   aria-invalid={!!errors.confirmPassword}
                 />
-                {errors.confirmPassword && <FieldError>{errors.confirmPassword}</FieldError>}
+                {errors.confirmPassword && (
+                  <FieldError>{errors.confirmPassword}</FieldError>
+                )}
               </Field>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={isLoading}
+              >
                 {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
 
@@ -219,12 +267,15 @@ export default function SignUpPage() {
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/signin" className="text-primary font-medium hover:underline">
+            <Link
+              href="/signin"
+              className="text-primary font-medium hover:underline"
+            >
               Sign In
             </Link>
           </p>
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

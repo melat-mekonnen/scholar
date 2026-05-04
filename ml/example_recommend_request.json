@@ -1,0 +1,16 @@
+{
+  "student": {
+    "field": "Computer Science",
+    "gpa": 3.8,
+    "country": "USA",
+    "financial_need": true
+  },
+  "scholarship": {
+    "field": "Computer Science",
+    "location": "USA",
+    "funding": "Full funding",
+    "requirements": {
+      "gpa": 3.5
+    }
+  }
+}

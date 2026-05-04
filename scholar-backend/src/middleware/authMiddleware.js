@@ -26,7 +26,7 @@ function authMiddleware(req, res, next) {
     req.query && req.query.token ? String(req.query.token) : null;
 
   const token =
-    tokenFromHeader || tokenFromAltHeader || tokenFromQuery || req.cookies?.token;
+    tokenFromHeader || tokenFromAltHeader || tokenFromQuery || req.cookies?.scholar_jwt || req.cookies?.token;
 
   if (!token) {
     return res.status(401).json({ message: "Authentication required" });

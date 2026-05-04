@@ -7,11 +7,13 @@ function isOwnerOrAdmin(role) {
 }
 
 function initialStatusForCreator(role) {
-  return isOwnerOrAdmin(role) ? "verified" : "pending";
+  // Every newly uploaded scholarship must be reviewed by admin before going live.
+  return "pending";
 }
 
 function nextStatusAfterUpdate(role) {
-  return isOwnerOrAdmin(role) ? "verified" : "pending";
+  // Any non-admin edit should trigger re-review before going live.
+  return role === "admin" ? "verified" : "pending";
 }
 
 function assertCanMutateScholarship(actor, scholarship) {

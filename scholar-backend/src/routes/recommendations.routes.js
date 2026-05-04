@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authMiddleware, requireStudent);
 
 router.get("/", recommendationsController.list);
+router.post("/feedback", recommendationsController.logFeedback);
 
 module.exports = router;
 

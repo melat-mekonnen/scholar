@@ -1,0 +1,14 @@
+{
+  "name": "scholar-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "npm run clean --prefix scholar-f",
+    "dev:frontend": "npm run dev --prefix scholar-f",
+    "dev:backend": "npm run dev --prefix scholar-backend",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

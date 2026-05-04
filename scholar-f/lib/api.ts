@@ -30,9 +30,12 @@ export async function apiFetch(
     headers.set("Authorization", `Bearer ${token}`)
   }
 
+  console.log("[apiFetch] url", url, "method", init.method || "GET")
+
   return fetch(url, {
     ...init,
     headers,
+    credentials: "include",
   })
 }
 

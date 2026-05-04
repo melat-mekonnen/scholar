@@ -470,6 +470,30 @@ class ScholarshipRepository {
     );
     return result.rows[0] || null;
   }
+  async getTrending(limit = 3) {
+    const result = await query(
+      `SELECT s.id, s.title, s.country, s.deadline, s.application_url,
+              (SELECT COUNT(*) FROM bookmarks b WHERE b.scholarship_id = s.id) as bookmark_count
+       FROM scholarships s
+       WHERE s.status = 'verified' AND (s.deadline IS NULL OR s.deadline >= CURRENT_DATE)
+       ORDER BY bookmark_count DESC, s.created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    return result.rows;
+  }
+
+  async getUrgentDeadlines(limit = 3) {
+    const result = await query(
+      `SELECT id, title, country, deadline, application_url
+       FROM scholarships
+       WHERE status = 'verified' AND deadline IS NOT NULL AND deadline >= CURRENT_DATE
+       ORDER BY deadline ASC
+       LIMIT $1`,
+      [limit]
+    );
+    return result.rows;
+  }
 }
 
 module.exports = { ScholarshipRepository };

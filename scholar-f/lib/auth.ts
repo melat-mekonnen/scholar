@@ -8,11 +8,13 @@ export function getToken(): string | null {
 export function setToken(token: string) {
   if (typeof window === "undefined") return
   window.localStorage.setItem(TOKEN_STORAGE_KEY, token)
+  document.cookie = `scholar_jwt=${token}; path=/; max-age=604800; SameSite=Lax`
 }
 
 export function clearToken() {
   if (typeof window === "undefined") return
   window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+  document.cookie = `scholar_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
 }
 
 export async function logoutFromServer() {

@@ -1,34 +1,29 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { setToken } from "@/lib/auth"
-import { getPostAuthPath } from "@/lib/redirect-by-role"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect } from "react";
+import { setToken } from "@/lib/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AuthCallbackPage() {
-  const router = useRouter()
-
   useEffect(() => {
     // Avoid `useSearchParams()` Suspense requirement by reading the URL directly.
-    const token = new URLSearchParams(window.location.search).get("token")
+    const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
-      setToken(token)
+      setToken(token);
       try {
-        const payloadPart = token.split(".")[1] || ""
+        const payloadPart = token.split(".")[1] || "";
         const payloadJson = atob(
           payloadPart.replace(/-/g, "+").replace(/_/g, "/"),
-        )
-        const payload = JSON.parse(payloadJson) as { role?: string }
-        router.replace(getPostAuthPath(payload.role))
-      } catch {
-        // Fallback if decoding fails for any reason.
-        router.replace("/dashboard")
+        );
+        const payload = JSON.parse(payloadJson) as { role?: string };
+        console.log("[OAuth callback] token received", { role: payload.role });
+      } catch (err) {
+        console.log("[OAuth callback] token parse failed", err);
       }
-      return
+      return;
     }
-    router.replace("/signin")
-  }, [router])
+    console.log("[OAuth callback] no token found, staying on callback page");
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -41,6 +36,5 @@ export default function AuthCallbackPage() {
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }
-

@@ -24,7 +24,11 @@ export async function createApplication(scholarshipId: string) {
   }>("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scholarshipId, status: "submitted" }),
+    body: JSON.stringify({
+      scholarshipId,
+      scholarship_id: scholarshipId,
+      status: "submitted",
+    }),
   })
 }
 
@@ -32,6 +36,13 @@ export async function getMyApplications() {
   return apiFetchJson<{ applications: StudentApplication[] }>("/api/applications", {
     method: "GET",
   })
+}
+
+export async function getApplicationsByUser(userId: string) {
+  return apiFetchJson<{ applications: StudentApplication[] }>(
+    `/api/applications/user/${encodeURIComponent(userId)}`,
+    { method: "GET" },
+  )
 }
 
 export async function updateApplicationStatus(id: string, status: ApplicationStatus) {

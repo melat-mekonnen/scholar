@@ -16,6 +16,8 @@
     "migrate:admin-audit-logs": "node scripts/migrate-admin-audit-logs-table.js",
     "migrate:scholarship-organization-name": "node scripts/migrate-scholarship-organization-name.js",
     "migrate:scholarship-sources": "node scripts/migrate-scholarship-sources.js",
+    "migrate:discovery-pipeline": "node scripts/migrate-discovery-pipeline-tables.js",
+    "migrate:scholarship-candidates": "node scripts/migrate-scholarship-candidates.js",
     "db:reset": "node scripts/db-reset-local.js",
     "seed:test-roles": "node scripts/seed-role-test-users.js",
     "verify:role-routing": "node scripts/verify-role-routing.js",
@@ -35,6 +37,7 @@
   "dependencies": {
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -44,6 +47,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
+    "node-cron": "^4.2.1",
     "nodemailer": "^8.0.5",
     "pg": "^8.13.1"
   },

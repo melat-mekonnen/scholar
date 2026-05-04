@@ -8,7 +8,7 @@ function optionalAuthMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader && authHeader.startsWith("Bearer ") ? authHeader.substring("Bearer ".length) : null;
-  const token = tokenFromHeader || req.cookies?.token;
+  const token = tokenFromHeader || req.cookies?.scholar_jwt || req.cookies?.token;
 
   if (!token) {
     return next();

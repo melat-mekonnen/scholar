@@ -34,6 +34,7 @@ class RecommendResult(BaseModel):
     id: str
     score: float
     matchedTerms: Optional[List[str]] = None
+    explanation: Optional[str] = None
 
 
 class RecommendResponse(BaseModel):
@@ -142,11 +143,19 @@ def recommend(req: RecommendRequest):
     results: List[RecommendResult] = []
     for i in ranked:
         s = req.scholarships[i]
+        matched_terms = matched_terms_by_idx.get(i) if req.includeMatchedTerms else None
+        
+        explanation = None
+        if matched_terms and len(matched_terms) > 0:
+            term = matched_terms[0].title()
+            explanation = f"Strong fit because your profile matches the scholarship focus on {term}."
+            
         results.append(
             RecommendResult(
                 id=s.id,
                 score=float(scores[i]),
-                matchedTerms=matched_terms_by_idx.get(i) if req.includeMatchedTerms else None,
+                matchedTerms=matched_terms,
+                explanation=explanation,
             )
         )
 

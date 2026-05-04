@@ -1,82 +1,90 @@
-"use client"
+"use client";
 
-import { useEffect, useState, type ReactNode } from "react"
-import { ExternalLink } from "lucide-react"
+import { useEffect, useState, type ReactNode } from "react";
+import { ExternalLink } from "lucide-react";
 
-import { apiFetchJson } from "@/lib/api"
+import { apiFetchJson } from "@/lib/api";
 import {
   mergeScholarshipDetail,
   normalizeScholarship,
   getApplicationUrl,
   type ScholarshipPublic,
-} from "@/lib/scholarship"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+} from "@/lib/scholarship";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  summary: ScholarshipPublic | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  summary: ScholarshipPublic | null;
   /** Shown next to Close (e.g. bookmark control). */
-  footerStartExtra?: ReactNode
-}
+  footerStartExtra?: ReactNode;
+  userProfile?: any;
+  onGetRecommendation?: (scholarship: ScholarshipPublic) => void;
+  recommendations?: Record<string, any>;
+};
 
 export function ScholarshipDetailDialog({
   open,
   onOpenChange,
   summary,
   footerStartExtra,
+  userProfile,
+  onGetRecommendation,
+  recommendations,
 }: Props) {
-  const [detail, setDetail] = useState<ScholarshipPublic | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [detail, setDetail] = useState<ScholarshipPublic | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open || !summary?.id) {
-      setDetail(null)
-      setLoading(false)
-      return
+      setDetail(null);
+      setLoading(false);
+      return;
     }
 
-    const currentSummary = summary as ScholarshipPublic
-    setDetail(null)
-    let cancelled = false
+    const currentSummary = summary as ScholarshipPublic;
+    setDetail(null);
+    let cancelled = false;
     async function load() {
-      setLoading(true)
+      setLoading(true);
       const { res, data } = await apiFetchJson<unknown>(
         `/api/scholarships/${currentSummary.id}`,
         {
-        method: "GET",
-        auth: false,
+          method: "GET",
+          auth: false,
         },
-      )
-      if (cancelled) return
+      );
+      if (cancelled) return;
       if (res.ok && data) {
-        setDetail(mergeScholarshipDetail(currentSummary, normalizeScholarship(data)))
+        setDetail(
+          mergeScholarshipDetail(currentSummary, normalizeScholarship(data)),
+        );
       } else {
-        setDetail(currentSummary)
+        setDetail(currentSummary);
       }
-      setLoading(false)
+      setLoading(false);
     }
-    void load()
+    void load();
     return () => {
-      cancelled = true
-    }
-  }, [open, summary])
+      cancelled = true;
+    };
+  }, [open, summary]);
 
-  const merged = detail ?? summary
-  const applyUrl = merged ? getApplicationUrl(merged) : undefined
+  const merged = detail ?? summary;
+  const applyUrl = merged ? getApplicationUrl(merged) : undefined;
   const degreeLevelLabel =
     merged && typeof merged.degreeLevel === "string"
       ? merged.degreeLevel.replace("_", " ")
-      : "—"
+      : "—";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,23 +104,67 @@ export function ScholarshipDetailDialog({
         <ScrollArea className="max-h-[min(60vh,420px)] px-6">
           <div className="space-y-4 py-4 pr-3">
             {loading && (
-              <p className="text-muted-foreground text-sm">Loading full details…</p>
+              <p className="text-muted-foreground text-sm">
+                Loading full details…
+              </p>
             )}
 
             {merged && (
               <>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">Verified</Badge>
-                  {merged.fundingType && <Badge variant="outline">{merged.fundingType}</Badge>}
-                  {merged.amount && <Badge variant="outline">{merged.amount}</Badge>}
+                  {merged.fundingType && (
+                    <Badge variant="outline">{merged.fundingType}</Badge>
+                  )}
+                  {merged.amount && (
+                    <Badge variant="outline">{merged.amount}</Badge>
+                  )}
                   {merged.deadline && (
                     <Badge variant="outline">Deadline: {merged.deadline}</Badge>
                   )}
                 </div>
 
+                {userProfile && merged && (
+                  <div className="space-y-2">
+                    {recommendations?.[merged.id] ? (
+                      <div>
+                        <p className="text-sm font-medium">
+                          Match: {recommendations[merged.id].score}%
+                        </p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          {recommendations[merged.id].explanations.map(
+                            (exp: string, i: number) => (
+                              <p key={i} className="text-green-600">
+                                ✓ {exp}
+                              </p>
+                            ),
+                          )}
+                          {recommendations[merged.id].warnings.map(
+                            (warn: string, i: number) => (
+                              <p key={i} className="text-orange-600">
+                                ⚠ {warn}
+                              </p>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onGetRecommendation?.(merged)}
+                      >
+                        Show Match
+                      </Button>
+                    )}
+                  </div>
+                )}
+
                 {merged.description ? (
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">About this scholarship</p>
+                    <p className="text-sm font-medium">
+                      About this scholarship
+                    </p>
                     <p className="text-muted-foreground whitespace-pre-wrap text-sm leading-relaxed">
                       {merged.description}
                     </p>
@@ -145,7 +197,11 @@ export function ScholarshipDetailDialog({
 
         <DialogFooter className="shrink-0 flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Close
             </Button>
             {footerStartExtra}
@@ -165,5 +221,5 @@ export function ScholarshipDetailDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

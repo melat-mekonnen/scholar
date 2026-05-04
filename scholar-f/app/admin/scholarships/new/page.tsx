@@ -47,7 +47,7 @@ export default function AdminNewScholarshipPage() {
         return
       }
       if (me.data?.role !== "admin") {
-        router.replace("/dashboard")
+        router.replace("/unauthorized")
         return
       }
       setAuthorized(true)

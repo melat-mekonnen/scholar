@@ -1,0 +1,11 @@
+{
+  "features": {
+    "has_official_domain": 1,
+    "has_deadline": 1,
+    "has_eligibility": 1,
+    "has_contact_info": 1,
+    "keyword_density": 0.18,
+    "content_length": 1500,
+    "is_https": 1
+  }
+}

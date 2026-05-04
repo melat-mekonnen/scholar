@@ -1,4 +1,8 @@
 const { getRecommendations } = require("../usecases/recommendations/getRecommendations");
+const { RecommendationFeedbackRepository } = require("../repositories/RecommendationFeedbackRepository");
+
+const feedbackRepo = new RecommendationFeedbackRepository();
+const ALLOWED_INTERACTIONS = ['viewed', 'clicked', 'saved', 'dismissed', 'applied'];
 
 async function list(req, res, next) {
   try {
@@ -11,5 +15,25 @@ async function list(req, res, next) {
   }
 }
 
-module.exports = { list };
+async function logFeedback(req, res, next) {
+  try {
+    const userId = req.user?.id;
+    const { scholarshipId, interactionType } = req.body;
+
+    if (!scholarshipId || !interactionType) {
+      return res.status(400).json({ message: "scholarshipId and interactionType are required" });
+    }
+
+    if (!ALLOWED_INTERACTIONS.includes(interactionType)) {
+      return res.status(400).json({ message: "Invalid interactionType" });
+    }
+
+    const result = await feedbackRepo.logInteraction(userId, scholarshipId, interactionType);
+    return res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { list, logFeedback };
 

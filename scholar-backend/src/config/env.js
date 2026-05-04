@@ -30,6 +30,9 @@ const env = {
   smtpUser: optional("SMTP_USER", ""),
   smtpPass: optional("SMTP_PASS", ""),
   smtpFrom: optional("SMTP_FROM", ""),
+  discoveryCronEnabled: optional("DISCOVERY_CRON_ENABLED", "true") === "true",
+  discoveryCronExpression: optional("DISCOVERY_CRON_EXPRESSION", "0 */6 * * *"),
+  discoveryProcessBatchSize: parseInt(optional("DISCOVERY_PROCESS_BATCH_SIZE", "25"), 10),
 };
 
 module.exports = { env };

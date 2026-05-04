@@ -9,14 +9,15 @@ const {
   googleAuth,
   googleCallback,
   logout,
+  debugAdmin,
 } = require("../controllers/authController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.post("/signup", signup);
-router.post("/register", signup);
 router.post("/login", login);
+router.get("/debug-admin", debugAdmin);
 router.get("/me", authMiddleware, me);
 router.post("/logout", authMiddleware, logout);
 router.post("/password-reset-request", passwordResetRequest);

@@ -1,7 +1,12 @@
 const { getAdminDashboard, getAdminStatistics } = require("../usecases/admin/getAdminDashboard");
+const { getAdminAnalytics } = require("../usecases/admin/getAdminAnalytics");
 const { listUsers } = require("../usecases/users/userUsecases");
 const { AdminAuditLogRepository } = require("../repositories/AdminAuditLogRepository");
 const { logAdminAction } = require("../services/adminAudit");
+const { DiscoveryRepository } = require("../repositories/DiscoveryRepository");
+const { runDiscoveryPipeline } = require("../services/discoveryPipeline");
+const { ScholarshipCandidateRepository } = require("../repositories/ScholarshipCandidateRepository");
+const { runCandidateDiscoveryCycle } = require("../services/discovery/candidatePipelineService");
 const {
   listPendingScholarships,
   listScholarships: listScholarshipsUsecase,
@@ -11,6 +16,8 @@ const {
 } = require("../usecases/admin/adminScholarships");
 
 const adminAuditRepo = new AdminAuditLogRepository();
+const discoveryRepo = new DiscoveryRepository();
+const candidateRepo = new ScholarshipCandidateRepository();
 
 async function getDashboard(req, res, next) {
   try {
@@ -24,6 +31,15 @@ async function getDashboard(req, res, next) {
 async function getStatistics(req, res, next) {
   try {
     const data = await getAdminStatistics();
+    return res.json(data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getAnalytics(req, res, next) {
+  try {
+    const data = await getAdminAnalytics();
     return res.json(data);
   } catch (err) {
     return next(err);
@@ -98,6 +114,10 @@ async function getScholarship(req, res, next) {
       amount: scholarship.amount,
       description: scholarship.description,
       applicationUrl: scholarship.application_url,
+      sourceName: scholarship.source_name,
+      sourceUrl: scholarship.source_url,
+      aiConfidence: scholarship.ai_confidence,
+      discoveredAt: scholarship.discovered_at,
       rejectionReason: scholarship.rejection_reason,
       createdAt: scholarship.created_at,
       updatedAt: scholarship.updated_at,
@@ -144,9 +164,116 @@ async function reject(req, res, next) {
   }
 }
 
+async function listDiscoverySources(req, res, next) {
+  try {
+    const sources = await discoveryRepo.listSources();
+    return res.json({ sources });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function upsertDiscoverySource(req, res, next) {
+  try {
+    const { sourceName, sourceType, sourceUrl, organizationName, domain, isActive } = req.body || {};
+    if (!sourceName || !sourceType || !sourceUrl) {
+      const err = new Error("sourceName, sourceType, and sourceUrl are required");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!["rss", "sitemap"].includes(String(sourceType))) {
+      const err = new Error("sourceType must be either 'rss' or 'sitemap'");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const source = await discoveryRepo.createSource({
+      sourceName: String(sourceName).trim(),
+      sourceType: String(sourceType).trim(),
+      sourceUrl: String(sourceUrl).trim(),
+      organizationName: organizationName ? String(organizationName).trim() : null,
+      domain: domain ? String(domain).trim().toLowerCase() : null,
+      isActive: isActive == null ? true : Boolean(isActive),
+    });
+
+    await logAdminAction(req.user, "discovery.source.upsert", "discovery_source", source.id, {
+      sourceType: source.source_type,
+      sourceUrl: source.source_url,
+    });
+
+    return res.status(201).json({ source });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function runDiscovery(req, res, next) {
+  try {
+    const limit = req.body?.limit ? Number(req.body.limit) : undefined;
+    const result = await runDiscoveryPipeline({ limit });
+    await logAdminAction(req.user, "discovery.pipeline.run", "system", null, result);
+    return res.json(result);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listCandidates(req, res, next) {
+  try {
+    const candidates = await candidateRepo.listPendingCandidates();
+    return res.json({ candidates });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function approveCandidate(req, res, next) {
+  try {
+    const moved = await candidateRepo.approveCandidateToScholarship(req.params.id);
+    if (!moved) {
+      const err = new Error("Candidate not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    await logAdminAction(req.user, "candidate.approve", "scholarship_candidate", req.params.id, {
+      scholarshipId: moved.id,
+    });
+    return res.json({ candidateId: req.params.id, scholarship: moved });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function rejectCandidate(req, res, next) {
+  try {
+    const updated = await candidateRepo.setCandidateStatus(req.params.id, "rejected");
+    if (!updated) {
+      const err = new Error("Candidate not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    await logAdminAction(req.user, "candidate.reject", "scholarship_candidate", req.params.id, {});
+    return res.json(updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function runCandidateDiscovery(req, res, next) {
+  try {
+    const limit = req.body?.limit ? Number(req.body.limit) : undefined;
+    const result = await runCandidateDiscoveryCycle({ limit });
+    await logAdminAction(req.user, "candidate.discovery.run", "system", null, result);
+    return res.json(result);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   getDashboard,
   getStatistics,
+  getAnalytics,
   listUsersForAdmin,
   getAuditLogs,
   listScholarships,
@@ -154,5 +281,12 @@ module.exports = {
   getScholarship,
   verify,
   reject,
+  listDiscoverySources,
+  upsertDiscoverySource,
+  runDiscovery,
+  listCandidates,
+  approveCandidate,
+  rejectCandidate,
+  runCandidateDiscovery,
 };
 

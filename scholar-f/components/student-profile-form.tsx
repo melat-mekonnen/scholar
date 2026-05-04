@@ -1,135 +1,150 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from "next/navigation"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Progress } from '@/components/ui/progress'
-import { useToast } from '@/hooks/use-toast'
-import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { apiFetchJson } from "@/lib/api";
+import { clearToken } from "@/lib/auth";
 
 export type StudentProfile = {
-  id: string
-  userId: string
-  gpa: number
-  degreeLevel: 'high_school' | 'bachelor' | 'master' | 'phd'
-  fieldOfStudy: string
-  preferredCountry: string
-  interests: string[]
-  completenessScore: number
-  createdAt: string
-  updatedAt: string
-}
+  id: string;
+  userId: string;
+  gpa: number;
+  degreeLevel: "high_school" | "bachelor" | "master" | "phd";
+  fieldOfStudy: string;
+  preferredCountry: string;
+  interests: string[];
+  completenessScore: number;
+  createdAt: string;
+  updatedAt: string;
+};
 
 interface StudentProfileFormProps {
-  onSave?: (profile: StudentProfile) => void
+  onSave?: (profile: StudentProfile) => void;
 }
 
 const degreeOptions = [
-  { value: 'high_school', label: 'High School' },
-  { value: 'bachelor', label: "Bachelor's Degree" },
-  { value: 'master', label: "Master's Degree" },
-  { value: 'phd', label: 'PhD' },
-]
+  { value: "high_school", label: "High School" },
+  { value: "bachelor", label: "Bachelor's Degree" },
+  { value: "master", label: "Master's Degree" },
+  { value: "phd", label: "PhD" },
+];
 
 const interestOptions = [
-  'STEM',
-  'Business',
-  'Arts & Humanities',
-  'Social Sciences',
-  'Engineering',
-  'Medicine',
-  'Law',
-  'Environmental Studies',
-  'Education',
-  'Technology',
-]
+  "STEM",
+  "Business",
+  "Arts & Humanities",
+  "Social Sciences",
+  "Engineering",
+  "Medicine",
+  "Law",
+  "Environmental Studies",
+  "Education",
+  "Technology",
+];
 
 export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const [profileId, setProfileId] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(true)
-  const [justSaved, setJustSaved] = useState(false)
-  const [gpa, setGpa] = useState('')
-  const [degreeLevel, setDegreeLevel] = useState('')
-  const [fieldOfStudy, setFieldOfStudy] = useState('')
-  const [preferredCountry, setPreferredCountry] = useState('')
-  const [interests, setInterests] = useState<string[]>([])
-  const [saving, setSaving] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [loadingExisting, setLoadingExisting] = useState(true)
+  const { toast } = useToast();
+  const router = useRouter();
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(true);
+  const [justSaved, setJustSaved] = useState(false);
+  const [gpa, setGpa] = useState("");
+  const [degreeLevel, setDegreeLevel] = useState("");
+  const [fieldOfStudy, setFieldOfStudy] = useState("");
+  const [preferredCountry, setPreferredCountry] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(true);
 
   type ProfileApiResponse = {
-    id: string
-    user_id?: string
-    userId?: string
-    gpa?: number | string | null
-    degree_level?: string
-    degreeLevel?: string
-    field_of_study?: string
-    fieldOfStudy?: string
-    preferred_country?: string
-    preferredCountry?: string
-    interests?: string[] | null
-    completeness_score?: number
-    completenessScore?: number
-    created_at?: string
-    createdAt?: string
-    updated_at?: string
-    updatedAt?: string
-  }
+    id: string;
+    user_id?: string;
+    userId?: string;
+    gpa?: number | string | null;
+    degree_level?: string;
+    degreeLevel?: string;
+    field_of_study?: string;
+    fieldOfStudy?: string;
+    preferred_country?: string;
+    preferredCountry?: string;
+    interests?: string[] | null;
+    completeness_score?: number;
+    completenessScore?: number;
+    created_at?: string;
+    createdAt?: string;
+    updated_at?: string;
+    updatedAt?: string;
+  };
 
   const completeness = useMemo(() => {
-    const hasGpa = gpa.trim() !== "" && !Number.isNaN(Number(gpa))
-    const hasDegreeLevel = Boolean(degreeLevel && degreeLevel.trim())
-    const hasFieldOfStudy = Boolean(fieldOfStudy && fieldOfStudy.trim())
-    const hasPreferredCountry = Boolean(preferredCountry && preferredCountry.trim())
-    const hasInterests = Array.isArray(interests) && interests.length > 0
+    const hasGpa = gpa.trim() !== "" && !Number.isNaN(Number(gpa));
+    const hasDegreeLevel = Boolean(degreeLevel && degreeLevel.trim());
+    const hasFieldOfStudy = Boolean(fieldOfStudy && fieldOfStudy.trim());
+    const hasPreferredCountry = Boolean(
+      preferredCountry && preferredCountry.trim(),
+    );
+    const hasInterests = Array.isArray(interests) && interests.length > 0;
 
     const items = [
       { key: "gpa", label: "GPA", ok: hasGpa },
       { key: "degreeLevel", label: "Degree level", ok: hasDegreeLevel },
       { key: "fieldOfStudy", label: "Field of study", ok: hasFieldOfStudy },
-      { key: "preferredCountry", label: "Preferred country", ok: hasPreferredCountry },
+      {
+        key: "preferredCountry",
+        label: "Preferred country",
+        ok: hasPreferredCountry,
+      },
       { key: "interests", label: "Interests", ok: hasInterests },
-    ] as const
+    ] as const;
 
-    const completed = items.filter((i) => i.ok).length
-    const total = items.length
-    const score = Math.round((completed / total) * 100)
-    const missing = items.filter((i) => !i.ok).map((i) => i.label)
+    const completed = items.filter((i) => i.ok).length;
+    const total = items.length;
+    const score = Math.round((completed / total) * 100);
+    const missing = items.filter((i) => !i.ok).map((i) => i.label);
 
-    return { score, total, completed, missing }
-  }, [gpa, degreeLevel, fieldOfStudy, preferredCountry, interests])
+    return { score, total, completed, missing };
+  }, [gpa, degreeLevel, fieldOfStudy, preferredCountry, interests]);
 
   useEffect(() => {
     async function loadExisting() {
-      setLoadingExisting(true)
+      setLoadingExisting(true);
       try {
-        const { res, data } = await apiFetchJson<ProfileApiResponse>("/api/profile", {
-          method: "GET",
-        })
+        const { res, data } = await apiFetchJson<ProfileApiResponse>(
+          "/api/profile",
+          {
+            method: "GET",
+          },
+        );
         if (res.status === 401 || res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
+          clearToken();
+          router.replace("/signin");
+          return;
         }
         if (res.status === 404) {
-          setProfileId(null)
-          setIsEditing(true)
-          return
+          setProfileId(null);
+          setIsEditing(true);
+          return;
         }
         if (!res.ok || !data) {
           toast({
@@ -138,61 +153,68 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
               (data as { message?: string } | null)?.message ||
               `Something went wrong (${res.status}).`,
             variant: "destructive",
-          })
-          setIsEditing(true)
-          return
+          });
+          setIsEditing(true);
+          return;
         }
 
-        setProfileId(data.id || null)
+        setProfileId(data.id || null);
         if (data.gpa != null) {
-          const parsed = typeof data.gpa === "number" ? data.gpa : Number(String(data.gpa))
-          if (!Number.isNaN(parsed)) setGpa(String(parsed))
+          const parsed =
+            typeof data.gpa === "number" ? data.gpa : Number(String(data.gpa));
+          if (!Number.isNaN(parsed)) setGpa(String(parsed));
         }
-        const dl = (data.degreeLevel ?? data.degree_level) as string | undefined
-        if (dl) setDegreeLevel(dl)
-        const fos = (data.fieldOfStudy ?? data.field_of_study) as string | undefined
-        if (fos) setFieldOfStudy(fos)
-        const pc = (data.preferredCountry ?? data.preferred_country) as string | undefined
-        if (pc) setPreferredCountry(pc)
-        if (Array.isArray(data.interests)) setInterests(data.interests)
+        const dl = (data.degreeLevel ?? data.degree_level) as
+          | string
+          | undefined;
+        if (dl) setDegreeLevel(dl);
+        const fos = (data.fieldOfStudy ?? data.field_of_study) as
+          | string
+          | undefined;
+        if (fos) setFieldOfStudy(fos);
+        const pc = (data.preferredCountry ?? data.preferred_country) as
+          | string
+          | undefined;
+        if (pc) setPreferredCountry(pc);
+        if (Array.isArray(data.interests)) setInterests(data.interests);
 
         // Existing profile starts in read-only mode until user clicks Edit.
-        setIsEditing(false)
+        setIsEditing(false);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Network error"
+        const message = err instanceof Error ? err.message : "Network error";
         toast({
           title: "Could not load profile",
           description: message,
           variant: "destructive",
-        })
-        setIsEditing(true)
+        });
+        setIsEditing(true);
       } finally {
-        setLoadingExisting(false)
+        setLoadingExisting(false);
       }
     }
 
-    void loadExisting()
-  }, [router, toast])
+    void loadExisting();
+  }, [router, toast]);
 
   const toggleInterest = (interest: string) => {
     setInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
         : prev.length < 10
-        ? [...prev, interest]
-        : prev
-    )
-  }
+          ? [...prev, interest]
+          : prev,
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!isEditing) {
-      setIsEditing(true)
-      return
+      setIsEditing(true);
+      return;
     }
 
-    setSaving(true)
-    setSuccess(false)
+    setSaving(true);
+    setSuccess(false);
 
     try {
       const payload = {
@@ -201,19 +223,20 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
         fieldOfStudy: fieldOfStudy || null,
         preferredCountry: preferredCountry || null,
         interests,
-      }
+      };
 
-      const method = profileId ? "PUT" : "POST"
-      const { res, data, errorMessage } = await apiFetchJson<ProfileApiResponse>("/api/profile", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
+      const method = profileId ? "PUT" : "POST";
+      const { res, data, errorMessage } =
+        await apiFetchJson<ProfileApiResponse>("/api/profile", {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
       if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
+        clearToken();
+        router.replace("/signin");
+        return;
       }
 
       if (!res.ok) {
@@ -221,53 +244,71 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
           (data as { message?: string } | null)?.message ||
             errorMessage ||
             "Failed to save profile",
-        )
+        );
       }
       if (data == null) {
-        throw new Error(errorMessage || "Failed to save profile")
+        throw new Error(errorMessage || "Failed to save profile");
       }
 
-      setProfileId(data.id || profileId)
-      setIsEditing(false)
+      setProfileId(data.id || profileId);
+      setIsEditing(false);
 
-  const saved: StudentProfile = {
+      const saved: StudentProfile = {
         id: data.id,
         userId: String(data.userId ?? data.user_id ?? ""),
         gpa:
           data.gpa != null && !Number.isNaN(Number(data.gpa))
             ? Number(data.gpa)
-            : (gpa ? parseFloat(gpa) : 0),
-        degreeLevel: ((data.degreeLevel ?? data.degree_level) || degreeLevel) as any,
-        fieldOfStudy: String(data.fieldOfStudy ?? data.field_of_study ?? fieldOfStudy ?? ""),
-        preferredCountry: String(data.preferredCountry ?? data.preferred_country ?? preferredCountry ?? ""),
+            : gpa
+              ? parseFloat(gpa)
+              : 0,
+        degreeLevel: ((data.degreeLevel ?? data.degree_level) ||
+          degreeLevel) as any,
+        fieldOfStudy: String(
+          data.fieldOfStudy ?? data.field_of_study ?? fieldOfStudy ?? "",
+        ),
+        preferredCountry: String(
+          data.preferredCountry ??
+            data.preferred_country ??
+            preferredCountry ??
+            "",
+        ),
         interests: Array.isArray(data.interests) ? data.interests : interests,
-        completenessScore: Number(data.completenessScore ?? data.completeness_score ?? completeness.score),
-        createdAt: String(data.createdAt ?? data.created_at ?? new Date().toISOString()),
-        updatedAt: String(data.updatedAt ?? data.updated_at ?? new Date().toISOString()),
-      }
+        completenessScore: Number(
+          data.completenessScore ??
+            data.completeness_score ??
+            completeness.score,
+        ),
+        createdAt: String(
+          data.createdAt ?? data.created_at ?? new Date().toISOString(),
+        ),
+        updatedAt: String(
+          data.updatedAt ?? data.updated_at ?? new Date().toISOString(),
+        ),
+      };
 
-      onSave?.(saved)
-      setSuccess(true)
-      setJustSaved(true)
+      onSave?.(saved);
+      setSuccess(true);
+      setJustSaved(true);
       toast({
-        title: 'Success',
-        description: 'Profile saved successfully.',
-      })
+        title: "Success",
+        description: "Profile saved successfully.",
+      });
 
-      setTimeout(() => setSuccess(false), 3000)
-      setTimeout(() => setJustSaved(false), 2000)
+      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => setJustSaved(false), 2000);
     } catch (err: any) {
       toast({
-        title: 'Error',
-        description: err.message || 'Failed to save profile',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: err.message || "Failed to save profile",
+        variant: "destructive",
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
-  const inputsDisabled = saving || loadingExisting || !isEditing
+  const inputsDisabled = saving || loadingExisting || !isEditing;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -286,12 +327,18 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Profile Completeness</CardTitle>
-          <CardDescription>Complete all sections to maximize scholarship matches</CardDescription>
+          <CardDescription>
+            Complete all sections to maximize scholarship matches
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{completeness.score}% Complete</span>
-            <span className="text-sm text-muted-foreground">{completeness.total} sections</span>
+            <span className="text-sm font-medium">
+              {completeness.score}% Complete
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {completeness.total} sections
+            </span>
           </div>
           <Progress value={completeness.score} className="h-2" />
           {completeness.missing.length ? (
@@ -306,7 +353,9 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>GPA</CardTitle>
-          <CardDescription>Optional — add when you know it (0.0 - 4.0)</CardDescription>
+          <CardDescription>
+            Optional — add when you know it (0.0 - 4.0)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
@@ -330,7 +379,9 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Degree Level</CardTitle>
-          <CardDescription>Optional — select your current or target degree</CardDescription>
+          <CardDescription>
+            Optional — select your current or target degree
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Select
@@ -388,9 +439,15 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
                   id={interest}
                   checked={interests.includes(interest)}
                   onCheckedChange={() => toggleInterest(interest)}
-                  disabled={inputsDisabled || (interests.length >= 10 && !interests.includes(interest))}
+                  disabled={
+                    inputsDisabled ||
+                    (interests.length >= 10 && !interests.includes(interest))
+                  }
                 />
-                <Label htmlFor={interest} className="font-normal cursor-pointer text-sm">
+                <Label
+                  htmlFor={interest}
+                  className="font-normal cursor-pointer text-sm"
+                >
                   {interest}
                 </Label>
               </div>
@@ -403,9 +460,16 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       </Card>
 
       {/* Submit */}
-      <Button type="submit" disabled={saving || loadingExisting} className="w-full flex justify-center items-center">
+      <Button
+        type="submit"
+        disabled={saving || loadingExisting}
+        className="w-full flex justify-center items-center"
+      >
         {saving ? (
-          <svg className="animate-spin h-4 w-4 mr-2 text-white" viewBox="0 0 24 24">
+          <svg
+            className="animate-spin h-4 w-4 mr-2 text-white"
+            viewBox="0 0 24 24"
+          >
             <circle
               className="opacity-25"
               cx="12"
@@ -421,8 +485,14 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
             />
           </svg>
         ) : null}
-        {saving ? 'Saving...' : isEditing ? 'Save Profile' : justSaved ? 'Saved' : 'Edit'}
+        {saving
+          ? "Saving..."
+          : isEditing
+            ? "Save Profile"
+            : justSaved
+              ? "Saved"
+              : "Edit"}
       </Button>
     </form>
-  )
+  );
 }

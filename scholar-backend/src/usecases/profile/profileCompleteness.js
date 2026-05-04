@@ -51,13 +51,17 @@ function normalizeInterests(interests) {
 
 function calculateProfileCompleteness(profile) {
   let score = 0;
+  // Based on 8 factors
+  if (profile.gpa != null) score += 10;
+  if (profile.degreeLevel) score += 15;
+  if (profile.fieldOfStudy) score += 15;
+  if (Array.isArray(profile.interests) && profile.interests.length > 0) score += 15;
+  if (profile.preferredCountry) score += 10;
+  if (profile.preferredFundingType) score += 10;
+  if (profile.preferredScholarshipType) score += 10;
+  if (profile.goals) score += 15;
 
-  if (profile.gpa != null) score += 25;
-  if (profile.degreeLevel) score += 25;
-  if (profile.fieldOfStudy) score += 25;
-  if (Array.isArray(profile.interests) && profile.interests.length > 0) score += 25;
-
-  return score;
+  return Math.min(score, 100);
 }
 
 /**
@@ -70,6 +74,11 @@ function validateProfileInput(input) {
   const degreeLevel = normalizeDegreeLevel(input.degreeLevel);
   const preferredCountry = optionalTrimmedString(input.preferredCountry);
   const interests = normalizeInterests(input.interests);
+  const financialNeed = Boolean(input.financialNeed);
+  const preferredFundingType = optionalTrimmedString(input.preferredFundingType);
+  const languageProficiency = Array.isArray(input.languageProficiency) ? input.languageProficiency : [];
+  const preferredScholarshipType = optionalTrimmedString(input.preferredScholarshipType);
+  const goals = optionalTrimmedString(input.goals);
 
   return {
     fieldOfStudy,
@@ -77,6 +86,11 @@ function validateProfileInput(input) {
     degreeLevel,
     preferredCountry,
     interests,
+    financialNeed,
+    preferredFundingType,
+    languageProficiency,
+    preferredScholarshipType,
+    goals,
   };
 }
 

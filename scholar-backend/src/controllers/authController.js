@@ -16,34 +16,45 @@ function hashResetToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
+function normalizeRole(role) {
+  if (typeof role !== "string") return role;
+  return role.trim().toLowerCase();
+}
+
 function signAccessToken(user) {
+  const normalizedRole = normalizeRole(user.role);
   const payload = {
     sub: user.id,
-    email: user.email,
+    email: String(user.email || "").toLowerCase(),
     fullName: user.full_name,
-    role: user.role,
+    role: normalizedRole,
   };
 
   return jwt.sign(payload, env.jwtSecret, { expiresIn: "7d" });
 }
 
 function setTokenCookie(res, token) {
-  res.cookie("token", token, {
+  res.cookie("scholar_jwt", token, {
     httpOnly: true,
     sameSite: "lax",
     secure: env.nodeEnv === "production",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60,
   });
+  // eslint-disable-next-line no-console
+  console.log(`[@auth] set cookie scholar_jwt path=/ sameSite=Lax secure=${env.nodeEnv === "production"}`);
 }
 
 function buildAuthResponse(user) {
+  const normalizedRole = normalizeRole(user.role);
   const token = signAccessToken(user);
 
   return {
     user: {
       id: user.id,
       fullName: user.full_name,
-      email: user.email,
-      role: user.role,
+      email: String(user.email || "").toLowerCase(),
+      role: normalizedRole,
     },
     token,
   };
@@ -52,9 +63,13 @@ function buildAuthResponse(user) {
 async function signup(req, res, next) {
   try {
     const { fullName, email, password } = req.body || {};
+    // eslint-disable-next-line no-console
+    console.log("[@auth] signup request payload", { fullName, email });
     const user = await signupUser({ fullName, email, password });
     const response = buildAuthResponse(user);
     setTokenCookie(res, response.token);
+    // eslint-disable-next-line no-console
+    console.log("[@auth] signup response", { user: response.user, tokenPreview: response.token.slice(0, 20) + "..." });
     return res.status(201).json(response);
   } catch (err) {
     return next(err);
@@ -64,9 +79,13 @@ async function signup(req, res, next) {
 async function login(req, res, next) {
   try {
     const { email, password } = req.body || {};
+    // eslint-disable-next-line no-console
+    console.log("[@auth] login request payload", { email });
     const user = await loginUser({ email, password });
     const response = buildAuthResponse(user);
     setTokenCookie(res, response.token);
+    // eslint-disable-next-line no-console
+    console.log("[@auth] login response", { user: response.user, tokenPreview: response.token.slice(0, 20) + "..." });
     return res.json(response);
   } catch (err) {
     return next(err);
@@ -90,8 +109,28 @@ async function me(req, res, next) {
 
 function logout(req, res, next) {
   try {
-    res.clearCookie("token");
+    res.clearCookie("scholar_jwt", { path: "/" });
     return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function debugAdmin(req, res, next) {
+  try {
+    const email = "admin@ethioscholar.com";
+    const user = await userRepo.findByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "Admin user not found" });
+    }
+
+    return res.json({
+      id: user.id,
+      fullName: user.full_name,
+      email: user.email,
+      role: user.role,
+      passwordHashExists: Boolean(user.password_hash),
+    });
   } catch (err) {
     return next(err);
   }
@@ -184,7 +223,7 @@ async function passwordReset(req, res, next) {
 async function refreshToken(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-    let token = req.cookies?.token || null;
+    let token = req.cookies?.scholar_jwt || req.cookies?.token || null;
 
     if (!token && authHeader) {
       const trimmed = String(authHeader).trim();
