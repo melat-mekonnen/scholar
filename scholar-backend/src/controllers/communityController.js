@@ -1,4 +1,5 @@
 const { CommunityRepository } = require("../repositories/CommunityRepository");
+const communityEvents = require("../services/communityEvents");
 
 const repo = new CommunityRepository();
 
@@ -150,7 +151,93 @@ async function createMessage(req, res, next) {
       throw err;
     }
 
-    return res.status(201).json(mapMessageRow(result));
+    const mapped = mapMessageRow(result);
+    communityEvents.publish(channelId, {
+      type: "message_created",
+      payload: mapped,
+    });
+    return res.status(201).json(mapped);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function streamChannel(req, res, next) {
+  try {
+    const channelId = String(req.params.channelId || "");
+    if (!UUID_V4.test(channelId)) {
+      const err = new Error("Invalid channel id");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const channel = await repo.findChannelById(channelId);
+    if (!channel || channel.is_active === false) {
+      const err = new Error("Channel not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    if (typeof res.flushHeaders === "function") res.flushHeaders();
+    res.write(": connected\n\n");
+
+    const unsubscribe = communityEvents.subscribe(channelId, (event) => {
+      if (!event || !event.type) return;
+      res.write(`event: ${event.type}\n`);
+      res.write(`data: ${JSON.stringify(event.payload ?? null)}\n\n`);
+    });
+
+    const heartbeat = setInterval(() => {
+      res.write(": ping\n\n");
+    }, 25000);
+
+    req.on("close", () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+      res.end();
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function reportMessage(req, res, next) {
+  try {
+    const messageId = String(req.params.messageId || "");
+    if (!UUID_V4.test(messageId)) {
+      const err = new Error("Invalid message id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const reason = String(req.body?.reason || "").trim();
+    if (!reason) {
+      const err = new Error("Report reason is required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const message = await repo.findMessageById(messageId);
+    if (!message) {
+      const err = new Error("Message not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const created = await repo.reportMessage({
+      messageId,
+      reporterUserId: req.user.id,
+      reason,
+    });
+    return res.status(201).json({
+      id: created.id,
+      messageId: created.message_id,
+      reason: created.reason,
+      status: created.status,
+      createdAt: created.created_at,
+    });
   } catch (err) {
     return next(err);
   }
@@ -182,5 +269,7 @@ module.exports = {
   listChannels,
   listMessages,
   createMessage,
+  streamChannel,
+  reportMessage,
   deleteMessage,
 };

@@ -6,6 +6,7 @@ export type CommunityChannel = {
   name: string
   description: string | null
   sortOrder: number
+  isActive?: boolean
   createdAt?: string
 }
 
@@ -78,5 +79,56 @@ export async function deleteCommunityMessage(messageId: string) {
   return apiFetchJson<null>(`/api/community/messages/${encodeURIComponent(messageId)}`, {
     method: "DELETE",
     auth: true,
+  })
+}
+
+export async function reportCommunityMessage(messageId: string, reason: string) {
+  return apiFetchJson<{ id: string; messageId: string; reason: string; status: string }>(
+    `/api/community/messages/${encodeURIComponent(messageId)}/report`,
+    {
+      method: "POST",
+      auth: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    },
+  )
+}
+
+export async function fetchOwnerCommunityChannels() {
+  return apiFetchJson<ChannelsResponse>("/api/owner/community/channels", {
+    method: "GET",
+    auth: true,
+  })
+}
+
+export async function createOwnerCommunityChannel(payload: {
+  name: string
+  slug?: string
+  description?: string
+  sortOrder?: number
+}) {
+  return apiFetchJson<CommunityChannel>("/api/owner/community/channels", {
+    method: "POST",
+    auth: true,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateOwnerCommunityChannel(
+  channelId: string,
+  payload: Partial<{
+    name: string
+    slug: string
+    description: string
+    sortOrder: number
+    isActive: boolean
+  }>,
+) {
+  return apiFetchJson<CommunityChannel>(`/api/owner/community/channels/${encodeURIComponent(channelId)}`, {
+    method: "PUT",
+    auth: true,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   })
 }
