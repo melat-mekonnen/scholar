@@ -14,6 +14,7 @@ import {
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
+import { useStudentI18n } from "@/lib/student-i18n"
 import {
   loadNotificationPreferences,
   saveNotificationPreferences,
@@ -67,6 +68,7 @@ function NavLink({
 export default function SettingsPage() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { t } = useStudentI18n()
   const [mounted, setMounted] = useState(false)
 
   const [me, setMe] = useState<MeResponse | null>(null)
@@ -109,18 +111,19 @@ export default function SettingsPage() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 border-r bg-card p-6 md:block">
         <div className="mb-8">
-          <h2 className="text-xl font-bold">Scholarship Portal</h2>
+          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
           <p className="mt-1 text-xs text-muted-foreground">Student dashboard</p>
         </div>
 
         <nav className="space-y-3">
-          <NavLink href="/dashboard">Dashboard</NavLink>
-          <NavLink href="/scholarships">Browse Scholarships</NavLink>
-          <NavLink href="/applications">My Applications</NavLink>
-          <NavLink href="/community">Community</NavLink>
-          <NavLink href="/saved">Saved Scholarships</NavLink>
-          <NavLink href="/profile">Profile</NavLink>
-          <NavLink href="/settings">Settings</NavLink>
+          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
+          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
+          <NavLink href="/applications">{t("My Applications")}</NavLink>
+          <NavLink href="/community">{t("Community")}</NavLink>
+          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
+          <NavLink href="/profile">{t("Profile")}</NavLink>
+          <NavLink href="/settings">{t("Settings")}</NavLink>
+          <NavLink href="/documents">{t("Documents")}</NavLink>
         </nav>
       </aside>
 

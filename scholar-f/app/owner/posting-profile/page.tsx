@@ -13,6 +13,7 @@ export default function OwnerPostingProfilePage() {
       savedToastDescription="Your posting profile was updated."
       allowedRoles={["owner"]}
       bounceManagersTo="/manager/profile"
+      embedded
     />
   )
 }

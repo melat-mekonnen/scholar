@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -82,25 +81,17 @@ export default function AdminNewScholarshipPage() {
 
   if (!authorized) {
     return (
-      <main className="min-h-screen bg-background p-8">
+      <main className="p-8">
         <p className="text-sm text-muted-foreground">Checking access…</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
+    <main>
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold">Create scholarship (admin)</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/admin">Dashboard</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/admin/scholarships/pending">Moderation queue</Link>
-            </Button>
-          </div>
         </div>
 
         <Card>

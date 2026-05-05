@@ -34,6 +34,8 @@ type PostingProfileEditorProps = {
   allowedRoles: readonly ("manager" | "owner")[]
   bounceOwnersTo?: string
   bounceManagersTo?: string
+  /** When true, omit standalone page chrome (used under app/owner layout). */
+  embedded?: boolean
 }
 
 export function PostingProfileEditor({
@@ -46,6 +48,7 @@ export function PostingProfileEditor({
   allowedRoles,
   bounceOwnersTo,
   bounceManagersTo,
+  embedded = false,
 }: PostingProfileEditorProps) {
   const router = useRouter()
   const { toast } = useToast()
@@ -146,22 +149,24 @@ export function PostingProfileEditor({
 
   if (!ready) {
     return (
-      <main className="min-h-screen bg-background p-8">
+      <main className={embedded ? "flex-1 p-6" : "min-h-screen bg-background p-8"}>
         <p className="text-sm text-muted-foreground">Loading…</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+    <main className={embedded ? "min-h-full flex-1 overflow-auto bg-muted/20 text-foreground" : "min-h-screen bg-gray-50 text-gray-900"}>
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <Button variant="ghost" size="icon" asChild className="mt-0.5 shrink-0">
-              <Link href={dashboardHref} aria-label={backAriaLabel}>
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
+            {!embedded ? (
+              <Button variant="ghost" size="icon" asChild className="mt-0.5 shrink-0">
+                <Link href={dashboardHref} aria-label={backAriaLabel}>
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+            ) : null}
             <div className="flex items-center gap-3">
               <div className="rounded-md bg-primary/10 p-2 text-primary">
                 <IdCard className="h-6 w-6" />
@@ -172,17 +177,19 @@ export function PostingProfileEditor({
               </div>
             </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              void logoutFromServer()
-              clearToken()
-              router.push("/signin")
-            }}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
+          {!embedded ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                void logoutFromServer()
+                clearToken()
+                router.push("/signin")
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
+          ) : null}
         </header>
 
         <Card>

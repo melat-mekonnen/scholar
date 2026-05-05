@@ -13,8 +13,9 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication } from "@/lib/applications"
+import { createApplication, updateApplicationStatus } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -37,6 +38,13 @@ type DashboardSummary = {
   recentActivity: string[]
 }
 
+type MeResponse = {
+  id: string
+  fullName?: string
+  email: string
+  role?: string
+}
+
 function toScholarshipCard(row: DashboardSummary["recommendedScholarships"][number]): ScholarshipPublic {
   return normalizeScholarship({
     id: row.id,
@@ -44,24 +52,32 @@ function toScholarshipCard(row: DashboardSummary["recommendedScholarships"][numb
     country: row.country,
     deadline: row.deadline,
     applicationUrl: row.applicationUrl,
-    degree_level: "bachelor",
   })
 }
 
 export default function DashboardPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t } = useStudentI18n()
 
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
+  const [me, setMe] = useState<MeResponse | null>(null)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { res, data } = await apiFetchJson<DashboardSummary>("/dashboard/summary", {
-        method: "GET",
-        auth: true,
-      })
+      const [summaryRes, meRes] = await Promise.all([
+        apiFetchJson<DashboardSummary>("/dashboard/summary", {
+          method: "GET",
+          auth: true,
+        }),
+        apiFetchJson<MeResponse>("/api/auth/me", { method: "GET", auth: true }),
+      ])
+      const { res, data } = summaryRes
+      if (!cancelled && meRes.res.ok && meRes.data) {
+        setMe(meRes.data)
+      }
       if (cancelled) return
       if (res.status === 401 || res.status === 403) {
         clearToken()
@@ -84,61 +100,144 @@ export default function DashboardPage() {
   const stats = summary?.stats
   const statCards = stats
     ? [
-        { title: "Active Applications", value: String(stats.activeApplications) },
-        { title: "Saved Scholarships", value: String(stats.savedScholarships) },
-        { title: "Recommended Matches", value: String(stats.recommendedMatches) },
-        { title: "Upcoming Deadlines", value: String(stats.upcomingDeadlines) },
+        { title: t("Active Applications"), value: String(stats.activeApplications) },
+        { title: t("Saved Scholarships"), value: String(stats.savedScholarships) },
+        { title: t("Recommended Matches"), value: String(stats.recommendedMatches) },
+        { title: t("Upcoming Deadlines"), value: String(stats.upcomingDeadlines) },
       ]
     : []
 
   const recommended = (summary?.recommendedScholarships ?? []).map(toScholarshipCard)
   const activities = summary?.recentActivity ?? []
 
+  function userInitials() {
+    if (!me) return "U"
+    if (me.fullName?.trim()) {
+      const parts = me.fullName.split(" ").filter(Boolean)
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+      return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase()
+    }
+    return (me.email?.[0] || "U").toUpperCase()
+  }
+
+  async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
+    const ok = await openScholarshipApplication(s)
+    if (!ok) {
+      toast({
+        title: "Application link unavailable",
+        description: "This scholarship does not have an official application URL yet.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Application opened",
+      description: "After you finish and come back, we will ask if you applied.",
+    })
+
+    window.setTimeout(() => {
+      const onFocus = async () => {
+        const applied = window.confirm("Did you submit your application on the official site?")
+        if (!applied) {
+          toast({
+            title: "No problem",
+            description: "Kept in listing only. It was not added to My Applications.",
+          })
+          return
+        }
+
+        const created = await createApplication(s.id)
+        if (created.res.status === 401 || created.res.status === 403) {
+          clearToken()
+          router.replace("/signin")
+          return
+        }
+        if (!created.res.ok && created.res.status !== 409) {
+          toast({
+            title: "Could not track application",
+            description: created.errorMessage || "Failed to save this application in your tracker.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (created.data?.id) {
+          await updateApplicationStatus(created.data.id, "submitted")
+        }
+
+        toast({
+          title: "Added to My Applications",
+          description: "Saved as submitted in your application tracker.",
+        })
+      }
+      window.addEventListener("focus", onFocus, { once: true })
+    }, 800)
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="w-64 border-r bg-card p-6 hidden md:block">
-        <h2 className="text-xl font-bold mb-8">Scholarship Portal</h2>
+        <h2 className="text-xl font-bold mb-8">{t("Scholarship Portal")}</h2>
 
         <nav className="space-y-3">
           <Link href="/dashboard" className="block text-sm font-medium hover:text-primary">
-            Dashboard
+            {t("Dashboard")}
           </Link>
           <Link href="/scholarships" className="block text-sm font-medium hover:text-primary">
-            Browse Scholarships
+            {t("Browse Scholarships")}
           </Link>
           <Link href="/applications" className="block text-sm font-medium hover:text-primary">
-            My Applications
+            {t("My Applications")}
           </Link>
           <Link href="/community" className="block text-sm font-medium hover:text-primary">
-            Community
+            {t("Community")}
           </Link>
           <Link href="/saved" className="block text-sm font-medium hover:text-primary">
-            Saved Scholarships
+            {t("Saved Scholarships")}
           </Link>
           <Link href="/profile" className="block text-sm font-medium hover:text-primary">
-            Profile
+            {t("Profile")}
           </Link>
           <Link href="/settings" className="block text-sm font-medium hover:text-primary">
-            Settings
+            {t("Settings")}
           </Link>
           <Link href="/documents" className="block text-sm font-medium hover:text-primary">
-            Document Resources
+            {t("Documents")}
           </Link>
         </nav>
       </aside>
 
       <div className="flex-1">
         <header className="flex items-center justify-between border-b p-4 bg-card">
-          <h1 className="text-lg font-semibold">Dashboard</h1>
-
-          <Avatar>
-            <AvatarFallback>ES</AvatarFallback>
-          </Avatar>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold">{t("Dashboard")}</h1>
+            {me?.role ? (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize text-muted-foreground">
+                {me.role}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarFallback>{userInitials()}</AvatarFallback>
+            </Avatar>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                clearToken()
+                router.push("/signin")
+              }}
+            >
+              Sign out
+            </Button>
+          </div>
         </header>
 
         <main className="p-6 space-y-8">
           <div>
-            <h2 className="text-2xl font-bold">Welcome back 👋</h2>
+            <h2 className="text-2xl font-bold">{t("Welcome back")}</h2>
             <p className="text-muted-foreground">
               Discover scholarships that match your profile.
             </p>
@@ -190,12 +289,11 @@ export default function DashboardPage() {
             {!loading && recommended.length === 0 && (
               <Card>
                 <CardContent className="pt-6 text-sm text-muted-foreground">
-                  No featured scholarships yet. Managers can mark scholarships as recommended in the database
-                  (<code className="text-xs">is_recommended_default</code>), or you can{" "}
+                  No recommended scholarships are available yet. You can{" "}
                   <Link href="/scholarships" className="text-primary underline underline-offset-2">
                     browse all scholarships
                   </Link>
-                  .
+                  to find current opportunities.
                 </CardContent>
               </Card>
             )}
@@ -223,37 +321,7 @@ export default function DashboardPage() {
                           variant="outline"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description:
-                                  created.errorMessage ||
-                                  "Failed to save this application in your tracker.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              toast({
-                                title: "Application started",
-                                description: "Saved to your application tracker.",
-                              })
-                            }
+                            await handleApplyWithReturnCheck(s)
                           }}
                         >
                           {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}

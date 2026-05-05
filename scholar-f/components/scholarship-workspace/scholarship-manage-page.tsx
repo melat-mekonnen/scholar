@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
 import { useScholarshipWorkspaceGate } from "@/hooks/use-scholarship-workspace-gate"
+import { cn } from "@/lib/utils"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -56,6 +57,7 @@ type ScholarshipDetail = {
 
 type Props = {
   workspace: ScholarshipWorkspace
+  embedded?: boolean
 }
 
 function statusBadge(status: ScholarshipRow["status"]) {
@@ -66,7 +68,7 @@ function statusBadge(status: ScholarshipRow["status"]) {
   return <Badge variant="outline">draft</Badge>
 }
 
-export function ScholarshipManagePage({ workspace }: Props) {
+export function ScholarshipManagePage({ workspace, embedded = false }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
   const gate = useScholarshipWorkspaceGate(workspace)
   const router = useRouter()
@@ -79,6 +81,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
 
   const [editing, setEditing] = useState<ScholarshipDetail | null>(null)
   const [saving, setSaving] = useState(false)
+  const editPanelRef = useRef<HTMLDivElement | null>(null)
   const [editForm, setEditForm] = useState({
     title: "",
     organizationName: "",
@@ -135,6 +138,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
   }, [items, q, statusFilter, workspace])
 
   async function openEdit(id: string) {
+    setError(null)
     const { res, data, errorMessage } = await apiFetchJson<ScholarshipDetail>(`/api/scholarships/${id}`, {
       method: "GET",
     })
@@ -161,6 +165,14 @@ export function ScholarshipManagePage({ workspace }: Props) {
       applicationUrl: data.applicationUrl ?? "",
     })
   }
+
+  useEffect(() => {
+    if (!editing) return
+    // The editor renders below the table; bring it into view so the action is obvious.
+    requestAnimationFrame(() => {
+      editPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }, [editing])
 
   async function saveEdit() {
     if (!editing) return
@@ -208,7 +220,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
 
   if (gate !== "ready") {
     return (
-      <main className={cfg.standaloneSurfaceClass}>
+      <main className={cn(embedded ? "flex-1" : cfg.standaloneSurfaceClass)}>
         <div className="mx-auto max-w-6xl px-4 py-8">
           <p className="text-sm text-muted-foreground">Loading…</p>
         </div>
@@ -217,7 +229,11 @@ export function ScholarshipManagePage({ workspace }: Props) {
   }
 
   return (
-    <main className={cfg.standaloneSurfaceClass}>
+    <main
+      className={cn(
+        embedded ? "min-h-full flex-1 overflow-auto bg-muted/20" : cfg.standaloneSurfaceClass,
+      )}
+    >
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -316,7 +332,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
         </Card>
 
         {editing ? (
-          <Card>
+          <Card ref={editPanelRef}>
             <CardHeader>
               <CardTitle className="text-base">Edit scholarship</CardTitle>
             </CardHeader>

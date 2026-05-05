@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -210,8 +209,8 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8">
+    <main>
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">User Management</h1>
@@ -220,15 +219,6 @@ export default function AdminUsersPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/admin/notifications">Notifications</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/admin/audit-logs">Audit logs</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/admin">Dashboard</Link>
-            </Button>
             <Input
               placeholder="Search by name or email"
               value={search}

@@ -33,6 +33,7 @@ function requireAdminManagerOrOwner(req, res, next) {
 
 router.get("/", documentsController.list);
 router.get("/:id", documentsController.getById);
+router.get("/:id/view", documentsController.view);
 router.get("/:id/download", documentsController.download);
 
 router.post(

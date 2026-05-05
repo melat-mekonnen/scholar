@@ -37,6 +37,16 @@ function parseOptionalScholarshipId(value) {
   return String(value);
 }
 
+function parseOptionalUserId(value) {
+  if (value == null || value === "") return null;
+  if (!UUID_V4.test(String(value))) {
+    const err = new Error("Invalid user id");
+    err.statusCode = 400;
+    throw err;
+  }
+  return String(value);
+}
+
 async function upload(req, res, next) {
   try {
     const role = req.user?.role;
@@ -121,7 +131,7 @@ async function list(req, res, next) {
       q: req.query?.q ? String(req.query.q) : null,
       type: req.query?.type ? String(req.query.type) : null,
       scholarshipId: parseOptionalScholarshipId(req.query?.scholarshipId),
-      uploadedByUserId: parseOptionalScholarshipId(req.query?.uploadedByUserId),
+      uploadedByUserId: parseOptionalUserId(req.query?.uploadedByUserId),
     });
 
     return res.json({
@@ -202,6 +212,37 @@ async function download(req, res, next) {
 
     await repo.incrementDownloadCount(id);
     return res.download(absolutePath, d.original_name);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function view(req, res, next) {
+  try {
+    const id = String(req.params?.id || "");
+    if (!UUID_V4.test(id)) {
+      const err = new Error("Invalid document id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const d = await repo.findById(id);
+    if (!d) {
+      const err = new Error("Document not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const absolutePath = path.resolve(d.file_path);
+    if (!fs.existsSync(absolutePath)) {
+      const err = new Error("Document file is missing on server");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    await repo.incrementDownloadCount(id);
+    res.setHeader("Content-Disposition", `inline; filename="${sanitizeFileName(d.original_name)}"`);
+    res.type(d.mime_type || "application/octet-stream");
+    return res.sendFile(absolutePath);
   } catch (err) {
     return next(err);
   }
@@ -292,6 +333,7 @@ module.exports = {
   list,
   getById,
   download,
+  view,
   update,
   remove,
 };

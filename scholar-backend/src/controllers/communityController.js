@@ -1,4 +1,7 @@
 const { CommunityRepository } = require("../repositories/CommunityRepository");
+const jwt = require("jsonwebtoken");
+const { env } = require("../config/env");
+const { subscribe, publish } = require("../services/communityEvents");
 
 const repo = new CommunityRepository();
 
@@ -14,12 +17,20 @@ function mapMessageRow(row) {
     body: row.body,
     createdAt: row.created_at,
     authorFullName: row.author_full_name,
+    isHidden: Boolean(row.is_hidden),
   };
+}
+
+function canAccessCommunityRole(role) {
+  return role === "student" || role === "owner" || role === "admin";
 }
 
 async function listChannels(req, res, next) {
   try {
-    const rows = await repo.listChannels();
+    if (!canAccessCommunityRole(req.user?.role)) {
+      return res.status(403).json({ message: "Community access is only for students, owners, or admins" });
+    }
+    const rows = await repo.listChannels({ includeInactive: req.user?.role === "owner" || req.user?.role === "admin" });
     return res.json({
       channels: rows.map((c) => ({
         id: c.id,
@@ -27,6 +38,7 @@ async function listChannels(req, res, next) {
         name: c.name,
         description: c.description,
         sortOrder: c.sort_order,
+        isActive: Boolean(c.is_active),
         createdAt: c.created_at,
       })),
     });
@@ -37,6 +49,9 @@ async function listChannels(req, res, next) {
 
 async function listMessages(req, res, next) {
   try {
+    if (!canAccessCommunityRole(req.user?.role)) {
+      return res.status(403).json({ message: "Community access is only for students, owners, or admins" });
+    }
     const channelId = String(req.params.channelId || "");
     if (!UUID_V4.test(channelId)) {
       const err = new Error("Invalid channel id");
@@ -45,7 +60,7 @@ async function listMessages(req, res, next) {
     }
 
     const channel = await repo.findChannelById(channelId);
-    if (!channel) {
+    if (!channel || !channel.is_active) {
       const err = new Error("Channel not found");
       err.statusCode = 404;
       throw err;
@@ -83,6 +98,9 @@ async function listMessages(req, res, next) {
 
 async function createMessage(req, res, next) {
   try {
+    if (!canAccessCommunityRole(req.user?.role)) {
+      return res.status(403).json({ message: "Community access is only for students, owners, or admins" });
+    }
     const channelId = String(req.params.channelId || "");
     if (!UUID_V4.test(channelId)) {
       const err = new Error("Invalid channel id");
@@ -110,7 +128,7 @@ async function createMessage(req, res, next) {
     }
 
     const channel = await repo.findChannelById(channelId);
-    if (!channel) {
+    if (!channel || !channel.is_active) {
       const err = new Error("Channel not found");
       err.statusCode = 404;
       throw err;
@@ -150,7 +168,9 @@ async function createMessage(req, res, next) {
       throw err;
     }
 
-    return res.status(201).json(mapMessageRow(result));
+    const payload = mapMessageRow(result);
+    publish(channelId, { type: "message_created", message: payload });
+    return res.status(201).json(payload);
   } catch (err) {
     return next(err);
   }
@@ -158,6 +178,9 @@ async function createMessage(req, res, next) {
 
 async function deleteMessage(req, res, next) {
   try {
+    if (!canAccessCommunityRole(req.user?.role)) {
+      return res.status(403).json({ message: "Community access is only for students, owners, or admins" });
+    }
     const messageId = String(req.params.messageId || "");
     if (!UUID_V4.test(messageId)) {
       const err = new Error("Invalid message id");
@@ -178,9 +201,92 @@ async function deleteMessage(req, res, next) {
   }
 }
 
+async function reportMessage(req, res, next) {
+  try {
+    if (req.user?.role !== "student") {
+      return res.status(403).json({ message: "Student access required" });
+    }
+    const messageId = String(req.params.messageId || "");
+    const reason = String(req.body?.reason || "").trim();
+    if (!UUID_V4.test(messageId)) {
+      const err = new Error("Invalid message id");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!reason) {
+      const err = new Error("Reason is required");
+      err.statusCode = 400;
+      throw err;
+    }
+    const msg = await repo.findMessageById(messageId);
+    if (!msg || msg.is_hidden) {
+      const err = new Error("Message not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    const created = await repo.createReport({
+      messageId,
+      reporterUserId: req.user.id,
+      reason,
+    });
+    return res.status(201).json({
+      id: created.id,
+      messageId: created.message_id,
+      reporterUserId: created.reporter_user_id,
+      reason: created.reason,
+      status: created.status,
+      createdAt: created.created_at,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+function streamChannel(req, res) {
+  const channelId = String(req.params.channelId || "");
+  const token = String(req.query?.token || "");
+  if (!UUID_V4.test(channelId) || !token) {
+    return res.status(400).json({ message: "Invalid stream request" });
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, env.jwtSecret);
+  } catch {
+    return res.status(401).json({ message: "Invalid stream token" });
+  }
+  if (!canAccessCommunityRole(payload.role)) {
+    return res.status(403).json({ message: "Community access denied" });
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  if (typeof res.flushHeaders === "function") {
+    res.flushHeaders();
+  }
+
+  res.write(`event: ready\ndata: ${JSON.stringify({ ok: true })}\n\n`);
+
+  const unsubscribe = subscribe(channelId, (event) => {
+    res.write(`event: ${event.type}\ndata: ${JSON.stringify(event.message)}\n\n`);
+  });
+
+  const keepAlive = setInterval(() => {
+    res.write(`event: ping\ndata: {}\n\n`);
+  }, 25000);
+
+  req.on("close", () => {
+    clearInterval(keepAlive);
+    unsubscribe();
+  });
+}
+
 module.exports = {
   listChannels,
   listMessages,
   createMessage,
   deleteMessage,
+  reportMessage,
+  streamChannel,
 };

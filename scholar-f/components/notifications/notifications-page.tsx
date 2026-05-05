@@ -28,6 +28,8 @@ type Props = {
   expectedRole: "manager" | "owner" | "admin"
   title: string
   backHref: string
+  /** When false, omit the back link (e.g. owner layout already provides navigation). */
+  showBackLink?: boolean
 }
 
 function typeLabel(type: string) {
@@ -36,7 +38,7 @@ function typeLabel(type: string) {
   return "Update"
 }
 
-export function NotificationsPage({ expectedRole, title, backHref }: Props) {
+export function NotificationsPage({ expectedRole, title, backHref, showBackLink = true }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState(false)
@@ -87,9 +89,9 @@ export function NotificationsPage({ expectedRole, title, backHref }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <header className="mb-6 flex items-center justify-between gap-3">
+    <div className={showBackLink ? "min-h-screen bg-gray-50 text-gray-900" : "text-gray-900"}>
+      <div className="mx-auto max-w-4xl px-4 py-6 md:py-8">
+        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-md bg-primary/10 p-2 text-primary">
               <Bell className="h-5 w-5" />
@@ -99,13 +101,15 @@ export function NotificationsPage({ expectedRole, title, backHref }: Props) {
               <p className="text-sm text-muted-foreground">Moderation updates for your scholarships.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline">
-              <Link href={backHref}>
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {showBackLink ? (
+              <Button asChild variant="outline">
+                <Link href={backHref}>
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Back
+                </Link>
+              </Button>
+            ) : null}
             <Button onClick={() => void markAllRead()} disabled={marking || unreadCount === 0}>
               <CheckCheck className="mr-1 h-4 w-4" />
               Mark all read

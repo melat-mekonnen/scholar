@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS documents (
   mime_type TEXT,
   file_size BIGINT NOT NULL DEFAULT 0,
   scholarship_id UUID REFERENCES scholarships (id) ON DELETE SET NULL,
-  uploaded_by_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  uploaded_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
   download_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -166,6 +166,7 @@ CREATE TABLE IF NOT EXISTS community_channels (
   name TEXT NOT NULL,
   description TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -176,11 +177,29 @@ CREATE TABLE IF NOT EXISTS community_messages (
   parent_message_id UUID REFERENCES community_messages (id) ON DELETE CASCADE,
   body TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+  hidden_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
+  hidden_at TIMESTAMPTZ,
   CONSTRAINT community_messages_body_len CHECK (char_length(body) >= 1 AND char_length(body) <= 8000)
 );
 
 CREATE INDEX IF NOT EXISTS idx_community_messages_channel_created ON community_messages (channel_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_community_messages_parent ON community_messages (parent_message_id);
+CREATE INDEX IF NOT EXISTS idx_community_messages_visible ON community_messages (channel_id, is_hidden, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS community_reports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  message_id UUID NOT NULL REFERENCES community_messages (id) ON DELETE CASCADE,
+  reporter_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'dismissed')),
+  reviewed_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_reports_status_created ON community_reports (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_community_reports_message ON community_reports (message_id);
 
 -- Default channels (idempotent)
 INSERT INTO community_channels (slug, name, description, sort_order)

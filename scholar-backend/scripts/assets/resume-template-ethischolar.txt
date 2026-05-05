@@ -1,0 +1,47 @@
+RESUME (ONE-PAGE / ATS-FRIENDLY) — SCHOLARSHIPS & OPPORTUNITIES
+EthioScholar — use plain structure; export to PDF when submitting if the programme requires PDF.
+
+[Your Full Name]
+[City, Country] | [Phone] | [Email] | [LinkedIn or portfolio URL]
+
+--------------------------------------------------------------------------------
+PROFILE (3–4 lines max)
+--------------------------------------------------------------------------------
+[Summarise: current role or student status, field, 1–2 concrete strengths, and the type of programme or role you are pursuing. Avoid empty adjectives; show evidence in the bullets below.]
+
+--------------------------------------------------------------------------------
+EDUCATION
+--------------------------------------------------------------------------------
+[Degree, Field of study], [University] — [Expected graduation Month YYYY]
+Relevant: [courses, project, or thesis title in one short clause]
+
+[Secondary credential], [School] — [YYYY]
+[Optional: distinction, stream, or result if appropriate for your context]
+
+--------------------------------------------------------------------------------
+EXPERIENCE & IMPACT
+--------------------------------------------------------------------------------
+[Role / project title] | [Organisation] | [Location] | [Month YYYY – Month YYYY]
+• [Action verb] + [what you did] + [result or scope, ideally with a number or time saved]
+• [Second bullet — keep each line under ~100 characters where possible]
+
+[Role / project title] | [Organisation] | [Location] | [Month YYYY – Month YYYY]
+• …
+
+--------------------------------------------------------------------------------
+SELECT ACHIEVEMENTS (scholarship-ready)
+--------------------------------------------------------------------------------
+• [Competition, publication, grant, or leadership outcome in one line]
+• [Another concrete outcome]
+
+--------------------------------------------------------------------------------
+SKILLS
+--------------------------------------------------------------------------------
+[Comma-separated list aligned with the opportunity: languages, software, lab skills, communication]
+
+--------------------------------------------------------------------------------
+REFERENCES
+--------------------------------------------------------------------------------
+Available upon request.
+
+Tips: (1) One page unless the instructions say otherwise. (2) Match keywords from the call — honestly. (3) Proofread with a second reader.

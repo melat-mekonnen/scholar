@@ -11,10 +11,12 @@ import {
   fetchCommunityChannels,
   fetchCommunityMessages,
   postCommunityMessage,
+  reportCommunityMessage,
   type CommunityChannel,
   type CommunityMessage,
 } from "@/lib/community"
 import { clearToken, getToken } from "@/lib/auth"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -57,6 +59,7 @@ function initials(name: string) {
 export default function CommunityPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t } = useStudentI18n()
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   const [me, setMe] = useState<MeResponse | null>(null)
@@ -72,6 +75,7 @@ export default function CommunityPage() {
   const [sending, setSending] = useState(false)
   const [draft, setDraft] = useState("")
   const [replyTo, setReplyTo] = useState<CommunityMessage | null>(null)
+  const streamRef = useRef<EventSource | null>(null)
 
   const selectedChannel = useMemo(
     () => channels.find((c) => c.id === channelId) ?? null,
@@ -168,6 +172,35 @@ export default function CommunityPage() {
     }
   }, [channelId, loadMessagesFirst, router])
 
+  useEffect(() => {
+    if (!channelId) return
+    if (streamRef.current) {
+      streamRef.current.close()
+      streamRef.current = null
+    }
+    const token = getToken()
+    if (!token) return
+    const source = new EventSource(
+      `/api/community/channels/${encodeURIComponent(channelId)}/stream?token=${encodeURIComponent(token)}`
+    )
+    source.addEventListener("message_created", (evt) => {
+      try {
+        const msg = JSON.parse((evt as MessageEvent).data) as CommunityMessage
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev
+          return [...prev, msg]
+        })
+      } catch {
+        // ignore malformed
+      }
+    })
+    streamRef.current = source
+    return () => {
+      source.close()
+      if (streamRef.current === source) streamRef.current = null
+    }
+  }, [channelId])
+
   async function loadOlder() {
     if (!channelId || !oldestCursor || loadingMore) return
     setLoadingMore(true)
@@ -238,24 +271,36 @@ export default function CommunityPage() {
     setMessages((prev) => prev.filter((x) => x.id !== m.id))
   }
 
+  async function reportMessage(m: CommunityMessage) {
+    const reason = window.prompt("Why are you reporting this message?")
+    if (!reason || !reason.trim()) return
+    const { res, errorMessage } = await reportCommunityMessage(m.id, reason.trim())
+    if (!res.ok) {
+      toast({ title: "Could not submit report", description: errorMessage || "Try again.", variant: "destructive" })
+      return
+    }
+    toast({ title: "Report submitted", description: "Owner moderators will review this message." })
+  }
+
   const canPost = me?.role === "student" || me?.role === "admin"
 
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 border-r bg-card p-6 md:block">
         <div className="mb-8">
-          <h2 className="text-xl font-bold">Scholarship Portal</h2>
+          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
           <p className="mt-1 text-xs text-muted-foreground">Student community</p>
         </div>
 
         <nav className="space-y-3">
-          <NavLink href="/dashboard">Dashboard</NavLink>
-          <NavLink href="/scholarships">Browse Scholarships</NavLink>
-          <NavLink href="/applications">My Applications</NavLink>
-          <NavLink href="/community">Community</NavLink>
-          <NavLink href="/saved">Saved Scholarships</NavLink>
-          <NavLink href="/profile">Profile</NavLink>
-          <NavLink href="/settings">Settings</NavLink>
+          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
+          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
+          <NavLink href="/applications">{t("My Applications")}</NavLink>
+          <NavLink href="/community">{t("Community")}</NavLink>
+          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
+          <NavLink href="/profile">{t("Profile")}</NavLink>
+          <NavLink href="/settings">{t("Settings")}</NavLink>
+          <NavLink href="/documents">{t("Documents")}</NavLink>
         </nav>
       </aside>
 
@@ -410,6 +455,17 @@ export default function CommunityPage() {
                               aria-label="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {me?.id !== m.userId && me?.role === "student" && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-2 text-xs"
+                              onClick={() => void reportMessage(m)}
+                            >
+                              Report
                             </Button>
                           )}
                         </div>

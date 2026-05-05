@@ -149,8 +149,8 @@ export default function PendingScholarshipsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+    <main>
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-8">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Scholarship Listings</h1>

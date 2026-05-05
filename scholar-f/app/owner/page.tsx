@@ -1,225 +1,237 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, Building2, Check, IdCard, LayoutDashboard, LogOut, Users, X } from "lucide-react"
+import { BarChart3, Building2, CalendarClock, Eye } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken, logoutFromServer } from "@/lib/auth"
+import { clearToken } from "@/lib/auth"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 type OwnerDashboard = {
   role: string
   message?: string
-  links?: { managerDashboard?: string; managerScholarships?: string }
 }
 
-type PendingScholarship = {
-  id: string
-  title: string
-  country?: string
-  status: "pending" | "verified" | "rejected" | "draft" | "expired"
-  deadline?: string
-}
-
-type NotificationsResponse = {
-  notifications: Array<{ isRead: boolean }>
+type ManagerDashboardResponse = {
+  statistics: {
+    totalScholarshipsPosted: number
+    scholarshipsByStatus: { pending: number; verified: number; expired: number }
+    totalApplicationsReceived: number
+    applicationsByStatus: { pending: number; submitted: number; accepted: number; rejected: number }
+  }
+  upcomingDeadlines: Array<{ id: string; title: string; deadline: string; status: string }>
+  mostViewedScholarships: Array<{ id: string; title: string; views: number }>
+  recentActivity: Array<{ type: string; message: string; at: string }>
 }
 
 export default function OwnerDashboardPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<OwnerDashboard | null>(null)
-  const [pending, setPending] = useState<PendingScholarship[]>([])
-  const [busyIds, setBusyIds] = useState<Record<string, boolean>>({})
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [ownerMeta, setOwnerMeta] = useState<OwnerDashboard | null>(null)
+  const [metrics, setMetrics] = useState<ManagerDashboardResponse | null>(null)
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       setError(null)
-      const { res, data: json, errorMessage } = await apiFetchJson<OwnerDashboard>(
-        "/api/owner/dashboard",
-        { method: "GET" },
-      )
-      if (res.status === 401 || res.status === 403) {
+      const [ownerRes, dashRes] = await Promise.all([
+        apiFetchJson<OwnerDashboard>("/api/owner/dashboard", { method: "GET" }),
+        apiFetchJson<ManagerDashboardResponse>("/api/manager/dashboard", { method: "GET" }),
+      ])
+      if (ownerRes.res.status === 401 || ownerRes.res.status === 403) {
         clearToken()
         router.replace("/signin")
         return
       }
-      if (!res.ok || !json) {
-        setError(errorMessage || "Could not load owner dashboard")
+      if (!ownerRes.res.ok || !ownerRes.data) {
+        setError(ownerRes.errorMessage || "Could not load owner workspace")
         setLoading(false)
         return
       }
-      setData(json)
+      setOwnerMeta(ownerRes.data)
 
-      const [pendingRes, notificationsRes] = await Promise.all([
-        apiFetchJson<{ scholarships: PendingScholarship[] }>("/api/admin/scholarships/pending", { method: "GET" }),
-        apiFetchJson<NotificationsResponse>("/api/notifications/mine?unread=true&limit=100", { method: "GET" }),
-      ])
-      if (pendingRes.res.ok && pendingRes.data?.scholarships) {
-        setPending(pendingRes.data.scholarships)
+      if (dashRes.res.status === 401 || dashRes.res.status === 403) {
+        clearToken()
+        router.replace("/signin")
+        return
       }
-      if (notificationsRes.res.ok && notificationsRes.data?.notifications) {
-        setUnreadCount(notificationsRes.data.notifications.length)
+      if (!dashRes.res.ok || !dashRes.data) {
+        setError(dashRes.errorMessage || "Could not load dashboard metrics")
+        setLoading(false)
+        return
       }
+      setMetrics(dashRes.data)
       setLoading(false)
     }
     void load()
   }, [router])
 
-  async function approve(id: string) {
-    setBusyIds((p) => ({ ...p, [id]: true }))
-    try {
-      const { res } = await apiFetchJson(`/api/admin/scholarships/${id}/verify`, { method: "PUT" })
-      if (res.ok) {
-        setPending((prev) => prev.filter((s) => s.id !== id))
-      }
-    } finally {
-      setBusyIds((p) => ({ ...p, [id]: false }))
-    }
-  }
-
-  async function reject(id: string) {
-    setBusyIds((p) => ({ ...p, [id]: true }))
-    try {
-      const { res } = await apiFetchJson(`/api/admin/scholarships/${id}/reject`, { method: "PUT" })
-      if (res.ok) {
-        setPending((prev) => prev.filter((s) => s.id !== id))
-      }
-    } finally {
-      setBusyIds((p) => ({ ...p, [id]: false }))
-    }
-  }
+  const stats = metrics?.statistics
+  const topDeadlines = useMemo(() => metrics?.upcomingDeadlines?.slice(0, 4) ?? [], [metrics?.upcomingDeadlines])
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <Building2 className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Owner dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                Posting profile and user roles live here; open <strong>Scholarship operations</strong> for
-                listings, deadlines, and documents under your owner account.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/owner/users">
-                <Users className="mr-2 h-4 w-4" />
-                Students & managers
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/posting-profile">
-                <IdCard className="mr-2 h-4 w-4" />
-                Posting profile
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/scholarships">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Scholarship operations
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/notifications">
-                <Bell className="mr-2 h-4 w-4" />
-                Notifications {unreadCount > 0 ? `(${unreadCount})` : ""}
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                void logoutFromServer()
-                clearToken()
-                router.push("/signin")
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
-          </div>
-        </header>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <header className="mb-8 flex items-start gap-3">
+        <div className="rounded-md bg-primary/10 p-2 text-primary">
+          <Building2 className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            {ownerMeta?.message ||
+              "High-level platform and scholarship performance. Use the sidebar for moderation, imports, and operations."}
+          </p>
+        </div>
+      </header>
 
-        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+      {loading && (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-8 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {data && !loading && (
-          <div className="space-y-4">
+      {error && !loading && <p className="text-sm text-destructive">{error}</p>}
+
+      {!loading && stats && (
+        <div className="space-y-6">
+          <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-                <CardDescription>{data.message}</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                <p className="mb-2">
-                  API: <code className="rounded bg-muted px-1">GET /api/owner/dashboard</code>
-                </p>
-                <p>
-                  Use <strong>Students & managers</strong> to promote students to manager (or revert).
-                  Later milestones: audit logs and cross-manager analytics.
-                </p>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground">Scholarships posted</p>
+                <p className="text-3xl font-bold tabular-nums">{stats.totalScholarshipsPosted}</p>
               </CardContent>
             </Card>
-
             <Card>
-              <CardHeader>
-                <CardTitle>Needs approval ({pending.length})</CardTitle>
-                <CardDescription>Manager posts waiting for owner/admin verification.</CardDescription>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground">Applications received</p>
+                <p className="text-3xl font-bold tabular-nums">{stats.totalApplicationsReceived}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground">Verified</p>
+                <p className="text-3xl font-bold tabular-nums">{stats.scholarshipsByStatus.verified}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground">Pending review</p>
+                <p className="text-3xl font-bold tabular-nums">{stats.scholarshipsByStatus.pending}</p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base">Upcoming deadlines</CardTitle>
+                <CalendarClock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="space-y-3">
-                {pending.length ? (
-                  pending.map((s) => (
-                    <div key={s.id} className="rounded border p-3 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{s.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {s.country || "N/A"} · deadline {s.deadline || "N/A"}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" asChild>
-                          <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => void approve(s.id)}
-                          disabled={!!busyIds[s.id]}
-                        >
-                          <Check className="mr-1 h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => void reject(s.id)}
-                          disabled={!!busyIds[s.id]}
-                        >
-                          <X className="mr-1 h-4 w-4" />
-                          Reject
-                        </Button>
-                      </div>
+                {topDeadlines.length ? (
+                  topDeadlines.map((d) => (
+                    <div key={d.id} className="rounded-md border p-3">
+                      <p className="font-medium leading-snug">{d.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(d.deadline).toLocaleDateString()}
+                      </p>
+                      <Badge variant="outline" className="mt-2 text-xs">
+                        {d.status}
+                      </Badge>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No scholarships waiting for approval.</p>
+                  <p className="text-sm text-muted-foreground">No upcoming deadlines in this window.</p>
                 )}
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base">Most viewed</CardTitle>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {metrics?.mostViewedScholarships?.length ? (
+                  metrics.mostViewedScholarships.slice(0, 5).map((s) => (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between gap-2 rounded-md border p-3"
+                    >
+                      <p className="min-w-0 font-medium leading-snug">{s.title}</p>
+                      <span className="shrink-0 text-sm text-muted-foreground tabular-nums">{s.views} views</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No view data yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base">Applications by status</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm text-muted-foreground">
+                <p>Pending: {stats.applicationsByStatus.pending}</p>
+                <p>Submitted: {stats.applicationsByStatus.submitted}</p>
+                <p>Accepted: {stats.applicationsByStatus.accepted}</p>
+                <p>Rejected: {stats.applicationsByStatus.rejected}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Recent activity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {metrics?.recentActivity?.length ? (
+                  metrics.recentActivity.slice(0, 6).map((a, idx) => (
+                    <div key={`${a.type}-${idx}`} className="rounded-md border p-3 text-sm">
+                      <p>{a.message}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(a.at).toLocaleString()}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No recent activity.</p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/owner/scholarships">Scholarship operations</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/owner/approvals">Pending approvals</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/owner/users">Students &amp; managers</Link>
+            </Button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

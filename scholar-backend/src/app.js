@@ -19,6 +19,7 @@ const communityRoutes = require("./routes/community.routes");
 const recommendationsRoutes = require("./routes/recommendations.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
+const ownerCommunityRoutes = require("./routes/owner.community.routes");
 const { errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/api/community", communityRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
 app.use("/api/discovery", discoveryRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/owner/community", ownerCommunityRoutes);
 
 app.use(errorHandler);
 

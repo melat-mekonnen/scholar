@@ -14,8 +14,9 @@ import {
 } from "@/lib/scholarship"
 import { cn } from "@/lib/utils"
 import { clearToken } from "@/lib/auth"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { apiFetchJson } from "@/lib/api"
-import { createApplication } from "@/lib/applications"
+import { createApplication, updateApplicationStatus } from "@/lib/applications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -48,6 +49,11 @@ type MeResponse = {
   role?: string
 }
 
+function formatDegreeLevel(value?: string | null) {
+  if (!value) return "N/A"
+  return value.replace("_", " ")
+}
+
 function NavLink({
   href,
   children,
@@ -73,6 +79,7 @@ function NavLink({
 export default function SavedScholarshipsPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t } = useStudentI18n()
 
   const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -121,22 +128,78 @@ export default function SavedScholarshipsPage() {
     void loadMe()
   }, [])
 
+  async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
+    const ok = await openScholarshipApplication(s)
+    if (!ok) {
+      toast({
+        title: "Application link unavailable",
+        description: "This scholarship does not have an official application URL yet.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Application opened",
+      description: "After you finish and come back, we will ask if you applied.",
+    })
+
+    window.setTimeout(() => {
+      const onFocus = async () => {
+        const applied = window.confirm("Did you submit your application on the official site?")
+        if (!applied) {
+          toast({
+            title: "No problem",
+            description: "Kept in listing only. It was not added to My Applications.",
+          })
+          return
+        }
+
+        const created = await createApplication(s.id)
+        if (created.res.status === 401 || created.res.status === 403) {
+          clearToken()
+          router.replace("/signin")
+          return
+        }
+        if (!created.res.ok && created.res.status !== 409) {
+          toast({
+            title: "Could not track application",
+            description: created.errorMessage || "Failed to save this application in your tracker.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (created.data?.id) {
+          await updateApplicationStatus(created.data.id, "submitted")
+        }
+
+        toast({
+          title: "Added to My Applications",
+          description: "Saved as submitted in your application tracker.",
+        })
+      }
+      window.addEventListener("focus", onFocus, { once: true })
+    }, 800)
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 border-r bg-card p-6 md:block">
         <div className="mb-8">
-          <h2 className="text-xl font-bold">Scholarship Portal</h2>
+          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
           <p className="mt-1 text-xs text-muted-foreground">Student dashboard</p>
         </div>
 
         <nav className="space-y-3">
-          <NavLink href="/dashboard">Dashboard</NavLink>
-          <NavLink href="/scholarships">Browse Scholarships</NavLink>
-          <NavLink href="/applications">My Applications</NavLink>
-          <NavLink href="/community">Community</NavLink>
-          <NavLink href="/saved">Saved Scholarships</NavLink>
-          <NavLink href="/profile">Profile</NavLink>
-          <NavLink href="/settings">Settings</NavLink>
+          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
+          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
+          <NavLink href="/applications">{t("My Applications")}</NavLink>
+          <NavLink href="/community">{t("Community")}</NavLink>
+          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
+          <NavLink href="/profile">{t("Profile")}</NavLink>
+          <NavLink href="/settings">{t("Settings")}</NavLink>
+          <NavLink href="/documents">{t("Documents")}</NavLink>
         </nav>
       </aside>
 
@@ -240,7 +303,7 @@ export default function SavedScholarshipsPage() {
                     </CardHeader>
                     <CardContent className="space-y-3 pt-0">
                       <p className="text-muted-foreground text-sm">
-                        {s.country} · {s.degreeLevel.replace("_", " ")}
+                        {s.country} · {formatDegreeLevel(s.degreeLevel)}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
@@ -262,36 +325,7 @@ export default function SavedScholarshipsPage() {
                           size="sm"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description:
-                                  created.errorMessage || "Failed to save this application in your tracker.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              toast({
-                                title: "Application started",
-                                description: "Saved to your application tracker.",
-                              })
-                            }
+                            await handleApplyWithReturnCheck(s)
                           }}
                         >
                           {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
