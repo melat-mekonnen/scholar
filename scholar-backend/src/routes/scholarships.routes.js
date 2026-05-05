@@ -34,7 +34,6 @@ router.post("/", authMiddleware, scholarshipsController.create);
 router.put("/:id", authMiddleware, scholarshipsController.update);
 router.delete("/:id", authMiddleware, scholarshipsController.remove);
 router.get("/my-scholarships", authMiddleware, scholarshipsController.myScholarships);
-router.get("/:id/applications/count", authMiddleware, scholarshipsController.applicationsCount);
 router.get("/", optionalAuthMiddleware, scholarshipsController.list);
 router.get("/filters", scholarshipsController.getFilters);
 router.get("/search", optionalAuthMiddleware, scholarshipsController.search);

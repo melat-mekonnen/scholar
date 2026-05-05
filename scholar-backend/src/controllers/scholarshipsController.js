@@ -1,5 +1,4 @@
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
-const { ApplicationRepository } = require("../repositories/ApplicationRepository");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
 const {
   initialStatusForCreator,
@@ -7,10 +6,8 @@ const {
   assertCanMutateScholarship,
   parseDeadline,
 } = require("../usecases/scholarships/scholarshipCrudRules");
-const { validateSearchInputs } = require("../usecases/scholarships/searchValidation");
 
 const repo = new ScholarshipRepository();
-const applicationRepo = new ApplicationRepository();
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -39,6 +36,8 @@ async function create(req, res, next) {
       fieldOfStudy,
       fundingType,
       deadline,
+      applicationStartDate,
+      applicationEndDate,
       amount,
       description,
       applicationUrl,
@@ -94,6 +93,8 @@ async function create(req, res, next) {
       fieldOfStudy: fieldOfStudy.trim(),
       fundingType: fundingType.trim(),
       deadline: parsedDeadline,
+      applicationStartDate: applicationStartDate || null,
+      applicationEndDate: applicationEndDate || null,
       amount: amount ? String(amount).trim() : null,
       description: description.trim(),
       applicationUrl: applicationUrl ? applicationUrl.trim() : null,
@@ -110,6 +111,8 @@ async function create(req, res, next) {
       fieldOfStudy: created.field_of_study,
       fundingType: created.funding_type,
       deadline: created.deadline,
+      startDate: created.application_start_date,
+      endDate: created.application_end_date,
       amount: created.amount,
       description: created.description,
       applicationUrl: created.application_url,
@@ -176,16 +179,6 @@ async function search(req, res, next) {
     const bookmarkUserId = getBookmarkUserId(req);
 
     const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
-    validateSearchInputs({
-      sort,
-      degreeLevels,
-      fundingTypes,
-      deadlineFrom,
-      deadlineTo,
-      status,
-      isPrivileged,
-    });
-
     const result = await repo.searchPublic({
       q,
       countries,
@@ -211,6 +204,8 @@ async function search(req, res, next) {
         fieldOfStudy: r.field_of_study,
         fundingType: r.funding_type,
         deadline: r.deadline,
+        startDate: r.application_start_date,
+        endDate: r.application_end_date,
         amount: r.amount,
         applicationUrl: r.application_url,
         bookmark_count: r.bookmark_count,
@@ -258,6 +253,8 @@ async function getById(req, res, next) {
             fieldOfStudy: anyRow.field_of_study,
             fundingType: anyRow.funding_type,
             deadline: anyRow.deadline,
+            startDate: anyRow.application_start_date,
+            endDate: anyRow.application_end_date,
             amount: anyRow.amount,
             description: anyRow.description,
             applicationUrl: anyRow.application_url,
@@ -283,6 +280,8 @@ async function getById(req, res, next) {
       fieldOfStudy: row.field_of_study,
       fundingType: row.funding_type,
       deadline: row.deadline,
+      startDate: row.application_start_date,
+      endDate: row.application_end_date,
       amount: row.amount,
       description: row.description,
       applicationUrl: row.application_url,
@@ -339,6 +338,8 @@ async function update(req, res, next) {
     if (body.fieldOfStudy != null) patch.fieldOfStudy = String(body.fieldOfStudy).trim();
     if (body.fundingType != null) patch.fundingType = String(body.fundingType).trim();
     if (body.deadline != null) patch.deadline = parseDeadline(body.deadline, { required: true });
+    if (body.applicationStartDate != null) patch.applicationStartDate = body.applicationStartDate || null;
+    if (body.applicationEndDate != null) patch.applicationEndDate = body.applicationEndDate || null;
     if (body.amount != null) patch.amount = String(body.amount).trim();
     if (body.description != null) patch.description = String(body.description).trim();
     if (body.applicationUrl != null) {
@@ -363,6 +364,8 @@ async function update(req, res, next) {
       fieldOfStudy: updated.field_of_study,
       fundingType: updated.funding_type,
       deadline: updated.deadline,
+      startDate: updated.application_start_date,
+      endDate: updated.application_end_date,
       amount: updated.amount,
       description: updated.description,
       applicationUrl: updated.application_url,
@@ -428,6 +431,8 @@ async function myScholarships(req, res, next) {
         degreeLevel: r.degree_level,
         fundingType: r.funding_type,
         deadline: r.deadline,
+        startDate: r.application_start_date,
+        endDate: r.application_end_date,
         status: r.status,
         rejectionReason: r.rejection_reason,
         createdAt: r.created_at,
@@ -436,37 +441,6 @@ async function myScholarships(req, res, next) {
       page: data.page,
       pageSize: data.pageSize,
     });
-  } catch (err) {
-    return next(err);
-  }
-}
-
-async function applicationsCount(req, res, next) {
-  try {
-    if (!req.user || !["manager", "admin"].includes(req.user.role)) {
-      const err = new Error("Manager or admin access required");
-      err.statusCode = 403;
-      throw err;
-    }
-    const { id } = req.params;
-    if (!id || !UUID_V4.test(id)) {
-      const err = new Error("Invalid scholarship id");
-      err.statusCode = 400;
-      throw err;
-    }
-    const scholarship = await repo.findById(id);
-    if (!scholarship) {
-      const err = new Error("Scholarship not found");
-      err.statusCode = 404;
-      throw err;
-    }
-    if (req.user.role === "manager" && String(scholarship.posted_by_user_id) !== String(req.user.id)) {
-      const err = new Error("Forbidden");
-      err.statusCode = 403;
-      throw err;
-    }
-    const total = await applicationRepo.countForScholarship(id);
-    return res.json({ scholarshipId: id, totalApplications: total });
   } catch (err) {
     return next(err);
   }
@@ -481,6 +455,5 @@ module.exports = {
   update,
   remove,
   myScholarships,
-  applicationsCount,
 };
 

@@ -7,11 +7,13 @@ const userController = require("../controllers/userController");
 
 const router = express.Router();
 
-router.get("/users", authMiddleware, requireAdminOrOwner, userController.list);
-router.get("/users/:id", authMiddleware, allowAdminSelfOrOwner(), userController.getById);
-router.put("/users/:id", authMiddleware, allowAdminSelfOrOwner(), userController.update);
-router.delete("/users/:id", authMiddleware, requireAdmin, userController.remove);
-router.put("/users/:id/activate", authMiddleware, requireAdmin, userController.activate);
-router.put("/users/:id/role", authMiddleware, requireAdminOrOwner, userController.changeRole);
+router.use(authMiddleware);
+
+router.get("/users", requireAdminOrOwner, userController.list);
+router.get("/users/:id", allowAdminSelfOrOwner(), userController.getById);
+router.put("/users/:id", allowAdminSelfOrOwner(), userController.update);
+router.delete("/users/:id", requireAdmin, userController.remove);
+router.put("/users/:id/activate", requireAdmin, userController.activate);
+router.put("/users/:id/role", requireAdminOrOwner, userController.changeRole);
 
 module.exports = router;

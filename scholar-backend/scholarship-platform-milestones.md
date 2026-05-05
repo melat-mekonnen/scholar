@@ -332,6 +332,73 @@ POST   /api/scholarships/:id/documents (manager/owner/admin)
 
 ---
 
+### Milestone 4.1: Independent Scholarship Source Ingestion Module
+**Duration:** 1 week (can run in parallel with M5 readiness work)
+
+#### Purpose
+Add real scholarship data sources as an isolated module so ingestion failures never break existing platform features.
+
+#### Scope & Boundaries (must-have)
+1. Build a standalone ingestion module under `src/modules/scholarship-ingestion/`
+2. Run ingestion as a separate worker/cron process (never inside request handlers)
+3. Write incoming records to staging/import tables first
+4. Publish to `scholarships` only through controlled validation/moderation rules
+5. Keep all existing scholarship endpoints backward compatible
+6. Keep student apply flow external (`application_url` redirect) without changing existing UX contracts
+
+#### Data Governance Rules
+- Use only public/allowed sources (respect source ToS and robots rules)
+- Keep attribution for each scholarship (`source_name`, `source_url`)
+- Prefer official application URLs (`application_url`) for outbound apply
+- Do not auto-publish low-quality or incomplete records
+
+#### Module Components
+- Connectors: source-specific collectors (API/feed/HTML/PDF/manual import)
+- Normalizer: map source payloads into canonical scholarship shape
+- Validator: required fields, URL validity, deadline parsing, enum mapping
+- Dedupe: `source_url`/`external_id`/fingerprint checks
+- Publisher: controlled upsert into live scholarships
+- Observability: run logs, parse errors, per-source health
+
+#### Data Tables (recommended)
+- `scholarship_import_runs` (job metadata and counters)
+- `scholarship_raw_imports` (raw payload + normalized snapshot)
+- `scholarship_import_errors` (validation/parse/publish failures)
+
+#### API & Endpoint Alignment
+No breaking API changes to planned milestones:
+- Keep existing M4/M5/M6 endpoints unchanged
+- Optional additive endpoint for analytics tracking:
+  - `POST /api/scholarships/:id/apply-click` (student)
+- Student apply action remains external redirect to `application_url`
+
+#### Deliverables
+- [ ] Ingestion module scaffold created and isolated from delivery/controllers
+- [ ] At least one source connector implemented (e.g., DAAD)
+- [ ] Staging/import persistence and publish pipeline working
+- [ ] Feature flags per source and global ingestion toggle added
+- [ ] Admin moderation/publish flow validated with imported records
+- [ ] Existing M2/M4 behavior unchanged (regression checks pass)
+
+#### Testing
+**Unit Tests:**
+- Normalization mapping rules
+- Validation and enum coercion
+- Deduplication logic
+
+**Integration Tests:**
+- Ingestion run writes to staging tables
+- Invalid records are rejected and logged
+- Valid pending records can be published to `scholarships`
+- Existing `/api/scholarships` responses remain stable after ingestion enablement
+
+**Operational Checks:**
+- Source run success/failure metrics visible
+- Per-source disable/enable flags work without deploy
+- Ingestion worker failure does not impact API uptime
+
+---
+
 ### Milestone 5: Scholarship Verification & Moderation
 **Duration:** 4 days
 
@@ -361,20 +428,15 @@ PUT    /api/admin/scholarships/:id/verify
 PUT    /api/admin/scholarships/:id/reject
 POST   /api/admin/scholarships/:id/flag
 GET    /api/scholarships (add ?status=verified filter)
-GET    /api/notifications/mine
-PUT    /api/notifications/mine/read
 ```
 
 #### Deliverables
-- [x] Verification workflow complete
-- [x] Admin moderation panel ready
-- [x] Automated expiry system working (daily background sweep + read-time expiry)
-- [x] Verification badges displayed
+- [ ] Verification workflow complete
+- [ ] Admin moderation panel ready
+- [ ] Automated expiry system working
+- [ ] Verification badges displayed
 
 #### Testing
-**Automated (this repo):**
-- `npm run verify:milestone5` — moderation workflow, pending queue, approve/reject, flag, notifications, status visibility
-
 **Integration Tests:**
 - Manager submits scholarship → Status: pending
 - Admin approves scholarship → Status: verified
@@ -427,17 +489,13 @@ GET    /api/scholarships/filters (returns available filter options)
 ```
 
 #### Deliverables
-- [x] Search functionality working
-- [x] All filters implemented
-- [x] Sorting options functional
-- [x] Pagination optimized
-- [x] Search performance acceptable (<500ms) *(indexed query path + verification script)*
+- [ ] Search functionality working
+- [ ] All filters implemented
+- [ ] Sorting options functional
+- [ ] Pagination optimized
+- [ ] Search performance acceptable (<500ms)
 
 #### Testing
-**Automated (this repo):**
-- `npm test` (includes search validation unit tests)
-- `npm run verify:milestone6` (keyword, filters, sort, pagination, no results, invalid filters/date range)
-
 **Unit Tests:**
 - Query builder logic
 - Filter combination logic
@@ -489,15 +547,12 @@ GET    /api/scholarships (add is_bookmarked field for logged-in student)
 ```
 
 #### Deliverables
-- [x] Bookmark system complete
-- [x] Duplicate prevention working
-- [x] Bookmark list with pagination
-- [x] Integration with scholarship list
+- [ ] Bookmark system complete
+- [ ] Duplicate prevention working
+- [ ] Bookmark list with pagination
+- [ ] Integration with scholarship list
 
 #### Testing
-**Automated (this repo):**
-- `npm run verify:milestone7` — bookmark create/remove, duplicate prevention, pagination list, list integration fields, delete-cascade behavior
-
 **Integration Tests:**
 - Student bookmarks scholarship → Success (201)
 - Student bookmarks same scholarship again → Error (409)
@@ -551,16 +606,13 @@ GET    /api/scholarships/:id/applications/count (manager-own/admin)
 ```
 
 #### Deliverables
-- [x] Application tracking complete
-- [x] Status management working
-- [x] Notes system functional
-- [x] Manager view implemented
-- [x] Application statistics ready
+- [ ] Application tracking complete
+- [ ] Status management working
+- [ ] Notes system functional
+- [ ] Manager view implemented
+- [ ] Application statistics ready
 
 #### Testing
-**Automated (this repo):**
-- `npm run verify:milestone8` — create/list/get/update/status/notes/delete flows + manager/admin access + count endpoint
-
 **Integration Tests:**
 - Student creates application → Success
 - Student updates application status → Success

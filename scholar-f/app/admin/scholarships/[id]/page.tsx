@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -16,15 +15,14 @@ type VerificationStatus = "draft" | "pending" | "verified" | "rejected" | "expir
 type ScholarshipDetail = {
   id: string
   title: string
-  country?: string | null
-  degreeLevel?: "high_school" | "bachelor" | "master" | "phd" | null
+  country: string
+  degreeLevel: "high_school" | "bachelor" | "master" | "phd"
   status: VerificationStatus
-  deadline?: string | null
+  deadline: string
   fundingType?: string
   fieldOfStudy?: string
   amount?: string
   description?: string
-  applicationUrl?: string
   createdAt?: string
   updatedAt?: string
   postedBy?: {
@@ -42,19 +40,7 @@ export default function ScholarshipReviewPage() {
   const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null)
   const [reason, setReason] = useState("")
   const [loading, setLoading] = useState(false)
-  const [savingDetails, setSavingDetails] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState({
-    title: "",
-    country: "",
-    degreeLevel: "",
-    fieldOfStudy: "",
-    fundingType: "",
-    deadline: "",
-    amount: "",
-    description: "",
-    applicationUrl: "",
-  })
 
   useEffect(() => {
     if (!id) return
@@ -77,25 +63,9 @@ export default function ScholarshipReviewPage() {
       }
 
       setScholarship(data)
-      setEditForm({
-        title: data.title ?? "",
-        country: data.country ?? "",
-        degreeLevel: data.degreeLevel ?? "",
-        fieldOfStudy: data.fieldOfStudy ?? "",
-        fundingType: data.fundingType ?? "",
-        deadline: data.deadline ?? "",
-        amount: data.amount ?? "",
-        description: data.description ?? "",
-        applicationUrl: data.applicationUrl ?? "",
-      })
     }
     load()
   }, [id, router])
-
-  function formatDegreeLevel(value?: string | null) {
-    if (!value) return "N/A"
-    return value.replace("_", " ")
-  }
 
   function renderStatusBadge(status: VerificationStatus) {
     switch (status) {
@@ -149,34 +119,9 @@ export default function ScholarshipReviewPage() {
     router.push("/admin/scholarships/pending")
   }
 
-  async function handleSaveDetails() {
-    if (!id) return
-    setSavingDetails(true)
-    setError(null)
-    try {
-      const { res, data, errorMessage } = await apiFetchJson<ScholarshipDetail>(`/api/scholarships/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
-      })
-      if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (!res.ok || !data) {
-        setError(errorMessage || "Failed to save scholarship details")
-        return
-      }
-      setScholarship((prev) => (prev ? { ...prev, ...data } : data))
-    } finally {
-      setSavingDetails(false)
-    }
-  }
-
   return (
-    <main>
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-8">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Scholarship Review</h1>
@@ -184,6 +129,12 @@ export default function ScholarshipReviewPage() {
               Carefully review scholarship details before approving or rejecting.
             </p>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/admin/scholarships/pending")}
+          >
+            Back to pending list
+          </Button>
         </header>
 
         {error && (
@@ -197,76 +148,13 @@ export default function ScholarshipReviewPage() {
             {/* Main details */}
             <section className="lg:col-span-2 space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Edit scholarship details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Input
-                    placeholder="Title"
-                    value={editForm.title}
-                    onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input
-                      placeholder="Country"
-                      value={editForm.country}
-                      onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Degree level (high_school, bachelor, master, phd)"
-                      value={editForm.degreeLevel}
-                      onChange={(e) => setEditForm((p) => ({ ...p, degreeLevel: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input
-                      placeholder="Field of study"
-                      value={editForm.fieldOfStudy}
-                      onChange={(e) => setEditForm((p) => ({ ...p, fieldOfStudy: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Funding type (fully_funded, partially_funded, self_funded)"
-                      value={editForm.fundingType}
-                      onChange={(e) => setEditForm((p) => ({ ...p, fundingType: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <Input
-                      type="date"
-                      value={editForm.deadline}
-                      onChange={(e) => setEditForm((p) => ({ ...p, deadline: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Amount"
-                      value={editForm.amount}
-                      onChange={(e) => setEditForm((p) => ({ ...p, amount: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Application URL"
-                      value={editForm.applicationUrl}
-                      onChange={(e) => setEditForm((p) => ({ ...p, applicationUrl: e.target.value }))}
-                    />
-                  </div>
-                  <Textarea
-                    placeholder="Description"
-                    value={editForm.description}
-                    onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
-                  />
-                  <div className="flex justify-end">
-                    <Button onClick={handleSaveDetails} disabled={savingDetails}>
-                      {savingDetails ? "Saving..." : "Save details"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
                 <CardHeader className="space-y-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <CardTitle className="text-xl">{scholarship.title}</CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {scholarship.country || "N/A"} · {formatDegreeLevel(scholarship.degreeLevel)}
+                        {scholarship.country} ·{" "}
+                        {scholarship.degreeLevel.replace("_", " ")}
                       </p>
                     </div>
                     {renderStatusBadge(scholarship.status)}
@@ -302,7 +190,7 @@ export default function ScholarshipReviewPage() {
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">
                         Deadline
                       </p>
-                      <p className="font-medium">{scholarship.deadline || "N/A"}</p>
+                      <p className="font-medium">{scholarship.deadline}</p>
                     </div>
                   </div>
 

@@ -21,6 +21,8 @@ class ScholarshipRepository {
     fieldOfStudy,
     fundingType,
     deadline,
+    applicationStartDate,
+    applicationEndDate,
     amount,
     description,
     applicationUrl,
@@ -36,13 +38,15 @@ class ScholarshipRepository {
          field_of_study,
          funding_type,
          deadline,
+         application_start_date,
+         application_end_date,
          amount,
          description,
          application_url,
          status,
          posted_by_user_id
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
        RETURNING id,
                  title,
                  organization_name,
@@ -51,6 +55,8 @@ class ScholarshipRepository {
                  field_of_study,
                  funding_type,
                  deadline,
+                 application_start_date,
+                 application_end_date,
                  amount,
                  description,
                  application_url,
@@ -65,6 +71,8 @@ class ScholarshipRepository {
         fieldOfStudy,
         fundingType,
         deadline,
+        applicationStartDate,
+        applicationEndDate,
         amount,
         description,
         applicationUrl,
@@ -99,7 +107,7 @@ class ScholarshipRepository {
     params.push(pageSize);
     params.push(offset);
     const listResult = await query(
-      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason, created_at
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, application_start_date, application_end_date, status, rejection_reason, created_at
        FROM scholarships
        ${whereClause}
        ORDER BY created_at DESC
@@ -125,15 +133,17 @@ class ScholarshipRepository {
            field_of_study = COALESCE($6, field_of_study),
            funding_type = COALESCE($7, funding_type),
            deadline = COALESCE($8, deadline),
-           amount = COALESCE($9, amount),
-           description = COALESCE($10, description),
-           application_url = COALESCE($11, application_url),
-           status = COALESCE($12, status),
-           rejection_reason = COALESCE($13, rejection_reason),
+           application_start_date = COALESCE($9, application_start_date),
+           application_end_date = COALESCE($10, application_end_date),
+           amount = COALESCE($11, amount),
+           description = COALESCE($12, description),
+           application_url = COALESCE($13, application_url),
+           status = COALESCE($14, status),
+           rejection_reason = COALESCE($15, rejection_reason),
            updated_at = NOW()
        WHERE id = $1
        RETURNING id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
-                 amount, description, application_url, status, rejection_reason, posted_by_user_id, updated_at`,
+                 application_start_date, application_end_date, amount, description, application_url, status, rejection_reason, posted_by_user_id, updated_at`,
       [
         id,
         patch.title ?? null,
@@ -143,6 +153,8 @@ class ScholarshipRepository {
         patch.fieldOfStudy ?? null,
         patch.fundingType ?? null,
         patch.deadline ?? null,
+        patch.applicationStartDate ?? null,
+        patch.applicationEndDate ?? null,
         patch.amount ?? null,
         patch.description ?? null,
         patch.applicationUrl ?? null,
@@ -333,6 +345,8 @@ class ScholarshipRepository {
               s.field_of_study,
               s.funding_type,
               s.deadline,
+              s.application_start_date,
+              s.application_end_date,
               s.amount,
               s.description,
               s.application_url,
@@ -370,6 +384,8 @@ class ScholarshipRepository {
               s.field_of_study,
               s.funding_type,
               s.deadline,
+              s.application_start_date,
+              s.application_end_date,
               s.amount,
               s.description,
               s.application_url,
@@ -392,11 +408,118 @@ class ScholarshipRepository {
   async findById(id) {
     const result = await query(
       `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
-              amount, description, application_url, status, rejection_reason, posted_by_user_id, created_at, updated_at
+              application_start_date, application_end_date, amount, description, application_url, status, rejection_reason, posted_by_user_id, created_at, updated_at
        FROM scholarships
        WHERE id = $1
        LIMIT 1`,
       [id],
+    );
+    return result.rows[0] || null;
+  }
+
+  async findImportDuplicate({ sourceUrl, externalId }) {
+    if (!sourceUrl && !externalId) return null;
+    const params = [];
+    const where = [];
+    if (sourceUrl) {
+      params.push(sourceUrl);
+      where.push(`source_url = $${params.length}`);
+    }
+    if (externalId) {
+      params.push(externalId);
+      where.push(`external_id = $${params.length}`);
+    }
+    const result = await query(
+      `SELECT id, title, source_url, external_id, status
+       FROM scholarships
+       WHERE ${where.join(" OR ")}
+       LIMIT 1`,
+      params,
+    );
+    return result.rows[0] || null;
+  }
+
+  async upsertImportedScholarship({
+    title,
+    organizationName,
+    country,
+    degreeLevel,
+    fieldOfStudy,
+    fundingType,
+    deadline,
+    applicationStartDate,
+    applicationEndDate,
+    amount,
+    description,
+    applicationUrl,
+    sourceName,
+    sourceUrl,
+    externalId,
+    aiConfidence,
+    publishStatus = "verified",
+  }) {
+    const result = await query(
+      `INSERT INTO scholarships (
+         title,
+         organization_name,
+         country,
+         degree_level,
+         field_of_study,
+         funding_type,
+         deadline,
+         application_start_date,
+         application_end_date,
+         amount,
+         description,
+         application_url,
+         status,
+         source_name,
+         source_url,
+         external_id,
+         ai_confidence,
+         discovered_at
+       )
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,NOW())
+       ON CONFLICT (source_url) WHERE source_url IS NOT NULL AND source_url <> ''
+       DO UPDATE SET
+         title = EXCLUDED.title,
+         organization_name = EXCLUDED.organization_name,
+         country = EXCLUDED.country,
+         degree_level = EXCLUDED.degree_level,
+         field_of_study = EXCLUDED.field_of_study,
+         funding_type = EXCLUDED.funding_type,
+         deadline = EXCLUDED.deadline,
+         application_start_date = EXCLUDED.application_start_date,
+         application_end_date = EXCLUDED.application_end_date,
+         amount = EXCLUDED.amount,
+         description = EXCLUDED.description,
+         application_url = EXCLUDED.application_url,
+         status = EXCLUDED.status,
+         source_name = EXCLUDED.source_name,
+         external_id = COALESCE(EXCLUDED.external_id, scholarships.external_id),
+         ai_confidence = EXCLUDED.ai_confidence,
+         discovered_at = NOW(),
+         updated_at = NOW()
+       RETURNING id, title, country, status, source_url`,
+      [
+        title,
+        organizationName || null,
+        country,
+        degreeLevel || null,
+        fieldOfStudy || null,
+        fundingType || null,
+        deadline || null,
+        applicationStartDate || null,
+        applicationEndDate || null,
+        amount || null,
+        description || null,
+        applicationUrl || null,
+        publishStatus,
+        sourceName || null,
+        sourceUrl || null,
+        externalId || null,
+        aiConfidence != null ? Number(aiConfidence) : null,
+      ],
     );
     return result.rows[0] || null;
   }
@@ -408,6 +531,8 @@ class ScholarshipRepository {
     fieldOfStudy,
     fundingType,
     deadline,
+    applicationStartDate,
+    applicationEndDate,
     amount,
     description,
     applicationUrl,
@@ -416,123 +541,25 @@ class ScholarshipRepository {
     externalId,
     aiConfidence,
   }) {
-    const params = [
+    return this.upsertImportedScholarship({
       title,
+      organizationName: null,
       country,
-      degreeLevel || null,
-      fieldOfStudy || null,
-      fundingType || null,
-      deadline || null,
-      amount || null,
-      description || null,
-      applicationUrl || null,
-      sourceName || null,
-      sourceUrl || null,
-      externalId || null,
-      aiConfidence != null ? Number(aiConfidence) : null,
-    ];
-
-    try {
-      const result = await query(
-        `INSERT INTO scholarships (
-           title,
-           country,
-           degree_level,
-           field_of_study,
-           funding_type,
-           deadline,
-           amount,
-           description,
-           application_url,
-           status,
-           source_name,
-           source_url,
-           external_id,
-           ai_confidence,
-           discovered_at
-         )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11,$12,$13,NOW())
-         ON CONFLICT (source_url)
-         WHERE source_url IS NOT NULL AND source_url <> ''
-         DO UPDATE SET
-           title = EXCLUDED.title,
-           country = EXCLUDED.country,
-           degree_level = EXCLUDED.degree_level,
-           field_of_study = EXCLUDED.field_of_study,
-           funding_type = EXCLUDED.funding_type,
-           deadline = EXCLUDED.deadline,
-           amount = EXCLUDED.amount,
-           description = EXCLUDED.description,
-           application_url = EXCLUDED.application_url,
-           source_name = EXCLUDED.source_name,
-           external_id = COALESCE(EXCLUDED.external_id, scholarships.external_id),
-           ai_confidence = EXCLUDED.ai_confidence,
-           discovered_at = NOW(),
-           updated_at = NOW()
-         RETURNING id, title, country, status, source_url`,
-        params,
-      );
-      return result.rows[0] || null;
-    } catch (err) {
-      // Fallback for environments where the unique index migration has not run yet.
-      if (err?.code !== "42P10") throw err;
-
-      const existing = await query(
-        `SELECT id
-         FROM scholarships
-         WHERE source_url = $1
-         LIMIT 1`,
-        [sourceUrl || null],
-      );
-
-      if (existing.rows[0]?.id) {
-        const updated = await query(
-          `UPDATE scholarships
-           SET title = $2,
-               country = $3,
-               degree_level = $4,
-               field_of_study = $5,
-               funding_type = $6,
-               deadline = $7,
-               amount = $8,
-               description = $9,
-               application_url = $10,
-               source_name = $11,
-               external_id = COALESCE($12, external_id),
-               ai_confidence = $13,
-               discovered_at = NOW(),
-               updated_at = NOW()
-           WHERE id = $1
-           RETURNING id, title, country, status, source_url`,
-          [existing.rows[0].id, ...params],
-        );
-        return updated.rows[0] || null;
-      }
-
-      const inserted = await query(
-        `INSERT INTO scholarships (
-           title,
-           country,
-           degree_level,
-           field_of_study,
-           funding_type,
-           deadline,
-           amount,
-           description,
-           application_url,
-           status,
-           source_name,
-           source_url,
-           external_id,
-           ai_confidence,
-           discovered_at
-         )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11,$12,$13,NOW())
-         RETURNING id, title, country, status, source_url`,
-        params,
-      );
-      return inserted.rows[0] || null;
-    }
+      degreeLevel,
+      fieldOfStudy,
+      fundingType,
+      deadline,
+      applicationStartDate,
+      applicationEndDate,
+      amount,
+      description,
+      applicationUrl,
+      sourceName,
+      sourceUrl,
+      externalId,
+      aiConfidence,
+      publishStatus: "pending",
+    });
   }
 }
 

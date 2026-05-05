@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Filter, Search as SearchIcon, X } from "lucide-react"
 
@@ -12,10 +12,8 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication, updateApplicationStatus } from "@/lib/applications"
+import { createApplication, getMyApplications } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
-import { useStudentI18n } from "@/lib/student-i18n"
-import { cn } from "@/lib/utils"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
 import { useToast } from "@/hooks/use-toast"
@@ -33,7 +31,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Empty,
   EmptyContent,
@@ -72,11 +69,6 @@ type SearchResponse = {
   page: number
   limit: number
 }
-type MeResponse = {
-  fullName?: string
-  email: string
-  role?: string
-}
 
 type SortOption =
   | "relevance"
@@ -84,41 +76,10 @@ type SortOption =
   | "deadline_desc"
   | "funding_amount"
   | "recent"
-
-const ALLOWED_DEGREE_LEVELS: DegreeLevel[] = ["high_school", "bachelor", "master", "phd"]
-const ALLOWED_FUNDING_TYPES = ["fully_funded", "partially_funded", "self_funded"] as const
-const ALLOWED_SORT: SortOption[] = [
-  "relevance",
-  "deadline_asc",
-  "deadline_desc",
-  "funding_amount",
-  "recent",
-]
-
-function normalizeDegreeLevel(value: string) {
-  const v = value.trim().toLowerCase()
-  if (ALLOWED_DEGREE_LEVELS.includes(v as DegreeLevel)) return v as DegreeLevel
-  if (v === "masters" || v === "master's" || v === "msc") return "master"
-  if (v === "doctorate") return "phd"
-  if (v === "master/phd" || v === "masters/phd" || v === "master,phd") return "master"
-  return null
-}
-
-function normalizeFundingType(value: string) {
-  const v = value.trim().toLowerCase()
-  if (ALLOWED_FUNDING_TYPES.includes(v as (typeof ALLOWED_FUNDING_TYPES)[number])) return v
-  if (v === "full" || v === "full_funded") return "fully_funded"
-  if (v === "partial" || v === "partial_funded") return "partially_funded"
-  return null
-}
+type ApplicationFilter = "all" | "applied" | "not_applied"
 
 function toggleInList(list: string[], value: string) {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
-}
-
-function formatDegreeLevel(value?: string | null) {
-  if (!value) return "N/A"
-  return value.replace("_", " ")
 }
 
 function buildParams(options: {
@@ -151,9 +112,7 @@ function buildParams(options: {
 
 export default function ScholarshipsPage() {
   const router = useRouter()
-  const pathname = usePathname()
   const { toast } = useToast()
-  const { t } = useStudentI18n()
 
   const [filters, setFilters] = useState<FiltersResponse | null>(null)
 
@@ -175,62 +134,33 @@ export default function ScholarshipsPage() {
   const [results, setResults] = useState<ScholarshipPublic[]>([])
   const [total, setTotal] = useState(0)
   const [viewScholarship, setViewScholarship] = useState<ScholarshipPublic | null>(null)
-  const [me, setMe] = useState<MeResponse | null>(null)
+  const [appliedScholarshipIds, setAppliedScholarshipIds] = useState<Set<string>>(new Set())
+  const [applicationFilter, setApplicationFilter] = useState<ApplicationFilter>("all")
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
+  const visibleResults = useMemo(() => {
+    if (applicationFilter === "all") return results
+    return results.filter((s) => {
+      const applied = appliedScholarshipIds.has(s.id)
+      return applicationFilter === "applied" ? applied : !applied
+    })
+  }, [results, appliedScholarshipIds, applicationFilter])
 
   useEffect(() => {
     if (typeof window === "undefined") return
     const sp = new URLSearchParams(window.location.search)
     setQ(sp.get("q") ?? "")
     setCountries(sp.getAll("country"))
-    setDegreeLevels(
-      Array.from(
-        new Set(sp.getAll("degree_level").map(normalizeDegreeLevel).filter((v): v is DegreeLevel => Boolean(v))),
-      ),
-    )
+    setDegreeLevels(sp.getAll("degree_level"))
     setFieldsOfStudy(sp.getAll("field_of_study"))
-    setFundingTypes(
-      Array.from(
-        new Set(
-          sp
-            .getAll("funding_type")
-            .map(normalizeFundingType)
-            .filter((v): v is string => Boolean(v)),
-        ),
-      ),
-    )
+    setFundingTypes(sp.getAll("funding_type"))
     setDeadlineFrom(sp.get("deadline_from") ?? "")
     setDeadlineTo(sp.get("deadline_to") ?? "")
-    const rawSort = sp.get("sort")
-    setSort(rawSort && ALLOWED_SORT.includes(rawSort as SortOption) ? (rawSort as SortOption) : "relevance")
+    setSort((sp.get("sort") as SortOption) ?? "relevance")
     setPage(Number(sp.get("page") ?? "1") || 1)
     setLimit(Number(sp.get("limit") ?? "20") || 20)
     setUrlSynced(true)
   }, [])
-
-  useEffect(() => {
-    async function loadMe() {
-      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
-      if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (res.ok && data) setMe(data)
-    }
-    void loadMe()
-  }, [router])
-
-  function userInitials() {
-    if (!me) return "U"
-    if (me.fullName?.trim()) {
-      const parts = me.fullName.split(" ").filter(Boolean)
-      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-      return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase()
-    }
-    return (me.email?.[0] || "U").toUpperCase()
-  }
 
   // Load available filter options
   useEffect(() => {
@@ -240,23 +170,13 @@ export default function ScholarshipsPage() {
         auth: false,
       })
       if (res.ok && data) {
-        const degreeLevels = Array.from(
-          new Set((data.degreeLevels ?? []).map((v) => normalizeDegreeLevel(String(v))).filter(Boolean)),
-        ) as DegreeLevel[]
-        const fundingTypes = Array.from(
-          new Set((data.fundingTypes ?? []).map((v) => normalizeFundingType(String(v))).filter(Boolean)),
-        ) as string[]
-        setFilters({
-          ...data,
-          degreeLevels,
-          fundingTypes,
-        })
+        setFilters(data)
       } else {
         setFilters({
           countries: [],
-          degreeLevels: ALLOWED_DEGREE_LEVELS,
+          degreeLevels: ["high_school", "bachelor", "master", "phd"],
           fieldsOfStudy: [],
-          fundingTypes: [...ALLOWED_FUNDING_TYPES],
+          fundingTypes: [],
         })
       }
     }
@@ -320,6 +240,15 @@ export default function ScholarshipsPage() {
     search()
   }, [params, urlSynced])
 
+  useEffect(() => {
+    async function loadApplied() {
+      const { res, data } = await getMyApplications()
+      if (res.status === 401 || res.status === 403 || !res.ok || !data) return
+      setAppliedScholarshipIds(new Set((data.applications || []).map((a) => a.scholarshipId)))
+    }
+    void loadApplied()
+  }, [])
+
   function updateScholarshipBookmark(scholarshipId: string, isBookmarked: boolean) {
     const patch = (row: ScholarshipPublic): ScholarshipPublic => {
       if (row.id !== scholarshipId) return row
@@ -346,61 +275,6 @@ export default function ScholarshipsPage() {
     setDeadlineTo("")
     setSort("relevance")
     setPage(1)
-  }
-
-  async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
-    const ok = await openScholarshipApplication(s)
-    if (!ok) {
-      toast({
-        title: "Application link unavailable",
-        description: "This scholarship does not have an official application URL yet.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    toast({
-      title: "Application opened",
-      description: "After you finish and come back, we will ask if you applied.",
-    })
-
-    window.setTimeout(() => {
-      const onFocus = async () => {
-        const applied = window.confirm("Did you submit your application on the official site?")
-        if (!applied) {
-          toast({
-            title: "No problem",
-            description: "Kept in listing only. It was not added to My Applications.",
-          })
-          return
-        }
-
-        const created = await createApplication(s.id)
-        if (created.res.status === 401 || created.res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
-        }
-        if (!created.res.ok && created.res.status !== 409) {
-          toast({
-            title: "Could not track application",
-            description: created.errorMessage || "Failed to save this application in your tracker.",
-            variant: "destructive",
-          })
-          return
-        }
-
-        if (created.data?.id) {
-          await updateApplicationStatus(created.data.id, "submitted")
-        }
-
-        toast({
-          title: "Added to My Applications",
-          description: "Saved as submitted in your application tracker.",
-        })
-      }
-      window.addEventListener("focus", onFocus, { once: true })
-    }, 800)
   }
 
   function FilterPanel({ compact }: { compact?: boolean }) {
@@ -533,41 +407,10 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-        </div>
-        <nav className="space-y-3">
-          <Link href="/dashboard" className={cn("block text-sm font-medium hover:text-primary", pathname === "/dashboard" && "text-primary")}>{t("Dashboard")}</Link>
-          <Link href="/scholarships" className={cn("block text-sm font-medium hover:text-primary", pathname === "/scholarships" && "text-primary")}>{t("Browse Scholarships")}</Link>
-          <Link href="/applications" className={cn("block text-sm font-medium hover:text-primary", pathname === "/applications" && "text-primary")}>{t("My Applications")}</Link>
-          <Link href="/community" className={cn("block text-sm font-medium hover:text-primary", pathname === "/community" && "text-primary")}>{t("Community")}</Link>
-          <Link href="/saved" className={cn("block text-sm font-medium hover:text-primary", pathname === "/saved" && "text-primary")}>{t("Saved Scholarships")}</Link>
-          <Link href="/profile" className={cn("block text-sm font-medium hover:text-primary", pathname === "/profile" && "text-primary")}>{t("Profile")}</Link>
-          <Link href="/settings" className={cn("block text-sm font-medium hover:text-primary", pathname === "/settings" && "text-primary")}>{t("Settings")}</Link>
-          <Link href="/documents" className={cn("block text-sm font-medium hover:text-primary", pathname === "/documents" && "text-primary")}>{t("Documents")}</Link>
-        </nav>
-      </aside>
-
-      <div className="flex-1">
-        <header className="flex items-center justify-between border-b bg-card p-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">{t("Browse Scholarships")}</h1>
-            {me?.role ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize text-muted-foreground">
-                {me.role}
-              </span>
-            ) : null}
-          </div>
-          <Avatar>
-            <AvatarFallback>{userInitials()}</AvatarFallback>
-          </Avatar>
-        </header>
-
-        <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold">{t("Browse Scholarships")}</h1>
+          <h1 className="text-2xl font-bold">Browse Scholarships</h1>
           <p className="text-sm text-muted-foreground">
             Search verified scholarships and filter by what matters to you.
           </p>
@@ -613,7 +456,7 @@ export default function ScholarshipsPage() {
               <SheetTrigger asChild>
                 <Button variant="outline" className="md:hidden">
                   <Filter className="h-4 w-4 mr-2" />
-                  {t("Filters")}
+                  Filters
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="p-0">
@@ -654,7 +497,11 @@ export default function ScholarshipsPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm text-muted-foreground">
-                {loading ? "Loading..." : `${total.toLocaleString()} results`}
+                {loading
+                  ? "Loading..."
+                  : applicationFilter === "all"
+                    ? `${total.toLocaleString()} results`
+                    : `${visibleResults.length.toLocaleString()} shown on this page`}
               </p>
               <div className="md:hidden">
                 <Select
@@ -677,6 +524,29 @@ export default function ScholarshipsPage() {
                 </Select>
               </div>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant={applicationFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("all")}
+              >
+                All
+              </Button>
+              <Button
+                variant={applicationFilter === "applied" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("applied")}
+              >
+                Applied
+              </Button>
+              <Button
+                variant={applicationFilter === "not_applied" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApplicationFilter("not_applied")}
+              >
+                Not Applied
+              </Button>
+            </div>
 
             {loading ? (
               <div className="grid gap-4">
@@ -693,7 +563,7 @@ export default function ScholarshipsPage() {
                   </Card>
                 ))}
               </div>
-            ) : results.length === 0 ? (
+            ) : visibleResults.length === 0 ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -712,7 +582,7 @@ export default function ScholarshipsPage() {
               </Empty>
             ) : (
               <div className="grid gap-4">
-                {results.map((s) => (
+                {visibleResults.map((s) => (
                   <Card key={s.id} className="rounded-2xl">
                     <CardContent className="p-6 space-y-3">
                       <div className="flex items-start justify-between gap-3">
@@ -720,10 +590,15 @@ export default function ScholarshipsPage() {
                           <p className="text-base font-semibold">{s.title}</p>
                           <p className="mt-1 text-sm text-muted-foreground">
                             {s.organizationName ? `${s.organizationName} · ` : ""}
-                            {s.country} · {formatDegreeLevel(s.degreeLevel)}
+                            {s.country} · {s.degreeLevel.replace("_", " ")}
                             {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
+                        {!s.startDate && !(s.endDate || s.deadline) && (
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            Dates not specified
+                          </span>
+                        )}
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked={s.isBookmarked ?? false}
@@ -735,12 +610,18 @@ export default function ScholarshipsPage() {
 
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="secondary">Verified</Badge>
+                        {appliedScholarshipIds.has(s.id) && (
+                          <Badge className="bg-blue-600 text-white">Applied</Badge>
+                        )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline">{s.bookmarkCount} saved</Badge>
                         )}
                         {s.fundingType && <Badge variant="outline">{s.fundingType}</Badge>}
                         {s.amount && <Badge variant="outline">{s.amount}</Badge>}
-                        {s.deadline && <Badge variant="outline">Deadline: {s.deadline}</Badge>}
+                        {s.startDate && <Badge variant="outline">Start: {s.startDate}</Badge>}
+                        {(s.endDate || s.deadline) && (
+                          <Badge variant="outline">End: {s.endDate || s.deadline}</Badge>
+                        )}
                       </div>
 
                       <div className="pt-2 flex gap-2">
@@ -755,7 +636,42 @@ export default function ScholarshipsPage() {
                           size="sm"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
-                            await handleApplyWithReturnCheck(s)
+                            const ok = await openScholarshipApplication(s)
+                            if (!ok) {
+                              toast({
+                                title: "Application link unavailable",
+                                description:
+                                  "This scholarship does not have an official application URL yet.",
+                                variant: "destructive",
+                              })
+                              return
+                            }
+
+                            const created = await createApplication(s.id)
+                            if (created.res.status === 401 || created.res.status === 403) {
+                              clearToken()
+                              router.replace("/signin")
+                              return
+                            }
+                            if (!created.res.ok && created.res.status !== 409) {
+                              toast({
+                                title: "Could not track application",
+                                description:
+                                  created.errorMessage || "Failed to save this application in your tracker.",
+                                variant: "destructive",
+                              })
+                            } else {
+                              if (created.res.status === 201) {
+                                setAppliedScholarshipIds((prev) => new Set(prev).add(s.id))
+                              }
+                              toast({
+                                title: "Application started",
+                                description:
+                                  created.res.status === 409
+                                    ? "Already in your application tracker."
+                                    : "Saved to your application tracker.",
+                              })
+                            }
                           }}
                         >
                           {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
@@ -812,7 +728,6 @@ export default function ScholarshipsPage() {
             )}
           </section>
         </div>
-        </main>
       </div>
 
       <ScholarshipDetailDialog
@@ -834,7 +749,7 @@ export default function ScholarshipsPage() {
           ) : undefined
         }
       />
-    </div>
+    </main>
   )
 }
 

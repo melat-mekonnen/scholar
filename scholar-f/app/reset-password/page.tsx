@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Suspense, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 import { apiFetchJson } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ function ResetPasswordForm() {
   const initialToken = useMemo(() => params.get("token") ?? "", [params])
   const [token, setToken] = useState(initialToken)
   const [newPassword, setNewPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -59,14 +61,29 @@ function ResetPasswordForm() {
               placeholder="Reset token"
               required
             />
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password (min 8 characters)"
-              minLength={8}
-              required
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password (min 8 characters)"
+                minLength={8}
+                required
+                className="pr-16"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground sm:w-11"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                )}
+              </button>
+            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Resetting..." : "Reset password"}
             </Button>

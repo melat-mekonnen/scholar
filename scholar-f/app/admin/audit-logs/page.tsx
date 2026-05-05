@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -89,14 +90,22 @@ export default function AdminAuditLogsPage() {
   const rows = useMemo(() => logs, [logs])
 
   return (
-    <main>
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-8">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Admin audit logs</h1>
             <p className="text-sm text-muted-foreground">
               Track admin actions across scholarships and users.
             </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/admin/users">Users</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/admin">Dashboard</Link>
+            </Button>
           </div>
         </header>
 

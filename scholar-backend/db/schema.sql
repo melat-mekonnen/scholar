@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS scholarships (
   organization_name TEXT,
   country TEXT NOT NULL,
   deadline DATE,
+  application_start_date DATE,
+  application_end_date DATE,
   degree_level TEXT,
   status TEXT NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft', 'pending', 'verified', 'rejected', 'expired')),
@@ -65,7 +67,7 @@ CREATE TABLE IF NOT EXISTS documents (
   mime_type TEXT,
   file_size BIGINT NOT NULL DEFAULT 0,
   scholarship_id UUID REFERENCES scholarships (id) ON DELETE SET NULL,
-  uploaded_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
+  uploaded_by_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   download_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -125,23 +127,10 @@ CREATE TABLE IF NOT EXISTS applications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   scholarship_id UUID NOT NULL REFERENCES scholarships (id) ON DELETE CASCADE,
-  status TEXT NOT NULL CHECK (status IN ('saved', 'preparing', 'submitted', 'accepted', 'rejected')),
+  status TEXT NOT NULL CHECK (status IN ('pending', 'submitted', 'accepted', 'rejected')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-CREATE TABLE IF NOT EXISTS application_notes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  application_id UUID NOT NULL REFERENCES applications (id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  note TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_application_notes_application
-  ON application_notes (application_id, created_at ASC);
-CREATE INDEX IF NOT EXISTS idx_application_notes_user
-  ON application_notes (user_id, created_at DESC);
 
 -- ---------------------------------------------------------------------------
 -- bookmarks
@@ -166,7 +155,6 @@ CREATE TABLE IF NOT EXISTS community_channels (
   name TEXT NOT NULL,
   description TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -177,29 +165,11 @@ CREATE TABLE IF NOT EXISTS community_messages (
   parent_message_id UUID REFERENCES community_messages (id) ON DELETE CASCADE,
   body TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
-  hidden_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
-  hidden_at TIMESTAMPTZ,
   CONSTRAINT community_messages_body_len CHECK (char_length(body) >= 1 AND char_length(body) <= 8000)
 );
 
 CREATE INDEX IF NOT EXISTS idx_community_messages_channel_created ON community_messages (channel_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_community_messages_parent ON community_messages (parent_message_id);
-CREATE INDEX IF NOT EXISTS idx_community_messages_visible ON community_messages (channel_id, is_hidden, created_at DESC);
-
-CREATE TABLE IF NOT EXISTS community_reports (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  message_id UUID NOT NULL REFERENCES community_messages (id) ON DELETE CASCADE,
-  reporter_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  reason TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'dismissed')),
-  reviewed_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
-  reviewed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_community_reports_status_created ON community_reports (status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_community_reports_message ON community_reports (message_id);
 
 -- Default channels (idempotent)
 INSERT INTO community_channels (slug, name, description, sort_order)
@@ -244,44 +214,46 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action
   ON admin_audit_logs (action);
 
 -- ---------------------------------------------------------------------------
--- scholarship moderation (milestone 5)
+-- scholarship import runs/raw/errors (independent ingestion module)
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS scholarship_flags (
+CREATE TABLE IF NOT EXISTS scholarship_import_runs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  scholarship_id UUID NOT NULL REFERENCES scholarships (id) ON DELETE CASCADE,
-  flagged_by_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  reason TEXT,
+  source_name TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'failed')),
+  started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  finished_at TIMESTAMPTZ,
+  records_fetched INTEGER NOT NULL DEFAULT 0,
+  records_upserted INTEGER NOT NULL DEFAULT 0,
+  records_failed INTEGER NOT NULL DEFAULT 0,
+  error_message TEXT
+);
+
+CREATE TABLE IF NOT EXISTS scholarship_raw_imports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  run_id UUID NOT NULL REFERENCES scholarship_import_runs(id) ON DELETE CASCADE,
+  source_name TEXT NOT NULL,
+  source_url TEXT,
+  external_id TEXT,
+  payload JSONB NOT NULL,
+  normalized_payload JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_scholarship_flags_scholarship
-  ON scholarship_flags (scholarship_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_scholarship_flags_actor
-  ON scholarship_flags (flagged_by_user_id, created_at DESC);
-
-CREATE TABLE IF NOT EXISTS scholarship_notifications (
+CREATE TABLE IF NOT EXISTS scholarship_import_errors (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  scholarship_id UUID REFERENCES scholarships (id) ON DELETE SET NULL,
-  type TEXT NOT NULL,
-  message TEXT NOT NULL,
-  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  run_id UUID NOT NULL REFERENCES scholarship_import_runs(id) ON DELETE CASCADE,
+  source_name TEXT NOT NULL,
+  source_url TEXT,
+  external_id TEXT,
+  error_type TEXT NOT NULL,
+  error_message TEXT NOT NULL,
+  payload JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_scholarship_notifications_user
-  ON scholarship_notifications (user_id, is_read, created_at DESC);
-
--- ---------------------------------------------------------------------------
--- scholarship search indexes (milestone 6)
--- ---------------------------------------------------------------------------
-CREATE INDEX IF NOT EXISTS idx_scholarships_status ON scholarships (status);
-CREATE INDEX IF NOT EXISTS idx_scholarships_deadline ON scholarships (deadline);
-CREATE INDEX IF NOT EXISTS idx_scholarships_created_at ON scholarships (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_scholarships_country ON scholarships (country);
-CREATE INDEX IF NOT EXISTS idx_scholarships_degree_level ON scholarships (degree_level);
-CREATE INDEX IF NOT EXISTS idx_scholarships_field_of_study ON scholarships (field_of_study);
-CREATE INDEX IF NOT EXISTS idx_scholarships_funding_type ON scholarships (funding_type);
-CREATE INDEX IF NOT EXISTS idx_scholarships_posted_by ON scholarships (posted_by_user_id);
-CREATE INDEX IF NOT EXISTS idx_scholarships_title_lower ON scholarships (LOWER(title));
-CREATE INDEX IF NOT EXISTS idx_scholarships_description_lower ON scholarships (LOWER(description));
+CREATE INDEX IF NOT EXISTS idx_import_runs_source_started
+  ON scholarship_import_runs(source_name, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_import_raw_run
+  ON scholarship_raw_imports(run_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_import_errors_run
+  ON scholarship_import_errors(run_id, created_at DESC);

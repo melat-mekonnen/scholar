@@ -8,7 +8,6 @@ import { StudentProfileForm, type StudentProfile } from "../../components/studen
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { apiFetchJson } from "@/lib/api"
 import { getPostAuthPath } from "@/lib/redirect-by-role"
-import { useStudentI18n } from "@/lib/student-i18n"
 
 type MeResponse = {
   role?: string
@@ -30,7 +29,6 @@ function backLabelForRole(role: string | undefined) {
 function ProfilePageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { t } = useStudentI18n()
   const intentStudent = searchParams.get("intent") === "student"
 
   const [role, setRole] = useState<string | undefined>(undefined)
@@ -70,54 +68,37 @@ function ProfilePageInner() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-        </div>
-        <nav className="space-y-3">
-          <Link href="/dashboard" className="block text-sm font-medium hover:text-primary">{t("Dashboard")}</Link>
-          <Link href="/scholarships" className="block text-sm font-medium hover:text-primary">{t("Browse Scholarships")}</Link>
-          <Link href="/applications" className="block text-sm font-medium hover:text-primary">{t("My Applications")}</Link>
-          <Link href="/community" className="block text-sm font-medium hover:text-primary">{t("Community")}</Link>
-          <Link href="/saved" className="block text-sm font-medium hover:text-primary">{t("Saved Scholarships")}</Link>
-          <Link href="/profile" className="block text-sm font-medium text-primary">{t("Profile")}</Link>
-          <Link href="/settings" className="block text-sm font-medium hover:text-primary">{t("Settings")}</Link>
-          <Link href="/documents" className="block text-sm font-medium hover:text-primary">{t("Documents")}</Link>
-        </nav>
-      </aside>
-
-      <div className="flex-1">
-        <header className="border-b bg-card">
-          <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <Link href={homeHref} className="flex items-center gap-2 hover:opacity-80">
-              <svg
-                className="h-5 w-5 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              <span className="text-sm font-medium">{backLabelForRole(role)}</span>
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b bg-card">
+        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href={homeHref} className="flex items-center gap-2 hover:opacity-80">
+            <svg
+              className="h-5 w-5 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span className="text-sm font-medium">{backLabelForRole(role)}</span>
+          </Link>
+          {(role === "manager" || role === "owner") && intentStudent ? (
+            <Link
+              href={role === "owner" ? "/owner/posting-profile" : "/manager/profile"}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Posting profile
             </Link>
-            {(role === "manager" || role === "owner") && intentStudent ? (
-              <Link
-                href={role === "owner" ? "/owner/posting-profile" : "/manager/profile"}
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                Posting profile
-              </Link>
-            ) : null}
-          </div>
-        </header>
+          ) : null}
+        </div>
+      </header>
 
-        <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Student applicant profile</h1>
           <p className="mt-2 text-muted-foreground">
@@ -262,8 +243,7 @@ function ProfilePageInner() {
             </Card>
           </aside>
         </div>
-        </main>
-      </div>
+      </main>
     </div>
   )
 }

@@ -2,14 +2,15 @@ const { getAdminDashboard, getAdminStatistics } = require("../usecases/admin/get
 const { listUsers } = require("../usecases/users/userUsecases");
 const { AdminAuditLogRepository } = require("../repositories/AdminAuditLogRepository");
 const { logAdminAction } = require("../services/adminAudit");
-const { notifyScholarshipDecision } = require("../services/scholarshipModerationNotifications");
 const {
   listPendingScholarships,
   listScholarships: listScholarshipsUsecase,
   getScholarshipById,
   verifyScholarship,
   rejectScholarship,
-  flagScholarship,
+  listImportRuns,
+  listImportErrors,
+  runImport,
 } = require("../usecases/admin/adminScholarships");
 
 const adminAuditRepo = new AdminAuditLogRepository();
@@ -118,13 +119,7 @@ async function getScholarship(req, res, next) {
 
 async function verify(req, res, next) {
   try {
-    const scholarship = await getScholarshipById(req.params.id);
     const updated = await verifyScholarship(req.params.id);
-    await notifyScholarshipDecision({
-      scholarshipId: req.params.id,
-      ownerUserId: scholarship.posted_by_id,
-      action: "verified",
-    });
     await logAdminAction(req.user, "scholarship.verify", "scholarship", req.params.id, {
       status: updated.status,
     });
@@ -137,14 +132,7 @@ async function verify(req, res, next) {
 async function reject(req, res, next) {
   try {
     const { reason } = req.body || {};
-    const scholarship = await getScholarshipById(req.params.id);
     const updated = await rejectScholarship(req.params.id, reason);
-    await notifyScholarshipDecision({
-      scholarshipId: req.params.id,
-      ownerUserId: scholarship.posted_by_id,
-      action: "rejected",
-      reason: updated.rejection_reason || null,
-    });
     await logAdminAction(req.user, "scholarship.reject", "scholarship", req.params.id, {
       status: updated.status,
       reason: updated.rejection_reason || null,
@@ -159,20 +147,37 @@ async function reject(req, res, next) {
   }
 }
 
-async function flag(req, res, next) {
+async function getImportRuns(req, res, next) {
   try {
-    const { reason } = req.body || {};
-    const flag = await flagScholarship(req.params.id, req.user?.id, reason);
-    await logAdminAction(req.user, "scholarship.flag", "scholarship", req.params.id, {
-      reason: flag.reason || null,
+    const runs = await listImportRuns({ limit: req.query.limit });
+    return res.json({ runs });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getImportErrors(req, res, next) {
+  try {
+    const errors = await listImportErrors({ limit: req.query.limit });
+    return res.json({ errors });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function triggerImport(req, res, next) {
+  try {
+    const { source, publishStatus } = req.body || {};
+    const result = await runImport({ source, publishStatus });
+    await logAdminAction(req.user, "scholarship.import.run", "system", "scholarship-ingestion", {
+      source: result.sourceName,
+      fetched: result.fetched,
+      upserted: result.upserted,
+      failed: result.failed,
+      publishStatus: result.publishStatus,
+      runId: result.runId,
     });
-    return res.status(201).json({
-      id: flag.id,
-      scholarshipId: flag.scholarship_id,
-      flaggedByUserId: flag.flagged_by_user_id,
-      reason: flag.reason,
-      createdAt: flag.created_at,
-    });
+    return res.status(201).json(result);
   } catch (err) {
     return next(err);
   }
@@ -188,6 +193,8 @@ module.exports = {
   getScholarship,
   verify,
   reject,
-  flag,
+  getImportRuns,
+  getImportErrors,
+  triggerImport,
 };
 

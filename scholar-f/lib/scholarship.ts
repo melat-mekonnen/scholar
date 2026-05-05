@@ -11,6 +11,8 @@ export type ScholarshipPublic = {
   fieldOfStudy?: string
   fundingType?: string
   deadline?: string
+  startDate?: string
+  endDate?: string
   amount?: string
   description?: string
   applicationUrl?: string
@@ -72,6 +74,17 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
     fieldOfStudy: str(r.fieldOfStudy) ?? str(r.field_of_study),
     fundingType: str(r.fundingType) ?? str(r.funding_type),
     deadline: str(r.deadline),
+    startDate:
+      str(r.startDate) ??
+      str(r.start_date) ??
+      str(r.applicationStartDate) ??
+      str(r.application_start_date),
+    endDate:
+      str(r.endDate) ??
+      str(r.end_date) ??
+      str(r.applicationEndDate) ??
+      str(r.application_end_date) ??
+      str(r.deadline),
     amount: str(r.amount),
     description: str(r.description),
     applicationUrl: url,
@@ -96,20 +109,32 @@ export function getApplicationUrl(s: ScholarshipPublic): string | undefined {
 export async function openScholarshipApplication(
   s: ScholarshipPublic,
 ): Promise<boolean> {
+  const popup = window.open("", "_blank", "noopener,noreferrer")
+  if (!popup) return false
+
   const direct = getApplicationUrl(s)
   if (direct) {
-    window.open(direct, "_blank", "noopener,noreferrer")
+    popup.location.href = direct
     return true
   }
-  if (!s.id) return false
+  if (!s.id) {
+    popup.close()
+    return false
+  }
   const { res, data } = await apiFetchJson<unknown>(`/api/scholarships/${s.id}`, {
     method: "GET",
     auth: false,
   })
-  if (!res.ok || !data) return false
+  if (!res.ok || !data) {
+    popup.close()
+    return false
+  }
   const url = getApplicationUrl(normalizeScholarship(data))
-  if (!url) return false
-  window.open(url, "_blank", "noopener,noreferrer")
+  if (!url) {
+    popup.close()
+    return false
+  }
+  popup.location.href = url
   return true
 }
 
@@ -128,6 +153,8 @@ export function mergeScholarshipDetail(
     fieldOfStudy: detail.fieldOfStudy ?? list.fieldOfStudy,
     fundingType: detail.fundingType ?? list.fundingType,
     deadline: detail.deadline ?? list.deadline,
+    startDate: detail.startDate ?? list.startDate,
+    endDate: detail.endDate ?? list.endDate,
     amount: detail.amount ?? list.amount,
     isBookmarked: detail.isBookmarked ?? list.isBookmarked,
     bookmarkCount: detail.bookmarkCount ?? list.bookmarkCount,

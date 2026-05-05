@@ -1,11 +1,10 @@
 const { query } = require("../infra/db/neonClient");
 
 class CommunityRepository {
-  async listChannels({ includeInactive = false } = {}) {
+  async listChannels() {
     const result = await query(
-      `SELECT id, slug, name, description, sort_order, created_at, is_active
+      `SELECT id, slug, name, description, sort_order, created_at
        FROM community_channels
-       ${includeInactive ? "" : "WHERE is_active = TRUE"}
        ORDER BY sort_order ASC, name ASC`,
       [],
     );
@@ -14,7 +13,7 @@ class CommunityRepository {
 
   async findChannelById(channelId) {
     const result = await query(
-      `SELECT id, slug, name, description, sort_order, is_active
+      `SELECT id, slug, name, description, sort_order
        FROM community_channels
        WHERE id = $1
        LIMIT 1`,
@@ -23,41 +22,9 @@ class CommunityRepository {
     return result.rows[0] || null;
   }
 
-  async createChannel({ slug, name, description, sortOrder, isActive = true }) {
-    const result = await query(
-      `INSERT INTO community_channels (slug, name, description, sort_order, is_active)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, slug, name, description, sort_order, is_active, created_at`,
-      [slug, name, description || null, sortOrder ?? 0, isActive]
-    );
-    return result.rows[0] || null;
-  }
-
-  async updateChannel(id, patch) {
-    const result = await query(
-      `UPDATE community_channels
-       SET slug = COALESCE($2, slug),
-           name = COALESCE($3, name),
-           description = COALESCE($4, description),
-           sort_order = COALESCE($5, sort_order),
-           is_active = COALESCE($6, is_active)
-       WHERE id = $1
-       RETURNING id, slug, name, description, sort_order, is_active, created_at`,
-      [
-        id,
-        patch.slug ?? null,
-        patch.name ?? null,
-        patch.description ?? null,
-        patch.sortOrder ?? null,
-        patch.isActive ?? null,
-      ]
-    );
-    return result.rows[0] || null;
-  }
-
   async findMessageById(messageId) {
     const result = await query(
-      `SELECT id, channel_id, user_id, parent_message_id, body, created_at, is_hidden
+      `SELECT id, channel_id, user_id, parent_message_id, body, created_at
        FROM community_messages
        WHERE id = $1
        LIMIT 1`,
@@ -74,7 +41,6 @@ class CommunityRepository {
               m.parent_message_id,
               m.body,
               m.created_at,
-              m.is_hidden,
               u.full_name AS author_full_name
        FROM community_messages m
        INNER JOIN users u ON u.id = m.user_id
@@ -98,11 +64,10 @@ class CommunityRepository {
                 m.parent_message_id,
                 m.body,
                 m.created_at,
-                m.is_hidden,
                 u.full_name AS author_full_name
          FROM community_messages m
          INNER JOIN users u ON u.id = m.user_id
-         WHERE m.channel_id = $1 AND m.created_at < $2::timestamptz AND m.is_hidden = FALSE
+         WHERE m.channel_id = $1 AND m.created_at < $2::timestamptz
          ORDER BY m.created_at DESC, m.id DESC
          LIMIT $3`,
         [channelId, before, lim],
@@ -116,11 +81,10 @@ class CommunityRepository {
               m.parent_message_id,
               m.body,
               m.created_at,
-              m.is_hidden,
               u.full_name AS author_full_name
        FROM community_messages m
        INNER JOIN users u ON u.id = m.user_id
-       WHERE m.channel_id = $1 AND m.is_hidden = FALSE
+       WHERE m.channel_id = $1
        ORDER BY m.created_at DESC, m.id DESC
        LIMIT $2`,
       [channelId, lim],
@@ -144,65 +108,6 @@ class CommunityRepository {
        WHERE id = $1 AND user_id = $2
        RETURNING id`,
       [messageId, userId],
-    );
-    return result.rows[0] || null;
-  }
-
-  async createReport({ messageId, reporterUserId, reason }) {
-    const result = await query(
-      `INSERT INTO community_reports (message_id, reporter_user_id, reason)
-       VALUES ($1, $2, $3)
-       RETURNING id, message_id, reporter_user_id, reason, status, created_at`,
-      [messageId, reporterUserId, reason]
-    );
-    return result.rows[0] || null;
-  }
-
-  async listReports({ status = "open", limit = 50 }) {
-    const result = await query(
-      `SELECT r.id,
-              r.message_id,
-              r.reporter_user_id,
-              r.reason,
-              r.status,
-              r.created_at,
-              m.channel_id,
-              m.body AS message_body,
-              m.user_id AS message_author_id,
-              u.full_name AS reporter_full_name,
-              mu.full_name AS author_full_name
-       FROM community_reports r
-       INNER JOIN community_messages m ON m.id = r.message_id
-       LEFT JOIN users u ON u.id = r.reporter_user_id
-       LEFT JOIN users mu ON mu.id = m.user_id
-       WHERE ($1 = 'all' OR r.status = $1)
-       ORDER BY r.created_at DESC
-       LIMIT $2`,
-      [status, limit]
-    );
-    return result.rows;
-  }
-
-  async resolveReport(reportId, ownerUserId, status = "resolved") {
-    const result = await query(
-      `UPDATE community_reports
-       SET status = $3, reviewed_by_user_id = $2, reviewed_at = NOW()
-       WHERE id = $1
-       RETURNING id, status, reviewed_by_user_id, reviewed_at`,
-      [reportId, ownerUserId, status]
-    );
-    return result.rows[0] || null;
-  }
-
-  async hideMessageByOwner(messageId, ownerUserId) {
-    const result = await query(
-      `UPDATE community_messages
-       SET is_hidden = TRUE,
-           hidden_by_user_id = $2,
-           hidden_at = NOW()
-       WHERE id = $1
-       RETURNING id, channel_id, is_hidden, hidden_by_user_id, hidden_at`,
-      [messageId, ownerUserId]
     );
     return result.rows[0] || null;
   }

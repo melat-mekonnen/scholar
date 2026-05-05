@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
 
 type CreateScholarshipResponse = {
@@ -21,10 +20,9 @@ type CreateScholarshipResponse = {
 
 type Props = {
   workspace: ScholarshipWorkspace
-  embedded?: boolean
 }
 
-export function ScholarshipNewForm({ workspace, embedded = false }: Props) {
+export function ScholarshipNewForm({ workspace }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
   const gate = useScholarshipWorkspaceGate(workspace)
   const router = useRouter()
@@ -76,7 +74,7 @@ export function ScholarshipNewForm({ workspace, embedded = false }: Props) {
 
   if (gate !== "ready") {
     return (
-      <main className={cn(embedded ? "flex-1" : cfg.standaloneSurfaceClass)}>
+      <main className={cfg.standaloneSurfaceClass}>
         <div className="mx-auto max-w-3xl px-4 py-8">
           <p className="text-sm text-muted-foreground">Loading…</p>
         </div>
@@ -85,7 +83,7 @@ export function ScholarshipNewForm({ workspace, embedded = false }: Props) {
   }
 
   return (
-    <main className={cn(embedded ? "min-h-full flex-1 overflow-auto bg-muted/20" : cfg.standaloneSurfaceClass)}>
+    <main className={cfg.standaloneSurfaceClass}>
       <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold">{cfg.newScholarshipTitle}</h1>

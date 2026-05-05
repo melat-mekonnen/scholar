@@ -1,22 +1,6 @@
 import { apiFetchJson } from "@/lib/api"
 
-export type ApplicationStatus = "saved" | "preparing" | "submitted" | "accepted" | "rejected"
-
-export type ApplicationNote = {
-  id: string
-  userId: string
-  userName?: string
-  userEmail?: string
-  note: string
-  createdAt: string
-}
-
-export type ApplicationTimelineEvent = {
-  type: "application_created" | "status_updated" | "note_added"
-  at: string
-  status?: ApplicationStatus
-  note?: string
-}
+export type ApplicationStatus = "pending" | "submitted" | "accepted" | "rejected"
 
 export type StudentApplication = {
   id: string
@@ -27,11 +11,11 @@ export type StudentApplication = {
   scholarship: {
     title: string
     country?: string
+    startDate?: string
+    endDate?: string
     deadline?: string
     applicationUrl?: string
   }
-  notes?: ApplicationNote[]
-  timeline?: ApplicationTimelineEvent[]
 }
 
 export async function createApplication(scholarshipId: string) {
@@ -42,7 +26,7 @@ export async function createApplication(scholarshipId: string) {
   }>("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scholarshipId, status: "saved" }),
+    body: JSON.stringify({ scholarshipId, status: "submitted" }),
   })
 }
 
@@ -58,22 +42,5 @@ export async function updateApplicationStatus(id: string, status: ApplicationSta
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   })
-}
-
-export async function getApplicationById(id: string) {
-  return apiFetchJson<StudentApplication>(`/api/applications/${id}`, {
-    method: "GET",
-  })
-}
-
-export async function addApplicationNote(id: string, note: string) {
-  return apiFetchJson<{ id: string; applicationId: string; note: string; createdAt: string }>(
-    `/api/applications/${id}/notes`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ note }),
-    }
-  )
 }
 

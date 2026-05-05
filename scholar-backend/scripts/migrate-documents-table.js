@@ -11,7 +11,7 @@ async function main() {
       mime_type TEXT,
       file_size BIGINT NOT NULL DEFAULT 0,
       scholarship_id UUID REFERENCES scholarships(id) ON DELETE SET NULL,
-      uploaded_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+      uploaded_by_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       download_count INTEGER NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

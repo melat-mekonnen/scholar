@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Building2 } from "lucide-react"
+import { ArrowLeft, Building2, IdCard, LogOut } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
+import { clearToken, logoutFromServer } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -216,19 +216,54 @@ export default function OwnerUsersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 text-foreground sm:py-8">
-      <header className="mb-6 flex items-start gap-3">
-        <div className="rounded-md bg-primary/10 p-2 text-primary">
-          <Building2 className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">Students & managers</h1>
-          <p className="text-sm text-muted-foreground">
-            Promote students to scholarship managers or return them to student. Admin and owner accounts are not
-            listed here.
-          </p>
-        </div>
-      </header>
+    <main className="min-h-screen bg-gray-50 text-gray-900">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <Button variant="ghost" size="icon" asChild className="mt-0.5 shrink-0">
+              <Link href="/owner" aria-label="Back to owner dashboard">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="rounded-md bg-primary/10 p-2 text-primary">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Students & managers</h1>
+                <p className="text-sm text-muted-foreground">
+                  Promote students to scholarship managers or return them to student. Admin and
+                  owner accounts are not listed here.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/owner">Dashboard</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/owner/posting-profile">
+                <IdCard className="mr-2 h-4 w-4" />
+                Posting profile
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/owner/scholarships">Scholarship operations</Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                void logoutFromServer()
+                clearToken()
+                router.push("/signin")
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
+          </div>
+        </header>
 
         {error && (
           <p className="mb-4 text-sm text-destructive">{error}</p>
@@ -409,6 +444,7 @@ export default function OwnerUsersPage() {
             </CardContent>
           </Card>
         )}
+      </div>
     </main>
   )
 }
