@@ -2,16 +2,20 @@ from __future__ import annotations
 
 from typing import List, Dict, Any
 
+from app.utils.country_utils import countries_match, normalize_country
 from app.utils.deadline_utils import deadline_meta
+from app.utils.degree_utils import degrees_match
+from app.utils.field_utils import fields_match, normalize_field
 
 
 def _rule_score(item: Dict[str, Any], filters: Dict[str, Any]) -> float:
     score = 0.0
-    if filters.get("country") and str(item.get("country") or "").lower() == str(filters["country"]).lower():
+    if filters.get("country"):
+        if countries_match(str(item.get("country") or ""), str(filters["country"])):
+            score += 0.4
+    if filters.get("field") and fields_match(str(filters["field"]), str(item.get("field") or "")):
         score += 0.4
-    if filters.get("field") and str(filters["field"]).lower() in str(item.get("field") or "").lower():
-        score += 0.4
-    if filters.get("level") and str(filters["level"]).lower() in str(item.get("level") or "").lower():
+    if filters.get("level") and degrees_match(str(filters["level"] or ""), str(item.get("level") or "")):
         score += 0.2
     if filters.get("funding_type"):
         item_funding = str(item.get("funding_type") or "").lower()

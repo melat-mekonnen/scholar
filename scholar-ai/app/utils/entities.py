@@ -23,7 +23,7 @@ def extract_entities(message: str) -> Dict[str, Any]:
         "strict_funding": False,
     }
 
-    country_match = re.search(r"\b(in|for|at)\s+([a-z]{3,})\b", text)
+    country_match = re.search(r"\b(in|for|at)\s+([a-z][a-z\s\.]{1,50})\b", text)
     if country_match:
         out["country"] = country_match.group(2).strip()
 
@@ -36,12 +36,17 @@ def extract_entities(message: str) -> Dict[str, Any]:
             out["level"] = level
             break
 
-    if re.search(r"\bfully funded\b", text):
-        out["funding_type"] = "fully funded"
-    elif re.search(r"\b(partially funded|partial funding|partially)\b", text):
-        out["funding_type"] = "partially funded"
-    elif re.search(r"\b(self funded|self-funding|self funding)\b", text):
-        out["funding_type"] = "self funded"
+    funding_patterns = [
+        ("fully funded", r"\b(fully funded|full funding|full scholarship|fully funded scholarship)\b"),
+        ("partially funded", r"\b(partially funded|partial funding|partial scholarship|partially funded scholarship)\b"),
+        ("tuition waiver", r"\b(tuition waiver|tuition covered|tuition waiver scholarship)\b"),
+        ("funded", r"\b(funded|funding)\b"),
+    ]
+
+    for funding_type, pattern in funding_patterns:
+        if re.search(pattern, text):
+            out["funding_type"] = funding_type
+            break
 
     if out["funding_type"] and re.search(r"\b(only|just|strictly)\b", text):
         out["strict_funding"] = True
