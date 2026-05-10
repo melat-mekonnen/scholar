@@ -1,6 +1,10 @@
 const axios = require("axios");
+const cheerio = require("cheerio");
 const { DiscoveryRepository } = require("../repositories/DiscoveryRepository");
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { enrichScholarshipData } = require("./aiEnrichmentService");
+const { buildScholarshipEmbeddingText, getTextEmbedding } = require("./embeddingService");
+const { detectDuplicateScholarship } = require("./duplicateDetectionService");
 
 const discoveryRepo = new DiscoveryRepository();
 const scholarshipRepo = new ScholarshipRepository();
@@ -121,24 +125,56 @@ function extractFromText({ html, fallbackTitle, pageUrl }) {
     return { isScholarship: false };
   }
 
-  const titleMatch = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html || "");
-  const title = normalizeWhitespace(titleMatch?.[1] || fallbackTitle || "Scholarship opportunity");
+  const $ = cheerio.load(html || "");
+  const title = normalizeWhitespace(
+    $("head title").text() || $("h1").first().text() || fallbackTitle || "Scholarship opportunity"
+  );
+  const description = normalizeWhitespace(
+    $("meta[name='description']").attr("content") || $("meta[property='og:description']").attr("content") || text.slice(0, 1600)
+  );
   const deadline = parseDateCandidate(DEADLINE_PATTERN.exec(text)?.[1] || "");
+  const degreeLevel = (() => {
+    const match = /\b(high school|bachelor(?:'s)?|undergraduate|master(?:'s)?|postgraduate|phd|doctoral)\b/i.exec(text);
+    return match ? match[1].toLowerCase().replace(/\bundergraduate\b/, "bachelor") : null;
+  })();
   const fundingType = /\bfully funded\b/i.test(text)
     ? "fully funded"
     : /\b(partial|partially funded)\b/i.test(text)
       ? "partial funding"
       : /\btuition waiver\b/i.test(text)
         ? "tuition waiver"
-        : "financial support";
-  const eligibilitySentence = (text.match(/[^.]*\b(eligibility|eligible|requirements?)\b[^.]*\./i) || [])[0] || "";
+        : /\b(grant|scholarship|fellowship|financial aid)\b/i.test(text)
+          ? "financial support"
+          : null;
+
+  const eligibleCountries = Array.from(
+    new Set(
+      Array.from(text.matchAll(/\b(?!any\b)(?:international|global|usa|united states|canada|uk|united kingdom|germany|france|australia|japan|singapore|europe|china|india|brazil|south africa)\b/gi)).map((m) => m[0])
+    )
+  );
+
+  const eligibleFields = Array.from(
+    new Set(
+      Array.from(text.matchAll(/\b(computer science|engineering|business|law|medicine|arts|social sciences|economics|math(?:ematics)?|science|education)\b/gi)).map((m) => m[0])
+    )
+  );
+
+  const gpaRequirements = normalizeWhitespace((text.match(/(gpa\s*(?:of)?\s*(?:[:>=]|is)?\s*[0-4](?:\.[0-9])?)/i) || [])[1] || "");
+  const englishRequirements = normalizeWhitespace((text.match(/\b(ielts|toefl|pte|duolingo)\b[^\.]{0,80}/i) || [])[0] || "");
+  const eligibilitySnippet = normalizeWhitespace((text.match(/[^.]*\b(eligibility|eligible|requirements?)\b[^.]*\./i) || [])[0] || "");
 
   return {
     isScholarship: true,
     title,
     deadline,
     fundingType,
-    eligibilitySnippet: normalizeWhitespace(eligibilitySentence),
+    degreeLevel,
+    fieldOfStudy: eligibleFields.length ? eligibleFields[0] : null,
+    eligibleCountries,
+    eligibleFields,
+    gpaRequirements: gpaRequirements || null,
+    englishRequirements: englishRequirements || null,
+    eligibilitySnippet,
     organizationName: (() => {
       try {
         return new URL(pageUrl).hostname.replace(/^www\./, "");
@@ -146,8 +182,9 @@ function extractFromText({ html, fallbackTitle, pageUrl }) {
         return null;
       }
     })(),
-    description: text.slice(0, 1500),
+    description,
     country: pickCountry(text),
+    applicationUrl: pageUrl,
   };
 }
 
@@ -157,13 +194,18 @@ async function collectSignals() {
 
   for (const source of sources) {
     try {
-      const { data } = await axios.get(source.source_url, {
+      const { data } = await axios.get(source.url, {
         timeout: 15000,
         responseType: "text",
         headers: { "User-Agent": "ScholarDiscoveryBot/1.0 (+scholar-backend)" },
       });
 
-      const items = source.source_type === "sitemap" ? parseSitemap(String(data || "")) : parseRss(String(data || ""));
+      const items = source.source_type === "sitemap"
+        ? parseSitemap(String(data || ""))
+        : source.source_type === "rss"
+          ? parseRss(String(data || ""))
+          : [{ title: source.name, link: source.url, publishedAt: null }];
+
       for (const item of items) {
         const inserted = await discoveryRepo.saveRawItem({
           sourceId: source.id,
@@ -208,30 +250,90 @@ async function processSignals({ limit = 25 } = {}) {
       }
 
       const verification = scoreCandidate({
-        sourceDomain: String(row.domain || "").toLowerCase(),
+        sourceDomain: String(new URL(row.source_url || row.item_url).hostname || "").toLowerCase(),
         text: extracted.description,
         pageUrl: row.item_url,
         deadline: extracted.deadline,
         eligibilitySnippet: extracted.eligibilitySnippet,
       });
 
+      const enrichment = await enrichScholarshipData({
+        title: extracted.title,
+        description: extracted.description,
+        country: extracted.country,
+        degreeLevel: extracted.degreeLevel,
+        fieldOfStudy: extracted.fieldOfStudy,
+        fundingType: extracted.fundingType,
+        eligibleCountries: extracted.eligibleCountries,
+        eligibleFields: extracted.eligibleFields,
+        gpaRequirements: extracted.gpaRequirements,
+        englishRequirements: extracted.englishRequirements,
+        sourceType: row.source_type,
+      });
+
+      const embedding = await getTextEmbedding(
+        buildScholarshipEmbeddingText({
+          title: extracted.title,
+          description: extracted.description,
+          funding_type: extracted.fundingType,
+          country: extracted.country,
+          degree_level: extracted.degreeLevel,
+          field_of_study: extracted.fieldOfStudy,
+          organization_name: extracted.organizationName,
+        })
+      );
+
+      const duplicateCheck = await detectDuplicateScholarship({
+        title: extracted.title,
+        organizationName: extracted.organizationName,
+        applicationUrl: row.item_url,
+        sourceUrl: row.item_url,
+        deadline: extracted.deadline,
+        embedding,
+      });
+
       await scholarshipRepo.upsertDiscoveredScholarship({
         title: extracted.title,
         country: extracted.country || "International",
-        degreeLevel: null,
-        fieldOfStudy: null,
+        degreeLevel: extracted.degreeLevel,
+        fieldOfStudy: extracted.fieldOfStudy,
         fundingType: extracted.fundingType,
         deadline: extracted.deadline,
         amount: null,
         description: `${extracted.description}\n\nVerification: score=${verification.score}, risk=${verification.risk}, flags=${JSON.stringify(verification.flags)}`,
         applicationUrl: row.item_url,
+        sourceId: row.source_id,
         sourceName: row.source_name || "Auto discovery",
         sourceUrl: row.item_url,
         externalId: row.id,
         aiConfidence: verification.probability,
+        extractionConfidence: Math.min(
+          1,
+          Math.max(
+            0,
+            (verification.score / 100) +
+              (Array.isArray(extracted.eligibleCountries) && extracted.eligibleCountries.length ? 0.1 : 0) +
+              (Array.isArray(extracted.eligibleFields) && extracted.eligibleFields.length ? 0.1 : 0)
+          )
+        ),
+        normalizedTags: enrichment.normalizedTags,
+        fundingClassification: enrichment.fundingClassification,
+        eligibilityHints: enrichment.eligibilityHints,
+        eligibleCountries: extracted.eligibleCountries,
+        eligibleFields: extracted.eligibleFields,
+        gpaRequirements: extracted.gpaRequirements,
+        englishRequirements: extracted.englishRequirements,
+        extractionMetadata: {
+          sourceType: row.source_type,
+          trustScore: row.trust_score,
+          payload: row.payload,
+        },
+        duplicateMetadata: duplicateCheck,
+        embedding,
       });
 
       await discoveryRepo.markRawItemProcessed(row.id);
+      await discoveryRepo.touchSource(row.source_id);
       summary.processed += 1;
       summary.candidates += 1;
     } catch (err) {
@@ -253,5 +355,6 @@ module.exports = {
   runDiscoveryPipeline,
   collectSignals,
   processSignals,
+  extractFromText,
 };
 

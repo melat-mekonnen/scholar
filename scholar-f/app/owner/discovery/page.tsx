@@ -1,65 +1,51 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Network, Activity, FileWarning, SearchX } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Network, Activity, FileWarning, SearchX } from "lucide-react";
 
-import { OwnerSidebar } from "@/components/layout/owner-sidebar"
-import { PageHeader } from "@/components/layout/page-header"
-import { PageLayout } from "@/components/layout/page-layout"
-import { DashboardCard } from "@/components/ui/dashboard-card"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DataTable } from "@/components/ui/data-table"
+import { PageHeader } from "@/components/layout/page-header";
+import { PageLayout } from "@/components/layout/page-layout";
+import { DashboardCard } from "@/components/ui/dashboard-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 
-import { useAuth } from "@/hooks/use-auth"
-import { clearToken } from "@/lib/auth"
-import { mockOwnerData } from "@/lib/mock-owner-data"
+import { mockOwnerData } from "@/lib/mock-owner-data";
 
 export default function OwnerDiscoveryPage() {
-  const router = useRouter()
-  const { user, loading: authLoading, isAuthenticated } = useAuth()
-  
-  const [isDataLoading, setIsDataLoading] = useState(false)
-
-  const isOwner = user?.role === "owner"
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
       if (!isAuthenticated) {
-        clearToken()
-        router.replace("/signin")
-        return
+        clearToken();
+        router.replace("/signin");
+        return;
       }
       if (!isOwner) {
-        router.replace("/unauthorized")
-        return
+        router.replace("/unauthorized");
+        return;
       }
     }
-  }, [authLoading, isAuthenticated, isOwner, router])
+  }, [authLoading, isAuthenticated, isOwner]);
 
-  if (authLoading || !isAuthenticated || !isOwner) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const { pipelineActivity } = mockOwnerData
+  const { pipelineActivity } = mockOwnerData;
 
   const columns = [
     {
       key: "date",
       header: "Date",
-      render: (val: string) => <span className="font-medium">{new Date(val).toLocaleDateString()}</span>,
+      render: (val: string) => (
+        <span className="font-medium">
+          {new Date(val).toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: "discovered",
       header: "Newly Discovered",
-      render: (val: number) => <span className="text-blue-600 font-semibold">+{val}</span>,
+      render: (val: number) => (
+        <span className="text-blue-600 font-semibold">+{val}</span>
+      ),
     },
     {
       key: "duplicates",
@@ -75,12 +61,10 @@ export default function OwnerDiscoveryPage() {
         </span>
       ),
     },
-  ]
+  ];
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <OwnerSidebar />
-
+    <main className="bg-background overflow-y-auto">
       <div className="flex-1">
         <PageHeader
           title="Discovery Pipeline"
@@ -118,9 +102,9 @@ export default function OwnerDiscoveryPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
-                <DataTable 
-                  columns={columns} 
-                  data={pipelineActivity} 
+                <DataTable
+                  columns={columns}
+                  data={pipelineActivity}
                   loading={isDataLoading}
                   emptyMessage="No activity logs found."
                 />
@@ -129,6 +113,6 @@ export default function OwnerDiscoveryPage() {
           </main>
         </PageLayout>
       </div>
-    </div>
-  )
+    </main>
+  );
 }

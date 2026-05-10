@@ -1,16 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Building2, Search, Plus } from "lucide-react"
+import { useEffect } from "react";
+import { Building2, Search, Plus } from "lucide-react";
 
-import { OwnerSidebar } from "@/components/layout/owner-sidebar"
-import { PageHeader } from "@/components/layout/page-header"
-import { PageLayout } from "@/components/layout/page-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { PageHeader } from "@/components/layout/page-header";
+import { PageLayout } from "@/components/layout/page-layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -18,49 +16,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { useAuth } from "@/hooks/use-auth"
-import { clearToken } from "@/lib/auth"
-import { mockOwnerData } from "@/lib/mock-owner-data"
+import { mockOwnerData } from "@/lib/mock-owner-data";
 
 export default function OwnerPartnersPage() {
-  const router = useRouter()
-  const { user, loading: authLoading, isAuthenticated } = useAuth()
-  
-  const isOwner = user?.role === "owner"
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (!isAuthenticated) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (!isOwner) {
-        router.replace("/unauthorized")
-        return
-      }
-    }
-  }, [authLoading, isAuthenticated, isOwner, router])
-
-  if (authLoading || !isAuthenticated || !isOwner) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const { universityPartners } = mockOwnerData
+  const { universityPartners } = mockOwnerData;
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <OwnerSidebar />
-
+    <main className="bg-background overflow-y-auto">
       <div className="flex-1">
         <PageHeader
           title="University Partners"
@@ -82,7 +46,10 @@ export default function OwnerPartnersPage() {
                 </CardTitle>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search partners..." className="w-64 pl-8" />
+                  <Input
+                    placeholder="Search partners..."
+                    className="w-64 pl-8"
+                  />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
@@ -100,16 +67,24 @@ export default function OwnerPartnersPage() {
                     <TableBody>
                       {universityPartners.map((p) => (
                         <TableRow key={p.id}>
-                          <TableCell className="font-medium text-primary">{p.name}</TableCell>
+                          <TableCell className="font-medium text-primary">
+                            {p.name}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={p.status === 'active' ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={
+                                p.status === "active" ? "default" : "secondary"
+                              }
+                            >
                               {p.status}
                             </Badge>
                           </TableCell>
                           <TableCell>{p.campaigns}</TableCell>
                           <TableCell>{p.submissions}</TableCell>
                           <TableCell className="text-right">
-                            <Button size="sm" variant="outline">Manage</Button>
+                            <Button size="sm" variant="outline">
+                              Manage
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -121,6 +96,6 @@ export default function OwnerPartnersPage() {
           </main>
         </PageLayout>
       </div>
-    </div>
-  )
+    </main>
+  );
 }

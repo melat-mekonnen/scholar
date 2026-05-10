@@ -1,5 +1,6 @@
 const { BookmarkRepository } = require("../repositories/BookmarkRepository");
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { checkBookmarkAccess } = require("../services/subscriptionService");
 
 const bookmarkRepo = new BookmarkRepository();
 const scholarshipRepo = new ScholarshipRepository();
@@ -38,6 +39,14 @@ async function addBookmark(req, res, next) {
       const err = new Error("Scholarship not found");
       err.statusCode = 404;
       throw err;
+    }
+
+    const bookmarkAccess = await checkBookmarkAccess(req.user.id);
+    if (!bookmarkAccess.canSave) {
+      return res.status(402).json({
+        message:
+          "Free plan saved scholarship limit reached. Upgrade to Premium for unlimited saved scholarships.",
+      });
     }
 
     try {

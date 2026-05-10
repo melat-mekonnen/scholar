@@ -5,7 +5,7 @@ export function getPostAuthPath(role: string | undefined): string {
       return "/admin"
     case "owner":
       return "/owner"
-    case "university_representative":
+    case "manager":
       return "/manager"
     case "student":
       return "/dashboard"

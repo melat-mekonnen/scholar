@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -10,9 +11,56 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL DEFAULT 'student'
     CHECK (role IN ('student', 'manager', 'owner', 'admin')),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  plan_type TEXT NOT NULL DEFAULT 'free' CHECK (plan_type IN ('free', 'premium')),
+  ai_requests_today INTEGER NOT NULL DEFAULT 0,
+  ai_requests_reset_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  subscription_status TEXT NOT NULL DEFAULT 'active' CHECK (subscription_status IN ('active', 'paused', 'cancelled')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS scholarship_sources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  url TEXT NOT NULL UNIQUE,
+  source_type TEXT NOT NULL CHECK (source_type IN ('rss', 'sitemap', 'page', 'api')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected')),
+  trust_score DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  last_crawled_at TIMESTAMPTZ,
+  created_by UUID REFERENCES users (id),
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS scholarship_discovery_sources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source_name TEXT NOT NULL,
+  source_type TEXT NOT NULL CHECK (source_type IN ('rss', 'sitemap')),
+  source_url TEXT NOT NULL UNIQUE,
+  organization_name TEXT,
+  domain TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  last_fetched_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS scholarship_discovery_raw_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source_id UUID NOT NULL REFERENCES scholarship_discovery_sources (id) ON DELETE CASCADE,
+  item_title TEXT,
+  item_url TEXT NOT NULL UNIQUE,
+  published_at DATE,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  collected_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  processed_at TIMESTAMPTZ,
+  process_error TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_scholarship_discovery_sources_url ON scholarship_discovery_sources (source_url);
+CREATE INDEX IF NOT EXISTS idx_scholarship_discovery_raw_items_unprocessed ON scholarship_discovery_raw_items (processed_at, collected_at);
 
 CREATE TABLE IF NOT EXISTS scholarships (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -26,12 +74,24 @@ CREATE TABLE IF NOT EXISTS scholarships (
   funding_type TEXT,
   field_of_study TEXT,
   amount TEXT,
+  embedding vector(1536),
   description TEXT,
   application_url TEXT,
+  source_id UUID REFERENCES scholarship_sources (id),
   source_name TEXT,
   source_url TEXT,
   external_id TEXT,
   ai_confidence DOUBLE PRECISION,
+  extraction_confidence DOUBLE PRECISION,
+  normalized_tags TEXT[] NOT NULL DEFAULT '{}',
+  funding_classification TEXT,
+  eligibility_hints TEXT,
+  eligible_countries TEXT[] NOT NULL DEFAULT '{}',
+  eligible_fields TEXT[] NOT NULL DEFAULT '{}',
+  gpa_requirements TEXT,
+  english_requirements TEXT,
+  extraction_metadata JSONB,
+  duplicate_metadata JSONB,
   discovered_at TIMESTAMPTZ,
   posted_by_user_id UUID REFERENCES users (id),
   rejection_reason TEXT,

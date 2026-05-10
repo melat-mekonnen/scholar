@@ -4,6 +4,24 @@ async function main() {
   await query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`, []);
 
   await query(
+    `CREATE TABLE IF NOT EXISTS scholarship_sources (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       name TEXT NOT NULL,
+       url TEXT NOT NULL UNIQUE,
+       source_type TEXT NOT NULL CHECK (source_type IN ('rss', 'sitemap', 'page', 'api')),
+       status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected')),
+       trust_score DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+       is_active BOOLEAN NOT NULL DEFAULT TRUE,
+       last_crawled_at TIMESTAMPTZ,
+       created_by UUID REFERENCES users (id),
+       metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+     )`,
+    [],
+  );
+
+  await query(
     `CREATE TABLE IF NOT EXISTS scholarship_discovery_sources (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        source_name TEXT NOT NULL,

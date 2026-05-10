@@ -18,7 +18,9 @@ const applicationsRoutes = require("./routes/applications.routes");
 const communityRoutes = require("./routes/community.routes");
 const recommendationsRoutes = require("./routes/recommendations.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
+const premiumRoutes = require("./routes/premium.routes");
 const { errorHandler } = require("./middleware/errorHandler");
+const { tracingMiddleware } = require("./middleware/tracing.middleware");
 
 const app = express();
 
@@ -29,7 +31,14 @@ app.use(
     credentials: true,
   })
 );
-app.use(morgan("dev"));
+
+app.use(tracingMiddleware);
+
+morgan.token('id', function getId(req) {
+  return req.id;
+});
+app.use(morgan(':id :method :url :status :res[content-length] - :response-time ms'));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -52,6 +61,7 @@ app.use("/api/applications", applicationsRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
 app.use("/api/discovery", discoveryRoutes);
+app.use("/api/premium", premiumRoutes);
 
 app.use(errorHandler);
 

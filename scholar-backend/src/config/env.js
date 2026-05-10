@@ -33,6 +33,7 @@ const env = {
   discoveryCronEnabled: optional("DISCOVERY_CRON_ENABLED", "true") === "true",
   discoveryCronExpression: optional("DISCOVERY_CRON_EXPRESSION", "0 */6 * * *"),
   discoveryProcessBatchSize: parseInt(optional("DISCOVERY_PROCESS_BATCH_SIZE", "25"), 10),
+  openAiApiKey: optional("OPENAI_API_KEY", ""),
 };
 
 module.exports = { env };

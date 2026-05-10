@@ -1,18 +1,22 @@
 const { query } = require("../infra/db/neonClient");
 
+const userSelectColumns = `
+  id, full_name, email, password_hash, google_id, auth_provider, role, is_active,
+  plan_type, ai_requests_today, ai_requests_reset_at, subscription_status
+`;
+
 class UserRepository {
   async findByEmail(email) {
     const result = await query(
-      "SELECT id, full_name, email, password_hash, google_id, auth_provider, role, is_active FROM users WHERE email = $1 LIMIT 1",
+      `SELECT ${userSelectColumns} FROM users WHERE email = $1 LIMIT 1`,
       [email]
-      
     );
     return result.rows[0] || null;
   }
 
   async findById(id) {
     const result = await query(
-      "SELECT id, full_name, email, password_hash, google_id, auth_provider, role, is_active FROM users WHERE id = $1 LIMIT 1",
+      `SELECT ${userSelectColumns} FROM users WHERE id = $1 LIMIT 1`,
       [id]
     );
     return result.rows[0] || null;
@@ -20,7 +24,7 @@ class UserRepository {
 
   async findByGoogleId(googleId) {
     const result = await query(
-      "SELECT id, full_name, email, password_hash, google_id, auth_provider, role, is_active FROM users WHERE google_id = $1 LIMIT 1",
+      `SELECT ${userSelectColumns} FROM users WHERE google_id = $1 LIMIT 1`,
       [googleId]
     );
     return result.rows[0] || null;
@@ -30,7 +34,7 @@ class UserRepository {
     const result = await query(
       `INSERT INTO users (full_name, email, password_hash, auth_provider, role, is_active)
        VALUES ($1, $2, $3, 'local', 'student', TRUE)
-       RETURNING id, full_name, email, google_id, auth_provider, role, is_active`,
+       RETURNING ${userSelectColumns}`,
       [fullName, email.toLowerCase(), passwordHash]
     );
     return result.rows[0];
@@ -42,7 +46,7 @@ class UserRepository {
        VALUES ($1, $2, $3, 'google', 'student', TRUE)
        ON CONFLICT (google_id)
        DO UPDATE SET full_name = EXCLUDED.full_name, email = EXCLUDED.email
-       RETURNING id, full_name, email, google_id, auth_provider, role, is_active`,
+       RETURNING ${userSelectColumns}`,
       [googleId, fullName, email.toLowerCase()]
     );
     return result.rows[0];
@@ -58,7 +62,7 @@ class UserRepository {
            is_active = TRUE,
            updated_at = NOW()
        WHERE google_id = $1
-       RETURNING id, full_name, email, google_id, auth_provider, role, is_active`,
+       RETURNING ${userSelectColumns}`,
       [googleId, fullName, email.toLowerCase()],
     );
     return result.rows[0] || null;
@@ -74,7 +78,7 @@ class UserRepository {
            is_active = TRUE,
            updated_at = NOW()
        WHERE email = $3
-       RETURNING id, full_name, email, google_id, auth_provider, role, is_active`,
+       RETURNING ${userSelectColumns}`,
       [googleId, fullName, email.toLowerCase()],
     );
     return result.rows[0] || null;
@@ -207,6 +211,24 @@ class UserRepository {
 
   async deletePasswordResetTokensByUser(userId) {
     await query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);
+  }
+
+  async incrementAiRequests(userId) {
+    const result = await query(
+      `UPDATE users
+       SET ai_requests_today = CASE
+         WHEN COALESCE(ai_requests_reset_at, NOW()) <= NOW() THEN 1
+         ELSE ai_requests_today + 1
+       END,
+       ai_requests_reset_at = CASE
+         WHEN COALESCE(ai_requests_reset_at, NOW()) <= NOW() THEN NOW() + INTERVAL '1 day'
+         ELSE ai_requests_reset_at
+       END
+       WHERE id = $1
+       RETURNING ${userSelectColumns}`,
+      [userId]
+    );
+    return result.rows[0] || null;
   }
 }
 

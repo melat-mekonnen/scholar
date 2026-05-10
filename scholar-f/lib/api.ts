@@ -45,8 +45,13 @@ export async function apiFetchJson<T>(
 ): Promise<{ res: Response; data: T | null; errorMessage: string | null }> {
   const res = await apiFetch(path, init)
   const data = (await parseJsonSafe(res)) as T | null
-  const errorMessage =
+  let errorMessage =
     res.ok ? null : (data as any)?.message ?? res.statusText ?? "Request failed"
+  
+  if (errorMessage && res.headers.has("x-request-id")) {
+    errorMessage += ` [Trace: ${res.headers.get("x-request-id")}]`;
+  }
+  
   return { res, data, errorMessage }
 }
 

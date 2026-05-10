@@ -4,72 +4,47 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { apiFetchJson } from "@/lib/api";
-import { clearToken } from "@/lib/auth";
-import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminCandidatesPage() {
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
-
-  // Check if user has admin role
-  const isAdmin = user?.role === "admin";
-
-  // Redirect if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading) {
-      if (!isAuthenticated) {
-        clearToken();
-        router.replace("/signin");
-        return;
-      }
-      if (!isAdmin) {
-        // Redirect students to their dashboard
-        router.replace("/unauthorized");
-        return;
-      }
-    }
-  }, [authLoading, isAuthenticated, isAdmin, router]);
-
-  // Don't render anything while checking authentication
-  if (authLoading || !isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadCandidates() {
       setLoading(true);
-      const { res, data } = await apiFetchJson<{ candidates: any[] }>(
-        "/api/admin/candidates",
-        {
+      setError(null);
+
+      try {
+        const { res, data, errorMessage } = await apiFetchJson<{
+          candidates: any[];
+        }>("/api/admin/candidates", {
           method: "GET",
-        },
-      );
+        });
 
-      if (res.status === 401 || res.status === 403) {
-        console.log("Admin access denied");
-        // Since we check roles upfront, this shouldn't happen, but handle gracefully
-        router.replace("/unauthorized");
-        return;
-      }
+        if (res.status === 401 || res.status === 403) {
+          console.log("Admin access denied");
+          router.replace("/unauthorized");
+          return;
+        }
 
-      if (res.ok && data) {
+        if (!res.ok || !data) {
+          throw new Error(errorMessage || "Failed to load candidates");
+        }
+
         setCandidates(data.candidates || []);
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Failed to load candidates",
+        );
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
-    loadCandidates();
+    void loadCandidates();
   }, [router]);
 
   return (
@@ -81,6 +56,12 @@ export default function AdminCandidatesPage() {
             Review scholarship discovery candidates.
           </p>
         </header>
+
+        {error ? (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
+            {error}
+          </div>
+        ) : null}
 
         <Card>
           <CardHeader>

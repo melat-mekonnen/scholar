@@ -1,4 +1,6 @@
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { StudentProfileRepository } = require("../repositories/StudentProfileRepository");
+const { searchScholarships } = require("../usecases/recommendations/vectorSearch");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
 const {
   initialStatusForCreator,
@@ -8,6 +10,7 @@ const {
 } = require("../usecases/scholarships/scholarshipCrudRules");
 
 const repo = new ScholarshipRepository();
+const profileRepo = new StudentProfileRepository();
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -173,7 +176,12 @@ async function search(req, res, next) {
     const bookmarkUserId = getBookmarkUserId(req);
 
     const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
-    const result = await repo.searchPublic({
+    let studentProfile = null;
+    if (req.user && req.user.role === "student") {
+      studentProfile = await profileRepo.findByUserId(req.user.id);
+    }
+
+    const result = await searchScholarships({
       q,
       countries,
       degreeLevels,
@@ -186,6 +194,7 @@ async function search(req, res, next) {
       limit: parsedLimit,
       status: isPrivileged ? status : undefined,
       bookmarkUserId,
+      studentProfile,
     });
 
     return res.json({
@@ -204,6 +213,10 @@ async function search(req, res, next) {
         bookmarkCount: r.bookmark_count,
         is_bookmarked: Boolean(r.is_bookmarked),
         isBookmarked: Boolean(r.is_bookmarked),
+        semanticScore: typeof r.semanticScore === "number" ? r.semanticScore : 0,
+        finalScore: typeof r.finalScore === "number" ? r.finalScore : 0,
+        rankingReasons: Array.isArray(r.rankingReasons) ? r.rankingReasons : [],
+        eligibility: r.eligibility || null,
       })),
       total: result.total,
       page: result.page,

@@ -39,6 +39,8 @@ function authMiddleware(req, res, next) {
       email: payload.email,
       fullName: payload.fullName,
       role: payload.role,
+      planType: payload.planType || "free",
+      subscriptionStatus: payload.subscriptionStatus || "active",
     };
     return next();
   } catch (err) {

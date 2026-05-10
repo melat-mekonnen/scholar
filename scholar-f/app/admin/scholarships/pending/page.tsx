@@ -20,6 +20,7 @@ import {
 import { apiFetchJson } from "@/lib/api";
 import { clearToken } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 type VerificationStatus =
   | "draft"
@@ -48,6 +49,7 @@ type PendingResponse = {
 export default function PendingScholarshipsPage() {
   const router = useRouter();
   const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   // All hooks must be called before any conditional returns
   const [scholarships, setScholarships] = useState<PendingScholarship[]>([]);
@@ -78,19 +80,9 @@ export default function PendingScholarshipsPage() {
     }
   }, [authLoading, isAuthenticated, isAdmin, router]);
 
-  // Don't render anything while checking authentication
-  if (authLoading || !isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    if (authLoading || !isAuthenticated || !isAdmin) return;
+
     async function load() {
       const currentRequestId = ++requestIdRef.current;
 
@@ -137,7 +129,19 @@ export default function PendingScholarshipsPage() {
     }
 
     load();
-  }, [router, trimmedSearch]);
+  }, [authLoading, isAuthenticated, isAdmin, router, trimmedSearch]);
+
+  // Don't render anything while checking authentication
+  if (authLoading || !isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   async function quickApprove(id: string) {
     setError(null);
@@ -149,14 +153,25 @@ export default function PendingScholarshipsPage() {
         { method: "PUT" },
       );
 
-      if (!res.ok)
+      if (!res.ok) {
         throw new Error(errorMessage || "Failed to approve scholarship");
+      }
 
       setScholarships((prev) => prev.filter((s) => s.id !== id));
+      toast({
+        title: "Scholarship approved",
+        description:
+          "Scholarship has been verified and removed from the pending queue.",
+      });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to approve scholarship",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to approve scholarship";
+      setError(message);
+      toast({
+        title: "Approval failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setMutatingIds((prev) => ({ ...prev, [id]: false }));
     }
@@ -172,14 +187,25 @@ export default function PendingScholarshipsPage() {
         { method: "PUT" },
       );
 
-      if (!res.ok)
+      if (!res.ok) {
         throw new Error(errorMessage || "Failed to reject scholarship");
+      }
 
       setScholarships((prev) => prev.filter((s) => s.id !== id));
+      toast({
+        title: "Scholarship rejected",
+        description:
+          "Scholarship has been rejected and removed from the pending queue.",
+      });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to reject scholarship",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to reject scholarship";
+      setError(message);
+      toast({
+        title: "Rejection failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setMutatingIds((prev) => ({ ...prev, [id]: false }));
     }

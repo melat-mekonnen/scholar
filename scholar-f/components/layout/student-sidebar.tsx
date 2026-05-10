@@ -9,10 +9,14 @@ import {
   User,
   Settings,
   LogOut,
+  Sparkles,
+  CreditCard,
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useRouter } from "next/navigation";
 import { clearToken } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
+import { PremiumBadge } from "@/components/premium/premium-badge";
 
 interface StudentSidebarProps {
   className?: string;
@@ -20,6 +24,7 @@ interface StudentSidebarProps {
 
 export function StudentSidebar({ className }: StudentSidebarProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleSignOut = () => {
     clearToken();
@@ -33,6 +38,11 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
           href: "/dashboard",
           label: "Dashboard",
           icon: <LayoutDashboard className="h-4 w-4" />,
+        },
+        {
+          href: "/recommendations",
+          label: "AI Recommendations",
+          icon: <Sparkles className="h-4 w-4" />,
         },
         {
           href: "/scholarships",
@@ -69,6 +79,11 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
           icon: <Settings className="h-4 w-4" />,
         },
         {
+          href: "/pricing",
+          label: "Pricing & Plans",
+          icon: <CreditCard className="h-4 w-4" />,
+        },
+        {
           href: "/documents",
           label: "Document Resources",
           icon: <FileText className="h-4 w-4" />,
@@ -92,6 +107,9 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
       brand={{
         name: "Scholarship Portal",
         logo: <LayoutDashboard className="h-5 w-5" />,
+        badge: user ? (
+          <PremiumBadge planType={user.planType} size="sm" />
+        ) : null,
       }}
       sections={sections}
       footer={footer}

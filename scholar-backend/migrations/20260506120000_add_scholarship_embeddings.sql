@@ -1,0 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+ALTER TABLE scholarships
+  ADD COLUMN IF NOT EXISTS embedding vector(1536);

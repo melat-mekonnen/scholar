@@ -1,126 +1,167 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { apiFetchJson } from "@/lib/api";
+import { clearToken } from "@/lib/auth";
 
-type VerificationStatus = "draft" | "pending" | "verified" | "rejected" | "expired"
+type VerificationStatus =
+  | "draft"
+  | "pending"
+  | "verified"
+  | "rejected"
+  | "expired";
 
 type ScholarshipDetail = {
-  id: string
-  title: string
-  country: string
-  degreeLevel: "high_school" | "bachelor" | "master" | "phd"
-  status: VerificationStatus
-  deadline: string
-  fundingType?: string
-  fieldOfStudy?: string
-  amount?: string
-  description?: string
-  sourceName?: string
-  sourceUrl?: string
-  aiConfidence?: number
-  discoveredAt?: string
-  createdAt?: string
-  updatedAt?: string
+  id: string;
+  title: string;
+  country: string;
+  degreeLevel: "high_school" | "bachelor" | "master" | "phd";
+  status: VerificationStatus;
+  deadline: string;
+  fundingType?: string;
+  fieldOfStudy?: string;
+  amount?: string;
+  description?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  aiConfidence?: number;
+  discoveredAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
   postedBy?: {
-    id: string
-    fullName: string
-    email: string
-  }
-}
+    id: string;
+    fullName: string;
+    email: string;
+  };
+};
 
 export default function ScholarshipReviewPage() {
-  const router = useRouter()
-  const params = useParams<{ id: string }>()
-  const id = params.id
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
 
-  const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null)
-  const [reason, setReason] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(
+    null,
+  );
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     async function load() {
-      setError(null)
+      setError(null);
       const { res, data, errorMessage } = await apiFetchJson<ScholarshipDetail>(
         `/api/admin/scholarships/${id}`,
         { method: "GET" },
-      )
+      );
 
       if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
+        clearToken();
+        router.replace("/signin");
+        return;
       }
 
       if (!res.ok || !data) {
-        setError(errorMessage || "Failed to load scholarship")
-        return
+        setError(errorMessage || "Failed to load scholarship");
+        return;
       }
 
-      setScholarship(data)
+      setScholarship(data);
     }
-    load()
-  }, [id, router])
+    load();
+  }, [id, router]);
 
   function renderStatusBadge(status: VerificationStatus) {
     switch (status) {
       case "verified":
-        return <Badge variant="default">Verified</Badge>
+        return <Badge variant="default">Verified</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>
+        return <Badge variant="destructive">Rejected</Badge>;
       case "expired":
-        return <Badge variant="secondary">Expired</Badge>
+        return <Badge variant="secondary">Expired</Badge>;
       case "draft":
-        return <Badge variant="outline">Draft</Badge>
+        return <Badge variant="outline">Draft</Badge>;
       case "pending":
       default:
-        return <Badge variant="outline">Pending</Badge>
+        return <Badge variant="outline">Pending</Badge>;
     }
   }
 
+  const { toast } = useToast();
+
   async function handleApprove() {
-    if (!id) return
-    setLoading(true)
-    setError(null)
-    const { res, errorMessage } = await apiFetchJson(
-      `/api/admin/scholarships/${id}/verify`,
-      { method: "PUT" },
-    )
-    setLoading(false)
-    if (!res.ok) {
-      setError(errorMessage || "Failed to approve scholarship")
-      return
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { res, errorMessage } = await apiFetchJson(
+        `/api/admin/scholarships/${id}/verify`,
+        { method: "PUT" },
+      );
+      if (!res.ok) {
+        throw new Error(errorMessage || "Failed to approve scholarship");
+      }
+      toast({
+        title: "Scholarship approved",
+        description: "The scholarship has been verified successfully.",
+      });
+      router.push("/admin/scholarships/pending");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to approve scholarship";
+      setError(message);
+      toast({
+        title: "Approval failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    router.push("/admin/scholarships/pending")
   }
 
   async function handleReject() {
-    if (!id) return
-    setLoading(true)
-    setError(null)
-    const { res, errorMessage } = await apiFetchJson(
-      `/api/admin/scholarships/${id}/reject`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: reason.trim() ? JSON.stringify({ reason: reason.trim() }) : undefined,
-      },
-    )
-    setLoading(false)
-    if (!res.ok) {
-      setError(errorMessage || "Failed to reject scholarship")
-      return
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { res, errorMessage } = await apiFetchJson(
+        `/api/admin/scholarships/${id}/reject`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: reason.trim()
+            ? JSON.stringify({ reason: reason.trim() })
+            : undefined,
+        },
+      );
+      if (!res.ok) {
+        throw new Error(errorMessage || "Failed to reject scholarship");
+      }
+      toast({
+        title: "Scholarship rejected",
+        description: "The scholarship has been rejected successfully.",
+      });
+      router.push("/admin/scholarships/pending");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to reject scholarship";
+      setError(message);
+      toast({
+        title: "Rejection failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    router.push("/admin/scholarships/pending")
   }
 
   return (
@@ -130,7 +171,8 @@ export default function ScholarshipReviewPage() {
           <div>
             <h1 className="text-2xl font-bold">Scholarship Review</h1>
             <p className="text-sm text-muted-foreground">
-              Carefully review scholarship details before approving or rejecting.
+              Carefully review scholarship details before approving or
+              rejecting.
             </p>
           </div>
           <Button
@@ -141,12 +183,12 @@ export default function ScholarshipReviewPage() {
           </Button>
         </header>
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         {!scholarship ? (
-          <p className="text-sm text-muted-foreground">Loading scholarship...</p>
+          <p className="text-sm text-muted-foreground">
+            Loading scholarship...
+          </p>
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Main details */}
@@ -155,7 +197,9 @@ export default function ScholarshipReviewPage() {
                 <CardHeader className="space-y-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <CardTitle className="text-xl">{scholarship.title}</CardTitle>
+                      <CardTitle className="text-xl">
+                        {scholarship.title}
+                      </CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {scholarship.country} ·{" "}
                         {scholarship.degreeLevel.replace("_", " ")}
@@ -171,7 +215,9 @@ export default function ScholarshipReviewPage() {
                         <p className="text-xs text-muted-foreground uppercase tracking-wide">
                           Field of study
                         </p>
-                        <p className="font-medium">{scholarship.fieldOfStudy}</p>
+                        <p className="font-medium">
+                          {scholarship.fieldOfStudy}
+                        </p>
                       </div>
                     )}
                     {scholarship.fundingType && (
@@ -201,7 +247,9 @@ export default function ScholarshipReviewPage() {
                         <p className="text-xs text-muted-foreground uppercase tracking-wide">
                           AI confidence
                         </p>
-                        <p className="font-medium">{Math.round(scholarship.aiConfidence * 100)}%</p>
+                        <p className="font-medium">
+                          {Math.round(scholarship.aiConfidence * 100)}%
+                        </p>
                       </div>
                     )}
                   </div>
@@ -241,7 +289,9 @@ export default function ScholarshipReviewPage() {
                     <CardTitle className="text-sm">Posted by</CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-1">
-                    <p className="font-medium">{scholarship.postedBy.fullName}</p>
+                    <p className="font-medium">
+                      {scholarship.postedBy.fullName}
+                    </p>
                     <p className="text-muted-foreground">
                       {scholarship.postedBy.email}
                     </p>
@@ -254,12 +304,14 @@ export default function ScholarshipReviewPage() {
             <section className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Verification actions</CardTitle>
+                  <CardTitle className="text-sm">
+                    Verification actions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <p className="text-muted-foreground">
-                    Approve verified, high-quality scholarships. Reject those that do
-                    not meet platform standards.
+                    Approve verified, high-quality scholarships. Reject those
+                    that do not meet platform standards.
                   </p>
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -272,10 +324,7 @@ export default function ScholarshipReviewPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
-                    <Button
-                      disabled={loading}
-                      onClick={handleApprove}
-                    >
+                    <Button disabled={loading} onClick={handleApprove}>
                       Approve scholarship
                     </Button>
                     <Button
@@ -293,6 +342,5 @@ export default function ScholarshipReviewPage() {
         )}
       </div>
     </main>
-  )
+  );
 }
-

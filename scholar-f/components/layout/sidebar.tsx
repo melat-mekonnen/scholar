@@ -24,6 +24,7 @@ interface SidebarProps {
   brand?: {
     name: string;
     logo?: ReactNode;
+    badge?: ReactNode;
   };
   sections: SidebarSection[];
   footer?: ReactNode;
@@ -43,7 +44,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex h-full w-64 flex-col border-r bg-card",
+        "fixed left-0 top-0 h-screen w-64 flex flex-col border-r bg-card z-40",
         collapsed && "w-16",
         className,
       )}
@@ -57,7 +58,10 @@ export function Sidebar({
             </div>
           )}
           {!collapsed && (
-            <span className="ml-3 font-semibold text-lg">{brand.name}</span>
+            <div className="ml-3 flex-1">
+              <span className="font-semibold text-lg">{brand.name}</span>
+              {brand.badge && <div className="mt-1">{brand.badge}</div>}
+            </div>
           )}
         </div>
       )}

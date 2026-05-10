@@ -10,6 +10,10 @@ export type User = {
   fullName: string;
   email: string;
   role: string;
+  planType: "free" | "premium";
+  subscriptionStatus: "active" | "paused" | "cancelled";
+  aiRequestsToday: number;
+  aiRequestsResetAt: string;
 };
 
 export function useAuth() {
@@ -24,7 +28,14 @@ export function useAuth() {
         });
 
         if (res.ok && data) {
-          setUser(data);
+          setUser({
+            ...data,
+            planType: data.planType ?? "free",
+            subscriptionStatus: data.subscriptionStatus ?? "active",
+            aiRequestsToday: data.aiRequestsToday ?? 0,
+            aiRequestsResetAt:
+              data.aiRequestsResetAt ?? new Date().toISOString(),
+          });
         } else {
           setUser(null);
         }

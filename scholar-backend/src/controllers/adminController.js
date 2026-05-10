@@ -175,30 +175,34 @@ async function listDiscoverySources(req, res, next) {
 
 async function upsertDiscoverySource(req, res, next) {
   try {
-    const { sourceName, sourceType, sourceUrl, organizationName, domain, isActive } = req.body || {};
+    const { sourceName, sourceType, sourceUrl, status, trustScore, isActive, metadata } = req.body || {};
     if (!sourceName || !sourceType || !sourceUrl) {
       const err = new Error("sourceName, sourceType, and sourceUrl are required");
       err.statusCode = 400;
       throw err;
     }
-    if (!["rss", "sitemap"].includes(String(sourceType))) {
-      const err = new Error("sourceType must be either 'rss' or 'sitemap'");
+    if (!["rss", "sitemap", "page", "api"].includes(String(sourceType))) {
+      const err = new Error("sourceType must be one of 'rss', 'sitemap', 'page', or 'api'");
       err.statusCode = 400;
       throw err;
     }
 
     const source = await discoveryRepo.createSource({
-      sourceName: String(sourceName).trim(),
+      name: String(sourceName).trim(),
       sourceType: String(sourceType).trim(),
-      sourceUrl: String(sourceUrl).trim(),
-      organizationName: organizationName ? String(organizationName).trim() : null,
-      domain: domain ? String(domain).trim().toLowerCase() : null,
+      url: String(sourceUrl).trim(),
+      status: status ? String(status).trim() : "pending",
+      trustScore: trustScore != null ? Number(trustScore) : 0.5,
       isActive: isActive == null ? true : Boolean(isActive),
+      createdBy: req.user?.id || null,
+      metadata: typeof metadata === "object" && metadata !== null ? metadata : {},
     });
 
-    await logAdminAction(req.user, "discovery.source.upsert", "discovery_source", source.id, {
+    await logAdminAction(req.user, "discovery.source.upsert", "scholarship_source", source.id, {
       sourceType: source.source_type,
-      sourceUrl: source.source_url,
+      sourceUrl: source.url,
+      status: source.status,
+      trustScore: source.trust_score,
     });
 
     return res.status(201).json({ source });

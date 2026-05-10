@@ -28,6 +28,8 @@ function signAccessToken(user) {
     email: String(user.email || "").toLowerCase(),
     fullName: user.full_name,
     role: normalizedRole,
+    planType: user.plan_type || "free",
+    subscriptionStatus: user.subscription_status || "active",
   };
 
   return jwt.sign(payload, env.jwtSecret, { expiresIn: "7d" });
@@ -39,14 +41,13 @@ function setTokenCookie(res, token) {
     sameSite: "lax",
     secure: env.nodeEnv === "production",
     path: "/",
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
   // eslint-disable-next-line no-console
   console.log(`[@auth] set cookie scholar_jwt path=/ sameSite=Lax secure=${env.nodeEnv === "production"}`);
 }
 
 function buildAuthResponse(user) {
-  const normalizedRole = normalizeRole(user.role);
   const token = signAccessToken(user);
 
   return {
@@ -54,7 +55,11 @@ function buildAuthResponse(user) {
       id: user.id,
       fullName: user.full_name,
       email: String(user.email || "").toLowerCase(),
-      role: normalizedRole,
+      role: user.role,
+      planType: user.plan_type || "free",
+      subscriptionStatus: user.subscription_status || "active",
+      aiRequestsToday: user.ai_requests_today || 0,
+      aiRequestsResetAt: user.ai_requests_reset_at || new Date().toISOString(),
     },
     token,
   };
@@ -101,6 +106,10 @@ async function me(req, res, next) {
       fullName: user.full_name,
       email: user.email,
       role: user.role,
+      planType: user.plan_type || "free",
+      subscriptionStatus: user.subscription_status || "active",
+      aiRequestsToday: user.ai_requests_today || 0,
+      aiRequestsResetAt: user.ai_requests_reset_at || new Date().toISOString(),
     });
   } catch (err) {
     return next(err);
@@ -281,5 +290,6 @@ module.exports = {
   googleAuth,
   googleCallback,
   logout,
+  debugAdmin,
 };
 

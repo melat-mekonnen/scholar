@@ -1,4 +1,5 @@
 const { query } = require("../infra/db/neonClient");
+const { vectorLiteral } = require("../services/embeddingService");
 
 class ScholarshipRepository {
   async expirePastDeadline() {
@@ -353,6 +354,198 @@ class ScholarshipRepository {
     };
   }
 
+  async searchPublicByVector({
+    queryEmbedding,
+    q,
+    strictQueryText,
+    countries,
+    degreeLevels,
+    fieldsOfStudy,
+    fundingTypes,
+    deadlineFrom,
+    deadlineTo,
+    sort,
+    page,
+    limit,
+    status,
+    bookmarkUserId,
+  }) {
+    const where = [];
+    const params = [];
+
+    const effectiveStatus = status || "verified";
+    params.push(effectiveStatus);
+    where.push(`s.status = $${params.length}`);
+    where.push(`(s.deadline IS NULL OR s.deadline >= CURRENT_DATE)`);
+    where.push(`s.embedding IS NOT NULL`);
+
+    if (q) {
+      params.push(`%${q.toLowerCase()}%`);
+      const p = `$${params.length}`;
+      where.push(
+        `(LOWER(s.title) LIKE ${p} OR LOWER(s.country) LIKE ${p} OR LOWER(s.field_of_study) LIKE ${p} OR LOWER(s.description) LIKE ${p})`
+      );
+    }
+
+    if (strictQueryText) {
+      params.push(`%${strictQueryText.toLowerCase()}%`);
+      const p = `$${params.length}`;
+      where.push(
+        `(LOWER(s.title) LIKE ${p} OR LOWER(s.country) LIKE ${p} OR LOWER(s.field_of_study) LIKE ${p} OR LOWER(s.description) LIKE ${p})`
+      );
+    }
+
+    if (countries && countries.length) {
+      params.push(countries);
+      where.push(`s.country = ANY($${params.length})`);
+    }
+
+    if (degreeLevels && degreeLevels.length) {
+      params.push(degreeLevels);
+      where.push(`s.degree_level = ANY($${params.length})`);
+    }
+
+    if (fieldsOfStudy && fieldsOfStudy.length) {
+      params.push(fieldsOfStudy);
+      where.push(`s.field_of_study = ANY($${params.length})`);
+    }
+
+    if (fundingTypes && fundingTypes.length) {
+      params.push(fundingTypes);
+      where.push(`s.funding_type = ANY($${params.length})`);
+    }
+
+    if (deadlineFrom) {
+      params.push(deadlineFrom);
+      where.push(`s.deadline >= $${params.length}`);
+    }
+
+    if (deadlineTo) {
+      params.push(deadlineTo);
+      where.push(`s.deadline <= $${params.length}`);
+    }
+
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+    const countResult = await query(
+      `SELECT COUNT(*) AS total FROM scholarships s ${whereClause}`,
+      params,
+    );
+    const total = Number(countResult.rows[0]?.total || 0);
+
+    params.push(queryEmbedding);
+    const embeddingIndex = params.length;
+    const orderBy = `ORDER BY s.embedding <=> $${embeddingIndex}::vector`;
+
+    const offset = (page - 1) * limit;
+    const listParams = [...params];
+    let isBookmarkedSelect = "FALSE AS is_bookmarked";
+    if (bookmarkUserId) {
+      listParams.push(bookmarkUserId);
+      const uidIdx = listParams.length;
+      isBookmarkedSelect = `EXISTS (SELECT 1 FROM bookmarks b WHERE b.scholarship_id = s.id AND b.user_id = $${uidIdx}) AS is_bookmarked`;
+    }
+
+    const rows = await query(
+      `SELECT s.id,
+              s.title,
+              s.organization_name,
+              s.country,
+              s.degree_level,
+              s.field_of_study,
+              s.funding_type,
+              s.deadline,
+              s.amount,
+              s.description,
+              s.application_url,
+              (SELECT COUNT(*)::int FROM bookmarks bcnt WHERE bcnt.scholarship_id = s.id) AS bookmark_count,
+              ${isBookmarkedSelect},
+              1.0 / (1 + (s.embedding <=> $${embeddingIndex}::vector)) AS semantic_score
+       FROM scholarships s
+       ${whereClause}
+       ${orderBy}
+       LIMIT $${listParams.length + 1} OFFSET $${listParams.length + 2}`,
+      [...listParams, limit, offset],
+    );
+
+    return {
+      results: rows.rows.map((row) => ({
+        ...row,
+        semanticScore: Number(row.semantic_score || 0),
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async listScholarshipsForEmbedding({ status = "verified", limit = 50 }) {
+    const result = await query(
+      `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, description
+       FROM scholarships
+       WHERE status = $1
+         AND embedding IS NULL
+       ORDER BY created_at DESC
+       LIMIT $2`,
+      [status, limit],
+    );
+    return result.rows;
+  }
+
+  async findScholarshipBySourceUrl(sourceUrl) {
+    if (!sourceUrl) return null;
+    const normalizedUrl = String(sourceUrl).trim();
+    const fallbackUrl = normalizedUrl.replace(/\/+$/, "");
+    const result = await query(
+      `SELECT id, title, organization_name, deadline, source_url, embedding::float8[] AS embedding
+       FROM scholarships
+       WHERE source_url = $1 OR source_url = $2
+       LIMIT 1`,
+      [normalizedUrl, fallbackUrl],
+    );
+    return result.rows[0] || null;
+  }
+
+  async findScholarshipByTitleAndOrganization(title, organizationName) {
+    if (!title || !organizationName) return null;
+    const normalizedTitle = String(title).trim().toLowerCase();
+    const normalizedOrg = String(organizationName).trim().toLowerCase();
+    const result = await query(
+      `SELECT id, title, organization_name, deadline, source_url, embedding::float8[] AS embedding
+       FROM scholarships
+       WHERE LOWER(TRIM(title)) = $1
+         AND LOWER(TRIM(organization_name)) = $2
+       LIMIT 1`,
+      [normalizedTitle, normalizedOrg],
+    );
+    return result.rows[0] || null;
+  }
+
+  async findSimilarScholarshipsByEmbedding(embedding, limit = 8) {
+    if (!Array.isArray(embedding) || !embedding.length) return [];
+    const vectorValue = vectorLiteral(embedding);
+    const result = await query(
+      `SELECT id, title, organization_name, deadline, source_url, embedding::float8[] AS embedding
+       FROM scholarships
+       WHERE embedding IS NOT NULL
+       ORDER BY embedding <=> $1::vector
+       LIMIT $2`,
+      [vectorValue, limit],
+    );
+    return result.rows;
+  }
+
+  async updateScholarshipEmbedding(id, embedding) {
+    const vectorValue = `[${embedding.map((value) => Number(value)).join(",")}]`;
+    await query(
+      `UPDATE scholarships
+       SET embedding = $2::vector,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [id, vectorValue],
+    );
+  }
+
   async findPublicById(id, { bookmarkUserId } = {}) {
     const params = [id];
     let isBookmarkedSelect = "FALSE AS is_bookmarked";
@@ -389,6 +582,21 @@ class ScholarshipRepository {
     return result.rows[0] || null;
   }
 
+  async findUrgentScholarships({ limit = 5 } = {}) {
+    const result = await query(
+      `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline, amount, application_url
+       FROM scholarships
+       WHERE status = 'verified'
+         AND deadline IS NOT NULL
+         AND deadline >= CURRENT_DATE
+         AND deadline <= CURRENT_DATE + INTERVAL '30 days'
+       ORDER BY deadline ASC, created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    return result.rows;
+  }
+
   async findById(id) {
     const result = await query(
       `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
@@ -411,11 +619,27 @@ class ScholarshipRepository {
     amount,
     description,
     applicationUrl,
+    sourceId,
     sourceName,
     sourceUrl,
     externalId,
     aiConfidence,
+    extractionConfidence,
+    normalizedTags,
+    fundingClassification,
+    eligibilityHints,
+    eligibleCountries,
+    eligibleFields,
+    gpaRequirements,
+    englishRequirements,
+    extractionMetadata,
+    duplicateMetadata,
+    embedding,
   }) {
+    const vectorLiteral = Array.isArray(embedding)
+      ? `[${embedding.map((value) => Number(value)).join(",")}]`
+      : null;
+
     const result = await query(
       `INSERT INTO scholarships (
          title,
@@ -428,13 +652,25 @@ class ScholarshipRepository {
          description,
          application_url,
          status,
+         source_id,
          source_name,
          source_url,
          external_id,
          ai_confidence,
+         extraction_confidence,
+         normalized_tags,
+         funding_classification,
+         eligibility_hints,
+         eligible_countries,
+         eligible_fields,
+         gpa_requirements,
+         english_requirements,
+         extraction_metadata,
+         duplicate_metadata,
+         embedding,
          discovered_at
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11,$12,$13,NOW())
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25, $26::vector, NOW())
        ON CONFLICT (source_url)
        DO UPDATE SET
          title = EXCLUDED.title,
@@ -446,9 +682,21 @@ class ScholarshipRepository {
          amount = EXCLUDED.amount,
          description = EXCLUDED.description,
          application_url = EXCLUDED.application_url,
+         source_id = COALESCE(EXCLUDED.source_id, scholarships.source_id),
          source_name = EXCLUDED.source_name,
          external_id = COALESCE(EXCLUDED.external_id, scholarships.external_id),
          ai_confidence = EXCLUDED.ai_confidence,
+         extraction_confidence = EXCLUDED.extraction_confidence,
+         normalized_tags = EXCLUDED.normalized_tags,
+         funding_classification = EXCLUDED.funding_classification,
+         eligibility_hints = EXCLUDED.eligibility_hints,
+         eligible_countries = EXCLUDED.eligible_countries,
+         eligible_fields = EXCLUDED.eligible_fields,
+         gpa_requirements = EXCLUDED.gpa_requirements,
+         english_requirements = EXCLUDED.english_requirements,
+         extraction_metadata = EXCLUDED.extraction_metadata,
+         duplicate_metadata = COALESCE(EXCLUDED.duplicate_metadata, scholarships.duplicate_metadata),
+         embedding = COALESCE(EXCLUDED.embedding, scholarships.embedding),
          discovered_at = NOW(),
          updated_at = NOW()
        RETURNING id, title, country, status, source_url`,
@@ -462,10 +710,22 @@ class ScholarshipRepository {
         amount || null,
         description || null,
         applicationUrl || null,
+        sourceId || null,
         sourceName || null,
         sourceUrl || null,
         externalId || null,
         aiConfidence != null ? Number(aiConfidence) : null,
+        extractionConfidence != null ? Number(extractionConfidence) : null,
+        normalizedTags || [],
+        fundingClassification || null,
+        eligibilityHints || null,
+        eligibleCountries || [],
+        eligibleFields || [],
+        gpaRequirements || null,
+        englishRequirements || null,
+        extractionMetadata || {},
+        duplicateMetadata || {},
+        vectorLiteral,
       ],
     );
     return result.rows[0] || null;

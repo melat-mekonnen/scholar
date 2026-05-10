@@ -7,7 +7,7 @@ const userController = require("../controllers/userController");
 
 const router = express.Router();
 
-router.use(authMiddleware);
+router.use("/users", authMiddleware);
 
 router.get("/users", requireAdminOrOwner, userController.list);
 router.get("/users/:id", allowAdminSelfOrOwner(), userController.getById);

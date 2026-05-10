@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { BarChart3, CalendarClock, Eye, IdCard, LayoutDashboard, LogOut, User } from "lucide-react"
+import { PageHeader } from "@/components/layout/page-header"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -72,100 +73,25 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
 
   if (gate !== "ready") {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      <div className="flex flex-col flex-1 p-8">
+        <Skeleton className="h-8 w-48 mb-6" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="flex">
-        <aside
-          className={`hidden md:flex w-64 flex-col border-r ${cfg.shellClassName}`}
-        >
-          <div className="px-6 py-4 border-b flex items-center gap-2">
-            <div className={`rounded-md p-2 ${cfg.badgeClass}`}>
-              <LayoutDashboard className="h-5 w-5" />
-            </div>
-            <div className="leading-tight">
-              <span className="font-semibold block">{cfg.shellTitle}</span>
-              <span className="text-xs text-muted-foreground">{cfg.shellSubtitle}</span>
-            </div>
-          </div>
+    <div className="flex flex-col flex-1 pb-10">
+      <PageHeader 
+        title={cfg.dashboardHeading} 
+        description={cfg.dashboardTagline} 
+      />
 
-          <nav className="p-4 space-y-1 text-sm">
-            <Link
-              href={cfg.basePath}
-              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 font-medium ${cfg.navActiveClass}`}
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              href={cfg.profilePath}
-              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
-            >
-              <IdCard className="h-4 w-4" />
-              {cfg.profileLinkLabel}
-            </Link>
-            <Link
-              href={cfg.newScholarshipPath}
-              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
-            >
-              <span className="text-lg leading-none">+</span>
-              New scholarship
-            </Link>
-            <Link
-              href={cfg.manageScholarshipsPath}
-              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
-            >
-              Manage scholarships
-            </Link>
-            <Link
-              href={cfg.documentsPath}
-              className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
-            >
-              Documents
-            </Link>
-            {workspace === "owner" ? (
-              <Link
-                href={cfg.ownerHomePath}
-                className={`flex items-center gap-2 w-full rounded-md px-3 py-2 ${cfg.navInactiveClass}`}
-              >
-                Owner home
-              </Link>
-            ) : null}
-          </nav>
-
-          <div className="mt-auto p-4 border-t">
-            <button
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-muted/50"
-              onClick={() => {
-                clearToken()
-                router.push("/signin")
-              }}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
-        </aside>
-
-        <div className="flex-1">
-          <header className="sticky top-0 z-10 bg-white border-b dark:bg-card">
-            <div className="px-5 py-4 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold">{cfg.dashboardHeading}</h1>
-                <p className="text-sm text-gray-500">{cfg.dashboardTagline}</p>
-              </div>
-              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <User className="h-4 w-4" />
-              </div>
-            </div>
-          </header>
-
-          <main className="p-5 space-y-6">
+      <main className="p-6 space-y-6 max-w-7xl">
             {error ? (
               <p className="text-sm text-destructive bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
             ) : null}
@@ -184,25 +110,25 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
                 <>
                   <Card>
                     <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Total Scholarships Posted</p>
+                      <p className="text-xs text-muted-foreground">Total Scholarships Posted</p>
                       <p className="text-3xl font-bold">{stats?.totalScholarshipsPosted ?? 0}</p>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Total Applications Received</p>
+                      <p className="text-xs text-muted-foreground">Total Applications Received</p>
                       <p className="text-3xl font-bold">{stats?.totalApplicationsReceived ?? 0}</p>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Verified Scholarships</p>
+                      <p className="text-xs text-muted-foreground">Verified Scholarships</p>
                       <p className="text-3xl font-bold">{stats?.scholarshipsByStatus.verified ?? 0}</p>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Pending Scholarships</p>
+                      <p className="text-xs text-muted-foreground">Pending Scholarships</p>
                       <p className="text-3xl font-bold">{stats?.scholarshipsByStatus.pending ?? 0}</p>
                     </CardContent>
                   </Card>
@@ -309,8 +235,6 @@ export function ScholarshipOpsDashboard({ workspace }: Props) {
               </Button>
             </section>
           </main>
-        </div>
-      </div>
     </div>
   )
 }

@@ -20,6 +20,16 @@ class BookmarkRepository {
     return result.rowCount;
   }
 
+  async countByUser(userId) {
+    const result = await query(
+      `SELECT COUNT(*)::int AS total
+       FROM bookmarks
+       WHERE user_id = $1`,
+      [userId]
+    );
+    return Number(result.rows[0]?.total || 0);
+  }
+
   async listByUser(userId, page, limit) {
     const offset = (page - 1) * limit;
     const countResult = await query(

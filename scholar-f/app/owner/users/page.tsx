@@ -1,21 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Users, Search } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Users, Search } from "lucide-react";
 
-import { apiFetchJson } from "@/lib/api"
-import { clearToken } from "@/lib/auth"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { apiFetchJson } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -23,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -31,125 +29,115 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+} from "@/components/ui/pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { OwnerSidebar } from "@/components/layout/owner-sidebar"
-import { PageHeader } from "@/components/layout/page-header"
-import { PageLayout } from "@/components/layout/page-layout"
-import { useAuth } from "@/hooks/use-auth"
+import { PageHeader } from "@/components/layout/page-header";
+import { PageLayout } from "@/components/layout/page-layout";
 
-type AssignableRole = "student" | "manager"
+type AssignableRole = "student" | "manager";
 
 type User = {
-  id: string
-  fullName: string
-  email: string
-  role: AssignableRole
-  isActive: boolean
-}
+  id: string;
+  fullName: string;
+  email: string;
+  role: AssignableRole;
+  isActive: boolean;
+};
 
 type UsersResponse = {
-  users: User[]
-  total: number
-  page: number
-  pageSize: number
-}
+  users: User[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
 
 export default function OwnerUsersPage() {
-  const router = useRouter()
-  const { user, loading: authLoading, isAuthenticated } = useAuth()
-  
-  const [users, setUsers] = useState<User[]>([])
-  const [search, setSearch] = useState("")
-  const [roleFilter, setRoleFilter] = useState<"" | AssignableRole>("")
-  const [page, setPage] = useState(1)
-  const [pageSize] = useState(10)
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [users, setUsers] = useState<User[]>([]);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"" | AssignableRole>("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [editName, setEditName] = useState("")
-  const [editEmail, setEditEmail] = useState("")
-  const [editRole, setEditRole] = useState<AssignableRole>("student")
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState<AssignableRole>("student");
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
-  const isOwner = user?.role === "owner"
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
     if (!authLoading) {
       if (!isAuthenticated) {
-        clearToken()
-        router.replace("/signin")
-        return
+        clearToken();
+        router.replace("/signin");
+        return;
       }
       if (!isOwner) {
-        router.replace("/unauthorized")
-        return
+        router.replace("/unauthorized");
+        return;
       }
     }
-  }, [authLoading, isAuthenticated, isOwner, router])
+  }, [authLoading, isAuthenticated, isOwner]);
 
   useEffect(() => {
-    if (!isOwner) return
+    if (!isOwner) return;
     async function fetchUsers() {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
         const params = new URLSearchParams({
           page: String(page),
           pageSize: String(pageSize),
           search: search.trim(),
-        })
+        });
         if (roleFilter) {
-          params.set("role", roleFilter)
+          params.set("role", roleFilter);
         }
         const { res, data, errorMessage } = await apiFetchJson<UsersResponse>(
           `/api/users?${params.toString()}`,
           { method: "GET" },
-        )
+        );
         if (res.status === 401 || res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
+          return;
         }
         if (!res.ok || !data) {
-          throw new Error(errorMessage || "Failed to load users")
+          throw new Error(errorMessage || "Failed to load users");
         }
-        setUsers((data.users ?? []) as User[])
-        setTotal(data.total ?? data.users?.length ?? 0)
+        setUsers((data.users ?? []) as User[]);
+        setTotal(data.total ?? data.users?.length ?? 0);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load users")
+        setError(err instanceof Error ? err.message : "Failed to load users");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    void fetchUsers()
-  }, [isOwner, page, pageSize, search, roleFilter, router])
+    void fetchUsers();
+  }, [isOwner, page, pageSize, search, roleFilter]);
 
   function startEdit(u: User) {
-    setEditingUser(u)
-    setEditName(u.fullName)
-    setEditEmail(u.email)
-    setEditRole(u.role)
+    setEditingUser(u);
+    setEditName(u.fullName);
+    setEditEmail(u.email);
+    setEditRole(u.role);
   }
 
   async function saveUser() {
-    if (!editingUser) return
-    setError(null)
-    const payload = { fullName: editName.trim(), email: editEmail.trim() }
+    if (!editingUser) return;
+    setError(null);
+    const payload = { fullName: editName.trim(), email: editEmail.trim() };
     try {
       if (editRole !== editingUser.role) {
-        const { res: roleRes, errorMessage: roleErr } = await apiFetchJson<User>(
-          `/api/users/${editingUser.id}/role`,
-          {
+        const { res: roleRes, errorMessage: roleErr } =
+          await apiFetchJson<User>(`/api/users/${editingUser.id}/role`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ role: editRole }),
-          },
-        )
-        if (!roleRes.ok) throw new Error(roleErr || "Failed to update role")
+          });
+        if (!roleRes.ok) throw new Error(roleErr || "Failed to update role");
       }
       const { res, data, errorMessage } = await apiFetchJson<User>(
         `/api/users/${editingUser.id}`,
@@ -158,25 +146,25 @@ export default function OwnerUsersPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
-      )
-      if (!res.ok) throw new Error(errorMessage || "Failed to update user")
+      );
+      if (!res.ok) throw new Error(errorMessage || "Failed to update user");
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editingUser.id
             ? { ...u, ...(data ?? {}), role: editRole }
             : u,
         ),
-      )
-      setEditingUser(null)
+      );
+      setEditingUser(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update user")
+      setError(err instanceof Error ? err.message : "Failed to update user");
     }
   }
 
   async function toggleStudentManager(u: User) {
-    const next: AssignableRole = u.role === "student" ? "manager" : "student"
-    if (next === u.role) return
-    setError(null)
+    const next: AssignableRole = u.role === "student" ? "manager" : "student";
+    if (next === u.role) return;
+    setError(null);
     try {
       const { res, errorMessage } = await apiFetchJson<User>(
         `/api/users/${u.id}/role`,
@@ -185,31 +173,18 @@ export default function OwnerUsersPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role: next }),
         },
-      )
-      if (!res.ok) throw new Error(errorMessage || "Failed to change role")
+      );
+      if (!res.ok) throw new Error(errorMessage || "Failed to change role");
       setUsers((prev) =>
         prev.map((user) => (user.id === u.id ? { ...user, role: next } : user)),
-      )
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to change role")
+      setError(err instanceof Error ? err.message : "Failed to change role");
     }
   }
 
-  if (authLoading || !isAuthenticated || !isOwner) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-background flex">
-      <OwnerSidebar />
-
+    <main className="bg-background overflow-y-auto">
       <div className="flex-1">
         <PageHeader
           title="Students & Managers"
@@ -237,8 +212,8 @@ export default function OwnerUsersPage() {
                       placeholder="Search by name or email"
                       value={search}
                       onChange={(e) => {
-                        setPage(1)
-                        setSearch(e.target.value)
+                        setPage(1);
+                        setSearch(e.target.value);
                       }}
                       className="w-64 pl-8"
                     />
@@ -246,8 +221,8 @@ export default function OwnerUsersPage() {
                   <Select
                     value={roleFilter || "all"}
                     onValueChange={(v) => {
-                      setPage(1)
-                      setRoleFilter(v === "all" ? "" : (v as AssignableRole))
+                      setPage(1);
+                      setRoleFilter(v === "all" ? "" : (v as AssignableRole));
                     }}
                   >
                     <SelectTrigger className="w-40">
@@ -276,24 +251,33 @@ export default function OwnerUsersPage() {
                     <TableBody>
                       {loading ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="h-24 text-center">Loading...</TableCell>
+                          <TableCell colSpan={5} className="h-24 text-center">
+                            Loading...
+                          </TableCell>
                         </TableRow>
                       ) : users.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                          <TableCell
+                            colSpan={5}
+                            className="py-6 text-center text-sm text-muted-foreground"
+                          >
                             No users found.
                           </TableCell>
                         </TableRow>
                       ) : (
                         users.map((u) => (
                           <TableRow key={u.id} className="hover:bg-gray-50/50">
-                            <TableCell className="font-medium">{u.fullName}</TableCell>
+                            <TableCell className="font-medium">
+                              {u.fullName}
+                            </TableCell>
                             <TableCell>{u.email}</TableCell>
                             <TableCell>
                               <Badge variant="outline">{u.role}</Badge>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={u.isActive ? "default" : "secondary"}>
+                              <Badge
+                                variant={u.isActive ? "default" : "secondary"}
+                              >
                                 {u.isActive ? "Active" : "Inactive"}
                               </Badge>
                             </TableCell>
@@ -310,7 +294,9 @@ export default function OwnerUsersPage() {
                                 variant="outline"
                                 onClick={() => toggleStudentManager(u)}
                               >
-                                {u.role === "student" ? "Make manager" : "Make student"}
+                                {u.role === "student"
+                                  ? "Make manager"
+                                  : "Make student"}
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -330,34 +316,34 @@ export default function OwnerUsersPage() {
                         <PaginationPrevious
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
-                            setPage((p) => Math.max(1, p - 1))
+                            e.preventDefault();
+                            setPage((p) => Math.max(1, p - 1));
                           }}
                         />
                       </PaginationItem>
                       {Array.from({ length: totalPages }).map((_, index) => {
-                        const p = index + 1
+                        const p = index + 1;
                         return (
                           <PaginationItem key={p}>
                             <PaginationLink
                               href="#"
                               isActive={p === page}
                               onClick={(e) => {
-                                e.preventDefault()
-                                setPage(p)
+                                e.preventDefault();
+                                setPage(p);
                               }}
                             >
                               {p}
                             </PaginationLink>
                           </PaginationItem>
-                        )
+                        );
                       })}
                       <PaginationItem>
                         <PaginationNext
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
-                            setPage((p) => Math.min(totalPages, p + 1))
+                            e.preventDefault();
+                            setPage((p) => Math.min(totalPages, p + 1));
                           }}
                         />
                       </PaginationItem>
@@ -387,7 +373,9 @@ export default function OwnerUsersPage() {
                     />
                     <Select
                       value={editRole}
-                      onValueChange={(value) => setEditRole(value as AssignableRole)}
+                      onValueChange={(value) =>
+                        setEditRole(value as AssignableRole)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Role" />
@@ -399,7 +387,10 @@ export default function OwnerUsersPage() {
                     </Select>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setEditingUser(null)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditingUser(null)}
+                    >
                       Cancel
                     </Button>
                     <Button onClick={() => void saveUser()}>
@@ -412,6 +403,6 @@ export default function OwnerUsersPage() {
           </main>
         </PageLayout>
       </div>
-    </div>
-  )
+    </main>
+  );
 }

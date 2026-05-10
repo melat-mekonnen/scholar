@@ -1,5 +1,6 @@
 const { getRecommendations } = require("../usecases/recommendations/getRecommendations");
 const { RecommendationFeedbackRepository } = require("../repositories/RecommendationFeedbackRepository");
+const { incrementAiRequest } = require("../services/subscriptionService");
 
 const feedbackRepo = new RecommendationFeedbackRepository();
 const ALLOWED_INTERACTIONS = ['viewed', 'clicked', 'saved', 'dismissed', 'applied'];
@@ -7,9 +8,24 @@ const ALLOWED_INTERACTIONS = ['viewed', 'clicked', 'saved', 'dismissed', 'applie
 async function list(req, res, next) {
   try {
     const userId = req.user?.id;
-    const topN = req.query?.topN ? Number(req.query.topN) : 10;
-    const data = await getRecommendations({ userId, topN });
-    return res.json(data);
+    const topN = req.query?.topN ? Number(req.query.topN) : 20;
+    const q = req.query?.q || "";
+    const subscriptionUsage = await incrementAiRequest(userId);
+    const data = await getRecommendations({
+      userId,
+      topN,
+      q,
+      isPremium: subscriptionUsage.isPremium,
+    });
+    return res.json({
+      ...data,
+      planType: subscriptionUsage.planType,
+      subscriptionStatus: subscriptionUsage.subscriptionStatus,
+      aiRequestsToday: subscriptionUsage.aiRequestsToday,
+      aiRequestsLimit: subscriptionUsage.aiRequestsLimit,
+      aiRequestsRemaining: subscriptionUsage.aiRequestsRemaining,
+      aiRequestsResetAt: subscriptionUsage.aiRequestsResetAt,
+    });
   } catch (err) {
     return next(err);
   }
