@@ -7,7 +7,7 @@ import { SystemStatusBadge } from "@/components/system-status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SidebarFooterProfileProps {
-  user: { full_name?: string; email?: string; role?: string } | null;
+  user: { fullName?: string; email?: string; role?: string } | any | null;
   apiPathBase?: string; // If provided, shows SystemStatusBadge
   isCollapsed?: boolean;
 }
@@ -50,10 +50,10 @@ export function SidebarFooterProfile({ user, apiPathBase, isCollapsed }: Sidebar
     router.push("/signin");
   };
 
-  const name = user?.full_name || "Unknown User";
+  const name = user?.fullName || user?.full_name || "Unknown User";
   const email = user?.email || "";
   const role = user?.role || "unknown";
-  const initials = getInitials(user?.full_name, user?.email);
+  const initials = getInitials(name, email);
   const colorClass = getDeterministicColor(email || name);
 
   return (

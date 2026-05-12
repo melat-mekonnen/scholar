@@ -48,7 +48,8 @@ const tracingMiddleware = (req, res, next) => {
       userId,
       planType,
       ipHash,
-      errorFlag
+      errorFlag,
+      event: req.observabilityEvent || (statusCode === 401 ? "auth_failure" : (statusCode === 429 ? "rate_limit" : null))
     };
 
     observabilityService.addTrace(trace);

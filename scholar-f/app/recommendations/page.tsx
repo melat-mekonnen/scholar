@@ -301,7 +301,7 @@ function ScholarshipCard({
 }
 
 export default function RecommendationsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -343,10 +343,11 @@ export default function RecommendationsPage() {
   };
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) return;
 
     loadRecommendations();
-  }, [user]);
+  }, [user, authLoading]);
 
   const loadRecommendations = async (query = "") => {
     try {
@@ -392,6 +393,17 @@ export default function RecommendationsPage() {
       handleSearch();
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex h-screen">
+        <StudentSidebar />
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <Skeleton className="h-[400px] w-full max-w-3xl rounded-xl" />
+        </main>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

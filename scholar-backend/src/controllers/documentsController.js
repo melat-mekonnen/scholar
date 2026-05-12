@@ -86,17 +86,23 @@ async function upload(req, res, next) {
       }
     }
 
-    const created = await repo.create({
-      id: randomUUID(),
-      title,
-      type,
-      filePath: file.path,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      fileSize: file.size || 0,
-      scholarshipId,
-      uploadedByUserId: userId,
-    });
+    let created;
+    try {
+      created = await repo.create({
+        id: randomUUID(),
+        title,
+        type,
+        filePath: file.path,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        fileSize: file.size || 0,
+        scholarshipId,
+        uploadedByUserId: userId,
+      });
+    } catch (dbErr) {
+      fs.unlink(file.path, () => {});
+      throw dbErr;
+    }
 
     return res.status(201).json({
       id: created.id,

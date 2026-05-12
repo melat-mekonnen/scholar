@@ -25,9 +25,9 @@ export default function HomePage() {
 
         <div className="relative mx-auto flex min-h-[140vh] max-w-7xl flex-col px-6 pt-16 pb-10 text-center">
           <h1 className="text-4xl font-bold px-16 pt-10 pb-7 tracking-tight sm:text-5xl md:text-6xl text-grey-60">
-            AI-Powered Scholarship Platform
+            AI-Powered Scholarship Platform 
             <span className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-grey-60">
-              for Ethiopian Students
+               for Ethiopian Students
             </span>
           </h1>
 

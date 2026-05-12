@@ -754,6 +754,18 @@ class ScholarshipRepository {
     );
     return result.rows;
   }
+
+  async getStats() {
+    const result = await query(
+      `SELECT 
+         COUNT(*)::int AS total_scholarships,
+         COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_approvals,
+         COUNT(*) FILTER (WHERE status = 'verified')::int AS verified_sources,
+         COUNT(*) FILTER (WHERE status = 'rejected' OR status = 'expired')::int AS suspicious_sources
+       FROM scholarships`
+    );
+    return result.rows[0];
+  }
 }
 
 module.exports = { ScholarshipRepository };

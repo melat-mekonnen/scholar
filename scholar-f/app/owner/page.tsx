@@ -54,12 +54,30 @@ export default function OwnerDashboardPage() {
   const [pending, setPending] = useState<PendingScholarship[]>([]);
   const [busyIds, setBusyIds] = useState<Record<string, boolean>>({});
 
+  const [totals, setTotals] = useState({
+    scholarships: 0,
+    pendingApprovals: 0,
+    verifiedSources: 0,
+    suspiciousSources: 0,
+    discoverySuccessRate: 94
+  });
+
   useEffect(() => {
     async function loadData() {
       if (!isOwner) return;
       setLoading(true);
 
-      // Load pending scholarships (simulate API call for now, mixing with real API where possible)
+      try {
+        const dashboardRes = await apiFetchJson<{
+          totals: typeof totals;
+        }>("/api/owner/dashboard", { method: "GET" });
+        if (dashboardRes.res.ok && dashboardRes.data?.totals) {
+          setTotals(dashboardRes.data.totals);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard totals", err);
+      }
+
       try {
         const pendingRes = await apiFetchJson<{
           scholarships: PendingScholarship[];
@@ -131,8 +149,6 @@ export default function OwnerDashboardPage() {
       setBusyIds((p) => ({ ...p, [id]: false }));
     }
   }
-
-  const { totals } = mockOwnerData;
 
   return (
     <main className="bg-background overflow-y-auto">
