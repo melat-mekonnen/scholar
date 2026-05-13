@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Building2, IdCard, LogOut } from "lucide-react"
+import { Building2, IdCard, LogOut, Search, ShieldCheck, Users } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
@@ -75,6 +75,9 @@ export default function OwnerUsersPage() {
   const [editRole, setEditRole] = useState<AssignableRole>("student")
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const managersOnPage = users.filter((user) => user.role === "manager").length
+  const studentsOnPage = users.filter((user) => user.role === "student").length
+  const activeOnPage = users.filter((user) => user.isActive).length
 
   useEffect(() => {
     async function gate() {
@@ -216,72 +219,101 @@ export default function OwnerUsersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <Button variant="ghost" size="icon" asChild className="mt-0.5 shrink-0">
-              <Link href="/owner" aria-label="Back to owner dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="rounded-md bg-primary/10 p-2 text-primary">
-                <Building2 className="h-6 w-6" />
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <div className="pointer-events-none absolute -left-16 top-16 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-52 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                  <Building2 className="h-5 w-5" />
+                </span>
+                <h1 className="text-2xl font-semibold tracking-tight">Students & managers</h1>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">Students & managers</h1>
-                <p className="text-sm text-muted-foreground">
-                  Promote students to scholarship managers or return them to student. Admin and
-                  owner accounts are not listed here.
-                </p>
-              </div>
+              <p className="max-w-2xl text-sm text-blue-50">
+                Promote students to scholarship managers or return them to student.
+                Admin and owner accounts are excluded from this list.
+              </p>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/owner">Dashboard</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/posting-profile">
-                <IdCard className="mr-2 h-4 w-4" />
-                Posting profile
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/scholarships">Scholarship operations</Link>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                void logoutFromServer()
-                clearToken()
-                router.push("/signin")
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" asChild className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+                <Link href="/owner/posting-profile">
+                  <IdCard className="mr-2 h-4 w-4" />
+                  Posting profile
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                onClick={() => {
+                  void logoutFromServer()
+                  clearToken()
+                  router.push("/signin")
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
         </header>
 
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Total users</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{total}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Students (this page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-blue-600">{studentsOnPage}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Managers (this page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">{managersOnPage}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Active users (this page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeOnPage}</p>
+            </CardContent>
+          </Card>
+        </section>
+
         {error && (
-          <p className="mb-4 text-sm text-destructive">{error}</p>
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
 
-        <Card>
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="text-base">Users</CardTitle>
+        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <CardHeader className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base">Users</CardTitle>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs text-blue-700">
+                <Users className="h-3.5 w-3.5" />
+                Page {page} of {totalPages}
+              </span>
+            </div>
             <div className="flex flex-wrap gap-2">
-              <Input
-                placeholder="Search by name or email"
-                value={search}
-                onChange={(e) => {
-                  setPage(1)
-                  setSearch(e.target.value)
-                }}
-                className="w-64"
-              />
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Search by name or email"
+                  value={search}
+                  onChange={(e) => {
+                    setPage(1)
+                    setSearch(e.target.value)
+                  }}
+                  className="h-10 w-64 rounded-xl border-slate-200 pl-9"
+                />
+              </div>
               <Select
                 value={roleFilter || "all"}
                 onValueChange={(v) => {
@@ -289,7 +321,7 @@ export default function OwnerUsersPage() {
                   setRoleFilter(v === "all" ? "" : (v as AssignableRole))
                 }}
               >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="h-10 w-44 rounded-xl border-slate-200">
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -304,7 +336,7 @@ export default function OwnerUsersPage() {
             {loading && (
               <p className="text-sm text-muted-foreground">Loading…</p>
             )}
-            <Table>
+            <Table className="overflow-hidden rounded-xl border border-slate-200">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -323,21 +355,25 @@ export default function OwnerUsersPage() {
                   </TableRow>
                 )}
                 {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.fullName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                  <TableRow key={user.id} className="hover:bg-slate-50/70">
+                    <TableCell className="font-medium text-slate-900">{user.fullName}</TableCell>
+                    <TableCell className="text-slate-600">{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{user.role}</Badge>
+                      <Badge variant="outline" className="capitalize">{user.role}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
+                      <Badge
+                        variant={user.isActive ? "default" : "secondary"}
+                        className={user.isActive ? "bg-emerald-600 text-white hover:bg-emerald-600" : ""}
+                      >
                         {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right space-x-1">
+                    <TableCell className="space-x-1 text-right">
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => startEdit(user)}
                       >
                         Edit
@@ -345,6 +381,7 @@ export default function OwnerUsersPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => toggleStudentManager(user)}
                       >
                         {user.role === "student" ? "Make manager" : "Make student"}
@@ -356,7 +393,8 @@ export default function OwnerUsersPage() {
             </Table>
 
             <div className="mt-4 flex items-center justify-between gap-4">
-              <p className="text-xs text-muted-foreground">
+              <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                 Showing page {page} of {totalPages}
               </p>
               <Pagination>
@@ -403,7 +441,7 @@ export default function OwnerUsersPage() {
         </Card>
 
         {editingUser && (
-          <Card className="mt-6">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Edit user</CardTitle>
             </CardHeader>
@@ -413,18 +451,20 @@ export default function OwnerUsersPage() {
                   placeholder="Name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  className="h-11 rounded-xl border-slate-200"
                 />
                 <Input
                   placeholder="Email"
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
+                  className="h-11 rounded-xl border-slate-200"
                 />
                 <Select
                   value={editRole}
                   onValueChange={(value) => setEditRole(value as AssignableRole)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl border-slate-200">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -434,10 +474,10 @@ export default function OwnerUsersPage() {
                 </Select>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingUser(null)}>
+                <Button variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditingUser(null)}>
                   Cancel
                 </Button>
-                <Button onClick={() => void saveUser()}>
+                <Button className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => void saveUser()}>
                   Save changes
                 </Button>
               </div>

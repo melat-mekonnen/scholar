@@ -2,8 +2,17 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useState, type ReactNode } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { Bookmark } from "lucide-react"
+import { useRouter } from "next/navigation"
+import {
+  Bookmark,
+  LayoutDashboard,
+  Search,
+  FileText,
+  Users,
+  UserCircle2,
+  Settings,
+  FolderOpen,
+} from "lucide-react"
 
 import { fetchBookmarksPage } from "@/lib/bookmarks"
 import {
@@ -12,14 +21,12 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { cn } from "@/lib/utils"
 import { clearToken } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { apiFetchJson } from "@/lib/api"
 import { createApplication, updateApplicationStatus } from "@/lib/applications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -41,6 +48,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { useToast } from "@/hooks/use-toast"
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 
 type MeResponse = {
   id: string
@@ -52,28 +61,6 @@ type MeResponse = {
 function formatDegreeLevel(value?: string | null) {
   if (!value) return "N/A"
   return value.replace("_", " ")
-}
-
-function NavLink({
-  href,
-  children,
-}: {
-  href: string
-  children: ReactNode
-}) {
-  const pathname = usePathname()
-  const active = pathname === href
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "block text-sm font-medium hover:text-primary",
-        active && "text-primary",
-      )}
-    >
-      {children}
-    </Link>
-  )
 }
 
 export default function SavedScholarshipsPage() {
@@ -89,6 +76,16 @@ export default function SavedScholarshipsPage() {
   const [page, setPage] = useState(1)
   const [limit] = useState(12)
   const [viewScholarship, setViewScholarship] = useState<ScholarshipPublic | null>(null)
+  const sidebarLinks = [
+    { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
+    { href: "/scholarships", label: t("Browse Scholarships"), icon: Search },
+    { href: "/applications", label: t("My Applications"), icon: FileText },
+    { href: "/community", label: t("Community"), icon: Users },
+    { href: "/saved", label: t("Saved Scholarships"), icon: Bookmark, active: true },
+    { href: "/profile", label: t("Profile"), icon: UserCircle2 },
+    { href: "/settings", label: t("Settings"), icon: Settings },
+    { href: "/documents", label: t("Documents"), icon: FolderOpen },
+  ]
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -184,52 +181,59 @@ export default function SavedScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Student dashboard</p>
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+      <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
+        <div className="mb-8 flex items-center gap-3">
+          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
         </div>
+        <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">{t("Student Portal")}</h2>
 
-        <nav className="space-y-3">
-          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
-          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
-          <NavLink href="/applications">{t("My Applications")}</NavLink>
-          <NavLink href="/community">{t("Community")}</NavLink>
-          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
-          <NavLink href="/profile">{t("Profile")}</NavLink>
-          <NavLink href="/settings">{t("Settings")}</NavLink>
-          <NavLink href="/documents">{t("Documents")}</NavLink>
+        <nav className="space-y-1.5">
+          {sidebarLinks.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  item.active
+                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
+                    : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                }
+              >
+                <span
+                  className={
+                    item.active
+                      ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
+                      : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
         </nav>
       </aside>
 
       <div className="flex-1">
-        <header className="flex items-center justify-between border-b bg-card p-4">
+        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">Saved scholarships</h1>
+            <h1 className="text-lg font-semibold text-slate-900">Saved scholarships</h1>
             {me?.role && (
-              <Badge variant="secondary" className="capitalize">
+              <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700">
                 {me.role}
               </Badge>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarFallback>
-                {(me?.fullName?.trim()
-                  ? me.fullName
-                      .split(" ")
-                      .filter(Boolean)
-                      .slice(0, 2)
-                      .map((p) => p[0]?.toUpperCase())
-                      .join("")
-                  : me?.email?.[0]?.toUpperCase()) || "U"}
-              </AvatarFallback>
-            </Avatar>
+            <ProfileAvatarLink />
             <Button
               variant="outline"
               size="sm"
+              className="border-slate-300 bg-white hover:bg-slate-50"
               onClick={() => {
                 clearToken()
                 router.push("/signin")
@@ -240,20 +244,20 @@ export default function SavedScholarshipsPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-4xl space-y-6 p-6">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Saved for later</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
+        <main className="mx-auto max-w-5xl space-y-6 p-6">
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+            <h2 className="text-2xl font-semibold tracking-tight">Saved for later</h2>
+            <p className="mt-1 text-sm text-blue-50">
               Scholarships you bookmarked. Remove the bookmark to take them off this list.
             </p>
           </div>
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>}
 
           {loading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl">
+                <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
@@ -274,7 +278,7 @@ export default function SavedScholarshipsPage() {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button asChild>
+                <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
                   <Link href="/scholarships">Browse scholarships</Link>
                 </Button>
               </EmptyContent>
@@ -283,10 +287,14 @@ export default function SavedScholarshipsPage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 {results.map((s) => (
-                  <Card key={s.id} className="rounded-2xl">
+                  <Card
+                    key={s.id}
+                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base leading-snug">{s.title}</CardTitle>
+                        <CardTitle className="text-base leading-snug text-slate-900 transition-colors group-hover:text-blue-700">{s.title}</CardTitle>
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked
@@ -302,7 +310,7 @@ export default function SavedScholarshipsPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3 pt-0">
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-sm text-slate-500">
                         {s.country} · {formatDegreeLevel(s.degreeLevel)}
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -317,12 +325,14 @@ export default function SavedScholarshipsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
                           onClick={() => setViewScholarship(s)}
                         >
                           View
                         </Button>
                         <Button
                           size="sm"
+                          className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
                             await handleApplyWithReturnCheck(s)
@@ -337,6 +347,7 @@ export default function SavedScholarshipsPage() {
               </div>
 
               {totalPages > 1 && (
+                <div className="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
@@ -376,10 +387,12 @@ export default function SavedScholarshipsPage() {
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
+                </div>
               )}
             </>
           )}
         </main>
+        <StudentPortalFooter />
       </div>
 
       <ScholarshipDetailDialog

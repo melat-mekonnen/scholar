@@ -3,8 +3,20 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Filter, Search as SearchIcon, X } from "lucide-react"
+import {
+  Filter,
+  Search as SearchIcon,
+  X,
+  LayoutDashboard,
+  FileText,
+  Users,
+  Bookmark,
+  UserCircle2,
+  Settings,
+  FolderOpen,
+} from "lucide-react"
 
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -277,16 +289,27 @@ export default function ScholarshipsPage() {
     setPage(1)
   }
 
+  const sidebarLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/scholarships", label: "Browse Scholarships", icon: SearchIcon, active: true },
+    { href: "/applications", label: "My Applications", icon: FileText },
+    { href: "/community", label: "Community", icon: Users },
+    { href: "/saved", label: "Saved Scholarships", icon: Bookmark },
+    { href: "/profile", label: "Profile", icon: UserCircle2 },
+    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/documents", label: "Document Resources", icon: FolderOpen },
+  ]
+
   function FilterPanel({ compact }: { compact?: boolean }) {
     const degreeOptions =
       filters?.degreeLevels ?? ["high_school", "bachelor", "master", "phd"]
     return (
-      <div className={compact ? "space-y-5 p-4" : "space-y-5"}>
+      <div className={compact ? "space-y-6 p-4" : "space-y-6"}>
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Country</p>
+          <p className="text-sm font-semibold text-slate-900">Country</p>
           <div className="space-y-2">
             {(filters?.countries ?? []).slice(0, 12).map((c) => (
-              <label key={c} className="flex items-center gap-2 text-sm">
+              <label key={c} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
                 <Checkbox
                   checked={countries.includes(c)}
                   onCheckedChange={() => {
@@ -298,7 +321,7 @@ export default function ScholarshipsPage() {
               </label>
             ))}
             {!filters?.countries?.length && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Countries will appear when backend returns filter options.
               </p>
             )}
@@ -306,10 +329,10 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Degree level</p>
+          <p className="text-sm font-semibold text-slate-900">Degree level</p>
           <div className="space-y-2">
             {degreeOptions.map((d) => (
-              <label key={d} className="flex items-center gap-2 text-sm capitalize">
+              <label key={d} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm capitalize text-slate-700 hover:bg-slate-50">
                 <Checkbox
                   checked={degreeLevels.includes(d)}
                   onCheckedChange={() => {
@@ -324,10 +347,10 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Field of study</p>
+          <p className="text-sm font-semibold text-slate-900">Field of study</p>
           <div className="space-y-2">
             {(filters?.fieldsOfStudy ?? []).slice(0, 10).map((f) => (
-              <label key={f} className="flex items-center gap-2 text-sm">
+              <label key={f} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
                 <Checkbox
                   checked={fieldsOfStudy.includes(f)}
                   onCheckedChange={() => {
@@ -339,7 +362,7 @@ export default function ScholarshipsPage() {
               </label>
             ))}
             {!filters?.fieldsOfStudy?.length && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Fields will appear when backend returns filter options.
               </p>
             )}
@@ -347,10 +370,10 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Funding type</p>
+          <p className="text-sm font-semibold text-slate-900">Funding type</p>
           <div className="space-y-2">
             {(filters?.fundingTypes ?? []).slice(0, 10).map((f) => (
-              <label key={f} className="flex items-center gap-2 text-sm">
+              <label key={f} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
                 <Checkbox
                   checked={fundingTypes.includes(f)}
                   onCheckedChange={() => {
@@ -362,7 +385,7 @@ export default function ScholarshipsPage() {
               </label>
             ))}
             {!filters?.fundingTypes?.length && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Funding types will appear when backend returns filter options.
               </p>
             )}
@@ -370,10 +393,10 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Deadline</p>
+          <p className="text-sm font-semibold text-slate-900">Deadline</p>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">From</p>
+              <p className="text-xs text-slate-500">From</p>
               <Input
                 type="date"
                 value={deadlineFrom}
@@ -381,10 +404,11 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineFrom(e.target.value)
                 }}
+                className="h-10 rounded-lg border-slate-200 bg-white"
               />
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">To</p>
+              <p className="text-xs text-slate-500">To</p>
               <Input
                 type="date"
                 value={deadlineTo}
@@ -392,13 +416,14 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineTo(e.target.value)
                 }}
+                className="h-10 rounded-lg border-slate-200 bg-white"
               />
             </div>
           </div>
         </div>
 
         <div className="pt-2">
-          <Button variant="outline" className="w-full" onClick={clearAll}>
+          <Button variant="outline" className="h-10 w-full rounded-lg border-slate-300 bg-white hover:bg-slate-50" onClick={clearAll}>
             Clear filters
           </Button>
         </div>
@@ -407,18 +432,69 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Browse Scholarships</h1>
-          <p className="text-sm text-muted-foreground">
-            Search verified scholarships and filter by what matters to you.
-          </p>
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="flex min-h-screen">
+        <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
+          <div className="mb-8 flex items-center gap-3">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+          </div>
+          <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Student Portal</h2>
+
+          <nav className="space-y-1.5">
+            {sidebarLinks.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    item.active
+                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
+                      : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  }
+                >
+                  <span
+                    className={
+                      item.active
+                        ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
+                        : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </aside>
+
+        <div className="relative w-full space-y-6 px-4 py-8">
+          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-24 top-64 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="flex justify-end">
+            <ProfileAvatarLink />
+          </div>
+        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight">Browse Scholarships</h1>
+              <p className="text-sm text-blue-50">
+                Search verified scholarships and filter by what matters to you.
+              </p>
+            </div>
+            <img
+              src="/ethioscholar-logo.svg"
+              alt="EthioScholar"
+              className="hidden h-10 w-auto brightness-0 invert md:block"
+            />
+          </div>
         </header>
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-xl">
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="relative w-full md:max-w-xl">
+            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               value={q}
               onChange={(e) => {
@@ -426,66 +502,67 @@ export default function ScholarshipsPage() {
                 setQ(e.target.value)
               }}
               placeholder="Search by keyword (e.g. engineering, Germany, fully funded)"
-              className="pl-9"
+              className="h-11 rounded-xl border-slate-200 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
             />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden md:block">
-              <Select
-                value={sort}
-                onValueChange={(v) => {
-                  setPage(1)
-                  setSort(v as SortOption)
-                }}
-              >
-                <SelectTrigger className="w-56">
-                  <SelectValue placeholder="Sort" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">Relevance</SelectItem>
-                  <SelectItem value="deadline_asc">Deadline (soonest)</SelectItem>
-                  <SelectItem value="deadline_desc">Deadline (latest)</SelectItem>
-                  <SelectItem value="funding_amount">Funding amount</SelectItem>
-                  <SelectItem value="recent">Recently added</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="md:hidden">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="p-0">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <FilterPanel compact />
-              </SheetContent>
-            </Sheet>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block">
+                <Select
+                  value={sort}
+                  onValueChange={(v) => {
+                    setPage(1)
+                    setSort(v as SortOption)
+                  }}
+                >
+                  <SelectTrigger className="h-11 w-56 rounded-xl border-slate-200 bg-white shadow-sm">
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">Relevance</SelectItem>
+                    <SelectItem value="deadline_asc">Deadline (soonest)</SelectItem>
+                    <SelectItem value="deadline_desc">Deadline (latest)</SelectItem>
+                    <SelectItem value="funding_amount">Funding amount</SelectItem>
+                    <SelectItem value="recent">Recently added</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button
-              variant="outline"
-              onClick={clearAll}
-              className="hidden md:inline-flex"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="h-11 rounded-xl border-slate-200 bg-white shadow-sm md:hidden">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="p-0">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                  </SheetHeader>
+                  <FilterPanel compact />
+                </SheetContent>
+              </Sheet>
+
+              <Button
+                variant="outline"
+                onClick={clearAll}
+                className="hidden h-11 rounded-xl border-slate-200 bg-white shadow-sm md:inline-flex"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>}
 
-        <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+        <div className="grid gap-6 md:grid-cols-[300px_1fr]">
           {/* Desktop filters */}
           <aside className="hidden md:block">
-            <Card className="rounded-2xl">
+            <Card className="sticky top-6 rounded-2xl border-blue-100/80 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base">Filters</CardTitle>
+                <CardTitle className="text-base text-slate-900">Filters</CardTitle>
               </CardHeader>
               <CardContent>
                 <FilterPanel />
@@ -495,8 +572,8 @@ export default function ScholarshipsPage() {
 
           {/* Results */}
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
+              <p className="text-sm text-slate-500">
                 {loading
                   ? "Loading..."
                   : applicationFilter === "all"
@@ -511,7 +588,7 @@ export default function ScholarshipsPage() {
                     setSort(v as SortOption)
                   }}
                 >
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="h-10 w-48 rounded-xl border-slate-200 bg-white shadow-sm">
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -528,6 +605,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "all" ? "default" : "outline"}
                 size="sm"
+                className={applicationFilter === "all" ? "bg-blue-600 text-white hover:bg-blue-700" : "border-slate-300 bg-white hover:bg-slate-50"}
                 onClick={() => setApplicationFilter("all")}
               >
                 All
@@ -535,6 +613,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "applied" ? "default" : "outline"}
                 size="sm"
+                className={applicationFilter === "applied" ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border-slate-300 bg-white hover:bg-slate-50"}
                 onClick={() => setApplicationFilter("applied")}
               >
                 Applied
@@ -542,6 +621,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "not_applied" ? "default" : "outline"}
                 size="sm"
+                className={applicationFilter === "not_applied" ? "bg-slate-700 text-white hover:bg-slate-800" : "border-slate-300 bg-white hover:bg-slate-50"}
                 onClick={() => setApplicationFilter("not_applied")}
               >
                 Not Applied
@@ -551,7 +631,7 @@ export default function ScholarshipsPage() {
             {loading ? (
               <div className="grid gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl">
+                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
                     <CardContent className="p-6 space-y-3">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
@@ -583,19 +663,23 @@ export default function ScholarshipsPage() {
             ) : (
               <div className="grid gap-4">
                 {visibleResults.map((s) => (
-                  <Card key={s.id} className="rounded-2xl">
+                  <Card
+                    key={s.id}
+                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardContent className="p-6 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="text-base font-semibold">{s.title}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-700">{s.title}</p>
+                          <p className="mt-1 text-sm text-slate-500">
                             {s.organizationName ? `${s.organizationName} · ` : ""}
                             {s.country} · {s.degreeLevel.replace("_", " ")}
                             {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
                         {!s.startDate && !(s.endDate || s.deadline) && (
-                          <span className="shrink-0 text-xs text-muted-foreground">
+                          <span className="shrink-0 text-xs text-slate-500">
                             Dates not specified
                           </span>
                         )}
@@ -609,7 +693,7 @@ export default function ScholarshipsPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary">Verified</Badge>
+                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">Verified</Badge>
                         {appliedScholarshipIds.has(s.id) && (
                           <Badge className="bg-blue-600 text-white">Applied</Badge>
                         )}
@@ -628,12 +712,14 @@ export default function ScholarshipsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
                           onClick={() => setViewScholarship(s)}
                         >
                           View
                         </Button>
                         <Button
                           size="sm"
+                          className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
                             const ok = await openScholarshipApplication(s)
@@ -684,7 +770,7 @@ export default function ScholarshipsPage() {
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="pt-2">
+              <div className="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
@@ -727,28 +813,28 @@ export default function ScholarshipsPage() {
               </div>
             )}
           </section>
+          <ScholarshipDetailDialog
+            open={viewScholarship !== null}
+            onOpenChange={(open) => {
+              if (!open) setViewScholarship(null)
+            }}
+            summary={viewScholarship}
+            footerStartExtra={
+              viewScholarship ? (
+                <ScholarshipBookmarkButton
+                  scholarshipId={viewScholarship.id}
+                  isBookmarked={viewScholarship.isBookmarked ?? false}
+                  onBookmarkedChange={(next) =>
+                    updateScholarshipBookmark(viewScholarship.id, next)
+                  }
+                  size="sm"
+                />
+              ) : undefined
+            }
+          />
         </div>
       </div>
-
-      <ScholarshipDetailDialog
-        open={viewScholarship !== null}
-        onOpenChange={(open) => {
-          if (!open) setViewScholarship(null)
-        }}
-        summary={viewScholarship}
-        footerStartExtra={
-          viewScholarship ? (
-            <ScholarshipBookmarkButton
-              scholarshipId={viewScholarship.id}
-              isBookmarked={viewScholarship.isBookmarked ?? false}
-              onBookmarkedChange={(next) =>
-                updateScholarshipBookmark(viewScholarship.id, next)
-              }
-              size="sm"
-            />
-          ) : undefined
-        }
-      />
+      </div>
     </main>
   )
 }

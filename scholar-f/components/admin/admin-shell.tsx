@@ -116,13 +116,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <aside className="hidden w-64 shrink-0 flex-col border-r bg-white md:flex dark:bg-card">
-        <div className="flex items-center gap-2 border-b px-6 py-4">
-          <div className="rounded-md bg-primary/10 p-2 text-primary">
-            <LayoutDashboard className="h-5 w-5" />
+        <div className="border-b px-6 py-4">
+          <div className="mb-4">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-9 w-auto" />
           </div>
-          <div className="leading-tight">
-            <span className="block font-semibold">Admin workspace</span>
-            <span className="text-xs text-muted-foreground">Platform control center</span>
+          <div className="flex items-center gap-2">
+            <div className="rounded-md bg-primary/10 p-2 text-primary">
+              <LayoutDashboard className="h-5 w-5" />
+            </div>
+            <div className="leading-tight">
+              <span className="block font-semibold">Admin workspace</span>
+              <span className="text-xs text-muted-foreground">Platform control center</span>
+            </div>
           </div>
         </div>
         <div className="flex flex-1 flex-col p-4">
@@ -154,11 +159,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <SheetTitle>Admin menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex h-full flex-col border-r bg-white dark:bg-card">
-                  <div className="flex items-center gap-2 border-b px-4 py-3">
-                    <div className="rounded-md bg-primary/10 p-2 text-primary">
-                      <LayoutDashboard className="h-5 w-5" />
+                  <div className="border-b px-4 py-3">
+                    <div className="mb-3">
+                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-8 w-auto" />
                     </div>
-                    <span className="font-semibold">Admin</span>
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-md bg-primary/10 p-2 text-primary">
+                        <LayoutDashboard className="h-5 w-5" />
+                      </div>
+                      <span className="font-semibold">Admin</span>
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto p-3">
                     <NavLinks pathname={pathname} unreadCount={unreadCount} onNavigate={() => setMobileOpen(false)} />

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { CirclePlus, Filter, Search, Sparkles } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -147,37 +148,65 @@ export default function PendingScholarshipsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-        <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Pending Scholarships</h1>
-            <p className="text-sm text-muted-foreground">
-              Review and moderate scholarships before they go live to students.
-            </p>
-          </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <Button asChild>
-              <Link href="/admin/scholarships/new">Create scholarship</Link>
-            </Button>
-            <Input
-              placeholder="Search by title or country"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-72"
-            />
+      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight">Pending Scholarships</h1>
+              <p className="text-sm text-blue-50">
+                Review and moderate scholarships before they go live to students.
+              </p>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs text-blue-50">
+                <Sparkles className="h-3.5 w-3.5" />
+                Faster review workflow
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild className="rounded-xl bg-white text-blue-700 hover:bg-blue-50">
+                <Link href="/admin/scholarships/new">
+                  <CirclePlus className="mr-2 h-4 w-4" />
+                  Create scholarship
+                </Link>
+              </Button>
+            </div>
           </div>
         </header>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Scholarships awaiting review</CardTitle>
+        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <CardHeader className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <CardTitle className="text-base">Scholarships awaiting review</CardTitle>
+              <div className="text-sm text-muted-foreground">
+                {loading ? "Loading..." : `${scholarships.length.toLocaleString()} items`}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Search by title or country"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-10 w-72 rounded-xl border-slate-200 pl-9"
+                />
+              </div>
+              <div className="relative">
+                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <div className="h-10 w-[180px] rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-600 shadow-sm flex items-center">
+                  Pending only
+                </div>
+              </div>
+            </div>
           </CardHeader>
 
           <CardContent>
-            <Table>
-              <TableHeader>
+            <Table className="overflow-hidden rounded-xl border border-slate-200">
+              <TableHeader className="bg-slate-50">
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Country</TableHead>
@@ -198,7 +227,7 @@ export default function PendingScholarshipsPage() {
                 ) : null}
 
                 {scholarships.map((s) => (
-                  <TableRow key={s.id}>
+                  <TableRow key={s.id} className="hover:bg-slate-50/60">
                     <TableCell className="max-w-xs">
                       <Link
                         href={`/admin/scholarships/${s.id}`}

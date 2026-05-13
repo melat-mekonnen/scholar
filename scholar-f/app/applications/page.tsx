@@ -3,7 +3,18 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import {
+  LayoutDashboard,
+  Search,
+  FileText,
+  Users,
+  Bookmark,
+  UserCircle2,
+  Settings,
+  FolderOpen,
+} from "lucide-react"
 
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { getMyApplications, updateApplicationStatus, type ApplicationStatus, type StudentApplication } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 
 export default function ApplicationsPage() {
   const router = useRouter()
@@ -58,6 +70,23 @@ export default function ApplicationsPage() {
     () => [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
     [items]
   )
+  const stats = useMemo(() => {
+    const total = items.length
+    const submitted = items.filter((a) => a.status === "submitted").length
+    const accepted = items.filter((a) => a.status === "accepted").length
+    const pending = items.filter((a) => a.status === "pending").length
+    return { total, submitted, accepted, pending }
+  }, [items])
+  const sidebarLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/scholarships", label: "Browse Scholarships", icon: Search },
+    { href: "/applications", label: "My Applications", icon: FileText, active: true },
+    { href: "/community", label: "Community", icon: Users },
+    { href: "/saved", label: "Saved Scholarships", icon: Bookmark },
+    { href: "/profile", label: "Profile", icon: UserCircle2 },
+    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/documents", label: "Document Resources", icon: FolderOpen },
+  ]
 
   function statusBadge(status: ApplicationStatus) {
     if (status === "accepted") return <Badge className="bg-green-600 text-white">Accepted</Badge>
@@ -67,79 +96,195 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 py-10 space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">My Applications</h1>
-            <p className="text-sm text-muted-foreground">
-              Track the scholarships you applied to and their statuses.
-            </p>
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="flex min-h-screen">
+        <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
+          <div className="mb-8 flex items-center gap-3">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href="/community">Community</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">Back to Dashboard</Link>
-            </Button>
+          <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Student Portal</h2>
+
+          <nav className="space-y-1.5">
+            {sidebarLinks.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    item.active
+                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
+                      : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  }
+                >
+                  <span
+                    className={
+                      item.active
+                        ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
+                        : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </aside>
+
+        <div className="mx-auto w-full max-w-6xl px-4 py-8">
+          <div className="mb-4 flex justify-end">
+            <ProfileAvatarLink />
           </div>
-        </header>
+          <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">My Applications</h1>
+                <p className="text-sm text-blue-50">
+                  Track the scholarships you applied to and their statuses.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+                  <Link href="/community">Community</Link>
+                </Button>
+                <Button asChild variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+                  <Link href="/dashboard">Back to Dashboard</Link>
+                </Button>
+              </div>
+            </div>
+          </header>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        {loading ? <p className="text-sm text-muted-foreground">Loading applications...</p> : null}
+          <div className="mt-6 space-y-5">
+            {!loading && sorted.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 opacity-80" />
+                  <CardContent className="pt-6">
+                    <p className="text-sm font-medium text-slate-500">Total Applications</p>
+                    <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.total}</p>
+                  </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-80" />
+                  <CardContent className="pt-6">
+                    <p className="text-sm font-medium text-slate-500">Submitted</p>
+                    <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.submitted}</p>
+                  </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-80" />
+                  <CardContent className="pt-6">
+                    <p className="text-sm font-medium text-slate-500">Accepted</p>
+                    <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.accepted}</p>
+                  </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-500 to-slate-700 opacity-80" />
+                  <CardContent className="pt-6">
+                    <p className="text-sm font-medium text-slate-500">Pending</p>
+                    <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.pending}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
 
-        {!loading && sorted.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">No applications yet</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Start with a scholarship, click Apply, and it will appear here for tracking.
-              </p>
-              <Button asChild>
-                <Link href="/scholarships">Browse scholarships</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
+            {error ? <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
+            {loading ? <p className="rounded-lg bg-white px-3 py-2 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200">Loading applications...</p> : null}
 
-        <div className="grid gap-4">
-          {sorted.map((a) => (
-            <Card key={a.id}>
-              <CardHeader>
-                <CardTitle className="text-base">{a.scholarship.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  {statusBadge(a.status)}
-                  {a.scholarship.country ? <Badge variant="outline">{a.scholarship.country}</Badge> : null}
-                  {a.scholarship.startDate ? <Badge variant="outline">Start: {String(a.scholarship.startDate)}</Badge> : null}
-                  {a.scholarship.endDate || a.scholarship.deadline ? (
-                    <Badge variant="outline">End: {String(a.scholarship.endDate || a.scholarship.deadline)}</Badge>
-                  ) : null}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <Select value={a.status} onValueChange={(v) => void changeStatus(a.id, v as ApplicationStatus)}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Update status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
-                      <SelectItem value="accepted">Accepted</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/scholarships">View scholarship</Link>
+            {!loading && sorted.length === 0 ? (
+              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-base">No applications yet</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-slate-500">
+                    Start with a scholarship, click Apply, and it will appear here for tracking.
+                  </p>
+                  <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
+                    <Link href="/scholarships">Browse scholarships</Link>
                   </Button>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            <section className="rounded-2xl border border-blue-100/70 bg-white/70 p-3 shadow-sm">
+              <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-base font-semibold text-slate-900">Application Tracker</h2>
+                  <p className="text-xs text-slate-500">Sorted by latest update</p>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="bg-white text-slate-700">Total: {stats.total}</Badge>
+                  <Badge variant="outline" className="bg-white text-blue-700">Submitted: {stats.submitted}</Badge>
+                  <Badge variant="outline" className="bg-white text-emerald-700">Accepted: {stats.accepted}</Badge>
+                  <Badge variant="outline" className="bg-white text-slate-700">Pending: {stats.pending}</Badge>
+                </div>
+              </div>
+
+              {sorted.length === 0 ? (
+                <Card className="rounded-2xl border-dashed border-slate-300 bg-white">
+                  <CardContent className="space-y-3 py-8 text-center">
+                    <p className="text-base font-semibold text-slate-900">No tracked applications yet</p>
+                    <p className="text-sm text-slate-500">
+                      Once you apply to a scholarship, it will appear here with status tracking.
+                    </p>
+                    <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
+                      <Link href="/scholarships">Browse scholarships</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {sorted.map((a) => (
+                    <Card
+                      key={a.id}
+                      className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                      <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base text-slate-900 transition-colors group-hover:text-blue-700">
+                          {a.scholarship.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {statusBadge(a.status)}
+                          {a.scholarship.country ? <Badge variant="outline">{a.scholarship.country}</Badge> : null}
+                          {a.scholarship.startDate ? <Badge variant="outline">Start: {String(a.scholarship.startDate)}</Badge> : null}
+                          {a.scholarship.endDate || a.scholarship.deadline ? (
+                            <Badge variant="outline">End: {String(a.scholarship.endDate || a.scholarship.deadline)}</Badge>
+                          ) : null}
+                          <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+                            Updated: {new Date(a.updatedAt).toLocaleDateString()}
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Select value={a.status} onValueChange={(v) => void changeStatus(a.id, v as ApplicationStatus)}>
+                            <SelectTrigger className="w-[190px] rounded-lg border-slate-300 bg-white">
+                              <SelectValue placeholder="Update status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="submitted">Submitted</SelectItem>
+                              <SelectItem value="accepted">Accepted</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button asChild variant="outline" size="sm" className="rounded-md border-slate-300 bg-white hover:bg-slate-50">
+                            <Link href="/scholarships">View scholarship</Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+          <StudentPortalFooter />
         </div>
       </div>
     </main>

@@ -162,100 +162,28 @@ export default function AdminDashboardPage() {
   const totals = dashboard?.totals
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="flex">
-        {/* Sidebar (desktop) */}
-        <aside className="hidden md:flex w-64 flex-col border-r bg-white">
-          <div className="px-6 py-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="rounded-md bg-primary/10 p-2 text-primary">
-                <LayoutDashboard className="h-5 w-5" />
-              </div>
-              <span className="font-semibold">EthioScholar</span>
-            </div>
+    <div className="relative p-6 space-y-6">
+      <div className="pointer-events-none absolute -left-24 top-20 h-60 w-60 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 top-56 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+
+      <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight">Admin Dashboard</h2>
+            <p className="text-sm text-blue-50">
+              Manage scholarships, users, and platform operations for EthioScholar.
+            </p>
           </div>
-
-          <nav className="p-4 space-y-1 text-sm">
-            <Link
-              href="/admin"
-              className="flex items-center gap-2 w-full rounded-md bg-primary/10 px-3 py-2 font-medium text-primary"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-
-            <Link
-              href="/admin/scholarships/pending"
-              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
-            >
-              <Eye className="h-4 w-4" />
-              Manage Scholarships
-            </Link>
-
-            <Link
-              href="/admin/users"
-              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
-            >
-              <Users className="h-4 w-4" />
-              Manage Users
-            </Link>
-            <Link
-              href="/admin/audit-logs"
-              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
-            >
-              <ListChecks className="h-4 w-4" />
-              Audit Logs
-            </Link>
-            <Link
-              href="/admin/documents"
-              className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
-            >
-              <Eye className="h-4 w-4" />
-              Manage Documents
-            </Link>
-          </nav>
-
-          <div className="mt-auto p-4 border-t space-y-2">
-            <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100">
-              <Settings className="h-4 w-4" />
-              Settings
-            </button>
-
-            <button
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 hover:bg-gray-100"
-              onClick={() => {
-                clearToken()
-                router.push("/signin")
-              }}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+              <Bell className="h-5 w-5" />
+            </span>
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+              <User className="h-5 w-5" />
+            </span>
           </div>
-        </aside>
-
-        {/* Main */}
-        <div className="flex-1">
-          {/* Top header */}
-          <header className="sticky top-0 z-10 bg-white border-b">
-            <div className="px-5 py-4 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500">
-                  Manage scholarships, users, and platform operations for EthioScholar.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5 text-muted-foreground" />
-                <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <User className="h-4 w-4" />
-                </div>
-              </div>
-            </div>
-          </header>
-
-          <main className="p-5">
+        </div>
+      </header>
             {error ? (
               <p className="text-sm text-destructive bg-red-50 border border-red-200 rounded px-3 py-2">
                 {error}
@@ -266,7 +194,7 @@ export default function AdminDashboardPage() {
             <section className="grid gap-4 md:grid-cols-4 mb-6">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="rounded-lg">
+                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
                     <CardContent className="p-4 space-y-2">
                       <Skeleton className="h-4 w-28" />
                       <Skeleton className="h-8 w-16" />
@@ -276,35 +204,39 @@ export default function AdminDashboardPage() {
                 ))
               ) : (
                 <>
-                  <Card className="rounded-lg">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Active Scholarships</p>
-                      <p className="text-3xl font-bold">{totals?.scholarships.verified ?? 0}</p>
-                      <p className="text-xs text-gray-400">Currently open for applications</p>
+                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-80" />
+                    <CardContent className="p-5">
+                      <p className="text-xs text-slate-500">Active Scholarships</p>
+                      <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{totals?.scholarships.verified ?? 0}</p>
+                      <p className="mt-1 text-xs text-slate-400">Currently open for applications</p>
                     </CardContent>
                   </Card>
 
-                  <Card className="rounded-lg">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Pending Approvals</p>
-                      <p className="text-3xl font-bold">{totals?.scholarships.pending ?? 0}</p>
-                      <p className="text-xs text-gray-400">Scholarships awaiting review</p>
+                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 opacity-80" />
+                    <CardContent className="p-5">
+                      <p className="text-xs text-slate-500">Pending Approvals</p>
+                      <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{totals?.scholarships.pending ?? 0}</p>
+                      <p className="mt-1 text-xs text-slate-400">Scholarships awaiting review</p>
                     </CardContent>
                   </Card>
 
-                  <Card className="rounded-lg">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Total Applications</p>
-                      <p className="text-3xl font-bold">{totals?.applications.total ?? 0}</p>
-                      <p className="text-xs text-gray-400">Across all listed scholarships</p>
+                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-80" />
+                    <CardContent className="p-5">
+                      <p className="text-xs text-slate-500">Total Applications</p>
+                      <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{totals?.applications.total ?? 0}</p>
+                      <p className="mt-1 text-xs text-slate-400">Across all listed scholarships</p>
                     </CardContent>
                   </Card>
 
-                  <Card className="rounded-lg">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-gray-500">Total Users</p>
-                      <p className="text-3xl font-bold">{totals?.users.total ?? 0}</p>
-                      <p className="text-xs text-gray-400">Registered student accounts</p>
+                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-600 to-slate-800 opacity-80" />
+                    <CardContent className="p-5">
+                      <p className="text-xs text-slate-500">Total Users</p>
+                      <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{totals?.users.total ?? 0}</p>
+                      <p className="mt-1 text-xs text-slate-400">Registered accounts</p>
                     </CardContent>
                   </Card>
                 </>
@@ -312,18 +244,18 @@ export default function AdminDashboardPage() {
             </section>
 
             {/* Scholarships needing approval */}
-            <section className="rounded-lg border bg-white">
-              <div className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3">
+            <section className="rounded-2xl border border-blue-100/80 bg-white shadow-sm">
+              <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between flex-wrap gap-3">
                 <h2 className="text-lg font-semibold">Needs Approval / Unverified</h2>
 
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="outline" className="rounded-md">
+                  <Button asChild variant="outline" className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
                     <Link href="/admin/scholarships/pending">Scholarship Listings</Link>
                   </Button>
-                  <Button asChild className="rounded-md">
+                  <Button asChild className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
                     <Link href="/admin/scholarships/new">Create Scholarship</Link>
                   </Button>
-                  <Button asChild variant="outline" className="rounded-md">
+                  <Button asChild variant="outline" className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
                     <Link href="/admin/audit-logs">View Audit Logs</Link>
                   </Button>
                 </div>
@@ -335,7 +267,7 @@ export default function AdminDashboardPage() {
                   <div className="relative min-w-[260px] flex-1">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      className="pl-8 rounded-md"
+                      className="h-10 pl-8 rounded-xl border-slate-200"
                       placeholder="Search scholarships..."
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -344,7 +276,7 @@ export default function AdminDashboardPage() {
 
                   <div className="flex items-center gap-3">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-[180px] rounded-md">
+                      <SelectTrigger className="h-10 w-[180px] rounded-xl border-slate-200 bg-white">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -360,9 +292,9 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* table */}
-                <div className="overflow-x-auto rounded-md border">
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <Table>
-                    <TableHeader className="bg-gray-50">
+                    <TableHeader className="bg-slate-50">
                       <TableRow>
                         <TableHead>Scholarship Title</TableHead>
                         <TableHead>Status</TableHead>
@@ -383,8 +315,8 @@ export default function AdminDashboardPage() {
                         ))
                       ) : visibleScholarships.length ? (
                         visibleScholarships.map((s) => (
-                          <TableRow key={s.id} className="hover:bg-gray-50/60">
-                            <TableCell className="font-medium text-indigo-700">
+                          <TableRow key={s.id} className="hover:bg-slate-50/60">
+                            <TableCell className="font-medium text-slate-900">
                               {s.title}
                             </TableCell>
                             <TableCell>{getStatusBadge(s.status)}</TableCell>
@@ -392,7 +324,7 @@ export default function AdminDashboardPage() {
                             <TableCell>{s.deadline ?? "N/A"}</TableCell>
                             <TableCell className="text-right">
                               <div className="inline-flex items-center gap-2">
-                                <Button size="icon-sm" variant="outline" asChild>
+                                <Button size="icon-sm" variant="outline" asChild className="border-slate-300 bg-white hover:bg-slate-50">
                                   <Link href={`/admin/scholarships/${s.id}`}>
                                     <Eye className="h-4 w-4" />
                                   </Link>
@@ -400,7 +332,7 @@ export default function AdminDashboardPage() {
 
                                 <Button
                                   size="icon-sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                   onClick={() => approveScholarship(s.id)}
                                   disabled={!!mutatingIds[s.id]}
                                   aria-label="Approve scholarship"
@@ -437,9 +369,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </section>
-          </main>
-        </div>
-      </div>
     </div>
   )
 }
