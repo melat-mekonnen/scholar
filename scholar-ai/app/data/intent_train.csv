@@ -1,0 +1,17 @@
+text,intent
+find scholarships in germany for masters in ai,find_scholarship
+show fully funded data science scholarships,find_scholarship
+i need scholarships in japan for engineering,find_scholarship
+recommend top scholarships for computer science students,find_scholarship
+what scholarships are available in the uk,find_scholarship
+am i eligible for daad with 3.5 gpa,eligibility_check
+can i apply if my gpa is 3.0,eligibility_check
+check eligibility for erasmus mundus,eligibility_check
+do i meet requirements for chevening,eligibility_check
+am i qualified for this scholarship,eligibility_check
+which scholarships are closing soon,deadline_check
+show upcoming deadlines for germany scholarships,deadline_check
+what should i apply before next month,deadline_check
+list urgent scholarship deadlines,deadline_check
+which scholarships expire in 2 weeks,deadline_check
+

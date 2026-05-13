@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, CheckCheck, ChevronLeft } from "lucide-react"
+import { Activity, Bell, CheckCheck, ChevronLeft } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -36,6 +36,13 @@ function typeLabel(type: string) {
   if (type === "scholarship_verified") return "Approved"
   if (type === "scholarship_rejected") return "Rejected"
   return "Update"
+}
+
+function typeTone(type: string, isRead: boolean) {
+  if (isRead) return "border-slate-200 bg-slate-50 text-slate-600"
+  if (type === "scholarship_verified") return "border-emerald-200 bg-emerald-50 text-emerald-700"
+  if (type === "scholarship_rejected") return "border-rose-200 bg-rose-50 text-rose-700"
+  return "border-blue-200 bg-blue-50 text-blue-700"
 }
 
 export function NotificationsPage({ expectedRole, title, backHref, showBackLink = true }: Props) {
@@ -89,37 +96,60 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
   }
 
   return (
-    <div className={showBackLink ? "min-h-screen bg-gray-50 text-gray-900" : "text-gray-900"}>
-      <div className="mx-auto max-w-4xl px-4 py-6 md:py-8">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <Bell className="h-5 w-5" />
+    <div className={showBackLink ? "min-h-screen bg-slate-50 text-slate-900" : "text-slate-900"}>
+      <div className="relative mx-auto max-w-5xl px-4 py-6 md:py-8">
+        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-slate-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-slate-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 top-44 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 top-72 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <header className="mb-6 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-gradient-to-br from-blue-50 to-emerald-50 p-2.5 text-blue-700 ring-1 ring-blue-100">
+                <Bell className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+                <p className="text-sm text-slate-500">Moderation updates for your scholarships.</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{title}</h1>
-              <p className="text-sm text-muted-foreground">Moderation updates for your scholarships.</p>
+            <div className="flex flex-wrap items-center gap-2">
+              {showBackLink ? (
+                <Button asChild variant="outline" className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
+                  <Link href={backHref}>
+                    <ChevronLeft className="mr-1 h-4 w-4" />
+                    Back
+                  </Link>
+                </Button>
+              ) : null}
+              <Button
+                onClick={() => void markAllRead()}
+                disabled={marking || unreadCount === 0}
+                className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+              >
+                <CheckCheck className="mr-1 h-4 w-4" />
+                Mark all read
+              </Button>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {showBackLink ? (
-              <Button asChild variant="outline">
-                <Link href={backHref}>
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Back
-                </Link>
-              </Button>
-            ) : null}
-            <Button onClick={() => void markAllRead()} disabled={marking || unreadCount === 0}>
-              <CheckCheck className="mr-1 h-4 w-4" />
-              Mark all read
-            </Button>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-blue-700">
+              Total: {items.length}
+            </span>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
+              Unread: {unreadCount}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-gradient-to-r from-blue-50 to-emerald-50 px-2.5 py-1 text-blue-700">
+              <Activity className="h-3.5 w-3.5" />
+              Activity stream
+            </span>
           </div>
         </header>
 
         {error ? <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
 
-        <Card>
+        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
             <CardDescription>{unreadCount} unread</CardDescription>
@@ -129,15 +159,17 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : items.length ? (
               items.map((n) => (
-                <div key={n.id} className="rounded border bg-white p-3">
+                <div key={n.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <Badge variant={n.isRead ? "secondary" : "default"}>{typeLabel(n.type)}</Badge>
+                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${typeTone(n.type, n.isRead)}`}>
+                      {typeLabel(n.type)}
+                    </span>
                     <span className="text-xs text-muted-foreground">{new Date(n.createdAt).toLocaleString()}</span>
                   </div>
-                  <p className="text-sm">{n.message}</p>
+                  <p className="text-sm text-slate-700">{n.message}</p>
                   {n.scholarshipId ? (
                     <div className="mt-2">
-                      <Link className="text-xs text-primary underline-offset-4 hover:underline" href={`/admin/scholarships/${n.scholarshipId}`}>
+                      <Link className="text-xs text-slate-700 underline underline-offset-4 hover:text-slate-900" href={`/admin/scholarships/${n.scholarshipId}`}>
                         View scholarship
                       </Link>
                     </div>

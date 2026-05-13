@@ -89,97 +89,72 @@ export default function OwnerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <Building2 className="h-6 w-6" />
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="relative mx-auto max-w-6xl px-4 py-8">
+        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <header className="mb-6 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                <Building2 className="h-5 w-5" />
+              </span>
+              <h1 className="text-2xl font-semibold tracking-tight">Owner dashboard</h1>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">Owner dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                Posting profile and user roles live here; open <strong>Scholarship operations</strong> for
-                listings, deadlines, and documents under your owner account.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/owner/users">
-                <Users className="mr-2 h-4 w-4" />
-                Students & managers
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/posting-profile">
-                <IdCard className="mr-2 h-4 w-4" />
-                Posting profile
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/owner/scholarships">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Scholarship operations
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                void logoutFromServer()
-                clearToken()
-                router.push("/signin")
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
+            <p className="text-sm text-blue-50">
+              Posting profile and user roles live here; open <strong>Scholarship operations</strong> for
+              listings, deadlines, and documents under your owner account.
+            </p>
           </div>
         </header>
 
-        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
+        {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>}
 
         {data && !loading && (
           <div className="space-y-4">
-            <Card>
+            <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>Overview</CardTitle>
-                <CardDescription>{data.message}</CardDescription>
+                <CardTitle className="text-lg text-slate-900">Overview</CardTitle>
+                <CardDescription className="text-slate-500">
+                  Owner dashboard for approvals, profile management, and scholarship operations oversight.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                <p className="mb-2">
-                  API: <code className="rounded bg-muted px-1">GET /api/owner/dashboard</code>
-                </p>
-                <p>
-                  Use <strong>Students & managers</strong> to promote students to manager (or revert).
-                  Later milestones: audit logs and cross-manager analytics.
-                </p>
+              <CardContent className="grid gap-3 text-sm">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="font-medium text-slate-900">Role</p>
+                  <p className="text-slate-600 capitalize">{data.role}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="font-medium text-slate-900">Pending approvals</p>
+                  <p className="text-slate-600">{pending.length}</p>
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>Needs approval ({pending.length})</CardTitle>
-                <CardDescription>Manager posts waiting for owner/admin verification.</CardDescription>
+                <CardTitle className="text-lg text-slate-900">Needs approval ({pending.length})</CardTitle>
+                <CardDescription className="text-slate-500">Pending scholarship submissions.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {pending.length ? (
                   pending.map((s) => (
-                    <div key={s.id} className="rounded border p-3 flex items-center justify-between gap-3">
+                    <div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
                       <div className="min-w-0">
-                        <p className="font-medium truncate">{s.title}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="truncate font-medium text-slate-900">{s.title}</p>
+                        <p className="text-xs text-slate-500">
                           {s.country || "N/A"} · deadline {s.deadline || "N/A"}
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" asChild>
+                        <Button size="sm" variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" asChild>
                           <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-emerald-600 text-white hover:bg-emerald-700"
                           onClick={() => void approve(s.id)}
                           disabled={!!busyIds[s.id]}
                         >
@@ -199,7 +174,9 @@ export default function OwnerDashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No scholarships waiting for approval.</p>
+                  <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500">
+                    No scholarships waiting for approval.
+                  </p>
                 )}
               </CardContent>
             </Card>

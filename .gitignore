@@ -1,1 +1,5 @@
 .env
+scholar-ai/.venv/
+scholar-ai/**/__pycache__/
+scholar-ai/**/*.pyc
+scholar-f/tsconfig.tsbuildinfo

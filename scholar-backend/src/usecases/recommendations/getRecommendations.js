@@ -2,6 +2,7 @@ const axios = require("axios");
 const { env } = require("../../config/env");
 const { ScholarshipRepository } = require("../../repositories/ScholarshipRepository");
 const { StudentProfileRepository } = require("../../repositories/StudentProfileRepository");
+const { fetchScholarshipPoolForAi } = require("./scholarshipPoolForAi");
 
 const scholarshipRepo = new ScholarshipRepository();
 const profileRepo = new StudentProfileRepository();
@@ -32,22 +33,8 @@ async function getRecommendations({ userId, topN = 10 }) {
     throw err;
   }
 
-  // Candidate pool: take a reasonable slice of verified scholarships.
-  // (simple first version; later you can prefilter by country/degree, or paginate)
-  const search = await scholarshipRepo.searchPublic({
-    q: "",
-    countries: [],
-    degreeLevels: [],
-    fieldsOfStudy: [],
-    fundingTypes: [],
-    deadlineFrom: "",
-    deadlineTo: "",
-    sort: "recent",
-    page: 1,
-    limit: 200,
-    status: "verified",
-    bookmarkUserId: userId,
-  });
+  // Candidate pool: prefer profile-aligned rows (country, degree, field), then widen if too few.
+  const search = await fetchScholarshipPoolForAi(scholarshipRepo, userId, profile, 200);
 
   const candidates = (search.results || []).map((s) => ({
     id: s.id,
@@ -71,15 +58,23 @@ async function getRecommendations({ userId, topN = 10 }) {
   const results = Array.isArray(data?.results) ? data.results : [];
 
   return {
+    source: "ai",
     studentText,
     results: results
       .map((r) => {
         const s = byId.get(r.id);
         if (!s) return null;
+        const matched = r.matchedTerms || [];
+        const matchPercentage =
+          r.matchPercent != null && Number.isFinite(Number(r.matchPercent))
+            ? Number(r.matchPercent)
+            : Math.round(Math.min(1, Math.max(0, Number(r.score) || 0)) * 10000) / 100;
         return {
           scholarship: s,
           score: r.score,
-          matchedTerms: r.matchedTerms || [],
+          matchedTerms: matched,
+          matchPercentage,
+          matchedInterests: matched,
         };
       })
       .filter(Boolean),

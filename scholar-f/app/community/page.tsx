@@ -19,6 +19,8 @@ import { clearToken, getToken } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -298,6 +300,8 @@ export default function CommunityPage() {
           <NavLink href="/applications">{t("My Applications")}</NavLink>
           <NavLink href="/community">{t("Community")}</NavLink>
           <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
+          <NavLink href="/ai-matches">{t("AI Matches")}</NavLink>
+          <NavLink href="/ai-chat">{t("AI Chatbot")}</NavLink>
           <NavLink href="/profile">{t("Profile")}</NavLink>
           <NavLink href="/settings">{t("Settings")}</NavLink>
           <NavLink href="/documents">{t("Documents")}</NavLink>
@@ -312,11 +316,14 @@ export default function CommunityPage() {
               Peer tips, experiences, and constructive feedback — stay kind and on-topic.
             </p>
           </div>
-          {me?.role && (
-            <Badge variant="secondary" className="capitalize">
-              {me.role}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {me?.role && (
+              <Badge variant="secondary" className="capitalize">
+                {me.role}
+              </Badge>
+            )}
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 md:flex-row md:gap-0 md:p-0">
@@ -543,6 +550,7 @@ export default function CommunityPage() {
             </div>
           </div>
         </div>
+        <StudentPortalFooter />
       </div>
     </div>
   )

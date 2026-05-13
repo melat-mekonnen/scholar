@@ -34,6 +34,8 @@ const AMHARIC: Record<string, string> = {
   View: "ይመልከቱ",
   Apply: "ያመልክቱ",
   "Mark all read": "ሁሉንም እንደተነበበ አድርግ",
+  "AI Matches": "AI ማዕከለኛ ውጤቶች",
+  "AI Chatbot": "AI ደብረ ተዋናይ",
 }
 
 type StudentI18nContextValue = {
