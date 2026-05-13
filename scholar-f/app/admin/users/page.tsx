@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { Search as SearchIcon, SlidersHorizontal, Users as UsersIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -58,6 +59,17 @@ export default function AdminUsersPage() {
   const [editRole, setEditRole] = useState<Role>("student")
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const activeCount = useMemo(() => users.filter((u) => u.isActive).length, [users])
+  const inactiveCount = useMemo(() => users.filter((u) => !u.isActive).length, [users])
+  const roleCounts = useMemo(
+    () => ({
+      student: users.filter((u) => u.role === "student").length,
+      manager: users.filter((u) => u.role === "manager").length,
+      owner: users.filter((u) => u.role === "owner").length,
+      admin: users.filter((u) => u.role === "admin").length,
+    }),
+    [users],
+  )
 
   useEffect(() => {
     async function fetchUsers() {
@@ -211,44 +223,104 @@ export default function AdminUsersPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">User Management</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage platform users, roles, and activation status.
-            </p>
+      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-slate-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-slate-500/10 blur-3xl" />
+
+        <header className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+                  <UsersIcon className="h-5 w-5" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">User Management</h1>
+                  <p className="text-sm text-slate-500">
+                    Manage platform users, roles, and activation status.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-600">
+                  Total: {total.toLocaleString()}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-600">
+                  Page size: {pageSize}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" asChild className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
+                <Link href="/admin/audit-logs">Audit logs</Link>
+              </Button>
+              <Button variant="outline" asChild className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
+                <Link href="/admin">Dashboard</Link>
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/admin/audit-logs">Audit logs</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/admin">Dashboard</Link>
-            </Button>
-            <Input
-              placeholder="Search by name or email"
-              value={search}
-              onChange={(e) => {
-                setPage(1)
-                setSearch(e.target.value)
-              }}
-              className="w-64"
-            />
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[260px]">
+              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Search by name or email"
+                value={search}
+                onChange={(e) => {
+                  setPage(1)
+                  setSearch(e.target.value)
+                }}
+                className="h-10 w-full rounded-xl border-slate-200 bg-white pl-9"
+              />
+            </div>
+            <div className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">
+              <SlidersHorizontal className="h-4 w-4" />
+              Use Edit to change role/status
+            </div>
           </div>
         </header>
 
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Active users (page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Inactive users (page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{inactiveCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Managers + Owners</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
+                {roleCounts.manager + roleCounts.owner}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Admins (page)</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{roleCounts.admin}</p>
+            </CardContent>
+          </Card>
+        </section>
+
         {error && (
-          <p className="mb-4 text-sm text-destructive">{error}</p>
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
 
-        <Card>
+        <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
+            <Table className="overflow-hidden rounded-xl border border-slate-200">
+              <TableHeader className="bg-slate-50">
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
@@ -266,21 +338,23 @@ export default function AdminUsersPage() {
                   </TableRow>
                 )}
                 {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.fullName}</TableCell>
+                  <TableRow key={user.id} className="hover:bg-slate-50/60">
+                    <TableCell className="font-medium text-slate-900">{user.fullName}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{user.role}</Badge>
+                      <Badge variant="outline" className="capitalize">{user.role}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={user.isActive ? "default" : "secondary"}>
                         {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right space-x-1">
+                    <TableCell className="text-right">
+                      <div className="flex flex-wrap justify-end gap-1">
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => startEdit(user)}
                       >
                         Edit
@@ -288,6 +362,7 @@ export default function AdminUsersPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => toggleActive(user)}
                       >
                         {user.isActive ? "Deactivate" : "Activate"}
@@ -295,6 +370,7 @@ export default function AdminUsersPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => changeRole(user, "promote")}
                       >
                         Promote
@@ -302,6 +378,7 @@ export default function AdminUsersPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="border-slate-300 bg-white hover:bg-slate-50"
                         onClick={() => changeRole(user, "demote")}
                       >
                         Demote
@@ -313,6 +390,7 @@ export default function AdminUsersPage() {
                       >
                         Delete
                       </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -367,7 +445,7 @@ export default function AdminUsersPage() {
         </Card>
 
         {editingUser && (
-          <Card className="mt-6">
+          <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Edit User</CardTitle>
             </CardHeader>
@@ -377,15 +455,17 @@ export default function AdminUsersPage() {
                   placeholder="Name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  className="h-11 rounded-xl border-slate-200"
                 />
                 <Input
                   placeholder="Email"
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
+                  className="h-11 rounded-xl border-slate-200"
                 />
                 <Select value={editRole} onValueChange={(value) => setEditRole(value as Role)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -397,10 +477,10 @@ export default function AdminUsersPage() {
                 </Select>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingUser(null)}>
+                <Button variant="outline" className="rounded-xl border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditingUser(null)}>
                   Cancel
                 </Button>
-                <Button onClick={saveUser}>
+                <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800" onClick={saveUser}>
                   Save changes
                 </Button>
               </div>

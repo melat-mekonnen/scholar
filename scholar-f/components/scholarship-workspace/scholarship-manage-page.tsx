@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { CirclePlus, Filter, Search, Sparkles } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -133,6 +134,13 @@ export function ScholarshipManagePage({ workspace }: Props) {
       return okQ && okStatus
     })
   }, [items, q, statusFilter, workspace])
+  const summary = useMemo(() => {
+    const total = visible.length
+    const pending = visible.filter((s) => s.status === "pending").length
+    const verified = visible.filter((s) => s.status === "verified").length
+    const rejected = visible.filter((s) => s.status === "rejected").length
+    return { total, pending, verified, rejected }
+  }, [visible])
 
   async function openEdit(id: string) {
     const { res, data, errorMessage } = await apiFetchJson<ScholarshipDetail>(`/api/scholarships/${id}`, {
@@ -218,54 +226,101 @@ export function ScholarshipManagePage({ workspace }: Props) {
 
   return (
     <main className={cfg.standaloneSurfaceClass}>
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h1 className="text-2xl font-bold">Manage scholarships</h1>
-            <p className="text-sm text-muted-foreground">
-              {workspace === "owner"
-                ? "Review and manage all scholarships across managers."
-                : "Update your scholarships. Manager updates go back to pending review."}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
+      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight">Manage scholarships</h1>
+              <p className="text-sm text-blue-50">
+                {workspace === "owner"
+                  ? "Review and manage all scholarships across managers."
+                  : "Update your scholarships. Manager updates go back to pending review."}
+              </p>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs text-blue-50">
+                <Sparkles className="h-3.5 w-3.5" />
+                Organized workflow for scholarship lifecycle
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" asChild className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
               <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
             </Button>
-            <Button asChild>
-              <Link href={cfg.newScholarshipPath}>New scholarship</Link>
-            </Button>
+              <Button asChild className="bg-white text-blue-700 hover:bg-blue-50">
+                <Link href={cfg.newScholarshipPath}>
+                  <CirclePlus className="mr-2 h-4 w-4" />
+                  New scholarship
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
+        </header>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2">
-            <CardTitle className="text-base">Scholarship list</CardTitle>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Search title..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                className="w-56"
-              />
-              <select
-                className="h-9 rounded-md border bg-background px-3 text-sm"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
-                <option value="rejected">Rejected</option>
-                <option value="expired">Expired</option>
-                <option value="draft">Draft</option>
-              </select>
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Total in view</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{summary.total}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Pending</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-amber-600">{summary.pending}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Verified</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">{summary.verified}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardContent className="pt-5">
+              <p className="text-xs text-slate-500">Rejected</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-rose-600">{summary.rejected}</p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <CardHeader className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base">Scholarship list</CardTitle>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Search title..."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="h-10 w-64 rounded-xl border-slate-200 pl-9"
+                />
+              </div>
+              <div className="relative">
+                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <select
+                  className="h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm text-slate-700 shadow-sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="expired">Expired</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table className="overflow-hidden rounded-xl border border-slate-200">
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
@@ -285,16 +340,16 @@ export function ScholarshipManagePage({ workspace }: Props) {
                   </TableRow>
                 ) : visible.length ? (
                   visible.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.title}</TableCell>
+                    <TableRow key={s.id} className="hover:bg-slate-50/70">
+                      <TableCell className="font-medium text-slate-900">{s.title}</TableCell>
                       <TableCell>{s.organizationName || "-"}</TableCell>
                       <TableCell>{statusBadge(s.status)}</TableCell>
                       <TableCell>{s.deadline || "-"}</TableCell>
                       <TableCell className="max-w-52 truncate text-xs text-muted-foreground">
                         {s.rejectionReason || "-"}
                       </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button size="sm" variant="outline" onClick={() => void openEdit(s.id)}>
+                      <TableCell className="space-x-1 text-right">
+                        <Button size="sm" variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => void openEdit(s.id)}>
                           Edit
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => void deleteScholarship(s.id)}>
@@ -316,66 +371,78 @@ export function ScholarshipManagePage({ workspace }: Props) {
         </Card>
 
         {editing ? (
-          <Card>
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Edit scholarship</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Input
-                placeholder="Title"
-                value={editForm.title}
-                onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
-              />
-              <Input
-                placeholder="Organization"
-                value={editForm.organizationName}
-                onChange={(e) => setEditForm((p) => ({ ...p, organizationName: e.target.value }))}
-              />
-              <Input
-                placeholder="Country"
-                value={editForm.country}
-                onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))}
-              />
-              <Input
-                placeholder="Degree level"
-                value={editForm.degreeLevel}
-                onChange={(e) => setEditForm((p) => ({ ...p, degreeLevel: e.target.value }))}
-              />
-              <Input
-                placeholder="Field of study"
-                value={editForm.fieldOfStudy}
-                onChange={(e) => setEditForm((p) => ({ ...p, fieldOfStudy: e.target.value }))}
-              />
-              <Input
-                placeholder="Funding type"
-                value={editForm.fundingType}
-                onChange={(e) => setEditForm((p) => ({ ...p, fundingType: e.target.value }))}
-              />
-              <Input
-                type="date"
-                value={editForm.deadline}
-                onChange={(e) => setEditForm((p) => ({ ...p, deadline: e.target.value }))}
-              />
-              <Input
-                placeholder="Amount"
-                value={editForm.amount}
-                onChange={(e) => setEditForm((p) => ({ ...p, amount: e.target.value }))}
-              />
-              <Input
-                placeholder="Application URL"
-                value={editForm.applicationUrl}
-                onChange={(e) => setEditForm((p) => ({ ...p, applicationUrl: e.target.value }))}
-              />
-              <Textarea
-                placeholder="Description"
-                value={editForm.description}
-                onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
-              />
+              <div className="grid gap-3 md:grid-cols-2">
+                <Input
+                  placeholder="Title"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Organization"
+                  value={editForm.organizationName}
+                  onChange={(e) => setEditForm((p) => ({ ...p, organizationName: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Country"
+                  value={editForm.country}
+                  onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Degree level"
+                  value={editForm.degreeLevel}
+                  onChange={(e) => setEditForm((p) => ({ ...p, degreeLevel: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Field of study"
+                  value={editForm.fieldOfStudy}
+                  onChange={(e) => setEditForm((p) => ({ ...p, fieldOfStudy: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Funding type"
+                  value={editForm.fundingType}
+                  onChange={(e) => setEditForm((p) => ({ ...p, fundingType: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  type="date"
+                  value={editForm.deadline}
+                  onChange={(e) => setEditForm((p) => ({ ...p, deadline: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Amount"
+                  value={editForm.amount}
+                  onChange={(e) => setEditForm((p) => ({ ...p, amount: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200"
+                />
+                <Input
+                  placeholder="Application URL"
+                  value={editForm.applicationUrl}
+                  onChange={(e) => setEditForm((p) => ({ ...p, applicationUrl: e.target.value }))}
+                  className="h-11 rounded-xl border-slate-200 md:col-span-2"
+                />
+                <Textarea
+                  placeholder="Description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                  className="min-h-[120px] rounded-xl border-slate-200 md:col-span-2"
+                />
+              </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditing(null)}>
+                <Button variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditing(null)}>
                   Cancel
                 </Button>
-                <Button onClick={() => void saveEdit()} disabled={saving}>
+                <Button onClick={() => void saveEdit()} disabled={saving} className="bg-emerald-600 text-white hover:bg-emerald-700">
                   {saving ? "Saving..." : "Save"}
                 </Button>
               </div>

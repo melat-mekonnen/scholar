@@ -1,15 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState, type ReactNode } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   Bell,
+  FolderOpen,
+  LayoutDashboard,
   Moon,
   Palette,
+  Search,
   Shield,
+  Bookmark,
+  FileText,
   UserCircle,
+  UserCircle2,
+  Users,
+  Settings as SettingsIcon,
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
@@ -20,10 +28,8 @@ import {
   saveNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/user-preferences"
-import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -35,34 +41,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 
 type MeResponse = {
   id: string
   fullName?: string
   email: string
   role?: string
-}
-
-function NavLink({
-  href,
-  children,
-}: {
-  href: string
-  children: ReactNode
-}) {
-  const pathname = usePathname()
-  const active = pathname === href
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "block text-sm font-medium hover:text-primary",
-        active && "text-primary",
-      )}
-    >
-      {children}
-    </Link>
-  )
 }
 
 export default function SettingsPage() {
@@ -107,53 +93,73 @@ export default function SettingsPage() {
     })
   }
 
-  return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Student dashboard</p>
-        </div>
+  const sidebarLinks = [
+    { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
+    { href: "/scholarships", label: t("Browse Scholarships"), icon: Search },
+    { href: "/applications", label: t("My Applications"), icon: FileText },
+    { href: "/community", label: t("Community"), icon: Users },
+    { href: "/saved", label: t("Saved Scholarships"), icon: Bookmark },
+    { href: "/profile", label: t("Profile"), icon: UserCircle2 },
+    { href: "/settings", label: t("Settings"), icon: SettingsIcon, active: true },
+    { href: "/documents", label: t("Documents"), icon: FolderOpen },
+  ]
 
-        <nav className="space-y-3">
-          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
-          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
-          <NavLink href="/applications">{t("My Applications")}</NavLink>
-          <NavLink href="/community">{t("Community")}</NavLink>
-          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
-          <NavLink href="/profile">{t("Profile")}</NavLink>
-          <NavLink href="/settings">{t("Settings")}</NavLink>
-          <NavLink href="/documents">{t("Documents")}</NavLink>
+  return (
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+      <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
+        <div className="mb-8 flex items-center gap-3">
+          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+        </div>
+        <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+          {t("Student Portal")}
+        </h2>
+
+        <nav className="space-y-1.5">
+          {sidebarLinks.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  item.active
+                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
+                    : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                }
+              >
+                <span
+                  className={
+                    item.active
+                      ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
+                      : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
         </nav>
       </aside>
 
       <div className="flex-1">
-        <header className="flex items-center justify-between border-b bg-card p-4">
+        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">Settings</h1>
+            <h1 className="text-lg font-semibold text-slate-900">Settings</h1>
             {me?.role && (
-              <Badge variant="secondary" className="capitalize">
+              <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700">
                 {me.role}
               </Badge>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarFallback>
-                {(me?.fullName?.trim()
-                  ? me.fullName
-                      .split(" ")
-                      .filter(Boolean)
-                      .slice(0, 2)
-                      .map((p) => p[0]?.toUpperCase())
-                      .join("")
-                  : me?.email?.[0]?.toUpperCase()) || "U"}
-              </AvatarFallback>
-            </Avatar>
+            <ProfileAvatarLink />
             <Button
               variant="outline"
               size="sm"
+              className="border-slate-300 bg-white hover:bg-slate-50"
               onClick={() => {
                 void logoutFromServer()
                 clearToken()
@@ -165,20 +171,20 @@ export default function SettingsPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-3xl space-y-8 p-6">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
+        <main className="mx-auto max-w-5xl space-y-8 p-6">
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
+            <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
+            <p className="mt-1 text-sm text-blue-50">
               Manage your account, notifications, and how EthioScholar looks for you.
             </p>
           </div>
 
           {/* Account */}
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <UserCircle className="text-primary h-5 w-5" />
-                <CardTitle className="text-base">Account</CardTitle>
+                <UserCircle className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-base text-slate-900">Account</CardTitle>
               </div>
               <CardDescription>
                 Your sign-in identity. Academic details are edited in your profile.
@@ -186,40 +192,40 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {loading ? (
-                <p className="text-muted-foreground text-sm">Loading…</p>
+                <p className="text-slate-500 text-sm">Loading…</p>
               ) : me ? (
                 <>
                   <div className="grid gap-1">
-                    <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
                       Name
                     </p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium text-slate-900">
                       {me.fullName?.trim() || "—"}
                     </p>
                   </div>
                   <div className="grid gap-1">
-                    <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
                       Email
                     </p>
-                    <p className="text-sm font-medium">{me.email}</p>
+                    <p className="text-sm font-medium text-slate-900">{me.email}</p>
                   </div>
                   <Separator />
-                  <Button asChild variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm" className="border-slate-300 bg-white hover:bg-slate-50">
                     <Link href="/profile">Edit academic profile</Link>
                   </Button>
                 </>
               ) : (
-                <p className="text-muted-foreground text-sm">Could not load account.</p>
+                <p className="text-slate-500 text-sm">Could not load account.</p>
               )}
             </CardContent>
           </Card>
 
           {/* Notifications */}
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Bell className="text-primary h-5 w-5" />
-                <CardTitle className="text-base">Notifications</CardTitle>
+                <Bell className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-base text-slate-900">Notifications</CardTitle>
               </div>
               <CardDescription>
                 Choose what we remind you about. Stored on this device until your account syncs with
@@ -230,7 +236,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="email-updates">Product updates</Label>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-slate-500 text-xs">
                     News and tips about EthioScholar
                   </p>
                 </div>
@@ -243,7 +249,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="deadlines">Deadline reminders</Label>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-slate-500 text-xs">
                     Alerts before scholarship deadlines you care about
                   </p>
                 </div>
@@ -256,7 +262,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="matches">New matches</Label>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-slate-500 text-xs">
                     When new scholarships match your profile
                   </p>
                 </div>
@@ -270,11 +276,11 @@ export default function SettingsPage() {
           </Card>
 
           {/* Appearance */}
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Palette className="text-primary h-5 w-5" />
-                <CardTitle className="text-base">Appearance</CardTitle>
+                <Palette className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-base text-slate-900">Appearance</CardTitle>
               </div>
               <CardDescription>Light, dark, or follow your system.</CardDescription>
             </CardHeader>
@@ -286,7 +292,7 @@ export default function SettingsPage() {
                     Theme
                   </Label>
                   <Select value={theme ?? "system"} onValueChange={setTheme}>
-                    <SelectTrigger id="theme-select" className="w-full">
+                    <SelectTrigger id="theme-select" className="w-full rounded-lg border-slate-300 bg-white">
                       <SelectValue placeholder="Theme" />
                     </SelectTrigger>
                     <SelectContent>
@@ -297,29 +303,29 @@ export default function SettingsPage() {
                   </Select>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">Loading theme…</p>
+                <p className="text-slate-500 text-sm">Loading theme…</p>
               )}
             </CardContent>
           </Card>
 
           {/* Security */}
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Shield className="text-primary h-5 w-5" />
-                <CardTitle className="text-base">Security</CardTitle>
+                <Shield className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-base text-slate-900">Security</CardTitle>
               </div>
               <CardDescription>Session and sign-in</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground text-sm">
+              <p className="text-slate-500 text-sm">
                 You are signed in with a secure token stored in this browser. Sign out on shared
                 devices when you are done.
               </p>
               <Button
                 variant="destructive"
                 onClick={() => {
-                void logoutFromServer()
+                  void logoutFromServer()
                   clearToken()
                   router.push("/signin")
                 }}
@@ -329,6 +335,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </main>
+        <StudentPortalFooter />
       </div>
     </div>
   )

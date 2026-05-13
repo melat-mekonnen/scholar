@@ -84,7 +84,7 @@ function NavLinks({
   onNavigate?: () => void
 }) {
   return (
-    <nav className="space-y-1 text-sm">
+    <nav className="space-y-0.5 text-sm">
       {NAV.map((item) => {
         const active = isActive(pathname, item)
         const isNotifications = item.href === "/owner/notifications"
@@ -95,12 +95,23 @@ function NavLinks({
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 font-medium",
-              active ? cfg.navActiveClass : cfg.navInactiveClass,
+              "group flex w-full items-center justify-between gap-1.5 rounded-xl px-2.5 py-1.5 font-medium transition-colors",
+              active
+                ? "bg-gradient-to-r from-blue-50 to-emerald-50 text-blue-700 ring-1 ring-blue-100"
+                : "text-slate-600 hover:bg-gradient-to-r hover:from-blue-50/70 hover:to-emerald-50/70 hover:text-slate-900",
             )}
           >
-            <span className="inline-flex items-center gap-2">
-              {item.icon}
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                  active
+                    ? "bg-white text-blue-700 ring-1 ring-blue-100"
+                    : "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200",
+                )}
+              >
+                {item.icon}
+              </span>
               {item.label}
             </span>
             {isNotifications && unreadCount > 0 ? (
@@ -162,31 +173,37 @@ export function OwnerShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <aside
-        className={cn(
-          "hidden w-64 shrink-0 flex-col border-r md:flex",
-          cfg.shellClassName,
-        )}
+        className="hidden w-72 shrink-0 flex-col border-r border-blue-100/70 bg-gradient-to-b from-blue-50/30 to-emerald-50/20 md:flex"
       >
-        <div className="flex items-center gap-2 border-b px-6 py-4">
-          <div className={cn("rounded-md p-2", cfg.badgeClass)}>
-            <Building2 className="h-5 w-5" />
+        <div className="border-b px-6 py-4">
+          <div className="mb-4 flex items-center gap-3">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
           </div>
-          <div className="leading-tight">
-            <span className="block font-semibold">Owner workspace</span>
-            <span className="text-xs text-muted-foreground">Platform administration</span>
+          <div className="flex items-center gap-2">
+            <div className="rounded-md bg-gradient-to-br from-blue-50 to-emerald-50 p-2 text-blue-700 ring-1 ring-blue-100">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div className="leading-tight">
+              <span className="block font-semibold">Owner workspace</span>
+              <span className="text-xs text-muted-foreground">Platform administration</span>
+            </div>
           </div>
         </div>
         <div className="flex flex-1 flex-col p-4">
           <NavLinks pathname={pathname} cfg={cfg} unreadCount={unreadCount} pendingCount={pendingCount} />
         </div>
-        <div className="mt-auto border-t p-4">
+        <div className="mt-auto border-t border-blue-100/70 p-4">
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-amber-50/80 dark:hover:bg-amber-950/20"
+            className="group flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
             onClick={signOut}
           >
-            <LogOut className="h-4 w-4" />
-            Sign out
+            <span className="inline-flex items-center gap-2.5">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors group-hover:bg-rose-100 group-hover:text-rose-700">
+                <LogOut className="h-4 w-4" />
+              </span>
+              <span className="text-sm font-medium">Sign out</span>
+            </span>
           </button>
         </div>
       </aside>
@@ -204,12 +221,17 @@ export function OwnerShell({ children }: { children: ReactNode }) {
                 <SheetHeader className="sr-only">
                   <SheetTitle>Owner menu</SheetTitle>
                 </SheetHeader>
-                <div className={cn("flex h-full flex-col border-r", cfg.shellClassName)}>
-                  <div className="flex items-center gap-2 border-b px-4 py-3">
-                    <div className={cn("rounded-md p-2", cfg.badgeClass)}>
-                      <Building2 className="h-5 w-5" />
+                <div className="flex h-full flex-col border-r border-blue-100/70 bg-gradient-to-b from-blue-50/30 to-emerald-50/20">
+                  <div className="border-b px-4 py-3">
+                    <div className="mb-3">
+                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-8 w-auto" />
                     </div>
-                    <span className="font-semibold">Owner</span>
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-md bg-gradient-to-br from-blue-50 to-emerald-50 p-2 text-blue-700 ring-1 ring-blue-100">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                      <span className="font-semibold">Owner</span>
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto p-3">
                     <NavLinks

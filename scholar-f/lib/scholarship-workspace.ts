@@ -37,8 +37,8 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
   return {
     workspace: w,
     shellTitle: "Manager Panel",
-    shellSubtitle: "Scholarship operations",
-    dashboardHeading: "Manager dashboard",
+    shellSubtitle: "",
+    dashboardHeading: "University Representative Dashboard",
     dashboardTagline: "Track scholarship performance and application activity.",
     profileLinkLabel: "Your profile",
     opsBackLabel: "Back to manager dashboard",
