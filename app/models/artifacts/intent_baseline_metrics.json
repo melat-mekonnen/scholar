@@ -1,0 +1,65 @@
+{
+  "model": "tfidf_mlp",
+  "val_accuracy": 0.6153846153846154,
+  "val_macro_f1": 0.3595238095238096,
+  "val_weighted_f1": 0.5208791208791209,
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      4,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ]
+  ],
+  "label_order": [
+    "application_help",
+    "compare_scholarships",
+    "deadline_check",
+    "eligibility_check",
+    "find_scholarship",
+    "out_of_scope"
+  ],
+  "classification_report": "                      precision    recall  f1-score   support\n\n    application_help       0.00      0.00      0.00         1\ncompare_scholarships       0.00      0.00      0.00         1\n      deadline_check       0.50      0.50      0.50         2\n   eligibility_check       0.75      1.00      0.86         3\n    find_scholarship       0.67      1.00      0.80         4\n        out_of_scope       0.00      0.00      0.00         2\n\n            accuracy                           0.62        13\n           macro avg       0.32      0.42      0.36        13\n        weighted avg       0.46      0.62      0.52        13\n"
+}

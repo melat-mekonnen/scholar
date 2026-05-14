@@ -1,0 +1,66 @@
+text,intent
+find scholarships in germany for masters in ai,find_scholarship
+show fully funded data science scholarships,find_scholarship
+i need scholarships in japan for engineering,find_scholarship
+recommend top scholarships for computer science students,find_scholarship
+what scholarships are available in the uk,find_scholarship
+fully funded phd positions in canada machine learning,find_scholarship
+scholarships for international students in netherlands,find_scholarship
+list grants for public health masters in africa,find_scholarship
+best funding options for stem bachelor in australia,find_scholarship
+where can i study abroad with a scholarship in 2026,find_scholarship
+need financial aid for mba in france,find_scholarship
+show me environmental science scholarships europe,find_scholarship
+undergraduate scholarships for low income students usa,find_scholarship
+masters in cybersecurity with funding in nordic countries,find_scholarship
+scholarships for women in tech engineering,find_scholarship
+agriculture phd funding opportunities developing countries,find_scholarship
+humanities fellowships for graduate study,find_scholarship
+sports medicine scholarships masters level,find_scholarship
+architecture study grants in italy,find_scholarship
+music performance scholarships at conservatories,find_scholarship
+am i eligible for daad with 3.5 gpa,eligibility_check
+can i apply if my gpa is 3.0,eligibility_check
+check eligibility for erasmus mundus,eligibility_check
+do i meet requirements for chevening,eligibility_check
+am i qualified for this scholarship,eligibility_check
+do i need work experience for fulbright,eligibility_check
+is ielts 6.5 enough for this program,eligibility_check
+age limit for commonwealth scholarships,eligibility_check
+can international students apply for this grant,eligibility_check
+eligibility if i already have a masters degree,eligibility_check
+requirements for need based aid at this school,eligibility_check
+am i too old to apply for a youth mobility scheme,eligibility_check
+nationality restrictions for this bursary,eligibility_check
+minimum gpa for merit scholarship consideration,eligibility_check
+which scholarships are closing soon,deadline_check
+show upcoming deadlines for germany scholarships,deadline_check
+what should i apply before next month,deadline_check
+list urgent scholarship deadlines,deadline_check
+which scholarships expire in 2 weeks,deadline_check
+when is the chevening application deadline,deadline_check
+how many days left to submit daad scholarship,deadline_check
+is the fulbright portal still open,deadline_check
+deadline extension for erasmus applications,deadline_check
+rolling admissions when should i apply by,deadline_check
+last date to upload transcripts for this award,deadline_check
+compare daad scholarship vs fulbright for my profile,compare_scholarships
+which program is better funded chevening or commonwealth,compare_scholarships
+should i pick erasmus mundus or national scholarship,compare_scholarships
+pros and cons of two scholarships i shortlisted,compare_scholarships
+difference between grant and scholarship for masters,compare_scholarships
+how do i submit my scholarship application,application_help
+what documents do i need for the application packet,application_help
+where do i upload letters of recommendation,application_help
+how to write a strong motivation letter for funding,application_help
+step by step applying for a study grant,application_help
+tips for scholarship interview preparation,application_help
+what is the weather in paris tomorrow,out_of_scope
+write my entire essay for me plagiarism free,out_of_scope
+who won the world cup in 1998,out_of_scope
+debug this python recursion error for my homework,out_of_scope
+best pizza recipe without cheese,out_of_scope
+translate this paragraph to korean for me,out_of_scope
+investment advice for cryptocurrency,out_of_scope
+diagnose my medical symptoms from this list,out_of_scope
+book a flight to tokyo cheapest,out_of_scope

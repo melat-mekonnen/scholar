@@ -1,0 +1,30 @@
+[
+  {
+    "name": "DAAD Scholarship",
+    "country": "Germany",
+    "field": "Computer Science",
+    "deadline": "2026-11-20",
+    "eligibility": "International students for Master and PhD programs with strong academic profile.",
+    "funding_type": "Fully funded",
+    "level": "master"
+  },
+  {
+    "name": "Chevening Scholarship",
+    "country": "United Kingdom",
+    "field": "Public Policy",
+    "deadline": "2026-12-01",
+    "eligibility": "Future leaders with undergraduate degree and leadership experience.",
+    "funding_type": "Fully funded",
+    "level": "master"
+  },
+  {
+    "name": "Erasmus Mundus Joint Masters",
+    "country": "Europe",
+    "field": "Engineering",
+    "deadline": "2026-01-10",
+    "eligibility": "Bachelor holders applying to approved Erasmus consortium programs.",
+    "funding_type": "Fully funded",
+    "level": "master"
+  }
+]
+
