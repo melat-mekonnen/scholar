@@ -1,20 +1,18 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Sparkles } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { clearToken, getToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
-import { cn } from "@/lib/utils"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
+import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
 import { createApplication } from "@/lib/applications"
 import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
 
@@ -28,19 +26,6 @@ type RecommendationsResponse = {
   source?: string
   studentText?: string
   results?: RecommendationItem[]
-}
-
-function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  const pathname = usePathname()
-  const active = pathname === href
-  return (
-    <Link
-      href={href}
-      className={cn("block text-sm font-medium hover:text-primary", active && "text-primary")}
-    >
-      {children}
-    </Link>
-  )
 }
 
 function formatDate(date?: string) {
@@ -103,47 +88,18 @@ export default function AiMatchesPage() {
   }, [router])
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5" />
-            {t("AI Matches")}
-          </p>
-        </div>
-        <nav className="space-y-3">
-          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
-          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
-          <NavLink href="/applications">{t("My Applications")}</NavLink>
-          <NavLink href="/community">{t("Community")}</NavLink>
-          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
-          <NavLink href="/ai-matches">{t("AI Matches")}</NavLink>
-          <NavLink href="/ai-chat">{t("AI Chatbot")}</NavLink>
-          <NavLink href="/profile">{t("Profile")}</NavLink>
-          <NavLink href="/settings">{t("Settings")}</NavLink>
-          <NavLink href="/documents">{t("Documents")}</NavLink>
-        </nav>
-      </aside>
-
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b bg-card px-4 py-3">
-          <div>
-            <h1 className="text-lg font-semibold">{t("AI Matches")}</h1>
-            <p className="text-xs text-muted-foreground">
-              Ranked using the AI service (TF‑IDF similarity). Complete your profile for better matches.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <StudentLanguageToggle />
-            <Avatar className="h-9 w-9">
-              <AvatarFallback>ES</AvatarFallback>
-            </Avatar>
-          </div>
-        </header>
-
-        <main className="space-y-6 p-4 sm:p-6">
-          <Card>
+    <StudentPortalShell
+      title={t("AI Matches")}
+      subtitle="Ranked using the AI service. Complete your profile for better matches."
+      hero={{
+        title: t("AI Matches"),
+        description: "Scholarships ranked by fit with your profile, field, and interests.",
+      }}
+      headerEnd={<StudentLanguageToggle />}
+      mainClassName="space-y-6 p-6"
+    >
+        
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardContent className="pt-6">
               {loading && (
                 <div className="space-y-3">
@@ -165,23 +121,23 @@ export default function AiMatchesPage() {
               {!loading && items.length > 0 && (
                 <ul className="space-y-3">
                   {items.map((item, index) => (
-                    <li key={`${item.scholarship.id}-${index}`} className="space-y-3 rounded-md border px-3 py-3">
+                    <li key={`${item.scholarship.id}-${index}`} className="space-y-3 rounded-xl border border-blue-100/80 bg-slate-50/50 px-4 py-4">
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-sm font-semibold">{item.scholarship.title}</p>
                           <p className="text-xs text-muted-foreground">
                             {item.scholarship.country || "N/A"}
-                            {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
+                            {item.scholarship.deadline ? ` Â· ${formatDate(item.scholarship.deadline)}` : ""}
                           </p>
                         </div>
-                        <span className="text-sm font-semibold text-primary">{item.matchPercentage}%</span>
+                        <span className="text-sm font-semibold text-blue-700">{item.matchPercentage}%</span>
                       </div>
                       {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {item.matchedInterests.slice(0, 6).map((interest) => (
                             <span
                               key={`${item.scholarship.id}-${interest}`}
-                              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium"
+                              className="rounded-full bg-emerald-50 text-emerald-800 px-2 py-0.5 text-xs font-medium"
                             >
                               {interest}
                             </span>
@@ -231,8 +187,7 @@ export default function AiMatchesPage() {
               )}
             </CardContent>
           </Card>
-        </main>
-      </div>
-    </div>
+        
+    </StudentPortalShell>
   )
 }

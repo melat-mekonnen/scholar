@@ -1,8 +1,7 @@
 "use client"
 
-import Link from "next/link"
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { MessageCircle, Send, Trash2 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
@@ -19,8 +18,7 @@ import { clearToken, getToken } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalFooter } from "@/components/student-portal/student-footer"
+import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,22 +31,6 @@ type MeResponse = {
   fullName?: string
   email: string
   role?: string
-}
-
-function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  const pathname = usePathname()
-  const active = pathname === href
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "block text-sm font-medium hover:text-primary",
-        active && "text-primary",
-      )}
-    >
-      {children}
-    </Link>
-  )
 }
 
 function initials(name: string) {
@@ -287,48 +269,15 @@ export default function CommunityPage() {
   const canPost = me?.role === "student" || me?.role === "admin"
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Student community</p>
-        </div>
-
-        <nav className="space-y-3">
-          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
-          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
-          <NavLink href="/applications">{t("My Applications")}</NavLink>
-          <NavLink href="/community">{t("Community")}</NavLink>
-          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
-          <NavLink href="/ai-matches">{t("AI Matches")}</NavLink>
-          <NavLink href="/ai-chat">{t("AI Chatbot")}</NavLink>
-          <NavLink href="/profile">{t("Profile")}</NavLink>
-          <NavLink href="/settings">{t("Settings")}</NavLink>
-          <NavLink href="/documents">{t("Documents")}</NavLink>
-        </nav>
-      </aside>
-
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b bg-card px-4 py-3">
-          <div>
-            <h1 className="text-lg font-semibold">Community support</h1>
-            <p className="text-xs text-muted-foreground">
-              Peer tips, experiences, and constructive feedback — stay kind and on-topic.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {me?.role && (
-              <Badge variant="secondary" className="capitalize">
-                {me.role}
-              </Badge>
-            )}
-            <ProfileAvatarLink />
-          </div>
-        </header>
-
+    <StudentPortalShell
+      title="Community"
+      subtitle="Peer tips, experiences, and constructive feedback — stay kind and on-topic."
+      role={me?.role}
+      mainClassName="flex min-h-0 flex-1 flex-col p-0"
+    >
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 md:flex-row md:gap-0 md:p-0">
-          <div className="w-full shrink-0 border-b bg-muted/30 p-4 md:w-72 md:border-b-0 md:border-r">
-            <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">Channels</p>
+          <div className="w-full shrink-0 rounded-2xl border border-blue-100/80 bg-white p-4 shadow-sm md:w-72">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-600">Channels</p>
             {loadingChannels && (
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -354,8 +303,8 @@ export default function CommunityPage() {
                           className={cn(
                             "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
                             channelId === c.id
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-muted",
+                              ? "bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-sm"
+                              : "hover:bg-slate-100",
                           )}
                         >
                           <span className="font-medium">{c.name}</span>
@@ -363,7 +312,7 @@ export default function CommunityPage() {
                             <span
                               className={cn(
                                 "mt-0.5 block text-xs opacity-90",
-                                channelId === c.id ? "text-primary-foreground/90" : "text-muted-foreground",
+                                channelId === c.id ? "text-blue-50" : "text-muted-foreground",
                               )}
                             >
                               {c.description}
@@ -421,7 +370,7 @@ export default function CommunityPage() {
                       key={m.id}
                       className={cn(
                         "overflow-hidden",
-                        m.parentMessageId ? "ml-6 border-l-2 border-primary/30" : "",
+                        m.parentMessageId ? "ml-6 border-l-2 border-blue-200" : "",
                       )}
                     >
                       <CardHeader className="flex flex-row items-start gap-3 space-y-0 p-4 pb-2">
@@ -493,7 +442,7 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            <div className="border-t bg-card p-4">
+            <div className="border-t border-blue-100/70 bg-white p-4">
               {replyTo && (
                 <div className="mb-2 flex items-center justify-between rounded-md border bg-muted/50 px-3 py-2 text-sm">
                   <span className="truncate text-muted-foreground">
@@ -513,7 +462,7 @@ export default function CommunityPage() {
                 <Textarea
                   placeholder={
                     canPost
-                      ? "Share experience, ask for feedback, or offer guidance…"
+                      ? "Share experience, ask for feedback, or offer guidanceÃ¢â‚¬Â¦"
                       : "Read-only for this account type."
                   }
                   value={draft}
@@ -534,7 +483,7 @@ export default function CommunityPage() {
                   onClick={() => void sendMessage()}
                 >
                   {sending ? (
-                    "Sending…"
+                    "SendingÃ¢â‚¬Â¦"
                   ) : (
                     <>
                       <Send className="mr-2 h-4 w-4" />
@@ -550,8 +499,7 @@ export default function CommunityPage() {
             </div>
           </div>
         </div>
-        <StudentPortalFooter />
-      </div>
-    </div>
+    </StudentPortalShell>
   )
 }
+

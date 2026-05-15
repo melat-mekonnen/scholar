@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   Bell,
@@ -18,16 +18,19 @@ import {
   UserCircle2,
   Users,
   Settings as SettingsIcon,
+  Sparkles,
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
+import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import {
   loadNotificationPreferences,
   saveNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/user-preferences"
+import type { SubscriptionStatus } from "@/lib/subscription-types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -43,7 +46,6 @@ import {
 } from "@/components/ui/select"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
-
 type MeResponse = {
   id: string
   fullName?: string
@@ -53,6 +55,7 @@ type MeResponse = {
 
 export default function SettingsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
   const { t } = useStudentI18n()
   const [mounted, setMounted] = useState(false)
@@ -60,6 +63,19 @@ export default function SettingsPage() {
   const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [prefs, setPrefs] = useState<NotificationPreferences>(loadNotificationPreferences)
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null)
+
+  async function loadSubscription() {
+    const { res, data } = await apiFetchJson<SubscriptionStatus>("/api/billing/subscription", {
+      method: "GET",
+      auth: true,
+    })
+    if (res.ok && data) {
+      setSubscription(data)
+    }
+  }
+
+  const chatQuota = subscription?.chat ?? null
 
   useEffect(() => {
     setMounted(true)
@@ -79,11 +95,19 @@ export default function SettingsPage() {
       setLoading(false)
     }
     void load()
+    void loadSubscription()
   }, [router])
 
   useEffect(() => {
     setPrefs(loadNotificationPreferences())
   }, [])
+
+  useEffect(() => {
+    const billing = searchParams.get("billing")
+    if (billing === "success" || billing === "cancel") {
+      router.replace(`/settings/subscription?billing=${billing}`)
+    }
+  }, [searchParams, router])
 
   function updatePrefs(partial: Partial<NotificationPreferences>) {
     setPrefs((prev) => {
@@ -93,57 +117,11 @@ export default function SettingsPage() {
     })
   }
 
-  const sidebarLinks = [
-    { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
-    { href: "/scholarships", label: t("Browse Scholarships"), icon: Search },
-    { href: "/applications", label: t("My Applications"), icon: FileText },
-    { href: "/community", label: t("Community"), icon: Users },
-    { href: "/saved", label: t("Saved Scholarships"), icon: Bookmark },
-    { href: "/profile", label: t("Profile"), icon: UserCircle2 },
-    { href: "/settings", label: t("Settings"), icon: SettingsIcon, active: true },
-    { href: "/documents", label: t("Documents"), icon: FolderOpen },
-  ]
-
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
-        <div className="mb-8 flex items-center gap-3">
-          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-        </div>
-        <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
-          {t("Student Portal")}
-        </h2>
+      <StudentPortalSidebar />
 
-        <nav className="space-y-1.5">
-          {sidebarLinks.map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  item.active
-                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
-                    : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                }
-              >
-                <span
-                  className={
-                    item.active
-                      ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
-                      : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
-                  }
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>{item.label}</span>
-              </Link>
-            )
-          })}
-        </nav>
-      </aside>
-
-      <div className="flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">Settings</h1>
@@ -179,6 +157,63 @@ export default function SettingsPage() {
             </p>
           </div>
 
+          {/* AI Chat subscription */}
+          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-violet-600" />
+                <CardTitle className="text-base text-slate-900">AI Chat subscription</CardTitle>
+              </div>
+              <CardDescription>
+                Free: 3 messages per day. Pro: unlimited AI chat. Manage plans, payments, and billing on the
+                subscription page.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {chatQuota ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className={
+                        chatQuota.unlimited
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-slate-100 text-slate-700"
+                      }
+                    >
+                      {chatQuota.unlimited ? "Pro" : "Free"}
+                    </Badge>
+                    {!chatQuota.unlimited ? (
+                      <span className="text-sm text-slate-600">
+                        {chatQuota.remaining ?? 0} of {chatQuota.limit ?? 3} messages left today
+                      </span>
+                    ) : (
+                      <span className="text-sm text-slate-600">Unlimited AI chat</span>
+                    )}
+                  </div>
+                  {subscription?.expiresAt ? (
+                    <p className="text-xs text-slate-500">
+                      Pro until {new Date(subscription.expiresAt).toLocaleDateString()}
+                      {subscription.provider ? ` Ã‚Â· ${subscription.provider}` : ""}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <Button asChild>
+                      <Link href="/settings/subscription">
+                        {chatQuota.unlimited ? "Manage subscription" : "View plans & upgrade"}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href="/ai-chat">Open AI Chat</Link>
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-slate-500">Loading subscription statusÃ¢â‚¬Â¦</p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Account */}
           <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
             <CardHeader>
@@ -192,7 +227,7 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {loading ? (
-                <p className="text-slate-500 text-sm">Loading…</p>
+                <p className="text-slate-500 text-sm">LoadingÃ¢â‚¬Â¦</p>
               ) : me ? (
                 <>
                   <div className="grid gap-1">
@@ -200,7 +235,7 @@ export default function SettingsPage() {
                       Name
                     </p>
                     <p className="text-sm font-medium text-slate-900">
-                      {me.fullName?.trim() || "—"}
+                      {me.fullName?.trim() || "Ã¢â‚¬â€"}
                     </p>
                   </div>
                   <div className="grid gap-1">
@@ -303,7 +338,7 @@ export default function SettingsPage() {
                   </Select>
                 </div>
               ) : (
-                <p className="text-slate-500 text-sm">Loading theme…</p>
+                <p className="text-slate-500 text-sm">Loading themeÃ¢â‚¬Â¦</p>
               )}
             </CardContent>
           </Card>

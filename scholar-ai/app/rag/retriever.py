@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import List, Dict, Any
 
-from app.rag.embeddings import scholarship_to_text, EmbeddingService
+from app.rag.embeddings import EmbeddingService
 from app.rag.faiss_index import build_index, search
+from app.rag.semantic_model import scholarship_retrieval_document
 
 
 class HybridRetriever:
@@ -15,7 +16,7 @@ class HybridRetriever:
     ) -> None:
         self.records = records
         self.embedding = EmbeddingService(use_sentence_transformers=use_sentence_transformers)
-        self.texts = [scholarship_to_text(r) for r in records]
+        self.texts = [scholarship_retrieval_document(r) for r in records]
         if self.texts:
             # Fit embeddings once on the corpus.
             self.embedding.fit(self.texts)

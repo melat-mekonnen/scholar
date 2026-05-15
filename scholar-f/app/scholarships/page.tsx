@@ -16,7 +16,10 @@ import {
   FolderOpen,
 } from "lucide-react"
 
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import {
+  StudentPortalFrame,
+  StudentPortalTopHeader,
+} from "@/components/student-portal/student-portal-frame"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -289,17 +292,6 @@ export default function ScholarshipsPage() {
     setPage(1)
   }
 
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/scholarships", label: "Browse Scholarships", icon: SearchIcon, active: true },
-    { href: "/applications", label: "My Applications", icon: FileText },
-    { href: "/community", label: "Community", icon: Users },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark },
-    { href: "/profile", label: "Profile", icon: UserCircle2 },
-    { href: "/settings", label: "Settings", icon: Settings },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen },
-  ]
-
   function FilterPanel({ compact }: { compact?: boolean }) {
     const degreeOptions =
       filters?.degreeLevels ?? ["high_school", "bachelor", "master", "phd"]
@@ -432,49 +424,11 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
-          <div className="mb-8 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-          </div>
-          <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Student Portal</h2>
+    <StudentPortalFrame header={<StudentPortalTopHeader title="Browse Scholarships" />}>
 
-          <nav className="space-y-1.5">
-            {sidebarLinks.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={
-                    item.active
-                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
-                      : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                  }
-                >
-                  <span
-                    className={
-                      item.active
-                        ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
-                        : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span>{item.label}</span>
-                </Link>
-              )
-            })}
-          </nav>
-        </aside>
-
-        <div className="relative w-full space-y-6 px-4 py-8">
-          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 top-64 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="flex justify-end">
-            <ProfileAvatarLink />
-          </div>
+      <div className="relative space-y-6">
+        <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 top-64 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
         <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-2">
@@ -673,9 +627,9 @@ export default function ScholarshipsPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-700">{s.title}</p>
                           <p className="mt-1 text-sm text-slate-500">
-                            {s.organizationName ? `${s.organizationName} · ` : ""}
-                            {s.country} · {s.degreeLevel.replace("_", " ")}
-                            {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
+                            {s.organizationName ? `${s.organizationName} Â· ` : ""}
+                            {s.country} Â· {s.degreeLevel.replace("_", " ")}
+                            {s.fieldOfStudy ? ` Â· ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
                         {!s.startDate && !(s.endDate || s.deadline) && (
@@ -813,6 +767,7 @@ export default function ScholarshipsPage() {
               </div>
             )}
           </section>
+        </div>
           <ScholarshipDetailDialog
             open={viewScholarship !== null}
             onOpenChange={(open) => {
@@ -832,10 +787,8 @@ export default function ScholarshipsPage() {
               ) : undefined
             }
           />
-        </div>
       </div>
-      </div>
-    </main>
+    </StudentPortalFrame>
   )
 }
 

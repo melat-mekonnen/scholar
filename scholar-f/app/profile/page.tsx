@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { apiFetchJson } from "@/lib/api"
 import { getPostAuthPath } from "@/lib/redirect-by-role"
+import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 
@@ -68,16 +69,6 @@ function ProfilePageInner() {
   }, [router, intentStudent])
 
   const homeHref = role ? getPostAuthPath(role) : "/dashboard"
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/scholarships", label: "Browse Scholarships", icon: Search },
-    { href: "/applications", label: "My Applications", icon: FileText },
-    { href: "/community", label: "Community", icon: Users },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark },
-    { href: "/profile", label: "Profile", icon: UserCircle2, active: true },
-    { href: "/settings", label: "Settings", icon: Settings },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen },
-  ]
 
   const handleSaveProfile = (_profile: StudentProfile) => {
     // Saved state is handled inside StudentProfileForm (toast + banner).
@@ -93,42 +84,9 @@ function ProfilePageInner() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
-        <div className="mb-8 flex items-center gap-3">
-          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-        </div>
-        <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Student Portal</h2>
+        <StudentPortalSidebar />
 
-        <nav className="space-y-1.5">
-          {sidebarLinks.map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  item.active
-                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
-                    : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                }
-              >
-                <span
-                  className={
-                    item.active
-                      ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
-                      : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
-                  }
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>{item.label}</span>
-              </Link>
-            )
-          })}
-        </nav>
-      </aside>
-
-      <div className="flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
           <Button asChild variant="outline" className="border-slate-300 bg-white hover:bg-slate-50">
             <Link href={homeHref}>{backLabelForRole(role)}</Link>
@@ -143,7 +101,7 @@ function ProfilePageInner() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl space-y-6 p-6">
+        <main className="min-h-0 flex-1 space-y-6 p-6">
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
             <h1 className="text-3xl font-semibold tracking-tight">Student applicant profile</h1>
             <p className="mt-2 text-sm text-blue-50">

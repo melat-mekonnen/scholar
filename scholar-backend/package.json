@@ -8,8 +8,12 @@
     "start": "node src/server.js",
     "migrate:application-url": "node scripts/add-application-url-column.js",
     "seed:daad-url": "node scripts/set-daad-application-url.js",
+    "migrate:subscription": "node scripts/migrate-subscription-tables.js",
+    "verify:subscription-m1": "node scripts/verify-subscription-m1.js",
+    "verify:subscription-m2": "node scripts/verify-subscription-m2.js",
     "migrate:bookmarks": "node scripts/migrate-bookmarks-table.js",
     "migrate:documents": "node scripts/migrate-documents-table.js",
+    "migrate:documents-pro": "node scripts/migrate-documents-requires-pro.js",
     "migrate:community": "node scripts/migrate-community-tables.js",
     "migrate:profile-nullable": "node scripts/migrate-student-profiles-nullable.js",
     "migrate:manager-profiles": "node scripts/migrate-manager-profiles-table.js",
@@ -24,7 +28,7 @@
     "verify:role-routing": "node scripts/verify-role-routing.js",
     "verify:milestone2": "node scripts/verify-milestone2-api.js",
     "verify:milestone4": "node scripts/verify-milestone4-api.js",
-    "test": "node --test tests/profileCompleteness.test.js tests/scholarshipSearchValidation.test.js tests/scholarshipCrudRules.test.js tests/trustedScholarshipSources.test.js tests/integration/mainApi.integration.test.js",
+    "test": "node --test tests/profileCompleteness.test.js tests/scholarshipSearchValidation.test.js tests/scholarshipCrudRules.test.js tests/trustedScholarshipSources.test.js tests/subscriptionQuota.test.js tests/subscriptionActivatePro.test.js tests/integration/mainApi.integration.test.js",
     "test:integration": "node --test tests/integration/mainApi.integration.test.js"
   },
   "keywords": [
@@ -49,7 +53,8 @@
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",

@@ -15,6 +15,7 @@ const AMHARIC: Record<string, string> = {
   "Saved Scholarships": "የተቀመጡ ስኮላርሺፖች",
   Profile: "መገለጫ",
   Settings: "ቅንብሮች",
+  Billing: "ክፍያ",
   Documents: "ሰነዶች",
   "Welcome back": "እንኳን ደህና መጡ",
   "Loading...": "በመጫን ላይ...",

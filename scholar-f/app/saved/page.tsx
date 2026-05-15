@@ -23,6 +23,7 @@ import {
 } from "@/lib/scholarship"
 import { clearToken } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
+import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { apiFetchJson } from "@/lib/api"
 import { createApplication, updateApplicationStatus } from "@/lib/applications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -76,16 +77,6 @@ export default function SavedScholarshipsPage() {
   const [page, setPage] = useState(1)
   const [limit] = useState(12)
   const [viewScholarship, setViewScholarship] = useState<ScholarshipPublic | null>(null)
-  const sidebarLinks = [
-    { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
-    { href: "/scholarships", label: t("Browse Scholarships"), icon: Search },
-    { href: "/applications", label: t("My Applications"), icon: FileText },
-    { href: "/community", label: t("Community"), icon: Users },
-    { href: "/saved", label: t("Saved Scholarships"), icon: Bookmark, active: true },
-    { href: "/profile", label: t("Profile"), icon: UserCircle2 },
-    { href: "/settings", label: t("Settings"), icon: Settings },
-    { href: "/documents", label: t("Documents"), icon: FolderOpen },
-  ]
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -182,42 +173,9 @@ export default function SavedScholarshipsPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
-        <div className="mb-8 flex items-center gap-3">
-          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-        </div>
-        <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">{t("Student Portal")}</h2>
+        <StudentPortalSidebar />
 
-        <nav className="space-y-1.5">
-          {sidebarLinks.map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  item.active
-                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
-                    : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                }
-              >
-                <span
-                  className={
-                    item.active
-                      ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
-                      : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
-                  }
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>{item.label}</span>
-              </Link>
-            )
-          })}
-        </nav>
-      </aside>
-
-      <div className="flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">Saved scholarships</h1>
@@ -244,7 +202,7 @@ export default function SavedScholarshipsPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-5xl space-y-6 p-6">
+        <main className="min-h-0 flex-1 space-y-6 p-6">
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
             <h2 className="text-2xl font-semibold tracking-tight">Saved for later</h2>
             <p className="mt-1 text-sm text-blue-50">
@@ -311,7 +269,7 @@ export default function SavedScholarshipsPage() {
                     </CardHeader>
                     <CardContent className="space-y-3 pt-0">
                       <p className="text-sm text-slate-500">
-                        {s.country} · {formatDegreeLevel(s.degreeLevel)}
+                        {s.country} Â· {formatDegreeLevel(s.degreeLevel)}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
