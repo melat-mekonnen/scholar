@@ -222,174 +222,174 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-slate-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-slate-500/10 blur-3xl" />
-
-        <header className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
-                  <UsersIcon className="h-5 w-5" />
-                </span>
-                <div>
-                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">User Management</h1>
-                  <p className="text-sm text-slate-500">
-                    Manage platform users, roles, and activation status.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-600">
-                  Total: {total.toLocaleString()}
-                </span>
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-600">
-                  Page size: {pageSize}
-                </span>
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
+      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm ring-1 ring-emerald-400/30">
+                <UsersIcon className="h-5 w-5" />
+              </span>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">User Management</h1>
+                <p className="text-sm text-slate-500">
+                  Manage platform users, roles, and activation status.
+                </p>
               </div>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" asChild className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
-                <Link href="/admin/audit-logs">Audit logs</Link>
-              </Button>
-              <Button variant="outline" asChild className="rounded-xl border-slate-300 bg-white hover:bg-slate-50">
-                <Link href="/admin">Dashboard</Link>
-              </Button>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-full border border-emerald-100 bg-emerald-50/80 px-2.5 py-1 font-medium text-emerald-900">
+                Total: {total.toLocaleString()}
+              </span>
+              <span className="rounded-full border border-emerald-100 bg-emerald-50/80 px-2.5 py-1 font-medium text-emerald-900">
+                Page size: {pageSize}
+              </span>
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[260px]">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                placeholder="Search by name or email"
-                value={search}
-                onChange={(e) => {
-                  setPage(1)
-                  setSearch(e.target.value)
-                }}
-                className="h-10 w-full rounded-xl border-slate-200 bg-white pl-9"
-              />
-            </div>
-            <div className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">
-              <SlidersHorizontal className="h-4 w-4" />
-              Use Edit to change role/status
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" asChild className="rounded-xl border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
+              <Link href="/admin/audit-logs">Audit logs</Link>
+            </Button>
+            <Button variant="outline" asChild className="rounded-xl border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
+              <Link href="/admin">Dashboard</Link>
+            </Button>
           </div>
-        </header>
+        </div>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Active users (page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeCount}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Inactive users (page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{inactiveCount}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Managers + Owners</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
-                {roleCounts.manager + roleCounts.owner}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Admins (page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{roleCounts.admin}</p>
-            </CardContent>
-          </Card>
-        </section>
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[260px] flex-1">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
+            <Input
+              placeholder="Search by name or email"
+              value={search}
+              onChange={(e) => {
+                setPage(1)
+                setSearch(e.target.value)
+              }}
+              className="h-10 w-full rounded-xl border-emerald-100/90 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
+            />
+          </div>
+          <div className="inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-100/90 bg-emerald-50/40 px-3 text-sm text-slate-700">
+            <SlidersHorizontal className="h-4 w-4 text-emerald-700" />
+            Use Edit to change role/status
+          </div>
+        </div>
+      </header>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+          <CardContent className="pt-6">
+            <p className="text-xs font-medium text-slate-500">Active users (page)</p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeCount}</p>
+          </CardContent>
+        </Card>
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-400 to-slate-600 opacity-90" />
+          <CardContent className="pt-6">
+            <p className="text-xs font-medium text-slate-500">Inactive users (page)</p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{inactiveCount}</p>
+          </CardContent>
+        </Card>
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-90" />
+          <CardContent className="pt-6">
+            <p className="text-xs font-medium text-slate-500">Managers + Owners</p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
+              {roleCounts.manager + roleCounts.owner}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-90" />
+          <CardContent className="pt-6">
+            <p className="text-xs font-medium text-slate-500">Admins (page)</p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{roleCounts.admin}</p>
+          </CardContent>
+        </Card>
+      </section>
 
         {error && (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
 
-        <Card className="rounded-2xl border-slate-200 bg-white shadow-sm">
+        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
           <CardHeader>
             <CardTitle className="text-base">Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table className="overflow-hidden rounded-xl border border-slate-200">
-              <TableHeader className="bg-slate-50">
+            <Table className="overflow-hidden rounded-xl border border-emerald-100/90 shadow-sm">
+              <TableHeader className="bg-emerald-50/60">
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-slate-700">Name</TableHead>
+                  <TableHead className="text-slate-700">Email</TableHead>
+                  <TableHead className="text-slate-700">Role</TableHead>
+                  <TableHead className="text-slate-700">Status</TableHead>
+                  <TableHead className="text-right text-slate-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 && !loading && (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={5} className="py-6 text-center text-sm text-slate-500">
                       No users found.
                     </TableCell>
                   </TableRow>
                 )}
                 {users.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-slate-50/60">
+                  <TableRow key={user.id} className="transition-colors hover:bg-emerald-50/50">
                     <TableCell className="font-medium text-slate-900">{user.fullName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="text-slate-600">{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="capitalize">{user.role}</Badge>
+                      <Badge variant="outline" className="capitalize border-emerald-200 text-emerald-800">
+                        {user.role}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Active" : "Inactive"}
-                      </Badge>
+                      {user.isActive ? (
+                        <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">Active</Badge>
+                      ) : (
+                        <Badge variant="secondary">Inactive</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-wrap justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => startEdit(user)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => toggleActive(user)}
-                      >
-                        {user.isActive ? "Deactivate" : "Activate"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => changeRole(user, "promote")}
-                      >
-                        Promote
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => changeRole(user, "demote")}
-                      >
-                        Demote
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteUser(user)}
-                      >
-                        Delete
-                      </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          onClick={() => startEdit(user)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          onClick={() => toggleActive(user)}
+                        >
+                          {user.isActive ? "Deactivate" : "Activate"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          onClick={() => changeRole(user, "promote")}
+                        >
+                          Promote
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          onClick={() => changeRole(user, "demote")}
+                        >
+                          Demote
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => deleteUser(user)}>
+                          Delete
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -398,7 +398,7 @@ export default function AdminUsersPage() {
             </Table>
 
             <div className="mt-4 flex items-center justify-between gap-4">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Showing page {page} of {totalPages}
               </p>
               <Pagination>
@@ -406,6 +406,7 @@ export default function AdminUsersPage() {
                   <PaginationItem>
                     <PaginationPrevious
                       href="#"
+                      className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
                       onClick={(e) => {
                         e.preventDefault()
                         setPage((p) => Math.max(1, p - 1))
@@ -419,6 +420,11 @@ export default function AdminUsersPage() {
                         <PaginationLink
                           href="#"
                           isActive={p === page}
+                          className={
+                            p === page
+                              ? "border-emerald-600 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
+                              : "text-slate-600 hover:bg-emerald-50/80"
+                          }
                           onClick={(e) => {
                             e.preventDefault()
                             setPage(p)
@@ -432,6 +438,7 @@ export default function AdminUsersPage() {
                   <PaginationItem>
                     <PaginationNext
                       href="#"
+                      className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
                       onClick={(e) => {
                         e.preventDefault()
                         setPage((p) => Math.min(totalPages, p + 1))
@@ -445,7 +452,7 @@ export default function AdminUsersPage() {
         </Card>
 
         {editingUser && (
-          <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-sm">
+          <Card className="mt-6 rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
             <CardHeader>
               <CardTitle className="text-base">Edit User</CardTitle>
             </CardHeader>
@@ -455,17 +462,17 @@ export default function AdminUsersPage() {
                   placeholder="Name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 bg-white shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Email"
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 bg-white shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Select value={editRole} onValueChange={(value) => setEditRole(value as Role)}>
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
+                  <SelectTrigger className="h-11 rounded-xl border-emerald-100/90 bg-white shadow-sm focus:ring-emerald-500">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -477,18 +484,21 @@ export default function AdminUsersPage() {
                 </Select>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" className="rounded-xl border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditingUser(null)}>
+                <Button
+                  variant="outline"
+                  className="rounded-xl border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                  onClick={() => setEditingUser(null)}
+                >
                   Cancel
                 </Button>
-                <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800" onClick={saveUser}>
+                <Button className="rounded-xl bg-emerald-600 text-white shadow-sm hover:bg-emerald-700" onClick={saveUser}>
                   Save changes
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
-      </div>
-    </main>
+    </div>
   )
 }
 

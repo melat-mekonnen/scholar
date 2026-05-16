@@ -5,18 +5,22 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Filter,
+  Search,
   Search as SearchIcon,
   X,
   LayoutDashboard,
   FileText,
   Users,
   Bookmark,
+  Sparkles,
+  MessageSquare,
   UserCircle2,
   Settings,
   FolderOpen,
 } from "lucide-react"
 
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -289,27 +293,16 @@ export default function ScholarshipsPage() {
     setPage(1)
   }
 
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/scholarships", label: "Browse Scholarships", icon: SearchIcon, active: true },
-    { href: "/applications", label: "My Applications", icon: FileText },
-    { href: "/community", label: "Community", icon: Users },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark },
-    { href: "/profile", label: "Profile", icon: UserCircle2 },
-    { href: "/settings", label: "Settings", icon: Settings },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen },
-  ]
-
   function FilterPanel({ compact }: { compact?: boolean }) {
     const degreeOptions =
       filters?.degreeLevels ?? ["high_school", "bachelor", "master", "phd"]
     return (
       <div className={compact ? "space-y-6 p-4" : "space-y-6"}>
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-900">Country</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Country</p>
           <div className="space-y-2">
             {(filters?.countries ?? []).slice(0, 12).map((c) => (
-              <label key={c} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
+              <label key={c} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-emerald-50">
                 <Checkbox
                   checked={countries.includes(c)}
                   onCheckedChange={() => {
@@ -329,7 +322,7 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-900">Degree level</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Degree level</p>
           <div className="space-y-2">
             {degreeOptions.map((d) => (
               <label key={d} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm capitalize text-slate-700 hover:bg-slate-50">
@@ -347,7 +340,7 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-900">Field of study</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Field of study</p>
           <div className="space-y-2">
             {(filters?.fieldsOfStudy ?? []).slice(0, 10).map((f) => (
               <label key={f} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
@@ -370,7 +363,7 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-900">Funding type</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Funding type</p>
           <div className="space-y-2">
             {(filters?.fundingTypes ?? []).slice(0, 10).map((f) => (
               <label key={f} className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-slate-700 hover:bg-slate-50">
@@ -393,7 +386,7 @@ export default function ScholarshipsPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-900">Deadline</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Deadline</p>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <p className="text-xs text-slate-500">From</p>
@@ -404,7 +397,7 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineFrom(e.target.value)
                 }}
-                className="h-10 rounded-lg border-slate-200 bg-white"
+                className="h-10 rounded-lg border-emerald-200 bg-white focus-visible:ring-emerald-500"
               />
             </div>
             <div className="space-y-1">
@@ -416,14 +409,14 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineTo(e.target.value)
                 }}
-                className="h-10 rounded-lg border-slate-200 bg-white"
+                className="h-10 rounded-lg border-emerald-200 bg-white focus-visible:ring-emerald-500"
               />
             </div>
           </div>
         </div>
 
         <div className="pt-2">
-          <Button variant="outline" className="h-10 w-full rounded-lg border-slate-300 bg-white hover:bg-slate-50" onClick={clearAll}>
+          <Button variant="outline" className="h-10 w-full rounded-lg border-emerald-200 text-emerald-800 hover:bg-emerald-50" onClick={clearAll}>
             Clear filters
           </Button>
         </div>
@@ -431,16 +424,29 @@ export default function ScholarshipsPage() {
     )
   }
 
+  const sidebarLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
+    { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: true },
+    { href: "/applications", label: "My Applications", icon: FileText, active: false },
+    { href: "/community", label: "Community", icon: Users, active: false },
+    { href: "/saved", label: "Saved Scholarships", icon: Bookmark, active: false },
+    { href: "/ai-matches", label: "AI Matches", icon: Sparkles, active: false },
+    { href: "/ai-chat", label: "AI Chatbot", icon: MessageSquare, active: false },
+    { href: "/profile", label: "Profile", icon: UserCircle2, active: false },
+    { href: "/settings", label: "Settings", icon: Settings, active: false },
+    { href: "/documents", label: "Document Resources", icon: FolderOpen, active: false },
+  ]
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-72 border-r border-blue-100/70 bg-white p-6 md:block">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+      <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col p-6">
           <div className="mb-8 flex items-center gap-3">
             <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
           </div>
-          <h2 className="mb-6 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Student Portal</h2>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Student Portal</p>
 
-          <nav className="space-y-1.5">
+          <nav className="flex flex-col gap-0.5">
             {sidebarLinks.map((item) => {
               const Icon = item.icon
               return (
@@ -449,52 +455,57 @@ export default function ScholarshipsPage() {
                   href={item.href}
                   className={
                     item.active
-                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-50 to-emerald-50 px-3 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-100"
-                      : "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
+                      : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
                   }
                 >
                   <span
                     className={
                       item.active
-                        ? "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 ring-1 ring-blue-100"
-                        : "inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200"
+                        ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
+                        : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
                     }
                   >
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span>{item.label}</span>
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.active ? (
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
+                  ) : (
+                    <span className="w-1.5 shrink-0" aria-hidden />
+                  )}
                 </Link>
               )
             })}
           </nav>
-        </aside>
+          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
+        </div>
+      </aside>
 
-        <div className="relative w-full space-y-6 px-4 py-8">
-          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 top-64 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="flex justify-end">
-            <ProfileAvatarLink />
-          </div>
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">Browse Scholarships</h1>
-              <p className="text-sm text-blue-50">
-                Search verified scholarships and filter by what matters to you.
-              </p>
-            </div>
-            <img
-              src="/ethioscholar-logo.svg"
-              alt="EthioScholar"
-              className="hidden h-10 w-auto brightness-0 invert md:block"
-            />
-          </div>
+      <div className="flex min-h-screen flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+          <h1 className="text-lg font-semibold text-emerald-950">Browse Scholarships</h1>
+          <ProfileAvatarLink />
         </header>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <main className="relative flex-1 space-y-6 p-6">
+          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
+
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            <div className="border-l-4 border-emerald-500 pl-4">
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Find your next scholarship</h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Search verified opportunities and filter by country, degree, field of study, and funding.
+              </p>
+            </div>
+          </div>
+
+        <div className="rounded-2xl border border-emerald-100/80 bg-white p-3 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-50">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="relative w-full md:max-w-xl">
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
             <Input
               value={q}
               onChange={(e) => {
@@ -502,7 +513,7 @@ export default function ScholarshipsPage() {
                 setQ(e.target.value)
               }}
               placeholder="Search by keyword (e.g. engineering, Germany, fully funded)"
-              className="h-11 rounded-xl border-slate-200 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
+              className="h-11 rounded-xl border-emerald-200 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
             />
             </div>
 
@@ -515,7 +526,7 @@ export default function ScholarshipsPage() {
                     setSort(v as SortOption)
                   }}
                 >
-                  <SelectTrigger className="h-11 w-56 rounded-xl border-slate-200 bg-white shadow-sm">
+                  <SelectTrigger className="h-11 w-56 rounded-xl border-emerald-200 focus:ring-emerald-500 bg-white shadow-sm">
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -530,14 +541,14 @@ export default function ScholarshipsPage() {
 
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="h-11 rounded-xl border-slate-200 bg-white shadow-sm md:hidden">
+                  <Button variant="outline" className="h-11 rounded-xl border-emerald-200 bg-white shadow-sm hover:bg-emerald-50 md:hidden">
                     <Filter className="h-4 w-4 mr-2" />
                     Filters
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="p-0">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
+                <SheetContent side="right" className="border-l border-emerald-100 p-0">
+                  <SheetHeader className="border-b border-emerald-100 bg-emerald-50/50 px-4 py-4">
+                    <SheetTitle className="text-emerald-950">Filters</SheetTitle>
                   </SheetHeader>
                   <FilterPanel compact />
                 </SheetContent>
@@ -546,7 +557,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant="outline"
                 onClick={clearAll}
-                className="hidden h-11 rounded-xl border-slate-200 bg-white shadow-sm md:inline-flex"
+                className="hidden h-11 rounded-xl border-emerald-200 bg-white text-emerald-800 shadow-sm hover:bg-emerald-50 md:inline-flex"
               >
                 <X className="h-4 w-4 mr-2" />
                 Reset
@@ -560,9 +571,10 @@ export default function ScholarshipsPage() {
         <div className="grid gap-6 md:grid-cols-[300px_1fr]">
           {/* Desktop filters */}
           <aside className="hidden md:block">
-            <Card className="sticky top-6 rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <Card className="relative sticky top-6 overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <CardHeader>
-                <CardTitle className="text-base text-slate-900">Filters</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base text-slate-900"><span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-teal-700 ring-1 ring-emerald-100"><Filter className="h-4 w-4" /></span>Filters</CardTitle>
               </CardHeader>
               <CardContent>
                 <FilterPanel />
@@ -572,13 +584,20 @@ export default function ScholarshipsPage() {
 
           {/* Results */}
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
-              <p className="text-sm text-slate-500">
-                {loading
-                  ? "Loading..."
-                  : applicationFilter === "all"
-                    ? `${total.toLocaleString()} results`
-                    : `${visibleResults.length.toLocaleString()} shown on this page`}
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm ring-1 ring-emerald-100/60">
+              <p className="text-sm text-slate-600">
+                {loading ? (
+                  "Loading..."
+                ) : applicationFilter === "all" ? (
+                  <>
+                    <span className="font-semibold text-emerald-700">{total.toLocaleString()}</span> results
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-emerald-700">{visibleResults.length.toLocaleString()}</span>{" "}
+                    shown on this page
+                  </>
+                )}
               </p>
               <div className="md:hidden">
                 <Select
@@ -588,7 +607,7 @@ export default function ScholarshipsPage() {
                     setSort(v as SortOption)
                   }}
                 >
-                  <SelectTrigger className="h-10 w-48 rounded-xl border-slate-200 bg-white shadow-sm">
+                  <SelectTrigger className="h-10 w-48 rounded-xl border-emerald-200 focus:ring-emerald-500 bg-white shadow-sm">
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -605,7 +624,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "all" ? "default" : "outline"}
                 size="sm"
-                className={applicationFilter === "all" ? "bg-blue-600 text-white hover:bg-blue-700" : "border-slate-300 bg-white hover:bg-slate-50"}
+                className={applicationFilter === "all" ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-800"}
                 onClick={() => setApplicationFilter("all")}
               >
                 All
@@ -621,7 +640,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "not_applied" ? "default" : "outline"}
                 size="sm"
-                className={applicationFilter === "not_applied" ? "bg-slate-700 text-white hover:bg-slate-800" : "border-slate-300 bg-white hover:bg-slate-50"}
+                className={applicationFilter === "not_applied" ? "bg-teal-600 text-white hover:bg-teal-700" : "border-slate-300 bg-white hover:bg-slate-50"}
                 onClick={() => setApplicationFilter("not_applied")}
               >
                 Not Applied
@@ -631,7 +650,7 @@ export default function ScholarshipsPage() {
             {loading ? (
               <div className="grid gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                     <CardContent className="p-6 space-y-3">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
@@ -644,9 +663,9 @@ export default function ScholarshipsPage() {
                 ))}
               </div>
             ) : visibleResults.length === 0 ? (
-              <Empty>
+              <Empty className="rounded-2xl border border-emerald-100/80 bg-white/90">
                 <EmptyHeader>
-                  <EmptyMedia variant="icon">
+                  <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700">
                     <SearchIcon className="size-6" />
                   </EmptyMedia>
                   <EmptyTitle>No results</EmptyTitle>
@@ -655,7 +674,7 @@ export default function ScholarshipsPage() {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button variant="outline" onClick={clearAll}>
+                  <Button variant="outline" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50" onClick={clearAll}>
                     Clear search & filters
                   </Button>
                 </EmptyContent>
@@ -665,13 +684,14 @@ export default function ScholarshipsPage() {
                 {visibleResults.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardContent className="p-6 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-700">{s.title}</p>
+                          <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">{s.title}</p>
                           <p className="mt-1 text-sm text-slate-500">
                             {s.organizationName ? `${s.organizationName} · ` : ""}
                             {s.country} · {s.degreeLevel.replace("_", " ")}
@@ -695,16 +715,16 @@ export default function ScholarshipsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">Verified</Badge>
                         {appliedScholarshipIds.has(s.id) && (
-                          <Badge className="bg-blue-600 text-white">Applied</Badge>
+                          <Badge className="bg-teal-600 text-white">Applied</Badge>
                         )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
-                          <Badge variant="outline">{s.bookmarkCount} saved</Badge>
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
                         )}
-                        {s.fundingType && <Badge variant="outline">{s.fundingType}</Badge>}
-                        {s.amount && <Badge variant="outline">{s.amount}</Badge>}
-                        {s.startDate && <Badge variant="outline">Start: {s.startDate}</Badge>}
+                        {s.fundingType && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.fundingType}</Badge>}
+                        {s.amount && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.amount}</Badge>}
+                        {s.startDate && <Badge variant="outline" className="border-emerald-200 text-emerald-800">Start: {s.startDate}</Badge>}
                         {(s.endDate || s.deadline) && (
-                          <Badge variant="outline">End: {s.endDate || s.deadline}</Badge>
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">End: {s.endDate || s.deadline}</Badge>
                         )}
                       </div>
 
@@ -712,7 +732,7 @@ export default function ScholarshipsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
+                          className="rounded-md border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
                           onClick={() => setViewScholarship(s)}
                         >
                           View
@@ -770,7 +790,7 @@ export default function ScholarshipsPage() {
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200">
+              <div className="rounded-xl border border-emerald-100/80 bg-white px-3 py-3 shadow-sm ring-1 ring-emerald-100/60">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
@@ -789,6 +809,11 @@ export default function ScholarshipsPage() {
                           <PaginationLink
                             href="#"
                             isActive={p === page}
+                            className={
+                              p === page
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                                : "hover:bg-emerald-50 hover:text-emerald-700"
+                            }
                             onClick={(e) => {
                               e.preventDefault()
                               setPage(p)
@@ -813,6 +838,7 @@ export default function ScholarshipsPage() {
               </div>
             )}
           </section>
+        </div>
           <ScholarshipDetailDialog
             open={viewScholarship !== null}
             onOpenChange={(open) => {
@@ -832,10 +858,9 @@ export default function ScholarshipsPage() {
               ) : undefined
             }
           />
-        </div>
+        </main>
       </div>
-      </div>
-    </main>
+    </div>
   )
 }
 

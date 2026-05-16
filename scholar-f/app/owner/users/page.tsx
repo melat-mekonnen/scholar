@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Building2, IdCard, LogOut, Search, ShieldCheck, Users } from "lucide-react"
+import { AlertCircle, Search, ShieldCheck, Users, X } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken, logoutFromServer } from "@/lib/auth"
+import { clearToken } from "@/lib/auth"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,6 +34,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type AssignableRole = "student" | "manager"
 
@@ -56,6 +57,9 @@ type MeResponse = {
   id?: string
   role?: string
 }
+
+const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+const fieldClass = "h-10 rounded-xl border-emerald-100/80 bg-white focus-visible:ring-emerald-500/30"
 
 export default function OwnerUsersPage() {
   const router = useRouter()
@@ -212,279 +216,315 @@ export default function OwnerUsersPage() {
 
   if (!authorized) {
     return (
-      <main className="min-h-screen bg-background">
-        <p className="p-8 text-sm text-muted-foreground">Checking access…</p>
-      </main>
+      <div className="relative mx-auto max-w-6xl space-y-4 px-4 py-6 sm:py-8">
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+        </div>
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div className="pointer-events-none absolute -left-16 top-16 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-52 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+    <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-8">
+      <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-                  <Building2 className="h-5 w-5" />
-                </span>
-                <h1 className="text-2xl font-semibold tracking-tight">Students & managers</h1>
-              </div>
-              <p className="max-w-2xl text-sm text-blue-50">
-                Promote students to scholarship managers or return them to student.
-                Admin and owner accounts are excluded from this list.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" asChild className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-                <Link href="/owner/posting-profile">
-                  <IdCard className="mr-2 h-4 w-4" />
-                  Posting profile
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-                onClick={() => {
-                  void logoutFromServer()
-                  clearToken()
-                  router.push("/signin")
-                }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </Button>
-            </div>
+      <header className={cn(cardShell, "border-l-4 border-l-emerald-500 px-6 py-6")}>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
+            <Users className="h-6 w-6" />
           </div>
-        </header>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Students & managers</h1>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+              Promote students to scholarship managers or return them to student. Admin and owner accounts are
+              excluded from this list.
+            </p>
+          </div>
+        </div>
+      </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Total users</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{total}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Students (this page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-blue-600">{studentsOnPage}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Managers (this page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">{managersOnPage}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Active users (this page)</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeOnPage}</p>
-            </CardContent>
-          </Card>
-        </section>
-
-        {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {loading ? (
+          <>
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+          </>
+        ) : (
+          <>
+            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total users</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{total}</p>
+            </div>
+            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Students (this page)</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{studentsOnPage}</p>
+            </div>
+            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Managers (this page)</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-700">{managersOnPage}</p>
+            </div>
+            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Active users (this page)</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{activeOnPage}</p>
+            </div>
+          </>
         )}
+      </section>
 
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-          <CardHeader className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base">Users</CardTitle>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs text-blue-700">
-                <Users className="h-3.5 w-3.5" />
-                Page {page} of {totalPages}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder="Search by name or email"
-                  value={search}
-                  onChange={(e) => {
-                    setPage(1)
-                    setSearch(e.target.value)
-                  }}
-                  className="h-10 w-64 rounded-xl border-slate-200 pl-9"
-                />
-              </div>
-              <Select
-                value={roleFilter || "all"}
-                onValueChange={(v) => {
+      {error ? (
+        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>{error}</p>
+        </div>
+      ) : null}
+
+      <Card className={cardShell}>
+        <CardHeader className="space-y-4 border-b border-emerald-100/70 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle className="text-lg text-slate-900">Users</CardTitle>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800">
+              <Users className="h-3.5 w-3.5" />
+              Page {page} of {totalPages}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Search by name or email"
+                value={search}
+                onChange={(e) => {
                   setPage(1)
-                  setRoleFilter(v === "all" ? "" : (v as AssignableRole))
+                  setSearch(e.target.value)
                 }}
-              >
-                <SelectTrigger className="h-10 w-44 rounded-xl border-slate-200">
-                  <SelectValue placeholder="Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All (students & managers)</SelectItem>
-                  <SelectItem value="student">Students only</SelectItem>
-                  <SelectItem value="manager">Managers only</SelectItem>
-                </SelectContent>
-              </Select>
+                className={cn(fieldClass, "w-64 pl-9 pr-9")}
+              />
+              {search ? (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  onClick={() => {
+                    setPage(1)
+                    setSearch("")
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : null}
             </div>
-          </CardHeader>
-          <CardContent>
-            {loading && (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            )}
-            <Table className="overflow-hidden rounded-xl border border-slate-200">
+            <Select
+              value={roleFilter || "all"}
+              onValueChange={(v) => {
+                setPage(1)
+                setRoleFilter(v === "all" ? "" : (v as AssignableRole))
+              }}
+            >
+              <SelectTrigger className={cn(fieldClass, "w-44")}>
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All (students & managers)</SelectItem>
+                <SelectItem value="student">Students only</SelectItem>
+                <SelectItem value="manager">Managers only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {loading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+          ) : (
+            <Table className="overflow-hidden rounded-xl border border-emerald-100/80">
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-emerald-100/80 bg-emerald-50/40 hover:bg-emerald-50/40">
+                  <TableHead className="text-slate-700">Name</TableHead>
+                  <TableHead className="text-slate-700">Email</TableHead>
+                  <TableHead className="text-slate-700">Role</TableHead>
+                  <TableHead className="text-slate-700">Status</TableHead>
+                  <TableHead className="text-right text-slate-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!loading && users.length === 0 && (
+                {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={5} className="py-10 text-center text-sm text-slate-500">
                       No users found.
                     </TableCell>
                   </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id} className="border-emerald-100/60 hover:bg-emerald-50/25">
+                      <TableCell className="font-medium text-slate-900">{user.fullName}</TableCell>
+                      <TableCell className="text-slate-600">{user.email}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "capitalize",
+                            user.role === "manager"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                              : "border-slate-200 bg-slate-50 text-slate-700",
+                          )}
+                        >
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            user.isActive
+                              ? "border-emerald-200 bg-emerald-600 text-white hover:bg-emerald-600"
+                              : "border-slate-200 bg-slate-100 text-slate-600"
+                          }
+                        >
+                          {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="space-x-1 text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-900 hover:bg-emerald-50"
+                          onClick={() => startEdit(user)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-900 hover:bg-emerald-50"
+                          onClick={() => void toggleStudentManager(user)}
+                        >
+                          {user.role === "student" ? "Make manager" : "Make student"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-                {users.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-slate-50/70">
-                    <TableCell className="font-medium text-slate-900">{user.fullName}</TableCell>
-                    <TableCell className="text-slate-600">{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">{user.role}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.isActive ? "default" : "secondary"}
-                        className={user.isActive ? "bg-emerald-600 text-white hover:bg-emerald-600" : ""}
-                      >
-                        {user.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="space-x-1 text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => startEdit(user)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-slate-300 bg-white hover:bg-slate-50"
-                        onClick={() => toggleStudentManager(user)}
-                      >
-                        {user.role === "student" ? "Make manager" : "Make student"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
+          )}
 
-            <div className="mt-4 flex items-center justify-between gap-4">
-              <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                Showing page {page} of {totalPages}
-              </p>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setPage((p) => Math.max(1, p - 1))
-                      }}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }).map((_, index) => {
-                    const p = index + 1
-                    return (
-                      <PaginationItem key={p}>
-                        <PaginationLink
-                          href="#"
-                          isActive={p === page}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setPage(p)
-                          }}
-                        >
-                          {p}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )
-                  })}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <p className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+              Showing page {page} of {totalPages}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    className="rounded-lg border-emerald-100 hover:bg-emerald-50"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setPage((p) => Math.max(1, p - 1))
+                    }}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const p = index + 1
+                  return (
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        href="#"
+                        isActive={p === page}
+                        className={cn(
+                          "rounded-lg",
+                          p === page && "border-emerald-200 bg-emerald-50 text-emerald-900",
+                        )}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPage(p)
+                        }}
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                })}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    className="rounded-lg border-emerald-100 hover:bg-emerald-50"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setPage((p) => Math.min(totalPages, p + 1))
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </CardContent>
+      </Card>
+
+      {editingUser ? (
+        <Card className={cardShell}>
+          <CardHeader className="border-b border-emerald-100/70 pb-4">
+            <CardTitle className="text-lg text-slate-900">Edit user</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <Input
+                placeholder="Name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className={fieldClass}
+              />
+              <Input
+                placeholder="Email"
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                className={fieldClass}
+              />
+              <Select
+                value={editRole}
+                onValueChange={(value) => setEditRole(value as AssignableRole)}
+              >
+                <SelectTrigger className={fieldClass}>
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                className="border-emerald-200 bg-white text-emerald-900 hover:bg-emerald-50"
+                onClick={() => setEditingUser(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="rounded-xl bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
+                onClick={() => void saveUser()}
+              >
+                Save changes
+              </Button>
             </div>
           </CardContent>
         </Card>
-
-        {editingUser && (
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">Edit user</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-3 md:grid-cols-3">
-                <Input
-                  placeholder="Name"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="h-11 rounded-xl border-slate-200"
-                />
-                <Input
-                  placeholder="Email"
-                  type="email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  className="h-11 rounded-xl border-slate-200"
-                />
-                <Select
-                  value={editRole}
-                  onValueChange={(value) => setEditRole(value as AssignableRole)}
-                >
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200">
-                    <SelectValue placeholder="Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditingUser(null)}>
-                  Cancel
-                </Button>
-                <Button className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => void saveUser()}>
-                  Save changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </main>
+      ) : null}
+    </div>
   )
 }

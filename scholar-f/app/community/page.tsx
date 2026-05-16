@@ -1,9 +1,24 @@
 "use client"
 
+import {
+  LayoutDashboard,
+  Search,
+  FileText,
+  Users,
+  Bookmark,
+  Sparkles,
+  MessageSquare,
+  UserCircle2,
+  Settings,
+  FolderOpen,
+  MessageCircle,
+  Send,
+  Trash2,
+} from "lucide-react"
+
 import Link from "next/link"
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { MessageCircle, Send, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { apiFetchJson } from "@/lib/api"
 import {
@@ -16,11 +31,10 @@ import {
   type CommunityMessage,
 } from "@/lib/community"
 import { clearToken, getToken } from "@/lib/auth"
-import { useStudentI18n } from "@/lib/student-i18n"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalFooter } from "@/components/student-portal/student-footer"
+import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,22 +49,6 @@ type MeResponse = {
   role?: string
 }
 
-function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  const pathname = usePathname()
-  const active = pathname === href
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "block text-sm font-medium hover:text-primary",
-        active && "text-primary",
-      )}
-    >
-      {children}
-    </Link>
-  )
-}
-
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return "?"
@@ -61,7 +59,6 @@ function initials(name: string) {
 export default function CommunityPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { t } = useStudentI18n()
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   const [me, setMe] = useState<MeResponse | null>(null)
@@ -286,39 +283,75 @@ export default function CommunityPage() {
 
   const canPost = me?.role === "student" || me?.role === "admin"
 
-  return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-card p-6 md:block">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">{t("Scholarship Portal")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Student community</p>
-        </div>
+  const sidebarLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
+    { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: false },
+    { href: "/applications", label: "My Applications", icon: FileText, active: false },
+    { href: "/community", label: "Community", icon: Users, active: true },
+    { href: "/saved", label: "Saved Scholarships", icon: Bookmark, active: false },
+    { href: "/ai-matches", label: "AI Matches", icon: Sparkles, active: false },
+    { href: "/ai-chat", label: "AI Chatbot", icon: MessageSquare, active: false },
+    { href: "/profile", label: "Profile", icon: UserCircle2, active: false },
+    { href: "/settings", label: "Settings", icon: Settings, active: false },
+    { href: "/documents", label: "Document Resources", icon: FolderOpen, active: false },
+  ]
 
-        <nav className="space-y-3">
-          <NavLink href="/dashboard">{t("Dashboard")}</NavLink>
-          <NavLink href="/scholarships">{t("Browse Scholarships")}</NavLink>
-          <NavLink href="/applications">{t("My Applications")}</NavLink>
-          <NavLink href="/community">{t("Community")}</NavLink>
-          <NavLink href="/saved">{t("Saved Scholarships")}</NavLink>
-          <NavLink href="/ai-matches">{t("AI Matches")}</NavLink>
-          <NavLink href="/ai-chat">{t("AI Chatbot")}</NavLink>
-          <NavLink href="/profile">{t("Profile")}</NavLink>
-          <NavLink href="/settings">{t("Settings")}</NavLink>
-          <NavLink href="/documents">{t("Documents")}</NavLink>
-        </nav>
+  return (
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+            <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col p-6">
+          <div className="mb-8 flex items-center gap-3">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+          </div>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Student Portal</p>
+
+          <nav className="flex flex-col gap-0.5">
+            {sidebarLinks.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    item.active
+                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
+                      : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
+                  }
+                >
+                  <span
+                    className={
+                      item.active
+                        ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
+                        : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.active ? (
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
+                  ) : (
+                    <span className="w-1.5 shrink-0" aria-hidden />
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
+        </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b bg-card px-4 py-3">
+<div className="flex min-h-screen flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <div>
-            <h1 className="text-lg font-semibold">Community support</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-lg font-semibold text-emerald-950">Community</h1>
+            <p className="text-xs text-slate-600">
               Peer tips, experiences, and constructive feedback — stay kind and on-topic.
             </p>
           </div>
           <div className="flex items-center gap-2">
             {me?.role && (
-              <Badge variant="secondary" className="capitalize">
+              <Badge className="border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100">
                 {me.role}
               </Badge>
             )}
@@ -326,9 +359,22 @@ export default function CommunityPage() {
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 md:flex-row md:gap-0 md:p-0">
-          <div className="w-full shrink-0 border-b bg-muted/30 p-4 md:w-72 md:border-b-0 md:border-r">
-            <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">Channels</p>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="pointer-events-none absolute -left-20 top-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 top-32 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
+          <div className="relative border-b border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-5 shadow-sm shadow-emerald-900/5 md:px-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            <div className="border-l-4 border-emerald-500 pl-4">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Community support</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Join a channel, share experiences, and help other students on their scholarship journey.
+              </p>
+            </div>
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+
+          <div className="w-full shrink-0 border-b border-emerald-100/80 bg-white p-4 md:w-72 md:border-b-0 md:border-r md:bg-gradient-to-b md:from-white md:to-emerald-50/20">
+            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-teal-700"><Users className="h-3.5 w-3.5" />Channels</p>
             {loadingChannels && (
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -340,8 +386,8 @@ export default function CommunityPage() {
                 {channelsError ? (
                   <p className="text-sm text-destructive">{channelsError}</p>
                 ) : channels.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No community channels found. Try running <code>npm run migrate:community</code> again,
+                  <p className="text-sm text-slate-600">
+                    No community channels found. Try running <code className="rounded bg-emerald-50 px-1 text-emerald-800">npm run migrate:community</code> again,
                     or reload the page.
                   </p>
                 ) : (
@@ -352,10 +398,10 @@ export default function CommunityPage() {
                           type="button"
                           onClick={() => setChannelId(c.id)}
                           className={cn(
-                            "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                            "w-full rounded-xl px-3 py-2 text-left text-sm transition-all",
                             channelId === c.id
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-muted",
+                              ? "bg-gradient-to-r from-emerald-50 to-teal-50 font-semibold text-emerald-800 ring-1 ring-emerald-200/80 shadow-sm"
+                              : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700",
                           )}
                         >
                           <span className="font-medium">{c.name}</span>
@@ -363,7 +409,7 @@ export default function CommunityPage() {
                             <span
                               className={cn(
                                 "mt-0.5 block text-xs opacity-90",
-                                channelId === c.id ? "text-primary-foreground/90" : "text-muted-foreground",
+                                channelId === c.id ? "text-emerald-700/90" : "text-slate-500",
                               )}
                             >
                               {c.description}
@@ -378,17 +424,17 @@ export default function CommunityPage() {
             )}
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b px-4 py-3">
+          <div className="flex min-h-0 flex-1 flex-col bg-slate-50/40">
+            <div className="border-b border-emerald-100/80 bg-white px-4 py-3 shadow-sm">
               {selectedChannel ? (
                 <>
-                  <h2 className="font-semibold">{selectedChannel.name}</h2>
+                  <h2 className="font-semibold text-emerald-950">{selectedChannel.name}</h2>
                   {selectedChannel.description && (
-                    <p className="text-sm text-muted-foreground">{selectedChannel.description}</p>
+                    <p className="text-sm text-slate-600">{selectedChannel.description}</p>
                   )}
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground">Select a channel to get started.</p>
+                <p className="text-sm text-slate-500">Select a channel to get started.</p>
               )}
             </div>
 
@@ -400,6 +446,7 @@ export default function CommunityPage() {
                       type="button"
                       variant="outline"
                       size="sm"
+                      className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
                       disabled={loadingMore || loadingMessages}
                       onClick={() => void loadOlder()}
                     >
@@ -420,18 +467,19 @@ export default function CommunityPage() {
                     <Card
                       key={m.id}
                       className={cn(
-                        "overflow-hidden",
-                        m.parentMessageId ? "ml-6 border-l-2 border-primary/30" : "",
+                        "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-shadow hover:shadow-md",
+                        m.parentMessageId ? "ml-6 border-l-4 border-emerald-400/80" : "",
                       )}
                     >
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500/80 to-teal-500/80" />
                       <CardHeader className="flex flex-row items-start gap-3 space-y-0 p-4 pb-2">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="text-xs">{initials(m.authorFullName)}</AvatarFallback>
+                        <Avatar className="h-9 w-9 ring-2 ring-emerald-100">
+                          <AvatarFallback className="bg-emerald-50 text-xs font-medium text-teal-700">{initials(m.authorFullName)}</AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <CardTitle className="text-sm font-medium">{m.authorFullName}</CardTitle>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-slate-500">
                               {new Date(m.createdAt).toLocaleString()}
                             </span>
                           </div>
@@ -445,7 +493,7 @@ export default function CommunityPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-8 w-8 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                               onClick={() => setReplyTo(m)}
                               aria-label="Reply"
                             >
@@ -484,7 +532,7 @@ export default function CommunityPage() {
                   ))}
 
                 {!loadingMessages && channelId && messages.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-8">
+                  <p className="py-8 text-center text-sm text-slate-500">
                     No messages yet. Be the first to share a tip or ask a question.
                   </p>
                 )}
@@ -493,10 +541,10 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            <div className="border-t bg-card p-4">
+            <div className="border-t border-emerald-100/80 bg-white p-4 shadow-[0_-4px_24px_-8px_rgba(16,185,129,0.15)]">
               {replyTo && (
-                <div className="mb-2 flex items-center justify-between rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                  <span className="truncate text-muted-foreground">
+                <div className="mb-2 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-sm">
+                  <span className="truncate text-slate-600">
                     Replying to <strong>{replyTo.authorFullName}</strong>
                   </span>
                   <Button type="button" variant="ghost" size="sm" onClick={() => setReplyTo(null)}>
@@ -505,7 +553,7 @@ export default function CommunityPage() {
                 </div>
               )}
               {!canPost && me && (
-                <p className="mb-2 text-xs text-muted-foreground">
+                <p className="mb-2 text-xs text-slate-500">
                   Community posting is available to students. Sign in with a student account to participate.
                 </p>
               )}
@@ -519,7 +567,7 @@ export default function CommunityPage() {
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   disabled={!canPost || !channelId || sending}
-                  className="min-h-[88px] flex-1 resize-none"
+                  className="min-h-[88px] flex-1 resize-none rounded-xl border-emerald-200 focus-visible:ring-emerald-500"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                       e.preventDefault()
@@ -529,7 +577,7 @@ export default function CommunityPage() {
                 />
                 <Button
                   type="button"
-                  className="sm:mb-0.5"
+                  className="bg-emerald-600 text-white hover:bg-emerald-700 sm:mb-0.5"
                   disabled={!canPost || !channelId || sending || !draft.trim()}
                   onClick={() => void sendMessage()}
                 >
@@ -543,14 +591,14 @@ export default function CommunityPage() {
                   )}
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs text-slate-500">
                 Tip: <kbd className="rounded border px-1">Ctrl</kbd> + <kbd className="rounded border px-1">Enter</kbd>{" "}
                 to send. Replies are one level deep.
               </p>
             </div>
           </div>
+          </div>
         </div>
-        <StudentPortalFooter />
       </div>
     </div>
   )

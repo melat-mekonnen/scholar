@@ -43,6 +43,9 @@ const degreeOptions = [
   { value: 'phd', label: 'PhD' },
 ]
 
+const profileCardClass =
+  "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+
 const interestOptions = [
   'STEM',
   'Business',
@@ -272,30 +275,31 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {loadingExisting ? (
-        <div className="rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-emerald-100/80 bg-emerald-50/50 px-4 py-2 text-sm text-slate-600">
           Loading your profile…
         </div>
       ) : null}
       {success && (
-        <div className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-800">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-900">
           Profile saved successfully!
         </div>
       )}
 
       {/* Completeness */}
-      <Card>
+      <Card className={profileCardClass}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
         <CardHeader>
-          <CardTitle>Profile Completeness</CardTitle>
+          <CardTitle className="text-slate-900">Profile Completeness</CardTitle>
           <CardDescription>Complete all sections to maximize scholarship matches</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{completeness.score}% Complete</span>
-            <span className="text-sm text-muted-foreground">{completeness.total} sections</span>
+            <span className="text-sm font-medium text-emerald-800">{completeness.score}% complete</span>
+            <span className="text-sm text-slate-500">{completeness.completed} of {completeness.total} sections</span>
           </div>
-          <Progress value={completeness.score} className="h-2" />
+          <Progress value={completeness.score} className="h-2 bg-emerald-100 [&>div]:bg-emerald-600" />
           {completeness.missing.length ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-500">
               Missing: {completeness.missing.join(", ")}
             </p>
           ) : null}
@@ -303,9 +307,10 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       </Card>
 
       {/* GPA */}
-      <Card>
+      <Card className={profileCardClass}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
         <CardHeader>
-          <CardTitle>GPA</CardTitle>
+          <CardTitle className="text-slate-900">GPA</CardTitle>
           <CardDescription>Optional — add when you know it (0.0 - 4.0)</CardDescription>
         </CardHeader>
         <CardContent>
@@ -321,15 +326,17 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
               value={gpa}
               onChange={(e) => setGpa(e.target.value)}
               disabled={inputsDisabled}
+              className="border-emerald-200/80 focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Degree Level */}
-      <Card>
+      <Card className={profileCardClass}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
         <CardHeader>
-          <CardTitle>Degree Level</CardTitle>
+          <CardTitle className="text-slate-900">Degree Level</CardTitle>
           <CardDescription>Optional — select your current or target degree</CardDescription>
         </CardHeader>
         <CardContent>
@@ -338,7 +345,7 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
             onValueChange={setDegreeLevel}
             disabled={inputsDisabled}
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-emerald-200/80 focus:ring-emerald-200/60">
               <SelectValue placeholder="Select degree level" />
             </SelectTrigger>
             <SelectContent>
@@ -353,9 +360,10 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
       </Card>
 
       {/* Field of Study */}
-      <Card>
+      <Card className={profileCardClass}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-500 opacity-90" />
         <CardHeader>
-          <CardTitle>Field of Study</CardTitle>
+          <CardTitle className="text-slate-900">Field of Study</CardTitle>
           <CardDescription>Optional — your major or focus area</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -364,20 +372,23 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
             value={fieldOfStudy}
             onChange={(e) => setFieldOfStudy(e.target.value)}
             disabled={inputsDisabled}
+            className="border-emerald-200/80 focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60"
           />
           <Input
             placeholder="Preferred country (e.g., Germany, Canada)"
             value={preferredCountry}
             onChange={(e) => setPreferredCountry(e.target.value)}
             disabled={inputsDisabled}
+            className="border-emerald-200/80 focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60"
           />
         </CardContent>
       </Card>
 
       {/* Interests */}
-      <Card>
+      <Card className={profileCardClass}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
         <CardHeader>
-          <CardTitle>Areas of Interest</CardTitle>
+          <CardTitle className="text-slate-900">Areas of Interest</CardTitle>
           <CardDescription>Optional — select up to 10 areas</CardDescription>
         </CardHeader>
         <CardContent>
@@ -396,14 +407,18 @@ export function StudentProfileForm({ onSave }: StudentProfileFormProps) {
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="mt-2 text-xs text-slate-500">
             Selected: {interests.length}/10
           </p>
         </CardContent>
       </Card>
 
       {/* Submit */}
-      <Button type="submit" disabled={saving || loadingExisting} className="w-full flex justify-center items-center">
+      <Button
+        type="submit"
+        disabled={saving || loadingExisting}
+        className="flex w-full items-center justify-center bg-emerald-600 text-white hover:bg-emerald-700"
+      >
         {saving ? (
           <svg className="animate-spin h-4 w-4 mr-2 text-white" viewBox="0 0 24 24">
             <circle

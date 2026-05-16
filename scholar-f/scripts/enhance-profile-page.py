@@ -1,155 +1,15 @@
-"use client"
+# -*- coding: utf-8 -*-
+from pathlib import Path
 
-import Link from "next/link"
-import { Suspense, useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-  CheckCircle2,
-} from "lucide-react"
+p = Path(__file__).resolve().parents[1] / "app/profile/page.tsx"
+t = p.read_text(encoding="utf-8")
 
-import { StudentProfileForm, type StudentProfile } from "../../components/student-profile-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { apiFetchJson } from "@/lib/api"
-import { getPostAuthPath } from "@/lib/redirect-by-role"
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
-import { StudentLanguageToggle } from "@/components/student-language-toggle"
-import { useStudentI18n } from "@/lib/student-i18n"
-import { Skeleton } from "@/components/ui/skeleton"
-type MeResponse = {
-  role?: string
-}
+start = t.find('<div className="flex-1">')
+end = t.find("        </main>\n      </div>\n    </div>\n  )\n}", start)
+if start < 0 or end < 0:
+    raise SystemExit("markers not found")
 
-function backLabelForRole(role: string | undefined) {
-  switch (role) {
-    case "manager":
-      return "Back to Manager"
-    case "admin":
-      return "Back to Admin"
-    case "owner":
-      return "Back to Owner"
-    default:
-      return "Back to Dashboard"
-  }
-}
-
-function ProfilePageInner() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { t } = useStudentI18n()
-  const intentStudent = searchParams.get("intent") === "student"
-
-  const [role, setRole] = useState<string | undefined>(undefined)
-  const [roleChecked, setRoleChecked] = useState(false)
-
-  useEffect(() => {
-    async function loadRole() {
-      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
-      if (res.ok && data?.role) {
-        setRole(data.role)
-        if (!intentStudent && data.role === "manager") {
-          router.replace("/manager/profile")
-          return
-        }
-        if (!intentStudent && data.role === "owner") {
-          router.replace("/owner/posting-profile")
-          return
-        }
-      }
-      setRoleChecked(true)
-    }
-    void loadRole()
-  }, [router, intentStudent])
-
-  const homeHref = role ? getPostAuthPath(role) : "/dashboard"
-
-  const handleSaveProfile = (_profile: StudentProfile) => {
-    // Saved state is handled inside StudentProfileForm (toast + banner).
-  }
-
-  if (!roleChecked) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8">
-        <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    )
-  }
-
-
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
-    { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: false },
-    { href: "/applications", label: "My Applications", icon: FileText, active: false },
-    { href: "/community", label: "Community", icon: Users, active: false },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark, active: false },
-    { href: "/ai-matches", label: "AI Matches", icon: Sparkles, active: false },
-    { href: "/ai-chat", label: "AI Chatbot", icon: MessageSquare, active: false },
-    { href: "/profile", label: "Profile", icon: UserCircle2, active: true },
-    { href: "/settings", label: "Settings", icon: Settings, active: false },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen, active: false },
-  ]
-
-  return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
-            <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col p-6">
-          <div className="mb-8 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-          </div>
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Student Portal</p>
-
-          <nav className="flex flex-col gap-0.5">
-            {sidebarLinks.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={
-                    item.active
-                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
-                      : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
-                  }
-                >
-                  <span
-                    className={
-                      item.active
-                        ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
-                        : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.active ? (
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
-                  ) : (
-                    <span className="w-1.5 shrink-0" aria-hidden />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
-          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
-        </div>
-      </aside>
-
-      <div className="flex min-h-screen flex-1 flex-col">
+new_block = r'''      <motion.div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           {(role === "manager" || role === "owner") && intentStudent ? (
             <Button asChild variant="outline" className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
@@ -179,7 +39,7 @@ function ProfilePageInner() {
           <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
+                <motion.div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
                   <UserCircle2 className="h-5 w-5" />
                 </div>
                 <div>
@@ -258,7 +118,7 @@ function ProfilePageInner() {
                     <p className="font-medium text-slate-900">Can I update my profile later?</p>
                     <p className="mt-1 text-xs text-slate-500">Yes, you can update your profile anytime.</p>
                   </div>
-                  <div>
+                  <motion.div>
                     <p className="font-medium text-slate-900">How does completeness score work?</p>
                     <p className="mt-1 text-xs text-slate-500">
                       GPA, degree, field, preferred country, and interests each add to your score.
@@ -268,26 +128,47 @@ function ProfilePageInner() {
               </Card>
             </aside>
           </div>
-        </main>
-      </div>
-    </div>
-  )
-}
+'''
 
-export default function ProfilePage() {
-  return (
-    <Suspense
-      fallback={
+new_block = new_block.replace("motion.div", "motion.div")
+new_block = new_block.replace("<motion.div", "<motion.div")
+new_block = new_block.replace("motion.div", "div")
+# fix botched replacements - do carefully
+new_block = new_block.replace('      <motion.div className="flex min-h-screen flex-1 flex-col">', '      <div className="flex min-h-screen flex-1 flex-col">')
+new_block = new_block.replace(
+    '                <motion.div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">',
+    '                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">',
+)
+new_block = new_block.replace("                  <motion.div>", "                  <div>")
+new_block = new_block.replace("                  </motion.div>", "                  </div>")
+
+t = t[:start] + new_block + t[end:]
+
+# Remove unused showPortalHeader if present
+t = t.replace("\n  const showPortalHeader = role === \"student\" || !role\n", "\n")
+
+# Suspense fallback
+t = t.replace(
+    """      fallback={
+        <div className="min-h-screen bg-background p-8">
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </div>
+      }""",
+    """      fallback={
         <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8">
-          <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">
+          <motion.div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-32 w-full" />
-          </div>
-        </div>
-      }
-    >
-      <ProfilePageInner />
-    </Suspense>
-  )
-}
+          </motion.div>
+        </motion.div>
+      }""",
+)
+t = t.replace(
+    '<motion.div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">',
+    '<div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">',
+)
+t = t.replace("</motion.div>\n        </motion.div>", "</div>\n        </div>")
+
+p.write_text(t, encoding="utf-8", newline="\n")
+print("done")

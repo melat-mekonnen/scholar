@@ -7,10 +7,10 @@ import { usePathname, useRouter } from "next/navigation"
 import {
   Bell,
   Briefcase,
-  Building2,
   ClipboardList,
   Download,
   FileText,
+  Files,
   IdCard,
   LayoutDashboard,
   LogOut,
@@ -40,94 +40,251 @@ type NavItem = {
   icon: ReactNode
 }
 
-const NAV: NavItem[] = [
-  { href: "/owner", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { href: "/owner/approvals", label: "Pending approvals", icon: <ClipboardList className="h-4 w-4" /> },
-  { href: "/owner/trusted-import", label: "Trusted import", icon: <Download className="h-4 w-4" /> },
+type NavGroup = {
+  label: string
+  items: NavItem[]
+}
+
+const NAV_GROUPS: NavGroup[] = [
   {
-    href: "/owner/scholarships",
-    label: "Scholarship operations",
-    icon: <Briefcase className="h-4 w-4" />,
+    label: "Overview",
+    items: [
+      { href: "/owner", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+      { href: "/owner/approvals", label: "Pending approvals", icon: <ClipboardList className="h-4 w-4" /> },
+      { href: "/owner/trusted-import", label: "Trusted import", icon: <Download className="h-4 w-4" /> },
+    ],
   },
-  { href: "/owner/scholarships/new", label: "New scholarship", icon: <Plus className="h-4 w-4" /> },
   {
-    href: "/owner/scholarships/manage",
-    label: "Manage scholarships",
-    icon: <FileText className="h-4 w-4" />,
+    label: "Scholarships",
+    items: [
+      {
+        href: "/owner/scholarships",
+        label: "Scholarship operations",
+        icon: <Briefcase className="h-4 w-4" />,
+      },
+      { href: "/owner/scholarships/new", label: "New scholarship", icon: <Plus className="h-4 w-4" /> },
+      {
+        href: "/owner/scholarships/manage",
+        label: "Manage scholarships",
+        icon: <FileText className="h-4 w-4" />,
+      },
+    ],
   },
-  { href: "/owner/posting-profile", label: "Posting profile", icon: <IdCard className="h-4 w-4" /> },
-  { href: "/owner/documents", label: "Documents", icon: <FileText className="h-4 w-4" /> },
-  { href: "/owner/users", label: "Students & managers", icon: <Users className="h-4 w-4" /> },
-  { href: "/owner/notifications", label: "Notifications", icon: <Bell className="h-4 w-4" /> },
-  { href: "/owner/community", label: "Community", icon: <MessageSquareWarning className="h-4 w-4" /> },
+  {
+    label: "Organization",
+    items: [
+      { href: "/owner/posting-profile", label: "Posting profile", icon: <IdCard className="h-4 w-4" /> },
+      { href: "/owner/documents", label: "Documents", icon: <Files className="h-4 w-4" /> },
+      { href: "/owner/users", label: "Students & managers", icon: <Users className="h-4 w-4" /> },
+    ],
+  },
+  {
+    label: "Engagement",
+    items: [
+      { href: "/owner/notifications", label: "Notifications", icon: <Bell className="h-4 w-4" /> },
+      { href: "/owner/community", label: "Community", icon: <MessageSquareWarning className="h-4 w-4" /> },
+    ],
+  },
 ]
 
-function isActive(pathname: string, item: NavItem) {
-  return pathname === item.href
+const FLAT_NAV = NAV_GROUPS.flatMap((g) => g.items)
+
+function navItemActive(pathname: string, item: NavItem) {
+  const matches = FLAT_NAV.filter((i) => {
+    if (pathname === i.href) return true
+    if (i.href === "/owner") return false
+    return pathname.startsWith(`${i.href}/`)
+  })
+  if (!matches.length) return false
+  const best = [...matches].sort((a, b) => b.href.length - a.href.length)[0]
+  return best.href === item.href
 }
 
 type NotificationResponse = {
   notifications: Array<{ isRead: boolean }>
 }
 
+const inactiveNavRow =
+  "group flex w-full items-center justify-between gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50/90 hover:text-emerald-800 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.2)]"
+const inactiveNavIcon =
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.28)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+const activeNavRow =
+  "group flex w-full items-center justify-between gap-1.5 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-2 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80"
+const activeNavIcon =
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-teal-700 ring-1 ring-teal-100"
+
 function NavLinks({
   pathname,
-  cfg,
   unreadCount,
   pendingCount,
   onNavigate,
 }: {
   pathname: string
-  cfg: ReturnType<typeof getScholarshipWorkspaceConfig>
   unreadCount: number
   pendingCount: number
   onNavigate?: () => void
 }) {
   return (
-    <nav className="space-y-0.5 text-sm">
-      {NAV.map((item) => {
-        const active = isActive(pathname, item)
-        const isNotifications = item.href === "/owner/notifications"
-        const isApprovals = item.href === "/owner/approvals"
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "group flex w-full items-center justify-between gap-1.5 rounded-xl px-2.5 py-1.5 font-medium transition-colors",
-              active
-                ? "bg-gradient-to-r from-blue-50 to-emerald-50 text-blue-700 ring-1 ring-blue-100"
-                : "text-slate-600 hover:bg-gradient-to-r hover:from-blue-50/70 hover:to-emerald-50/70 hover:text-slate-900",
-            )}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className={cn(
-                  "inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
-                  active
-                    ? "bg-white text-blue-700 ring-1 ring-blue-100"
-                    : "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-slate-700 group-hover:ring-1 group-hover:ring-slate-200",
-                )}
-              >
-                {item.icon}
-              </span>
-              {item.label}
-            </span>
-            {isNotifications && unreadCount > 0 ? (
-              <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-                {unreadCount}
-              </Badge>
-            ) : null}
-            {isApprovals && pendingCount > 0 ? (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] tabular-nums">
-                {pendingCount}
-              </Badge>
-            ) : null}
-          </Link>
-        )
-      })}
-    </nav>
+    <div className="space-y-2">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+            {group.label}
+          </p>
+          <nav className="flex flex-col gap-1">
+            {group.items.map((item) => {
+              const active = navItemActive(pathname, item)
+              const isNotifications = item.href === "/owner/notifications"
+              const isApprovals = item.href === "/owner/approvals"
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={active ? activeNavRow : inactiveNavRow}
+                >
+                  <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                    <span className={active ? activeNavIcon : inactiveNavIcon}>{item.icon}</span>
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                  {isNotifications && unreadCount > 0 ? (
+                    <Badge
+                      variant="outline"
+                      className="h-5 shrink-0 border-rose-200 bg-rose-50 px-1.5 text-[10px] font-semibold text-rose-800"
+                    >
+                      {unreadCount}
+                    </Badge>
+                  ) : null}
+                  {isApprovals && pendingCount > 0 ? (
+                    <Badge
+                      variant="outline"
+                      className="h-5 shrink-0 border-emerald-200 bg-emerald-50 px-1.5 text-[10px] font-semibold tabular-nums text-emerald-900"
+                    >
+                      {pendingCount}
+                    </Badge>
+                  ) : null}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SidebarAlerts({
+  pendingCount,
+  unreadCount,
+  compact,
+}: {
+  pendingCount: number
+  unreadCount: number
+  compact?: boolean
+}) {
+  if (pendingCount === 0 && unreadCount === 0) return null
+
+  return (
+    <div
+      className={cn(
+        "mb-3 grid gap-2",
+        compact ? "grid-cols-1" : pendingCount > 0 && unreadCount > 0 ? "grid-cols-2" : "grid-cols-1",
+      )}
+    >
+      {pendingCount > 0 ? (
+        <Link
+          href="/owner/approvals"
+          className="rounded-xl border border-emerald-200/80 bg-emerald-50/80 px-3 py-2 text-xs font-medium text-emerald-900 transition-colors hover:bg-emerald-100"
+        >
+          <span className="block text-[10px] uppercase tracking-wide text-emerald-700/80">Approvals</span>
+          <span className="text-sm font-semibold tabular-nums">{pendingCount} pending</span>
+        </Link>
+      ) : null}
+      {unreadCount > 0 ? (
+        <Link
+          href="/owner/notifications"
+          className="rounded-xl border border-rose-200/80 bg-rose-50/80 px-3 py-2 text-xs font-medium text-rose-900 transition-colors hover:bg-rose-100"
+        >
+          <span className="block text-[10px] uppercase tracking-wide text-rose-700/80">Alerts</span>
+          <span className="text-sm font-semibold tabular-nums">{unreadCount} unread</span>
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
+function OwnerSidebarHeader({ compact }: { compact?: boolean }) {
+  return (
+    <div className={cn("border-b border-emerald-100/80", compact ? "px-4 py-3" : "px-6 py-5")}>
+      <div className={cn("flex items-center gap-3", compact ? "mb-3" : "mb-4")}>
+        <img
+          src="/ethioscholar-logo.svg"
+          alt="EthioScholar"
+          className={compact ? "h-8 w-auto" : "h-10 w-auto"}
+        />
+      </div>
+      <p
+        className={cn(
+          "font-semibold uppercase text-teal-700",
+          compact ? "text-[10px] tracking-[0.18em]" : "text-xs tracking-[0.2em]",
+        )}
+      >
+        Owner portal
+      </p>
+    </div>
+  )
+}
+
+function OwnerSidebarFooter({ onSignOut, compact }: { onSignOut: () => void; compact?: boolean }) {
+  return (
+    <div className={cn("mt-auto border-t border-emerald-100/80", compact ? "p-3" : "p-6 pt-4")}>
+      <button
+        type="button"
+        className="group flex w-full items-center justify-between rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-emerald-800 shadow-sm transition-colors hover:bg-emerald-50"
+        onClick={onSignOut}
+      >
+        <span className="inline-flex items-center gap-2.5">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 transition-colors group-hover:bg-emerald-100">
+            <LogOut className="h-4 w-4" />
+          </span>
+          <span className="text-sm font-medium">Sign out</span>
+        </span>
+      </button>
+    </div>
+  )
+}
+
+function OwnerSidebarPanel({
+  pathname,
+  unreadCount,
+  pendingCount,
+  onNavigate,
+  onSignOut,
+  compact,
+}: {
+  pathname: string
+  unreadCount: number
+  pendingCount: number
+  onNavigate?: () => void
+  onSignOut: () => void
+  compact?: boolean
+}) {
+  return (
+    <>
+      <OwnerSidebarHeader compact={compact} />
+      <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", compact ? "px-4 py-3" : "px-6 py-4")}>
+        <SidebarAlerts pendingCount={pendingCount} unreadCount={unreadCount} compact={compact} />
+        <div className="rounded-2xl border border-emerald-100/80 bg-emerald-50/20 p-2 shadow-sm shadow-emerald-900/5">
+          <NavLinks
+            pathname={pathname}
+            unreadCount={unreadCount}
+            pendingCount={pendingCount}
+            onNavigate={onNavigate}
+          />
+        </div>
+      </div>
+      <OwnerSidebarFooter onSignOut={onSignOut} compact={compact} />
+    </>
   )
 }
 
@@ -168,48 +325,23 @@ export function OwnerShell({ children }: { children: ReactNode }) {
     router.push("/signin")
   }
 
-  const pageLabel = NAV.find((n) => isActive(pathname, n))?.label ?? "Owner"
+  const pageLabel = FLAT_NAV.find((n) => navItemActive(pathname, n))?.label ?? "Owner"
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
       <aside
-        className="hidden w-72 shrink-0 flex-col border-r border-blue-100/70 bg-gradient-to-b from-blue-50/30 to-emerald-50/20 md:flex"
+        className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-screen", cfg.shellClassName)}
       >
-        <div className="border-b px-6 py-4">
-          <div className="mb-4 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="rounded-md bg-gradient-to-br from-blue-50 to-emerald-50 p-2 text-blue-700 ring-1 ring-blue-100">
-              <Building2 className="h-5 w-5" />
-            </div>
-            <div className="leading-tight">
-              <span className="block font-semibold">Owner workspace</span>
-              <span className="text-xs text-muted-foreground">Platform administration</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-1 flex-col p-4">
-          <NavLinks pathname={pathname} cfg={cfg} unreadCount={unreadCount} pendingCount={pendingCount} />
-        </div>
-        <div className="mt-auto border-t border-blue-100/70 p-4">
-          <button
-            type="button"
-            className="group flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-            onClick={signOut}
-          >
-            <span className="inline-flex items-center gap-2.5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors group-hover:bg-rose-100 group-hover:text-rose-700">
-                <LogOut className="h-4 w-4" />
-              </span>
-              <span className="text-sm font-medium">Sign out</span>
-            </span>
-          </button>
-        </div>
+        <OwnerSidebarPanel
+          pathname={pathname}
+          unreadCount={unreadCount}
+          pendingCount={pendingCount}
+          onSignOut={signOut}
+        />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-card px-4 py-3 md:px-5">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-5">
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -221,43 +353,30 @@ export function OwnerShell({ children }: { children: ReactNode }) {
                 <SheetHeader className="sr-only">
                   <SheetTitle>Owner menu</SheetTitle>
                 </SheetHeader>
-                <div className="flex h-full flex-col border-r border-blue-100/70 bg-gradient-to-b from-blue-50/30 to-emerald-50/20">
-                  <div className="border-b px-4 py-3">
-                    <div className="mb-3">
-                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-8 w-auto" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="rounded-md bg-gradient-to-br from-blue-50 to-emerald-50 p-2 text-blue-700 ring-1 ring-blue-100">
-                        <Building2 className="h-5 w-5" />
-                      </div>
-                      <span className="font-semibold">Owner</span>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-3">
-                    <NavLinks
-                      pathname={pathname}
-                      cfg={cfg}
-                      unreadCount={unreadCount}
-                      pendingCount={pendingCount}
-                      onNavigate={() => setMobileOpen(false)}
-                    />
-                  </div>
-                  <div className="border-t p-3">
-                    <Button variant="outline" className="w-full" onClick={signOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign out
-                    </Button>
-                  </div>
+                <div className={cn("flex h-full flex-col", cfg.shellClassName)}>
+                  <OwnerSidebarPanel
+                    pathname={pathname}
+                    unreadCount={unreadCount}
+                    pendingCount={pendingCount}
+                    onNavigate={() => setMobileOpen(false)}
+                    onSignOut={signOut}
+                    compact
+                  />
                 </div>
               </SheetContent>
             </Sheet>
             <h1 className="truncate text-lg font-semibold">{pageLabel}</h1>
-            <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs capitalize text-muted-foreground sm:inline">
+            <span className="hidden shrink-0 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium capitalize text-emerald-800 sm:inline">
               owner
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="hidden border-emerald-200 text-emerald-800 hover:bg-emerald-50 sm:inline-flex"
+            >
               <Link href="/owner/notifications">
                 <Bell className="mr-1 h-4 w-4" />
                 {unreadCount > 0 ? `${unreadCount} unread` : "Alerts"}
@@ -266,7 +385,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto bg-muted/20">{children}</div>
+        <div className="flex-1 overflow-auto bg-slate-100">{children}</div>
       </div>
     </div>
   )

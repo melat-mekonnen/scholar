@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { CirclePlus, Filter, Search, Sparkles } from "lucide-react"
+import { CirclePlus, Filter, Search } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,7 +27,7 @@ type PendingScholarship = {
   id: string
   title: string
   country: string
-  degreeLevel?: "high_school" | "bachelor" | "master" | "phd" // <-- make optional
+  degreeLevel?: "high_school" | "bachelor" | "master" | "phd"
   deadline: string
   status: VerificationStatus
 }
@@ -63,8 +63,7 @@ export default function PendingScholarshipsPage() {
 
         const url = `/api/admin/scholarships/pending${params.toString() ? `?${params.toString()}` : ""}`
 
-        const { res, data, errorMessage } =
-          await apiFetchJson<PendingResponse>(url, { method: "GET" })
+        const { res, data, errorMessage } = await apiFetchJson<PendingResponse>(url, { method: "GET" })
 
         if (requestIdRef.current !== currentRequestId) return
 
@@ -95,10 +94,7 @@ export default function PendingScholarshipsPage() {
     setMutatingIds((prev) => ({ ...prev, [id]: true }))
 
     try {
-      const { res, errorMessage } = await apiFetchJson(
-        `/api/admin/scholarships/${id}/verify`,
-        { method: "PUT" },
-      )
+      const { res, errorMessage } = await apiFetchJson(`/api/admin/scholarships/${id}/verify`, { method: "PUT" })
 
       if (!res.ok) throw new Error(errorMessage || "Failed to approve scholarship")
 
@@ -115,10 +111,7 @@ export default function PendingScholarshipsPage() {
     setMutatingIds((prev) => ({ ...prev, [id]: true }))
 
     try {
-      const { res, errorMessage } = await apiFetchJson(
-        `/api/admin/scholarships/${id}/reject`,
-        { method: "PUT" },
-      )
+      const { res, errorMessage } = await apiFetchJson(`/api/admin/scholarships/${id}/reject`, { method: "PUT" })
 
       if (!res.ok) throw new Error(errorMessage || "Failed to reject scholarship")
 
@@ -133,158 +126,163 @@ export default function PendingScholarshipsPage() {
   function renderStatusBadge(status: VerificationStatus) {
     switch (status) {
       case "verified":
-        return <Badge className="bg-green-600 text-white">Verified</Badge>
+        return <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">Verified</Badge>
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>
       case "expired":
         return <Badge variant="secondary">Expired</Badge>
       case "draft":
-        return <Badge variant="outline">Draft</Badge>
+        return (
+          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+            Draft
+          </Badge>
+        )
       case "pending":
       default:
-        return <Badge variant="outline">Pending</Badge>
+        return <Badge className="bg-amber-500 text-white hover:bg-amber-600">Pending</Badge>
     }
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">Pending Scholarships</h1>
-              <p className="text-sm text-blue-50">
-                Review and moderate scholarships before they go live to students.
-              </p>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs text-blue-50">
-                <Sparkles className="h-3.5 w-3.5" />
-                Faster review workflow
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button asChild className="rounded-xl bg-white text-blue-700 hover:bg-blue-50">
-                <Link href="/admin/scholarships/new">
-                  <CirclePlus className="mr-2 h-4 w-4" />
-                  Create scholarship
-                </Link>
-              </Button>
-            </div>
+    <div className="mx-auto max-w-6xl space-y-8 p-6">
+      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
+        <div className="flex flex-col gap-4 border-l-4 border-emerald-500 pl-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Pending scholarships</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+              Review and moderate scholarships before they go live to students.
+            </p>
           </div>
-        </header>
+          <Button
+            asChild
+            className="shrink-0 rounded-md bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 sm:self-start"
+          >
+            <Link href="/admin/scholarships/new">
+              <CirclePlus className="mr-2 h-4 w-4" />
+              Create scholarship
+            </Link>
+          </Button>
+        </div>
+      </header>
 
-        {error ? <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
+      ) : null}
 
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-          <CardHeader className="space-y-4">
+      <section className="rounded-2xl border border-emerald-100/80 bg-white/90 p-3 shadow-sm shadow-emerald-900/5">
+        <Card className="border-0 bg-transparent shadow-none">
+          <CardHeader className="space-y-4 px-3 pb-2 pt-1 sm:px-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-base">Scholarships awaiting review</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                {loading ? "Loading..." : `${scholarships.length.toLocaleString()} items`}
-              </div>
+              <CardTitle className="text-base font-semibold text-slate-900">Scholarships awaiting review</CardTitle>
+              <p className="text-sm text-slate-500">
+                {loading ? "Loading…" : `${scholarships.length.toLocaleString()} items`}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <div className="relative min-w-[200px] flex-1 sm:max-w-sm">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
                 <Input
                   placeholder="Search by title or country"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-10 w-72 rounded-xl border-slate-200 pl-9"
+                  className="h-10 rounded-md border-emerald-100/90 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
                 />
               </div>
               <div className="relative">
-                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <div className="h-10 w-[180px] rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-600 shadow-sm flex items-center">
+                <Filter className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
+                <div className="flex h-10 min-w-[160px] items-center rounded-md border border-emerald-100/90 bg-white pl-9 pr-3 text-sm text-slate-600 shadow-sm">
                   Pending only
                 </div>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent>
-            <Table className="overflow-hidden rounded-xl border border-slate-200">
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead>Degree level</TableHead>
-                  <TableHead>Deadline</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {scholarships.length === 0 && !loading ? (
+          <CardContent className="px-3 pb-3 pt-0 sm:px-4 sm:pb-4">
+            <div className="overflow-x-auto rounded-xl border border-emerald-100/90 bg-white shadow-sm">
+              <Table>
+                <TableHeader className="bg-emerald-50/60">
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
-                      No pending scholarships at the moment.
-                    </TableCell>
+                    <TableHead className="text-slate-700">Title</TableHead>
+                    <TableHead className="text-slate-700">Country</TableHead>
+                    <TableHead className="text-slate-700">Degree level</TableHead>
+                    <TableHead className="text-slate-700">Deadline</TableHead>
+                    <TableHead className="text-slate-700">Status</TableHead>
+                    <TableHead className="text-right text-slate-700">Actions</TableHead>
                   </TableRow>
-                ) : null}
+                </TableHeader>
 
-                {scholarships.map((s) => (
-                  <TableRow key={s.id} className="hover:bg-slate-50/60">
-                    <TableCell className="max-w-xs">
-                      <Link
-                        href={`/admin/scholarships/${s.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {s.title}
-                      </Link>
-                    </TableCell>
+                <TableBody>
+                  {scholarships.length === 0 && !loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
+                        No pending scholarships at the moment.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
 
-                    <TableCell>{s.country}</TableCell>
+                  {scholarships.map((s) => (
+                    <TableRow key={s.id} className="transition-colors hover:bg-emerald-50/50">
+                      <TableCell className="max-w-xs">
+                        <Link
+                          href={`/admin/scholarships/${s.id}`}
+                          className="font-medium text-slate-900 underline-offset-2 hover:text-emerald-700 hover:underline"
+                        >
+                          {s.title}
+                        </Link>
+                      </TableCell>
 
-                    <TableCell className="capitalize">
-                      {s.degreeLevel ? s.degreeLevel.replace("_", " ") : "N/A"}
-                    </TableCell>
+                      <TableCell className="text-slate-600">{s.country}</TableCell>
 
-                    <TableCell>{s.deadline}</TableCell>
+                      <TableCell className="capitalize text-slate-600">
+                        {s.degreeLevel ? s.degreeLevel.replace("_", " ") : "N/A"}
+                      </TableCell>
 
-                    <TableCell>{renderStatusBadge(s.status)}</TableCell>
+                      <TableCell className="text-slate-600">{s.deadline}</TableCell>
 
-                    <TableCell className="text-right space-x-1">
-                      <Button size="sm" variant="outline" asChild>
-                        <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
-                      </Button>
+                      <TableCell>{renderStatusBadge(s.status)}</TableCell>
 
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => quickApprove(s.id)}
-                        disabled={isMutating(s.id)}
-                      >
-                        Approve
-                      </Button>
+                      <TableCell className="text-right">
+                        <div className="inline-flex flex-wrap items-center justify-end gap-2">
+                          <Button size="sm" variant="outline" asChild className="rounded-md border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
+                            <Link href={`/admin/scholarships/${s.id}`}>Review</Link>
+                          </Button>
 
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => quickReject(s.id)}
-                        disabled={isMutating(s.id)}
-                      >
-                        Reject
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          <Button
+                            size="sm"
+                            className="rounded-md bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
+                            onClick={() => quickApprove(s.id)}
+                            disabled={isMutating(s.id)}
+                          >
+                            Approve
+                          </Button>
 
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="rounded-md"
+                            onClick={() => quickReject(s.id)}
+                            disabled={isMutating(s.id)}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-8 text-center text-sm text-slate-500">
+                        Loading…
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
-      </div>
-    </main>
+      </section>
+    </div>
   )
 }

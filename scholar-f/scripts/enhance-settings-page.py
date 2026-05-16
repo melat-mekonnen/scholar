@@ -1,164 +1,18 @@
-"use client"
+# -*- coding: utf-8 -*-
+from pathlib import Path
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
-import {
-  Bell,
-  FolderOpen,
-  LayoutDashboard,
-  Moon,
-  Palette,
-  Search,
-  Shield,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  FileText,
-  UserCircle,
-  UserCircle2,
-  Users,
-  Settings as SettingsIcon,
-} from "lucide-react"
+p = Path(__file__).resolve().parents[1] / "app/settings/page.tsx"
+t = p.read_text(encoding="utf-8")
 
-import { apiFetchJson } from "@/lib/api"
-import { clearToken, logoutFromServer } from "@/lib/auth"
-import { useStudentI18n } from "@/lib/student-i18n"
-import {
-  loadNotificationPreferences,
-  saveNotificationPreferences,
-  type NotificationPreferences,
-} from "@/lib/user-preferences"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
-import { StudentLanguageToggle } from "@/components/student-language-toggle"
-import { Skeleton } from "@/components/ui/skeleton"
+start = t.find('<motion.div className="flex-1">')
+start = t.find('<div className="flex-1">')
+end = t.find("        </main>\n      </motion.div>\n    </motion.div>")
+end = t.find("        </main>\n      </div>\n    </div>")
 
-const settingsCardClass =
-  "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+if start < 0 or end < 0:
+    raise SystemExit(f"markers not found start={start} end={end}")
 
-type MeResponse = {
-  id: string
-  fullName?: string
-  email: string
-  role?: string
-}
-
-export default function SettingsPage() {
-  const router = useRouter()
-  const { theme, setTheme } = useTheme()
-  const { t } = useStudentI18n()
-  const [mounted, setMounted] = useState(false)
-
-  const [me, setMe] = useState<MeResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [prefs, setPrefs] = useState<NotificationPreferences>(loadNotificationPreferences)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    async function load() {
-      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
-      if (res.status === 401) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (res.ok && data) {
-        setMe(data)
-      }
-      setLoading(false)
-    }
-    void load()
-  }, [router])
-
-  useEffect(() => {
-    setPrefs(loadNotificationPreferences())
-  }, [])
-
-  function updatePrefs(partial: Partial<NotificationPreferences>) {
-    setPrefs((prev) => {
-      const next = { ...prev, ...partial }
-      saveNotificationPreferences(next)
-      return next
-    })
-  }
-
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
-    { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: false },
-    { href: "/applications", label: "My Applications", icon: FileText, active: false },
-    { href: "/community", label: "Community", icon: Users, active: false },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark, active: false },
-    { href: "/ai-matches", label: "AI Matches", icon: Sparkles, active: false },
-    { href: "/ai-chat", label: "AI Chatbot", icon: MessageSquare, active: false },
-    { href: "/profile", label: "Profile", icon: UserCircle2, active: false },
-    { href: "/settings", label: "Settings", icon: SettingsIcon, active: true },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen, active: false },
-  ]
-
-  return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
-            <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col p-6">
-          <div className="mb-8 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-          </div>
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Student Portal</p>
-
-          <nav className="flex flex-col gap-0.5">
-            {sidebarLinks.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={
-                    item.active
-                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
-                      : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
-                  }
-                >
-                  <span
-                    className={
-                      item.active
-                        ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
-                        : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.active ? (
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
-                  ) : (
-                    <span className="w-1.5 shrink-0" aria-hidden />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
-          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
-        </div>
-      </aside>
-
-      <div className="flex min-h-screen flex-1 flex-col">
+new_block = r'''      <div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +47,7 @@ export default function SettingsPage() {
                     Manage your account, notifications, and how EthioScholar looks for you.
                   </p>
                 </div>
-              </div>
+              </motion.div>
               <Button asChild variant="outline" size="sm" className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50">
                 <Link href="/profile">{t("Profile")}</Link>
               </Button>
@@ -297,7 +151,7 @@ export default function SettingsPage() {
           <Card className={settingsCardClass}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
             <CardHeader>
-              <div className="flex items-center gap-2">
+              <motion.div className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-emerald-600" />
                 <CardTitle className="text-base text-slate-900">Appearance</CardTitle>
               </div>
@@ -356,8 +210,32 @@ export default function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
-        </main>
-      </div>
-    </div>
-  )
-}
+'''
+
+new_block = new_block.replace("</motion.div>", "</div>").replace("<motion.div", "<div").replace("motion.div", "motion.div")
+new_block = new_block.replace("motion.div", "motion.div")
+# fix appearance card header broken tag
+new_block = new_block.replace(
+    """            <CardHeader>
+              <motion.div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-base text-slate-900">Appearance</CardTitle>
+              </div>""",
+    """            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-base text-slate-900">Appearance</CardTitle>
+              </div>""",
+)
+new_block = new_block.replace(
+    """                </div>
+              </motion.div>
+              <Button asChild""",
+    """                </div>
+              </div>
+              <Button asChild""",
+)
+
+t = t[:start] + new_block + t[end:]
+p.write_text(t, encoding="utf-8", newline="\n")
+print("done")

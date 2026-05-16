@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { FileText, FolderOpen, Sparkles, Upload } from "lucide-react"
+import { FileText, Files, FolderOpen, Sparkles, Upload } from "lucide-react"
 
 import { apiFetch, apiFetchJson, API_BASE_URL } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
+import { cn } from "@/lib/utils"
 
 type MeResponse = { id: string; role?: string }
 type DocumentRow = {
@@ -31,6 +32,7 @@ type Props = {
 
 export function ScholarshipDocumentsPage({ workspace }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
+  const isManager = workspace === "manager"
   const gate = useScholarshipWorkspaceGate(workspace)
   const router = useRouter()
   const [myUserId, setMyUserId] = useState<string>("")
@@ -113,7 +115,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
     return (
       <main className={cfg.standaloneSurfaceClass}>
         <div className="mx-auto max-w-4xl px-4 py-8">
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-slate-600">Loading…</p>
         </div>
       </main>
     )
@@ -124,43 +126,75 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
       ? "Filtering documents by your owner account."
       : "Filtering documents by your manager account."
 
-  return (
-    <main className={cfg.standaloneSurfaceClass}>
-      <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-8">
-        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
 
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
+  return (
+    <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
+      <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-8">
+        <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-6 shadow-sm shadow-emerald-900/5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">{cfg.documentPageHeading}</h1>
-              <p className="text-sm text-blue-50">
-                Upload and manage document resources linked to your scholarships.
-              </p>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs text-blue-50">
-                <Sparkles className="h-3.5 w-3.5" />
-                Organized document workspace
+            {isManager ? (
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
+                    <Files className="h-6 w-6" />
+                  </div>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">
+                    {cfg.documentPageHeading}
+                  </h1>
+                </div>
+                <p className="max-w-xl text-sm text-slate-600">
+                  Upload PDFs or guides and tie them to a scholarship ID so applicants can use your resources.
+                </p>
+                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  Accepted formats: PDF, Word, or plain text
+                </div>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-              <Link href={cfg.profilePath}>{cfg.profileLinkLabel}</Link>
-            </Button>
-              <Button asChild variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-              <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
-            </Button>
+            ) : (
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
+                    <Files className="h-6 w-6" />
+                  </div>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.documentPageHeading}</h1>
+                </div>
+                <p className="max-w-xl text-sm text-slate-600">
+                  Upload and manage document resources linked to your scholarships.
+                </p>
+                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  Organized document workspace
+                </div>
+              </div>
+            )}
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
+              <Button
+                asChild
+                variant="outline"
+                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+              >
+                <Link href={cfg.profilePath}>{cfg.profileLinkLabel}</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+              >
+                <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
+              </Button>
             </div>
           </div>
         </header>
 
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+        <Card className={cardShell}>
+          <CardHeader className="border-b border-emerald-100/80">
+            <CardTitle className="flex items-center gap-2 text-lg text-slate-900">
               <Upload className="h-5 w-5 text-emerald-600" />
               Upload new document
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <form className="space-y-4" onSubmit={onSubmit}>
               {formError ? (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">
@@ -172,48 +206,55 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   placeholder="Title"
                   value={form.title}
                   onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                   required
                 />
                 <Input
                   placeholder="Type (cv_template, tips, guide, etc.)"
                   value={form.type}
                   onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                   required
                 />
                 <Input
                   placeholder="Scholarship ID (required for upload)"
                   value={form.scholarshipId}
                   onChange={(e) => setForm((p) => ({ ...p, scholarshipId: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200 md:col-span-2"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500 md:col-span-2"
                   required
                 />
                 <Input
                   type="file"
                   accept=".pdf,.doc,.docx,.txt"
                   onChange={(e) => setForm((p) => ({ ...p, file: e.target.files?.[0] || null }))}
-                  className="h-11 rounded-xl border-slate-200 md:col-span-2"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1 file:text-sm file:font-medium file:text-emerald-800 hover:file:bg-emerald-100 md:col-span-2"
                   required
                 />
               </div>
-              <Button type="submit" disabled={loading} className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-900/15 ring-1 ring-emerald-500/25 hover:bg-emerald-700"
+              >
                 {loading ? "Uploading…" : "Upload document"}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FolderOpen className="h-5 w-5 text-blue-600" />
+        <Card className={cardShell}>
+          <CardHeader className="border-b border-emerald-100/80">
+            <CardTitle className="flex items-center gap-2 text-lg text-slate-900">
+              <FolderOpen className="h-5 w-5 text-emerald-600" />
               My uploaded documents
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 pt-2">
             {docs.map((d) => (
-              <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <div
+                key={d.id}
+                className="rounded-xl border border-emerald-100/80 bg-emerald-50/25 p-4"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium text-slate-900">{d.title}</p>
@@ -221,12 +262,22 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                       {d.originalName}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <Badge variant="outline">{d.type}</Badge>
-                      <Badge variant="outline">Downloads: {d.downloadCount}</Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-200/90 bg-white text-emerald-800"
+                      >
+                        {d.type}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-200/90 bg-white text-emerald-800"
+                      >
+                        Downloads: {d.downloadCount}
+                      </Badge>
                     </div>
                   </div>
                   <a
-                    className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+                    className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:from-emerald-700 hover:to-teal-700"
                     href={`${API_BASE_URL}/api/documents/${d.id}/download`}
                     target="_blank"
                     rel="noreferrer"
@@ -238,11 +289,15 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
               </div>
             ))}
             {!docs.length ? (
-              <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-muted-foreground">
+              <p
+                className="rounded-lg border border-emerald-100/80 bg-emerald-50/30 px-3 py-3 text-sm text-slate-600"
+              >
                 No documents yet.
               </p>
             ) : null}
-            {myUserId ? <p className="text-xs text-muted-foreground">{accountHint}</p> : null}
+            {myUserId ? (
+              <p className="text-xs text-slate-500">{accountHint}</p>
+            ) : null}
           </CardContent>
         </Card>
       </div>
