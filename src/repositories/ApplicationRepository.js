@@ -102,6 +102,8 @@ class ApplicationRepository {
        FROM applications a
        INNER JOIN users u ON u.id = a.user_id
        INNER JOIN scholarships s ON s.id = a.scholarship_id
+       INNER JOIN bookmarks b
+         ON b.user_id = a.user_id AND b.scholarship_id = a.scholarship_id
        LEFT JOIN student_notification_preferences p ON p.user_id = a.user_id
        WHERE a.status = 'pending'
          AND a.follow_up_sent_at IS NULL

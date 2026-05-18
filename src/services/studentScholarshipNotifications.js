@@ -98,6 +98,7 @@ async function runDeadlineReminderSweep() {
   return sent;
 }
 
+/** Only pending applications that are also bookmarked (saved + apply). */
 async function runApplicationFollowUpSweep() {
   const minAgeMinutes = Math.max(
     1,
