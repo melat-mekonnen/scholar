@@ -90,6 +90,30 @@ export const roleNavigationConfig: Record<string, RoleConfig> = {
       }
     ]
   },
+  student: {
+    brandName: "Scholarship Portal",
+    brandIcon: LayoutDashboard,
+    navSections: [
+      {
+        items: [
+          { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { href: "/recommendations", label: "AI Recommendations", icon: FileBadge },
+          { href: "/scholarships", label: "Browse Scholarships", icon: Search },
+          { href: "/applications", label: "My Applications", icon: FileText },
+          { href: "/community", label: "Community", icon: Users },
+          { href: "/saved", label: "Saved Scholarships", icon: ListChecks },
+        ]
+      },
+      {
+        items: [
+          { href: "/profile", label: "Profile", icon: User },
+          { href: "/settings", label: "Settings", icon: Activity },
+          { href: "/pricing", label: "Pricing & Plans", icon: BadgeDollarSign },
+          { href: "/documents", label: "Document Resources", icon: FileText },
+        ]
+      }
+    ]
+  },
   unknown: {
     brandName: "Unknown Role",
     brandIcon: AlertTriangle,

@@ -41,26 +41,72 @@ async function getTextEmbedding(text) {
   }
 
   if (!openai) {
-    throw new Error("OpenAI API key is not configured.");
+    // For local development without an API key, return a mock 1536-dim vector
+    // This allows the SQL vector search architecture to be tested.
+    console.warn("OpenAI API key missing. Using mock embedding for semantic search.");
+    const mockEmbedding = Array(1536).fill(0).map(() => Math.random() * 2 - 1);
+    
+    // Normalize to unit vector
+    const length = Math.sqrt(mockEmbedding.reduce((sum, val) => sum + val * val, 0));
+    const normalized = mockEmbedding.map(val => val / length);
+    
+    queryEmbeddingCache.set(key, normalized);
+    return normalized;
   }
 
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text,
-  });
+  const MAX_RETRIES = 2;
+  const TIMEOUT_MS = 5000;
 
-  const embedding = response?.data?.[0]?.embedding;
-  if (!Array.isArray(embedding)) {
-    throw new Error("OpenAI embedding response invalid.");
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      const response = await openai.embeddings.create({
+        model: "text-embedding-3-small",
+        input: text,
+      }, { signal: controller.signal });
+
+      clearTimeout(timeoutId);
+
+      const embedding = response.data[0].embedding;
+      
+      // Keep cache small to prevent memory leaks
+      if (queryEmbeddingCache.size > 1000) {
+        const firstKey = queryEmbeddingCache.keys().next().value;
+        queryEmbeddingCache.delete(firstKey);
+      }
+      
+      queryEmbeddingCache.set(key, embedding);
+      return embedding;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.warn(`[AI_TIMEOUT] OpenAI embedding generation timed out on attempt ${attempt}`);
+      } else {
+        console.warn(`[AI_API_FAILURE] OpenAI embedding generation failed on attempt ${attempt}:`, err.message);
+      }
+      
+      if (attempt === MAX_RETRIES) {
+        throw new Error(`OpenAI API failed after ${MAX_RETRIES} attempts: ${err.message}`);
+      }
+      
+      // Wait before retry
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
   }
-
-  queryEmbeddingCache.set(key, embedding);
-  return embedding;
 }
 
 async function batchScholarshipEmbeddings(scholarships = []) {
   if (!openai) {
-    throw new Error("OpenAI API key is not configured.");
+    const output = [];
+    console.warn("OpenAI API key missing. Using mock embeddings for batch.");
+    scholarships.forEach(scholarship => {
+      const mockEmbedding = Array(1536).fill(0).map(() => Math.random() * 2 - 1);
+      const length = Math.sqrt(mockEmbedding.reduce((sum, val) => sum + val * val, 0));
+      const normalized = mockEmbedding.map(val => val / length);
+      output.push({ scholarship, embedding: normalized });
+    });
+    return output;
   }
 
   const batchSize = 50;

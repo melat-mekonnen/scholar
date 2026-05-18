@@ -1,0 +1,45 @@
+{
+  "modelVersion": "v20260516124218",
+  "importance": [
+    {
+      "feature": "degree_similarity",
+      "importance": 1.0
+    },
+    {
+      "feature": "gpa_similarity",
+      "importance": 0.0
+    },
+    {
+      "feature": "country_match",
+      "importance": 0.0
+    },
+    {
+      "feature": "field_similarity",
+      "importance": 0.0
+    },
+    {
+      "feature": "funding_similarity",
+      "importance": 0.0
+    },
+    {
+      "feature": "interest_similarity",
+      "importance": 0.0
+    },
+    {
+      "feature": "student_gpa",
+      "importance": 0.0
+    },
+    {
+      "feature": "scholarship_gpa",
+      "importance": 0.0
+    },
+    {
+      "feature": "scholarship_full_funding",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_gpa_requirement",
+      "importance": 0.0
+    }
+  ]
+}

@@ -10,6 +10,7 @@ async function list(req, res, next) {
     const userId = req.user?.id;
     const topN = req.query?.topN ? Number(req.query.topN) : 20;
     const q = req.query?.q || "";
+    req.observabilityEvent = "recommendation_fetch";
     const subscriptionUsage = await incrementAiRequest(userId);
     const data = await getRecommendations({
       userId,

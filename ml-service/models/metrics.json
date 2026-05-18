@@ -1,0 +1,44 @@
+{
+  "modelVersion": "v20260516124218",
+  "datasetVersion": "dataset-676004679d",
+  "datasetSummary": {
+    "students": 3,
+    "scholarships": 6,
+    "interactions": 5,
+    "positiveLabels": 5,
+    "negativeLabels": 13
+  },
+  "classBalance": {
+    "scalePosWeight": 2.6,
+    "ratio": "13:5"
+  },
+  "trainingSize": 14,
+  "validationSize": 4,
+  "accuracy": 0.75,
+  "precision": 0.5,
+  "recall": 1.0,
+  "rocAuc": 0.8333333333333334,
+  "confusionMatrix": [
+    [
+      2,
+      1
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "featureColumns": [
+    "gpa_similarity",
+    "country_match",
+    "degree_similarity",
+    "field_similarity",
+    "funding_similarity",
+    "interest_similarity",
+    "student_gpa",
+    "scholarship_gpa",
+    "scholarship_full_funding",
+    "has_gpa_requirement"
+  ],
+  "trainedAt": "2026-05-16T12:42:19.097628Z"
+}

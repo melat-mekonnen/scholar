@@ -2,6 +2,7 @@ const { ScholarshipRepository } = require("../../repositories/ScholarshipReposit
 const { StudentProfileRepository } = require("../../repositories/StudentProfileRepository");
 const { searchScholarships } = require("./vectorSearch");
 const { evaluateProfileStrength } = require("./profileStrengthEngine");
+const { getMlRecommendations } = require("../../services/mlRecommendationService");
 
 const scholarshipRepo = new ScholarshipRepository();
 const profileRepo = new StudentProfileRepository();
@@ -38,7 +39,7 @@ async function getRecommendations({ userId, topN = 10, q = "", isPremium = false
   const profileCompleteness = checkProfileCompleteness(profile);
   const profileStrength = evaluateProfileStrength(profile || {});
 
-  // Use vector search for AI-powered recommendations
+  // Use vector search as the semantic fallback and baseline ranking source
   const searchResult = await searchScholarships({
     q,
     countries: [],
@@ -56,12 +57,32 @@ async function getRecommendations({ userId, topN = 10, q = "", isPremium = false
     isPremium,
   });
 
+  const mlResult = profile
+    ? await getMlRecommendations({
+        studentId: userId,
+        studentProfile: profile,
+        scholarships: searchResult.results,
+      })
+    : null;
+
+  const results = mlResult?.recommendations || searchResult.results;
+  const modelVersion = mlResult?.modelVersion || "unknown";
+  const fallbackUsed = !profile || mlResult?.fallbackUsed || false;
+  const fallbackReason = !profile
+    ? "This student does not have a complete profile for ML ranking."
+    : mlResult?.fallbackReason || null;
+  const latencyMs = mlResult?.latencyMs ?? null;
+
   return {
-    results: searchResult.results,
+    results,
     total: searchResult.total,
     hasProfile,
     profileCompleteness,
     profileStrength,
+    modelVersion,
+    fallbackUsed,
+    fallbackReason,
+    latencyMs,
   };
 }
 

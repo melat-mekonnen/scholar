@@ -2,6 +2,7 @@ const { ScholarshipRepository } = require("../repositories/ScholarshipRepository
 const { StudentProfileRepository } = require("../repositories/StudentProfileRepository");
 const { searchScholarships } = require("../usecases/recommendations/vectorSearch");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
+const { getTextEmbedding } = require("../services/embeddingService");
 const {
   initialStatusForCreator,
   nextStatusAfterUpdate,
@@ -228,6 +229,85 @@ async function search(req, res, next) {
   }
 }
 
+async function semanticSearch(req, res, next) {
+  try {
+    await repo.expirePastDeadline();
+    
+    const {
+      q,
+      countries,
+      degreeLevels,
+      fieldsOfStudy,
+      fundingTypes,
+      deadlineFrom,
+      deadlineTo,
+      sort,
+      page,
+      limit,
+    } = req.body || {};
+
+    if (!q || !String(q).trim()) {
+      const err = new Error("Search query 'q' is required for semantic search");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const queryText = String(q).trim();
+    const queryEmbedding = await getTextEmbedding(queryText);
+
+    const parsedCountries = normalizeMulti(countries);
+    const parsedDegreeLevels = normalizeMulti(degreeLevels);
+    const parsedFields = normalizeMulti(fieldsOfStudy);
+    const parsedFundingTypes = normalizeMulti(fundingTypes);
+
+    const parsedPage = page ? Math.max(parseInt(page, 10), 1) : 1;
+    const parsedLimit = limit ? Math.min(Math.max(parseInt(limit, 10), 1), 100) : 20;
+
+    const bookmarkUserId = getBookmarkUserId(req);
+
+    const result = await repo.searchPublicByVector({
+      queryEmbedding,
+      q: null, // semantic search doesn't strictly need text match for relevance, just vector
+      countries: parsedCountries,
+      degreeLevels: parsedDegreeLevels,
+      fieldsOfStudy: parsedFields,
+      fundingTypes: parsedFundingTypes,
+      deadlineFrom,
+      deadlineTo,
+      sort,
+      page: parsedPage,
+      limit: parsedLimit,
+      status: "verified",
+      bookmarkUserId,
+    });
+
+    return res.json({
+      results: result.results.map((r) => ({
+        id: r.id,
+        title: r.title,
+        organizationName: r.organization_name,
+        country: r.country,
+        degreeLevel: r.degree_level,
+        fieldOfStudy: r.field_of_study,
+        fundingType: r.funding_type,
+        deadline: r.deadline,
+        amount: r.amount,
+        applicationUrl: r.application_url,
+        bookmark_count: r.bookmark_count,
+        bookmarkCount: r.bookmark_count,
+        is_bookmarked: Boolean(r.is_bookmarked),
+        isBookmarked: Boolean(r.is_bookmarked),
+        semanticScore: typeof r.semanticScore === "number" ? r.semanticScore : 0,
+      })),
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function getById(req, res, next) {
   try {
     await repo.expirePastDeadline();
@@ -446,6 +526,7 @@ module.exports = {
   list,
   getFilters,
   search,
+  semanticSearch,
   getById,
   update,
   remove,

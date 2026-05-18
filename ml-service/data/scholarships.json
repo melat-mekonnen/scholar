@@ -1,0 +1,68 @@
+[
+  {
+    "id": "scholarship-001",
+    "title": "Global Computer Science Fellowship",
+    "country": "USA",
+    "degree_level": "master",
+    "field_of_study": "Computer Science",
+    "funding_type": "Full funding",
+    "amount": "50,000",
+    "description": "A scholarship covering tuition and living expenses for outstanding computer science students.",
+    "gpa_requirement": 3.5
+  },
+  {
+    "id": "scholarship-002",
+    "title": "Canada Business Leaders Grant",
+    "country": "Canada",
+    "degree_level": "bachelor",
+    "field_of_study": "Business",
+    "funding_type": "Partial funding",
+    "amount": "20,000",
+    "description": "Support for future business leaders studying in Canada.",
+    "gpa_requirement": 3.0
+  },
+  {
+    "id": "scholarship-003",
+    "title": "European Climate Science Doctoral Award",
+    "country": "Germany",
+    "degree_level": "phd",
+    "field_of_study": "Environmental Science",
+    "funding_type": "Full funding",
+    "amount": "70,000",
+    "description": "A funded doctoral award for climate and sustainability research.",
+    "gpa_requirement": 3.4
+  },
+  {
+    "id": "scholarship-004",
+    "title": "Global STEM Merit Scholarship",
+    "country": "USA",
+    "degree_level": "bachelor",
+    "field_of_study": "Engineering",
+    "funding_type": "Partial funding",
+    "amount": "30,000",
+    "description": "Merit-based support for high-achieving engineering students.",
+    "gpa_requirement": 3.4
+  },
+  {
+    "id": "scholarship-005",
+    "title": "International Research Fellowship",
+    "country": "Germany",
+    "degree_level": "phd",
+    "field_of_study": "Data Science",
+    "funding_type": "Full funding",
+    "amount": "60,000",
+    "description": "Research fellowship for international doctoral students in data-driven science.",
+    "gpa_requirement": 3.6
+  },
+  {
+    "id": "scholarship-006",
+    "title": "Social Impact Scholarship",
+    "country": "USA",
+    "degree_level": "master",
+    "field_of_study": "Environmental Science",
+    "funding_type": "Partial funding",
+    "amount": "25,000",
+    "description": "A scholarship for social impact and environmental change projects.",
+    "gpa_requirement": 3.2
+  }
+]

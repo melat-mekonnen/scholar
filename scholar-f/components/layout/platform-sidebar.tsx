@@ -39,7 +39,7 @@ export function PlatformSidebar({ role }: { role: string }) {
             <BrandIcon className="h-5 w-5" />
           </div>
           {state === "expanded" && (
-            <span className="font-semibold text-lg truncate">{config.brandName}</span>
+            <span className="font-semibold text-lg truncate group-data-[collapsible=icon]:hidden">{config.brandName}</span>
           )}
         </div>
       </SidebarHeader>
@@ -66,7 +66,7 @@ export function PlatformSidebar({ role }: { role: string }) {
                     >
                       <Link href={item.href} className="flex items-center gap-3 w-full">
                         <Icon className={cn("h-4 w-4 shrink-0 transition-colors duration-200", isActive && "text-primary")} />
-                        <span>{item.label}</span>
+                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

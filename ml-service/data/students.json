@@ -1,0 +1,32 @@
+[
+  {
+    "id": "student-001",
+    "gpa": 3.8,
+    "preferred_country": "USA",
+    "degree_level": "master",
+    "field_of_study": "Computer Science",
+    "interests": ["machine learning", "data science", "software engineering"],
+    "financial_need": true,
+    "preferred_funding_type": "Full funding"
+  },
+  {
+    "id": "student-002",
+    "gpa": 3.2,
+    "preferred_country": "Canada",
+    "degree_level": "bachelor",
+    "field_of_study": "Business",
+    "interests": ["management", "finance", "entrepreneurship"],
+    "financial_need": false,
+    "preferred_funding_type": "Partial funding"
+  },
+  {
+    "id": "student-003",
+    "gpa": 3.5,
+    "preferred_country": "Germany",
+    "degree_level": "phd",
+    "field_of_study": "Environmental Science",
+    "interests": ["sustainability", "climate policy", "research"],
+    "financial_need": true,
+    "preferred_funding_type": "Full funding"
+  }
+]

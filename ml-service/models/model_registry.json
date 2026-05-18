@@ -1,0 +1,11 @@
+[
+  {
+    "version": "v20260516124218",
+    "createdAt": "2026-05-16T12:42:19.119196Z",
+    "datasetVersion": "dataset-676004679d",
+    "metricsPath": "metrics.json",
+    "featureImportancePath": "feature_importance.json",
+    "modelPath": "recommendation_model_v20260516124218.pkl",
+    "isActive": true
+  }
+]

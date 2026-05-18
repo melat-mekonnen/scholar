@@ -12,6 +12,12 @@ class ObservabilityService {
       total4xx: 0,
       total5xx: 0,
       aiRequests: 0,
+      mlRequestCount: 0,
+      mlPredictionCount: 0,
+      mlPredictionLatencyMs: 0,
+      mlFallbacks: 0,
+      mlConfidenceSum: 0,
+      activeModelVersion: "unknown",
       rateLimitHits: 0,
       authRequests: 0,
       guestRequests: 0,
@@ -50,6 +56,27 @@ class ObservabilityService {
     if (trace.endpoint.includes("/api/recommendations") || trace.endpoint.includes("/api/discovery/ai")) {
       this.metrics.aiRequests++;
     }
+  }
+
+  recordMlRecommendation({ success, latencyMs, modelVersion, count, averageConfidence }) {
+    this.metrics.mlRequestCount++;
+    this.metrics.activeModelVersion = modelVersion || this.metrics.activeModelVersion;
+    if (typeof count === "number") {
+      this.metrics.mlPredictionCount += count;
+    }
+    if (typeof latencyMs === "number") {
+      this.metrics.mlPredictionLatencyMs += latencyMs;
+    }
+    if (typeof averageConfidence === "number") {
+      this.metrics.mlConfidenceSum += averageConfidence * (count || 1);
+    }
+    if (!success) {
+      this.metrics.mlFallbacks++;
+    }
+  }
+
+  recordMlFallback() {
+    this.metrics.mlFallbacks++;
   }
 
   getMetrics() {
@@ -96,6 +123,9 @@ class ObservabilityService {
       systemStatus = "Warning";
     }
 
+    const averageMlLatency = this.metrics.mlRequestCount > 0 ? Number((this.metrics.mlPredictionLatencyMs / this.metrics.mlRequestCount).toFixed(2)) : 0;
+    const averageMlConfidence = this.metrics.mlPredictionCount > 0 ? Number((this.metrics.mlConfidenceSum / this.metrics.mlPredictionCount).toFixed(4)) : 0;
+
     return {
       ...this.metrics,
       uptimeSeconds: Math.floor((Date.now() - this.metrics.startTime) / 1000),
@@ -103,7 +133,10 @@ class ObservabilityService {
       slowestEndpoints,
       systemStatus,
       errorRate: parseFloat(errorRate.toFixed(2)),
-      bufferSize: this.traces.length
+      bufferSize: this.traces.length,
+      averageMlLatency,
+      averageMlConfidence,
+      mlFallbackRate: this.metrics.mlRequestCount > 0 ? Number(((this.metrics.mlFallbacks / this.metrics.mlRequestCount) * 100).toFixed(2)) : 0,
     };
   }
 

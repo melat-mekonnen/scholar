@@ -122,6 +122,7 @@ export default function ScholarshipsPage() {
   const [filters, setFilters] = useState<FiltersResponse | null>(null);
   const [urlSynced, setUrlSynced] = useState(false);
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [countries, setCountries] = useState<string[]>([]);
   const [degreeLevels, setDegreeLevels] = useState<string[]>([]);
   const [fieldsOfStudy, setFieldsOfStudy] = useState<string[]>([]);
@@ -216,11 +217,18 @@ export default function ScholarshipsPage() {
     loadProfile();
   }, []);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQ(q);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [q]);
+
   // Update URL when state changes
   const params = useMemo(
     () =>
       buildParams({
-        q,
+        q: debouncedQ,
         countries,
         degreeLevels,
         fieldsOfStudy,
@@ -232,7 +240,7 @@ export default function ScholarshipsPage() {
         limit,
       }),
     [
-      q,
+      debouncedQ,
       countries,
       degreeLevels,
       fieldsOfStudy,
@@ -257,10 +265,38 @@ export default function ScholarshipsPage() {
     async function search() {
       setLoading(true);
       setError(null);
-      const { res, data, errorMessage } = await apiFetchJson<SearchResponse>(
-        `/api/scholarships/search?${params.toString()}`,
-        { method: "GET" },
-      );
+      
+      let res, data, errorMessage;
+      if (debouncedQ.trim()) {
+        const payload = {
+          q: debouncedQ,
+          countries,
+          degreeLevels,
+          fieldsOfStudy,
+          fundingTypes,
+          deadlineFrom,
+          deadlineTo,
+          sort,
+          page,
+          limit,
+        };
+        const response = await apiFetchJson<SearchResponse>(
+          `/api/scholarships/semantic-search`,
+          { method: "POST", body: JSON.stringify(payload) },
+        );
+        res = response.res;
+        data = response.data;
+        errorMessage = response.errorMessage;
+      } else {
+        const response = await apiFetchJson<SearchResponse>(
+          `/api/scholarships/search?${params.toString()}`,
+          { method: "GET" },
+        );
+        res = response.res;
+        data = response.data;
+        errorMessage = response.errorMessage;
+      }
+
       if (!res.ok || !data) {
         setLoading(false);
         setError(errorMessage || "Failed to load scholarships");
@@ -663,6 +699,11 @@ export default function ScholarshipsPage() {
 
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="secondary">Verified</Badge>
+                          {typeof s.semanticScore === "number" && s.semanticScore > 0 && debouncedQ && (
+                            <Badge className="bg-primary/20 text-primary border-primary/30">
+                              {Math.round(s.semanticScore * 100)}% Semantic Match
+                            </Badge>
+                          )}
                           {typeof s.bookmarkCount === "number" &&
                             s.bookmarkCount > 0 && (
                               <Badge variant="outline">

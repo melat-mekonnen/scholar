@@ -13,7 +13,12 @@ import {
 
 import { apiFetchJson } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
-import { StudentSidebar } from "@/components/layout/student-sidebar";
+import { PlatformSidebar } from "@/components/layout/platform-sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,16 +71,20 @@ type RecommendationsResponse = {
   total: number;
   hasProfile: boolean;
   profileCompleteness: {
-    gpa?: boolean;
-    fieldOfStudy?: boolean;
-    degreeLevel?: boolean;
-    englishTests?: boolean;
+    gpa: boolean;
+    fieldOfStudy: boolean;
+    degreeLevel: boolean;
+    englishTests: boolean;
   };
   profileStrength?: {
     label: string;
     score: number;
     reasons: string[];
   };
+  modelVersion?: string;
+  fallbackUsed?: boolean;
+  fallbackReason?: string | null;
+  latencyMs?: number | null;
 };
 
 function getEligibilityBadgeColor(status: string) {
@@ -322,13 +331,18 @@ export default function RecommendationsPage() {
     score: number;
     reasons: string[];
   } | null>(null);
+  const [modelVersion, setModelVersion] = useState("unknown");
+  const [fallbackUsed, setFallbackUsed] = useState(false);
+  const [fallbackReason, setFallbackReason] = useState<string | null>(null);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeTrigger, setUpgradeTrigger] = useState<
     "ai_limit" | "premium_feature"
   >("premium_feature");
 
   const planType = user?.planType ?? "free";
-  const freeAiLimit = 10;
+  const freeAiLimit = 5;
   const isNearLimit =
     planType === "free" && (user?.aiRequestsToday ?? 0) >= freeAiLimit * 0.8;
   const hasReachedLimit =
@@ -352,6 +366,7 @@ export default function RecommendationsPage() {
   const loadRecommendations = async (query = "") => {
     try {
       setLoading(true);
+      setErrorMessage(null);
       const { res, data } = await apiFetchJson<RecommendationsResponse>(
         `/api/recommendations${query ? `?q=${encodeURIComponent(query)}` : ""}`,
         { method: "GET", auth: true },
@@ -362,21 +377,57 @@ export default function RecommendationsPage() {
         setHasProfile(data.hasProfile);
         setProfileCompleteness(data.profileCompleteness);
         setProfileStrength(data.profileStrength || null);
+        setModelVersion((data as any)?.modelVersion || "unknown");
+        setFallbackUsed((data as any)?.fallbackUsed || false);
+        setFallbackReason((data as any)?.fallbackReason || null);
+        setLatencyMs((data as any)?.latencyMs ?? null);
       } else {
+        const message =
+          (data as any)?.message || "Unable to load recommendations.";
+        setErrorMessage(message);
         console.error("Failed to load recommendations:", data);
         toast({
           title: "Failed to load recommendations",
+          description: message,
           variant: "destructive",
         });
       }
     } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unexpected error loading recommendations.";
+      setErrorMessage(message);
       console.error("Error loading recommendations:", error);
       toast({
         title: "Error loading recommendations",
+        description: message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const logRecommendationInteraction = async (
+    scholarshipId: string,
+    interactionType: string,
+  ) => {
+    try {
+      await apiFetchJson(`/api/recommendations/feedback`, {
+        method: "POST",
+        auth: true,
+        body: JSON.stringify({ scholarshipId, interactionType }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.warn(
+        "Failed to log recommendation interaction",
+        interactionType,
+        error,
+      );
     }
   };
 
@@ -394,328 +445,368 @@ export default function RecommendationsPage() {
     }
   };
 
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchQuery.trim().length === 0) return;
+      handleSearch();
+    }, 600);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
   if (authLoading) {
     return (
-      <div className="flex h-screen">
-        <StudentSidebar />
-        <main className="flex-1 p-6 flex items-center justify-center">
-          <Skeleton className="h-[400px] w-full max-w-3xl rounded-xl" />
-        </main>
-      </div>
+      <SidebarProvider>
+        <PlatformSidebar role="student" />
+        <SidebarInset>
+          <div className="flex h-screen items-center justify-center">
+            <Skeleton className="h-100 w-full max-w-3xl rounded-xl" />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex h-screen">
-        <StudentSidebar />
-        <main className="flex-1 p-6">
-          <div className="text-center">
-            <p>Please sign in to view recommendations.</p>
-          </div>
-        </main>
-      </div>
+      <SidebarProvider>
+        <PlatformSidebar role="student" />
+        <SidebarInset>
+          <main className="flex-1 p-6">
+            <div className="text-center">
+              <p>Please sign in to view recommendations.</p>
+            </div>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <StudentSidebar />
-      <main className="flex-1 overflow-y-auto">
+    <SidebarProvider>
+      <PlatformSidebar role="student" />
+      <SidebarInset>
         <header className="flex flex-col gap-4 border-b p-4 bg-card md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-lg font-semibold">
-              AI-Powered Recommendations
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              Personalized scholarship matches powered by AI. All opportunities
-              are sourced from the backend scholarship database and ranked using
-              your profile and semantic relevance.
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <PremiumBadge planType={planType} size="sm" />
-              {planType === "free" ? (
-                <span className="text-sm text-muted-foreground">
-                  {user?.aiRequestsToday ?? 0}/{freeAiLimit} AI requests used
-                  today
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground">
-                  Premium insights unlocked
-                </span>
-              )}
+          <div className="flex items-start gap-3">
+            <SidebarTrigger className="-ml-1 md:hidden" />
+            <div>
+              <h1 className="text-lg font-semibold">
+                AI-Powered Recommendations
+              </h1>
+              <p className="text-sm text-muted-foreground max-w-2xl">
+                Personalized scholarship matches powered by AI. All
+                opportunities are sourced from the backend scholarship database
+                and ranked using your profile and semantic relevance.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <PremiumBadge planType={planType} size="sm" />
+                {planType === "free" ? (
+                  <span className="text-sm text-muted-foreground">
+                    {user?.aiRequestsToday ?? 0}/{freeAiLimit} AI requests used
+                    today
+                  </span>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    Premium insights unlocked
+                  </span>
+                )}
+                <Badge className="bg-slate-100 text-slate-800 border-slate-200">
+                  Model {modelVersion}
+                </Badge>
+                {fallbackUsed && (
+                  <Badge className="bg-amber-100 text-amber-900 border-amber-200">
+                    Semantic fallback active
+                  </Badge>
+                )}
+              </div>
             </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] items-end">
-              <UsageMeter
-                aiRequestsToday={user?.aiRequestsToday ?? 0}
-                aiRequestsResetAt={
-                  user?.aiRequestsResetAt ?? new Date().toISOString()
-                }
-                planType={planType}
-                className="w-full"
-              />
-              {planType === "free" && isNearLimit && (
-                <Button
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0"
-                  onClick={() => openUpgradeModal("ai_limit")}
-                >
-                  Upgrade for unlimited AI
-                </Button>
-              )}
-            </div>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] items-end">
+            <UsageMeter
+              aiRequestsToday={user?.aiRequestsToday ?? 0}
+              aiRequestsResetAt={
+                user?.aiRequestsResetAt ?? new Date().toISOString()
+              }
+              planType={planType}
+              className="w-full"
+            />
+            {planType === "free" && isNearLimit && (
+              <Button
+                className="bg-linear-to-r from-amber-500 to-orange-500 text-white border-0"
+                onClick={() => openUpgradeModal("ai_limit")}
+              >
+                Upgrade for unlimited AI
+              </Button>
+            )}
           </div>
         </header>
 
-        <div className="p-6 space-y-6">
-          {profileStrength && (
-            <Card className="border-slate-200 bg-slate-50/70">
-              <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                      {profileStrength.label.toUpperCase()}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Profile strength {profileStrength.score}%
-                    </span>
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {profileStrength && (
+              <Card className="border-slate-200 bg-slate-50/70">
+                <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                        {profileStrength.label.toUpperCase()}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        Profile strength {profileStrength.score}%
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {profileStrength.reasons[0] ||
+                        "Personalized matching powered by your student profile."}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {profileStrength.reasons[0] ||
-                      "Personalized matching powered by your student profile."}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/profile")}
-                >
-                  Improve profile
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-          {planType === "free" && (
-            <Card className="border-amber-200 bg-amber-50/60">
-              <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-semibold">Free plan limits applied</p>
-                  <p className="text-sm text-muted-foreground">
-                    Your current plan includes {freeAiLimit} AI requests per
-                    day. Upgrade for unlimited recommendations and richer
-                    analysis.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0"
-                    onClick={() => router.push("/pricing")}
-                  >
-                    View plans
-                  </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setShowUpgradeModal(true)}
+                    onClick={() => router.push("/profile")}
                   >
-                    Learn more
+                    Improve profile
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {hasReachedLimit && (
-            <Card className="border-red-200 bg-red-50">
-              <CardContent>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                </CardContent>
+              </Card>
+            )}
+            {planType === "free" && (
+              <Card className="border-amber-200 bg-amber-50/60">
+                <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="font-semibold text-red-900">
-                      Daily AI limit reached
-                    </p>
-                    <p className="text-sm text-red-700">
-                      Upgrade your plan to continue generating recommendations
-                      today.
+                    <p className="font-semibold">Free plan limits applied</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your current plan includes {freeAiLimit} AI requests per
+                      day. Upgrade for unlimited recommendations and richer
+                      analysis.
                     </p>
                   </div>
-                  <Button
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0"
-                    onClick={() => setShowUpgradeModal(true)}
-                  >
-                    Upgrade now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {/* Search Input */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Try: 'fully funded masters in japan' or 'women in STEM scholarships'"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="pl-10"
-                  />
-                </div>
-                <Button onClick={handleSearch} disabled={loading}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Profile Completeness Warning */}
-          {profileIncomplete && (
-            <Card className="border-yellow-200 bg-yellow-50">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-3">
-                  <div className="text-yellow-600 mt-1">⚠️</div>
-                  <div>
-                    <h3 className="font-medium text-yellow-800 mb-2">
-                      Recommendation quality may improve with a complete profile
-                    </h3>
-                    <p className="text-sm text-yellow-700 mb-3">
-                      Add missing profile details to improve matching accuracy
-                      and see more relevant scholarship suggestions.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {!profileCompleteness.gpa && (
-                        <Badge variant="outline">GPA</Badge>
-                      )}
-                      {!profileCompleteness.fieldOfStudy && (
-                        <Badge variant="outline">Field of Study</Badge>
-                      )}
-                      {!profileCompleteness.degreeLevel && (
-                        <Badge variant="outline">Degree Level</Badge>
-                      )}
-                      {!profileCompleteness.englishTests && (
-                        <Badge variant="outline">English Tests</Badge>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-2">
                     <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => router.push("/profile")}
+                      className="bg-linear-to-r from-amber-500 to-orange-500 text-white border-0"
+                      onClick={() => router.push("/pricing")}
                     >
-                      {hasProfile ? "Update Profile" : "Complete Profile"}
+                      View plans
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      Learn more
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+            {hasReachedLimit && (
+              <Card className="border-red-200 bg-red-50">
+                <CardContent>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-semibold text-red-900">
+                        Daily AI limit reached
+                      </p>
+                      <p className="text-sm text-red-700">
+                        Upgrade your plan to continue generating recommendations
+                        today.
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-linear-to-r from-amber-500 to-orange-500 text-white border-0"
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      Upgrade now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {errorMessage && (
+              <Card className="border-rose-200 bg-rose-50">
+                <CardContent>
+                  <p className="font-semibold text-rose-900">
+                    Recommendation error
+                  </p>
+                  <p className="text-sm text-rose-700">{errorMessage}</p>
+                </CardContent>
+              </Card>
+            )}
+            {/* Search Input */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Try: 'fully funded masters in japan' or 'women in STEM scholarships'"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button onClick={handleSearch} disabled={loading}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          )}
 
-          {planType === "free" && !loading && (
-            <div className="grid md:grid-cols-3 gap-4">
-              <LockedFeature
-                title="Advanced fit analysis"
-                description="See the deeper fit score and a preview of premium reasoning."
-                onUpgrade={() => openUpgradeModal("premium_feature")}
-              >
-                <div className="space-y-2 p-4">
-                  <div className="h-4 w-3/4 rounded-md bg-muted" />
-                  <div className="h-3 w-1/2 rounded-md bg-muted" />
-                  <div className="h-3 w-5/6 rounded-md bg-muted" />
-                </div>
-              </LockedFeature>
-
-              <LockedFeature
-                title="Scholarship competitiveness"
-                description="Compare your profile against other applicants."
-                onUpgrade={() => openUpgradeModal("premium_feature")}
-              >
-                <div className="space-y-2 p-4">
-                  <div className="h-4 w-1/2 rounded-md bg-muted" />
-                  <div className="h-3 w-2/3 rounded-md bg-muted" />
-                  <div className="h-3 w-1/3 rounded-md bg-muted" />
-                </div>
-              </LockedFeature>
-
-              <LockedFeature
-                title="AI application advice"
-                description="Receive tailored tips to strengthen your application."
-                onUpgrade={() => openUpgradeModal("premium_feature")}
-              >
-                <div className="space-y-2 p-4">
-                  <div className="h-4 w-full rounded-md bg-muted" />
-                  <div className="h-3 w-4/5 rounded-md bg-muted" />
-                  <div className="h-3 w-2/3 rounded-md bg-muted" />
-                </div>
-              </LockedFeature>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {loading && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-20 w-full" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-9 w-20" />
-                      <Skeleton className="h-9 w-20" />
+            {/* Profile Completeness Warning */}
+            {profileIncomplete && (
+              <Card className="border-yellow-200 bg-yellow-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-yellow-600 mt-1">⚠️</div>
+                    <div>
+                      <h3 className="font-medium text-yellow-800 mb-2">
+                        Recommendation quality may improve with a complete
+                        profile
+                      </h3>
+                      <p className="text-sm text-yellow-700 mb-3">
+                        Add missing profile details to improve matching accuracy
+                        and see more relevant scholarship suggestions.
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {!profileCompleteness.gpa && (
+                          <Badge variant="outline">GPA</Badge>
+                        )}
+                        {!profileCompleteness.fieldOfStudy && (
+                          <Badge variant="outline">Field of Study</Badge>
+                        )}
+                        {!profileCompleteness.degreeLevel && (
+                          <Badge variant="outline">Degree Level</Badge>
+                        )}
+                        {!profileCompleteness.englishTests && (
+                          <Badge variant="outline">English Tests</Badge>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.push("/profile")}
+                      >
+                        {hasProfile ? "Update Profile" : "Complete Profile"}
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Recommendations */}
-          {!loading && recommendations.length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {recommendations.map((scholarship) => (
-                <ScholarshipCard
-                  key={scholarship.id}
-                  scholarship={scholarship}
-                  planType={planType}
-                />
-              ))}
-            </div>
-          )}
+            {planType === "free" && !loading && (
+              <div className="grid md:grid-cols-3 gap-4">
+                <LockedFeature
+                  title="Advanced fit analysis"
+                  description="See the deeper fit score and a preview of premium reasoning."
+                  onUpgrade={() => openUpgradeModal("premium_feature")}
+                >
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 w-3/4 rounded-md bg-muted" />
+                    <div className="h-3 w-1/2 rounded-md bg-muted" />
+                    <div className="h-3 w-5/6 rounded-md bg-muted" />
+                  </div>
+                </LockedFeature>
 
-          {/* Empty State */}
-          {!loading && recommendations.length === 0 && (
-            <Empty>
-              <EmptyMedia>
-                <Sparkles className="h-12 w-12 text-muted-foreground" />
-              </EmptyMedia>
-              <EmptyHeader>
-                <EmptyTitle>No recommendations found</EmptyTitle>
-                <EmptyDescription>
-                  {searchQuery
-                    ? "Try broadening your search terms or check your profile completeness."
-                    : "Complete your profile to get personalized AI-powered recommendations."}
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <div className="flex gap-2">
-                  <Button onClick={() => router.push("/profile")}>
-                    Complete Profile
-                  </Button>
-                  <Button variant="outline" onClick={() => setSearchQuery("")}>
-                    Clear Search
-                  </Button>
-                </div>
-              </EmptyContent>
-            </Empty>
-          )}
-        </div>
-      </main>
+                <LockedFeature
+                  title="Scholarship competitiveness"
+                  description="Compare your profile against other applicants."
+                  onUpgrade={() => openUpgradeModal("premium_feature")}
+                >
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 w-1/2 rounded-md bg-muted" />
+                    <div className="h-3 w-2/3 rounded-md bg-muted" />
+                    <div className="h-3 w-1/3 rounded-md bg-muted" />
+                  </div>
+                </LockedFeature>
+
+                <LockedFeature
+                  title="AI application advice"
+                  description="Receive tailored tips to strengthen your application."
+                  onUpgrade={() => openUpgradeModal("premium_feature")}
+                >
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 w-full rounded-md bg-muted" />
+                    <div className="h-3 w-4/5 rounded-md bg-muted" />
+                    <div className="h-3 w-2/3 rounded-md bg-muted" />
+                  </div>
+                </LockedFeature>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+              <div className="grid md:grid-cols-2 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-20 w-full" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-9 w-20" />
+                        <Skeleton className="h-9 w-20" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Recommendations */}
+            {!loading && recommendations.length > 0 && (
+              <div className="grid md:grid-cols-2 gap-6">
+                {recommendations.map((scholarship) => (
+                  <ScholarshipCard
+                    key={scholarship.id}
+                    scholarship={scholarship}
+                    planType={planType}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && recommendations.length === 0 && (
+              <Empty>
+                <EmptyMedia>
+                  <Sparkles className="h-12 w-12 text-muted-foreground" />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>No recommendations found</EmptyTitle>
+                  <EmptyDescription>
+                    {searchQuery
+                      ? "Try broadening your search terms or check your profile completeness."
+                      : "Complete your profile to get personalized AI-powered recommendations."}
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <div className="flex gap-2">
+                    <Button onClick={() => router.push("/profile")}>
+                      Complete Profile
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      Clear Search
+                    </Button>
+                  </div>
+                </EmptyContent>
+              </Empty>
+            )}
+          </div>
+        </main>
+      </SidebarInset>
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         trigger={upgradeTrigger}
       />
-    </div>
+    </SidebarProvider>
   );
 }

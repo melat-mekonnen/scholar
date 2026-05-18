@@ -37,6 +37,7 @@ router.get("/my-scholarships", authMiddleware, scholarshipsController.myScholars
 router.get("/", optionalAuthMiddleware, scholarshipsController.list);
 router.get("/filters", scholarshipsController.getFilters);
 router.get("/search", optionalAuthMiddleware, scholarshipsController.search);
+router.post("/semantic-search", optionalAuthMiddleware, scholarshipsController.semanticSearch);
 router.post(
   "/:id/documents",
   authMiddleware,

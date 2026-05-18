@@ -1,0 +1,7 @@
+[
+  {"student_id": "student-001", "scholarship_id": "scholarship-001", "action": "bookmark"},
+  {"student_id": "student-001", "scholarship_id": "scholarship-006", "action": "apply"},
+  {"student_id": "student-002", "scholarship_id": "scholarship-002", "action": "bookmark"},
+  {"student_id": "student-003", "scholarship_id": "scholarship-003", "action": "apply"},
+  {"student_id": "student-003", "scholarship_id": "scholarship-005", "action": "bookmark"}
+]

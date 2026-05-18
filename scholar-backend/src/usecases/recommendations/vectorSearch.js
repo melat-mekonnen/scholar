@@ -44,7 +44,11 @@ async function searchScholarships({
   let semanticResults = null;
   if (q && q.trim()) {
     try {
+      const startEmbedding = Date.now();
       const embedding = await getTextEmbedding(q);
+      console.log(`[OBSERVABILITY] Embedding latency: ${Date.now() - startEmbedding}ms for query "${q}"`);
+
+      const startSearch = Date.now();
       semanticResults = await scholarshipRepo.searchPublicByVector({
         queryEmbedding: vectorLiteral(embedding),
         q,
@@ -61,8 +65,10 @@ async function searchScholarships({
         status,
         bookmarkUserId,
       });
+      console.log(`[OBSERVABILITY] Vector DB search latency: ${Date.now() - startSearch}ms for query "${q}"`);
     } catch (err) {
       // Fallback to keyword search if embedding generation or pgvector lookup fails.
+      console.warn(`[AI_FALLBACK_ACTIVATED] Semantic search failed, falling back to keyword search for query "${q}". Reason:`, err.message);
       semanticResults = null;
     }
   }

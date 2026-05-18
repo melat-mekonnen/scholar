@@ -433,7 +433,7 @@ class ScholarshipRepository {
     );
     const total = Number(countResult.rows[0]?.total || 0);
 
-    params.push(queryEmbedding);
+    params.push(vectorLiteral(queryEmbedding));
     const embeddingIndex = params.length;
     const orderBy = `ORDER BY s.embedding <=> $${embeddingIndex}::vector`;
 
