@@ -1,0 +1,63 @@
+CURRICULUM VITAE (CV) — ACADEMIC / SCHOLARSHIP STYLE
+EthioScholar — replace bracketed placeholders with your own information.
+
+================================================================================
+CONTACT & HEADER
+================================================================================
+[Your Full Name]
+[City, Country] · [Phone with country code] · [Professional email]
+[LinkedIn URL] · [Personal website or portfolio, if any]
+
+Optional one-line profile (max ~35 words):
+[2–3 sentences: your field, current stage (e.g. undergraduate applicant), key strengths, and what you aim to study or research.]
+
+================================================================================
+EDUCATION
+================================================================================
+[List most recent first. Include expected graduation if not yet completed.]
+
+[Degree and field], [Institution], [City, Country]                          [Start year] – [End year or Expected YYYY]
+• [Honours track / relevant coursework / thesis title if applicable]
+• [GPA or class rank only if strong and commonly used in your context; otherwise omit]
+
+[Secondary school leaving certificate or equivalent], [School name], [City]     [YYYY]
+• [Relevant achievement, e.g. national exam result band — only if you are comfortable sharing]
+
+================================================================================
+SCHOLARSHIPS, AWARDS & HONOURS
+================================================================================
+• [Award name], [Granting organisation], [Year]
+• [Scholarship name], [Institution or donor], [Year]
+
+================================================================================
+RESEARCH & PROJECTS (if applicable)
+================================================================================
+[Project or research title] — [Institution / supervisor / lab]               [YYYY – YYYY]
+• [What you did: methods, tools, outcome in one line]
+• [Publication, poster, or conference — if none, omit this bullet]
+
+================================================================================
+LEADERSHIP, VOLUNTEERING & COMMUNITY
+================================================================================
+• [Role], [Organisation], [Location]                                           [YYYY – YYYY]
+  [One line on impact or responsibility]
+
+================================================================================
+WORK EXPERIENCE (if applicable)
+================================================================================
+[Job title], [Organisation], [City]                                            [YYYY – YYYY]
+• [Achievement-focused bullet using a metric where possible]
+
+================================================================================
+SKILLS
+================================================================================
+Languages: [e.g. Amharic — native; English — CEFR B2 / TOEFL xxx]
+Technical: [e.g. Python, LaTeX, data analysis in Stata, lab techniques you actually use]
+Other: [e.g. public speaking, peer tutoring, event organisation]
+
+================================================================================
+REFERENCES (optional on CV — often “available upon request”)
+================================================================================
+Available upon request.
+
+— End of template — Save a copy before editing; keep one master CV and tailor shorter versions per application.

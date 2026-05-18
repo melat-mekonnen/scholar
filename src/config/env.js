@@ -1,0 +1,71 @@
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+function required(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required env var: ${name}`);
+  }
+  return value;
+}
+
+function optional(name, fallback) {
+  const value = process.env[name];
+  return value == null || value === "" ? fallback : value;
+}
+
+function optionalBool(name, fallback = false) {
+  const value = process.env[name];
+  if (value == null || value === "") return fallback;
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+const env = {
+  nodeEnv: process.env.NODE_ENV || "development",
+  port: parseInt(process.env.PORT || "4000", 10),
+  databaseUrl: required("DATABASE_URL"),
+  jwtSecret: required("JWT_SECRET"),
+  frontendAppUrl: required("FRONTEND_APP_URL"),
+  googleClientId: required("GOOGLE_CLIENT_ID"),
+  googleClientSecret: required("GOOGLE_CLIENT_SECRET"),
+  googleRedirectUri: required("GOOGLE_REDIRECT_URI"),
+  aiServiceUrl: optional("AI_SERVICE_URL", "http://127.0.0.1:8010"),
+  smtpHost: optional("SMTP_HOST", ""),
+  smtpPort: parseInt(optional("SMTP_PORT", "587"), 10),
+  smtpUser: optional("SMTP_USER", ""),
+  smtpPass: optional("SMTP_PASS", ""),
+  smtpFrom: optional("SMTP_FROM", ""),
+  ingestionEnabled: optionalBool("INGESTION_ENABLED", false),
+  ingestDaadEnabled: optionalBool("INGEST_DAAD_ENABLED", false),
+  chatFreeDailyLimit: Math.max(
+    1,
+    parseInt(optional("CHAT_FREE_DAILY_LIMIT", "3"), 10) || 3
+  ),
+  chatQuotaBypassRoles: optional("CHAT_QUOTA_BYPASS_ROLES", "admin,owner")
+    .split(",")
+    .map((r) => r.trim().toLowerCase())
+    .filter(Boolean),
+  stripeSecretKey: optional("STRIPE_SECRET_KEY", ""),
+  stripeWebhookSecret: optional("STRIPE_WEBHOOK_SECRET", ""),
+  stripePriceIdProMonthly: optional("STRIPE_PRICE_ID_PRO_MONTHLY", ""),
+  stripeSuccessUrl:
+    optional("STRIPE_SUCCESS_URL", "") ||
+    `${optional("FRONTEND_APP_URL", "http://localhost:3000")}/settings/subscription?billing=success`,
+  stripeCancelUrl:
+    optional("STRIPE_CANCEL_URL", "") ||
+    `${optional("FRONTEND_APP_URL", "http://localhost:3000")}/settings/subscription?billing=cancel`,
+  chapaSecretKey: optional("CHAPA_SECRET_KEY", ""),
+  chapaProAmountEtb: optional("CHAPA_PRO_AMOUNT_ETB", "149"),
+  chapaProDays: Math.max(1, parseInt(optional("CHAPA_PRO_DAYS", "30"), 10) || 30),
+  chapaCallbackUrl:
+    optional("CHAPA_CALLBACK_URL", "") ||
+    `http://127.0.0.1:${parseInt(optional("PORT", "4000"), 10)}/api/billing/webhooks/chapa`,
+  chapaReturnUrl:
+    optional("CHAPA_RETURN_URL", "") ||
+    `${optional("FRONTEND_APP_URL", "http://localhost:3000")}/settings/subscription?billing=success`,
+  chapaFallbackEmail: optional("CHAPA_FALLBACK_EMAIL", ""),
+};
+
+module.exports = { env };
+
