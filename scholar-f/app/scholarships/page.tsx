@@ -20,6 +20,9 @@ import {
   StudentPortalFrame,
   StudentPortalTopHeader,
 } from "@/components/student-portal/student-portal-frame"
+import { StudentPortalHeroSection } from "@/components/student-portal/student-portal-hero"
+import { studentPortalCardClass, studentPortalStatCardClass } from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -27,7 +30,7 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication, getMyApplications } from "@/lib/applications"
+import { getMyApplications, startTrackedApplication } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -429,21 +432,17 @@ export default function ScholarshipsPage() {
       <div className="relative space-y-6">
         <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 top-64 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">Browse Scholarships</h1>
-              <p className="text-sm text-blue-50">
-                Search verified scholarships and filter by what matters to you.
-              </p>
-            </div>
+        <StudentPortalHeroSection
+          title="Browse Scholarships"
+          description="Search verified scholarships and filter by what matters to you."
+          end={
             <img
               src="/ethioscholar-logo.svg"
               alt="EthioScholar"
-              className="hidden h-10 w-auto brightness-0 invert md:block"
+              className="hidden h-10 w-auto shrink-0 md:block"
             />
-          </div>
-        </header>
+          }
+        />
 
         <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -514,7 +513,7 @@ export default function ScholarshipsPage() {
         <div className="grid gap-6 md:grid-cols-[300px_1fr]">
           {/* Desktop filters */}
           <aside className="hidden md:block">
-            <Card className="sticky top-6 rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <Card className="sticky top-6 rounded-2xl border-emerald-100/80 bg-white shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base text-slate-900">Filters</CardTitle>
               </CardHeader>
@@ -585,7 +584,7 @@ export default function ScholarshipsPage() {
             {loading ? (
               <div className="grid gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                     <CardContent className="p-6 space-y-3">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
@@ -619,7 +618,7 @@ export default function ScholarshipsPage() {
                 {visibleResults.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className={cn(studentPortalStatCardClass, "hover:shadow-lg")}
                   >
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardContent className="p-6 space-y-3">
@@ -676,6 +675,13 @@ export default function ScholarshipsPage() {
                           className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
+                            const created = await startTrackedApplication(s.id)
+                            if (created.res.status === 401 || created.res.status === 403) {
+                              clearToken()
+                              router.replace("/signin")
+                              return
+                            }
+
                             const ok = await openScholarshipApplication(s)
                             if (!ok) {
                               toast({
@@ -687,29 +693,24 @@ export default function ScholarshipsPage() {
                               return
                             }
 
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
+                            const tracked = created
+                            if (!tracked.res.ok && tracked.res.status !== 409) {
                               toast({
                                 title: "Could not track application",
                                 description:
-                                  created.errorMessage || "Failed to save this application in your tracker.",
+                                  tracked.errorMessage || "Failed to save this application in your tracker.",
                                 variant: "destructive",
                               })
                             } else {
-                              if (created.res.status === 201) {
+                              if (tracked.res.status === 201 || tracked.res.status === 200) {
                                 setAppliedScholarshipIds((prev) => new Set(prev).add(s.id))
                               }
                               toast({
                                 title: "Application started",
                                 description:
-                                  created.res.status === 409
+                                  tracked.res.status === 409
                                     ? "Already in your application tracker."
-                                    : "Saved to your application tracker.",
+                                    : "Saved as pending — confirm when you finish on the official site.",
                               })
                             }
                           }}

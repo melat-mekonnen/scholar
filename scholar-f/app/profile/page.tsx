@@ -23,6 +23,13 @@ import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
+import { StudentPortalHeroSection } from "@/components/student-portal/student-portal-hero"
+import {
+  studentPortalCardClass,
+  studentPortalHeaderClass,
+  studentPortalPageBg,
+} from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 
 type MeResponse = {
   role?: string
@@ -83,11 +90,11 @@ function ProfilePageInner() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
         <StudentPortalSidebar />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
+        <header className={studentPortalHeaderClass}>
           <Button asChild variant="outline" className="border-slate-300 bg-white hover:bg-slate-50">
             <Link href={homeHref}>{backLabelForRole(role)}</Link>
           </Button>
@@ -102,17 +109,17 @@ function ProfilePageInner() {
         </header>
 
         <main className="min-h-0 flex-1 space-y-6 p-6">
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-            <h1 className="text-3xl font-semibold tracking-tight">Student applicant profile</h1>
-            <p className="mt-2 text-sm text-blue-50">
-              GPA, degree, field of study, and interests used for smarter scholarship matching.
-            </p>
+          <StudentPortalHeroSection
+            as="h1"
+            title="Student applicant profile"
+            description="GPA, degree, field of study, and interests used for smarter scholarship matching."
+          >
             {(role === "manager" || role === "owner") && intentStudent ? (
-              <p className="mt-3 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-blue-50">
+              <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
                 You are editing your <strong>applicant</strong> details. Your posting profile is separate.
               </p>
             ) : null}
-          </div>
+          </StudentPortalHeroSection>
 
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
@@ -120,7 +127,7 @@ function ProfilePageInner() {
             </div>
 
             <aside className="space-y-6">
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+              <Card className={studentPortalCardClass}>
                 <CardHeader>
                   <CardTitle className="text-base">Tips for Success</CardTitle>
                 </CardHeader>
@@ -156,7 +163,7 @@ function ProfilePageInner() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+              <Card className={studentPortalCardClass}>
                 <CardHeader>
                   <CardTitle className="text-base">Frequently Asked</CardTitle>
                 </CardHeader>

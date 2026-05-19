@@ -27,9 +27,13 @@ import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import {
   loadNotificationPreferences,
-  saveNotificationPreferences,
+  saveNotificationPreferences as saveLocalNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/user-preferences"
+import {
+  fetchNotificationPreferences,
+  saveNotificationPreferences as saveServerNotificationPreferences,
+} from "@/lib/notification-preferences-api"
 import type { SubscriptionStatus } from "@/lib/subscription-types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -46,6 +50,13 @@ import {
 } from "@/components/ui/select"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
+import { StudentPortalHeroSection } from "@/components/student-portal/student-portal-hero"
+import {
+  studentPortalCardClass,
+  studentPortalHeaderClass,
+  studentPortalPageBg,
+} from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 type MeResponse = {
   id: string
   fullName?: string
@@ -91,6 +102,23 @@ export default function SettingsPage() {
       }
       if (res.ok && data) {
         setMe(data)
+        if (data.role === "student" || !data.role) {
+          const prefsRes = await fetchNotificationPreferences()
+          if (prefsRes.res.ok && prefsRes.data) {
+            const serverPrefs: NotificationPreferences = {
+              emailUpdates: prefsRes.data.emailUpdates,
+              deadlineReminders: prefsRes.data.deadlineReminders,
+              matchAlerts: prefsRes.data.matchAlerts,
+              applyFollowups: prefsRes.data.applyFollowups,
+            }
+            setPrefs(serverPrefs)
+            saveLocalNotificationPreferences(serverPrefs)
+          } else {
+            setPrefs(loadNotificationPreferences())
+          }
+        } else {
+          setPrefs(loadNotificationPreferences())
+        }
       }
       setLoading(false)
     }
@@ -112,17 +140,20 @@ export default function SettingsPage() {
   function updatePrefs(partial: Partial<NotificationPreferences>) {
     setPrefs((prev) => {
       const next = { ...prev, ...partial }
-      saveNotificationPreferences(next)
+      saveLocalNotificationPreferences(next)
+      if (me?.role === "student" || !me?.role) {
+        void saveServerNotificationPreferences(next)
+      }
       return next
     })
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
       <StudentPortalSidebar />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
+        <header className={studentPortalHeaderClass}>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">Settings</h1>
             {me?.role && (
@@ -150,15 +181,13 @@ export default function SettingsPage() {
         </header>
 
         <main className="mx-auto max-w-5xl space-y-8 p-6">
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-            <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
-            <p className="mt-1 text-sm text-blue-50">
-              Manage your account, notifications, and how EthioScholar looks for you.
-            </p>
-          </div>
+          <StudentPortalHeroSection
+            title="Settings"
+            description="Manage your account, notifications, and how EthioScholar looks for you."
+          />
 
           {/* AI Chat subscription */}
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-violet-600" />
@@ -215,7 +244,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Account */}
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <UserCircle className="h-5 w-5 text-emerald-600" />
@@ -256,15 +285,15 @@ export default function SettingsPage() {
           </Card>
 
           {/* Notifications */}
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-blue-600" />
                 <CardTitle className="text-base text-slate-900">Notifications</CardTitle>
               </div>
               <CardDescription>
-                Choose what we remind you about. Stored on this device until your account syncs with
-                the server.
+                Email and reminder preferences for your account. Changes sync to the server when you
+                are signed in as a student.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -307,11 +336,24 @@ export default function SettingsPage() {
                   onCheckedChange={(v) => updatePrefs({ matchAlerts: v })}
                 />
               </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="apply-followups">Application follow-up emails</Label>
+                  <p className="text-slate-500 text-xs">
+                    Email to confirm you applied after starting from a saved scholarship
+                  </p>
+                </div>
+                <Switch
+                  id="apply-followups"
+                  checked={prefs.applyFollowups}
+                  onCheckedChange={(v) => updatePrefs({ applyFollowups: v })}
+                />
+              </div>
             </CardContent>
           </Card>
 
           {/* Appearance */}
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-emerald-600" />
@@ -344,7 +386,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Security */}
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />

@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
 
 const FREE_DAILY_LIMIT = 3
 const PRO_CHAPA_ETB = 149
@@ -91,7 +92,7 @@ export function SubscriptionPlans({
 
   if (loading) {
     return (
-      <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+      <Card className={studentPortalCardClass}>
         <CardContent className="py-12 text-center text-sm text-slate-500">
           Loading your plan…
         </CardContent>
@@ -111,7 +112,7 @@ export function SubscriptionPlans({
       </div>
 
       {/* Current status */}
-      <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+      <Card className={studentPortalCardClass}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-900">Your usage today</CardTitle>
           <CardDescription>
@@ -159,7 +160,7 @@ export function SubscriptionPlans({
         <Card
           className={cn(
             "relative rounded-2xl border shadow-sm transition-shadow",
-            !isPro ? "border-blue-200 ring-2 ring-blue-100" : "border-slate-200 bg-white"
+            !isPro ? "border-emerald-200 ring-2 ring-emerald-100" : "border-slate-200 bg-white"
           )}
         >
           {!isPro ? (
@@ -220,7 +221,7 @@ export function SubscriptionPlans({
 
       {/* Payment methods */}
       {!isPro ? (
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+        <Card className={studentPortalCardClass}>
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Choose payment method</CardTitle>
             <CardDescription>

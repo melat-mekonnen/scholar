@@ -13,7 +13,8 @@ import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
-import { createApplication } from "@/lib/applications"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
+import { startTrackedApplication } from "@/lib/applications"
 import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
 
 type RecommendationItem = {
@@ -99,7 +100,7 @@ export default function AiMatchesPage() {
       mainClassName="space-y-6 p-6"
     >
         
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardContent className="pt-6">
               {loading && (
                 <div className="space-y-3">
@@ -121,7 +122,7 @@ export default function AiMatchesPage() {
               {!loading && items.length > 0 && (
                 <ul className="space-y-3">
                   {items.map((item, index) => (
-                    <li key={`${item.scholarship.id}-${index}`} className="space-y-3 rounded-xl border border-blue-100/80 bg-slate-50/50 px-4 py-4">
+                    <li key={`${item.scholarship.id}-${index}`} className="space-y-3 rounded-xl border border-emerald-100/80 bg-slate-50/50 px-4 py-4">
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-sm font-semibold">{item.scholarship.title}</p>
@@ -152,7 +153,7 @@ export default function AiMatchesPage() {
                           size="sm"
                           disabled={!getApplicationUrl(item.scholarship)}
                           onClick={async () => {
-                            const created = await createApplication(item.scholarship.id)
+                            const created = await startTrackedApplication(item.scholarship.id)
                             if (created.res.status === 401 || created.res.status === 403) {
                               clearToken()
                               router.replace("/signin")
@@ -174,7 +175,10 @@ export default function AiMatchesPage() {
                                 variant: "destructive",
                               })
                             } else {
-                              toast({ title: "Application started", description: "Saved to your application tracker." })
+                              toast({
+                                title: "Application started",
+                                description: "Saved as pending — confirm when you finish on the official site.",
+                              })
                             }
                           }}
                         >

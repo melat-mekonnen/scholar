@@ -6,6 +6,12 @@ import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-li
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { Badge } from "@/components/ui/badge"
+import {
+  studentPortalHeaderClass,
+  studentPortalHeroAccentClass,
+  studentPortalHeroCardClass,
+  studentPortalPageBg,
+} from "@/components/student-portal/student-portal-ui"
 import { cn } from "@/lib/utils"
 
 export type StudentPortalHero = {
@@ -37,11 +43,11 @@ export function StudentPortalShell({
   showFooter = true,
 }: StudentPortalShellProps) {
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
       <StudentPortalSidebar documentsLabel={documentsLabel} />
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-blue-100/70 bg-white/95 px-4 py-4 backdrop-blur">
+        <header className={studentPortalHeaderClass}>
           <div className="min-w-0 flex-1 pr-4">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
@@ -61,9 +67,11 @@ export function StudentPortalShell({
 
         <main className={cn("flex min-h-0 flex-1 flex-col", mainClassName)}>
           {hero ? (
-            <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-              <h2 className="text-2xl font-semibold tracking-tight">{hero.title}</h2>
-              <p className="mt-1 text-sm text-blue-50">{hero.description}</p>
+            <div className={studentPortalHeroCardClass}>
+              <div className={studentPortalHeroAccentClass}>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{hero.title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{hero.description}</p>
+              </div>
             </div>
           ) : null}
           {children}

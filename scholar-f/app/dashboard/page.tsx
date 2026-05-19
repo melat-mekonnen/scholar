@@ -25,12 +25,22 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication } from "@/lib/applications"
+import { startTrackedApplication } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
+import {
+  studentPortalHeaderClass,
+  studentPortalHeroAccentClass,
+  studentPortalHeroCardClass,
+  studentPortalPageBg,
+  studentPortalStatCardAccentClass,
+  studentPortalStatCardClass,
+  studentPortalCardClass,
+} from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 
 type DashboardStats = {
   activeApplications: number
@@ -150,11 +160,11 @@ export default function DashboardPage() {
   const activities = summary?.recentActivity ?? []
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
       <StudentPortalSidebar />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
+        <header className={studentPortalHeaderClass}>
           <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
 
           <Link
@@ -171,19 +181,21 @@ export default function DashboardPage() {
         </header>
 
         <main className="p-6 space-y-8">
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-            <h2 className="text-2xl font-semibold">
-              Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""} 👋
-            </h2>
-            <p className="mt-1 text-sm text-blue-50">
-              Discover scholarships that match your profile.
-            </p>
+          <div className={studentPortalHeroCardClass}>
+            <div className={studentPortalHeroAccentClass}>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""} 👋
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Discover scholarships that match your profile.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-4">
             {loading
               ? Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                     <CardContent className="pt-6">
                       <Skeleton className="h-4 w-28 mb-2" />
                       <Skeleton className="h-8 w-16" />
@@ -193,9 +205,9 @@ export default function DashboardPage() {
               : statCards.map((stat) => (
                   <Card
                     key={stat.title}
-                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className={studentPortalStatCardClass}
                   >
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 opacity-80" />
+                    <div className={studentPortalStatCardAccentClass} />
                     <CardContent className="pt-6">
                       <p className="text-sm font-medium text-slate-500">{stat.title}</p>
                       <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
@@ -210,7 +222,7 @@ export default function DashboardPage() {
             {loading && (
               <div className="grid md:grid-cols-3 gap-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                     <CardHeader>
                       <Skeleton className="h-6 w-3/4" />
                     </CardHeader>
@@ -228,7 +240,7 @@ export default function DashboardPage() {
             )}
 
             {!loading && recommended.length === 0 && (
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+              <Card className={studentPortalCardClass}>
                 <CardContent className="pt-6 text-sm text-slate-500">
                   No featured scholarships yet. Managers can mark scholarships as recommended in the database
                   (<code className="text-xs">is_recommended_default</code>), or you can{" "}
@@ -245,7 +257,7 @@ export default function DashboardPage() {
                 {recommended.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className={cn(studentPortalStatCardClass, "hover:shadow-lg")}
                   >
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="pb-3">
@@ -274,7 +286,7 @@ export default function DashboardPage() {
                           className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
-                            const created = await createApplication(s.id)
+                            const created = await startTrackedApplication(s.id)
                             if (created.res.status === 401 || created.res.status === 403) {
                               clearToken()
                               router.replace("/signin")
@@ -320,7 +332,7 @@ export default function DashboardPage() {
           <div>
             <h3 className="mb-4 text-xl font-semibold text-slate-900">Recent Activity</h3>
 
-            <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+            <Card className={studentPortalCardClass}>
               <CardContent className="pt-6 space-y-3">
                 {loading && (
                   <>

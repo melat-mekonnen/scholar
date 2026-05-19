@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
 
 type ChatApiResponse = {
   intent: string
@@ -246,7 +247,7 @@ export default function AiChatPage() {
               </CardContent>
             </Card>
           ) : null}
-          <Card className="flex flex-1 rounded-2xl border-blue-100/80 bg-white shadow-sm flex-col overflow-hidden min-h-105">
+          <Card className={cn(studentPortalCardClass, "flex min-h-105 flex-1 flex-col overflow-hidden")}>
             <CardContent className="flex flex-1 flex-col gap-3 p-0">
               <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4">
                 <div className="space-y-4 pb-2">

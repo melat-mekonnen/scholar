@@ -23,6 +23,7 @@ const billingWebhookRoutes = require("./routes/billing.webhook.routes");
 const billingChapaWebhookRoutes = require("./routes/billing.chapa.webhook.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
+const notificationPreferencesRoutes = require("./routes/notification-preferences.routes");
 const ownerCommunityRoutes = require("./routes/owner.community.routes");
 const { errorHandler } = require("./middleware/errorHandler");
 
@@ -72,6 +73,7 @@ app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/discovery", discoveryRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/notification-preferences", notificationPreferencesRoutes);
 app.use("/api/owner/community", ownerCommunityRoutes);
 
 app.use(errorHandler);

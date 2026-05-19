@@ -97,7 +97,7 @@ export function DocumentResourcesGallery({
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-3xl border border-blue-100/80 bg-gradient-to-b from-blue-50/80 via-white to-emerald-50/50 px-6 py-10 text-center shadow-sm md:px-10 md:py-12">
+      <section className="relative overflow-hidden rounded-3xl border border-emerald-100/80 bg-gradient-to-b from-emerald-50/80 via-white to-teal-50/50 px-6 py-10 text-center shadow-sm md:px-10 md:py-12">
         <div className="pointer-events-none absolute -left-16 top-8 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-16 bottom-4 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
 
@@ -128,7 +128,7 @@ export function DocumentResourcesGallery({
             placeholder="Search templates and guides..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 rounded-full border-blue-100 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
+            className="h-11 rounded-full border-emerald-100 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
           />
         </div>
 
@@ -140,7 +140,7 @@ export function DocumentResourcesGallery({
               className={cn(
                 "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                 typeFilter === "all"
-                  ? "bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-sm"
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
                   : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
               )}
             >
@@ -154,7 +154,7 @@ export function DocumentResourcesGallery({
                 className={cn(
                   "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   typeFilter === t
-                    ? "bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
                     : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
                 )}
               >
@@ -178,7 +178,7 @@ export function DocumentResourcesGallery({
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-blue-200 bg-white px-6 py-14 text-center">
+        <div className="rounded-2xl border border-dashed border-emerald-200 bg-white px-6 py-14 text-center">
           <FileText className="mx-auto h-10 w-10 text-blue-400" />
           <p className="mt-3 font-medium text-slate-900">No documents match your search</p>
           <p className="mt-1 text-sm text-slate-500">Try another keyword or clear filters.</p>
@@ -203,7 +203,7 @@ export function DocumentResourcesGallery({
                       <Link href={`/documents/${doc.id}`} className="group flex flex-col">
                         <div className="relative transition-transform duration-200 group-hover:-translate-y-1">
                           {isPro ? (
-                            <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-blue-600 to-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                            <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
                               <Crown className="h-2.5 w-2.5" />
                               Pro
                             </span>
@@ -229,8 +229,8 @@ export function DocumentResourcesGallery({
                   )
                 })}
               </CarouselContent>
-              <CarouselPrevious className="-left-1 border-blue-100 bg-white shadow-md hover:bg-blue-50 md:-left-4" />
-              <CarouselNext className="-right-1 border-blue-100 bg-white shadow-md hover:bg-blue-50 md:-right-4" />
+              <CarouselPrevious className="-left-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 md:-left-4" />
+              <CarouselNext className="-right-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 md:-right-4" />
             </Carousel>
           </div>
 
@@ -245,7 +245,7 @@ export function DocumentResourcesGallery({
                   className={cn(
                     "h-2 rounded-full transition-all",
                     i === activeSnap
-                      ? "w-6 bg-gradient-to-r from-blue-600 to-emerald-600"
+                      ? "w-6 bg-gradient-to-r from-emerald-600 to-teal-600"
                       : "w-2 bg-slate-300 hover:bg-slate-400"
                   )}
                 />
@@ -258,7 +258,7 @@ export function DocumentResourcesGallery({
               type="button"
               variant="outline"
               onClick={() => setShowAllGrid((v) => !v)}
-              className="rounded-full border-slate-300 bg-white px-6 shadow-sm hover:border-blue-200 hover:bg-blue-50/50"
+              className="rounded-full border-slate-300 bg-white px-6 shadow-sm hover:border-blue-200 hover:bg-emerald-50/50"
             >
               {showAllGrid ? "Hide full list" : "All document resources"}
             </Button>
@@ -267,13 +267,13 @@ export function DocumentResourcesGallery({
       )}
 
       {showAllGrid && !loading && filtered.length > 0 ? (
-        <section className="space-y-4 border-t border-blue-100/70 pt-8">
+        <section className="space-y-4 border-t border-emerald-100/70 pt-8">
           <h3 className="text-lg font-semibold text-slate-900">All resources</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((doc) => (
               <div
                 key={doc.id}
-                className="flex flex-col rounded-2xl border border-blue-100/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="max-w-[140px] mx-auto w-full">
                   <DocumentTemplatePreview

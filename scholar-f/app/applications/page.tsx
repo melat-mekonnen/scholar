@@ -9,11 +9,18 @@ import {
   StudentPortalFrame,
   StudentPortalTopHeader,
 } from "@/components/student-portal/student-portal-frame"
+import { StudentPortalHeroSection } from "@/components/student-portal/student-portal-hero"
+import {
+  studentPortalCardClass,
+  studentPortalStatCardAccentClass,
+  studentPortalStatCardClass,
+} from "@/components/student-portal/student-portal-ui"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 export default function ApplicationsPage() {
   const router = useRouter()
@@ -78,39 +85,37 @@ export default function ApplicationsPage() {
 
   return (
     <StudentPortalFrame header={<StudentPortalTopHeader title="My Applications" />}>
-      <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight">My Applications</h2>
-        <p className="mt-1 text-sm text-blue-50">
-          Track the scholarships you applied to and their statuses.
-        </p>
-      </div>
+      <StudentPortalHeroSection
+        title="My Applications"
+        description="Track the scholarships you applied to and their statuses."
+      />
 
       <div className="space-y-5">
         {!loading && sorted.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 opacity-80" />
+            <Card className={studentPortalStatCardClass}>
+              <div className={studentPortalStatCardAccentClass} />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Total Applications</p>
                 <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.total}</p>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-80" />
+            <Card className={studentPortalStatCardClass}>
+              <div className={studentPortalStatCardAccentClass} />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Submitted</p>
                 <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.submitted}</p>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-80" />
+            <Card className={studentPortalStatCardClass}>
+              <div className={studentPortalStatCardAccentClass} />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Accepted</p>
                 <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.accepted}</p>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-500 to-slate-700 opacity-80" />
+            <Card className={studentPortalStatCardClass}>
+              <div className={studentPortalStatCardAccentClass} />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Pending</p>
                 <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.pending}</p>
@@ -123,7 +128,7 @@ export default function ApplicationsPage() {
         {loading ? <p className="rounded-lg bg-white px-3 py-2 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200">Loading applications...</p> : null}
 
         {!loading && sorted.length === 0 ? (
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={studentPortalCardClass}>
             <CardHeader>
               <CardTitle className="text-base">No applications yet</CardTitle>
             </CardHeader>
@@ -138,7 +143,7 @@ export default function ApplicationsPage() {
           </Card>
         ) : null}
 
-        <section className="rounded-2xl border border-blue-100/70 bg-white/70 p-3 shadow-sm">
+        <section className="rounded-2xl border border-emerald-100/70 bg-white/70 p-3 shadow-sm">
           <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-base font-semibold text-slate-900">Application Tracker</h2>
@@ -169,7 +174,7 @@ export default function ApplicationsPage() {
               {sorted.map((a) => (
                 <Card
                   key={a.id}
-                  className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                  className={cn(studentPortalStatCardClass, "hover:shadow-lg")}
                 >
                   <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                   <CardHeader className="pb-3">

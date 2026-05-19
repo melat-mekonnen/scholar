@@ -2,6 +2,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
+  studentPortalHeroAccentClass,
+  studentPortalHeroCardClass,
+  studentPortalPageBg,
+  studentPortalStatCardAccentClass,
+  studentPortalStatCardClass,
+} from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
+import {
   Brain,
   ShieldCheck,
   ClipboardList,
@@ -16,7 +24,7 @@ import {
 } from "lucide-react"
 export default function HomePage() {
   return (
-    <main id="top" className="min-h-screen bg-slate-50 text-slate-900">
+    <main id="top" className={cn("min-h-screen", studentPortalPageBg)}>
 
       {/* HERO SECTION */}
       <section className="relative overflow-hidden bg-slate-900">
@@ -26,10 +34,10 @@ export default function HomePage() {
           style={{ backgroundImage: "url('/hero1.png')" }}
         />
         {/* Reduced opacity so the hero image shows more clearly */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/52 via-blue-900/28 to-emerald-900/16" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/55 via-emerald-900/30 to-teal-900/20" />
         {/* Overlay for readability */}
 
-        <div className="relative z-10 w-full bg-white/95 shadow-md backdrop-blur">
+        <div className="relative z-10 w-full border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
           <div className="flex w-full items-center justify-between px-4 py-2 md:px-8">
             <div className="flex items-center">
               <Link href="/" aria-label="EthioScholar Home">
@@ -72,7 +80,7 @@ export default function HomePage() {
               Making your
               <span className="mt-2 block">dreams come true.</span>
             </h1>
-            <p className="mt-4 max-w-2xl text-sm text-blue-100 sm:text-base">
+            <p className="mt-4 max-w-2xl text-sm text-emerald-50 sm:text-base">
               Access trusted scholarships, intelligent AI recommendations, and seamless application tracking to
               achieve your academic goals.
             </p>
@@ -84,7 +92,7 @@ export default function HomePage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-blue-100/70 bg-white/10 text-white hover:bg-white/20"
+                className="border-emerald-100/70 bg-white/10 text-white hover:bg-white/20"
               >
                 <Link href="/signin">Sign In</Link>
               </Button>
@@ -96,12 +104,12 @@ export default function HomePage() {
 
       {/* FEATURES */}
       <section className="relative mt-2 overflow-hidden py-24">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-100 via-white to-slate-100" />
         {/* Large soft bubbles — blue + emerald only */}
-        <div className="pointer-events-none absolute -left-40 top-8 h-96 w-96 rounded-full bg-blue-500/18 blur-3xl" />
+        <div className="pointer-events-none absolute -left-40 top-8 h-96 w-96 rounded-full bg-emerald-500/16 blur-3xl" />
         <div className="pointer-events-none absolute left-1/4 top-1/2 h-80 w-80 -translate-y-1/2 rounded-full bg-emerald-500/14 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-emerald-500/16 blur-3xl" />
-        <div className="pointer-events-none absolute right-1/3 top-24 h-64 w-64 rounded-full bg-blue-500/12 blur-3xl" />
+        <div className="pointer-events-none absolute right-1/3 top-24 h-64 w-64 rounded-full bg-teal-500/12 blur-3xl" />
 
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="mx-auto max-w-3xl text-center">
@@ -111,23 +119,24 @@ export default function HomePage() {
           </div>
 
           <div className="relative mx-auto mt-14 max-w-7xl">
-            {/* Sharp bubble orbs — blue vs emerald */}
-            <div className="pointer-events-none absolute left-6 top-16 h-20 w-20 rounded-full bg-blue-500/20 blur-2xl" />
-            <div className="pointer-events-none absolute right-8 top-5 h-24 w-24 rounded-full bg-emerald-500/22 blur-2xl" />
+            {/* Sharp bubble orbs — emerald + teal */}
+            <div className="pointer-events-none absolute left-6 top-16 h-20 w-20 rounded-full bg-emerald-500/20 blur-2xl" />
+            <div className="pointer-events-none absolute right-8 top-5 h-24 w-24 rounded-full bg-teal-500/22 blur-2xl" />
             <div className="pointer-events-none absolute bottom-8 left-1/2 h-28 w-28 -translate-x-1/2 rounded-full bg-emerald-500/18 blur-2xl" />
-            <div className="pointer-events-none absolute -left-10 top-24 h-16 w-16 rounded-full border border-blue-300/80 bg-gradient-to-br from-blue-200/70 to-blue-500/35 shadow-[0_0_24px_rgba(59,130,246,0.25)]" />
-            <div className="pointer-events-none absolute right-1/4 top-2 h-10 w-10 rounded-full border border-emerald-300/80 bg-gradient-to-br from-emerald-200/70 to-emerald-500/35 shadow-[0_0_20px_rgba(16,185,129,0.25)]" />
-            <div className="pointer-events-none absolute -right-6 top-28 h-20 w-20 rounded-full border border-blue-200/70 bg-gradient-to-br from-sky-100/80 to-blue-400/30" />
-            <div className="pointer-events-none absolute left-1/3 bottom-3 h-12 w-12 rounded-full border border-blue-200/70 bg-gradient-to-br from-blue-100/80 to-blue-400/25" />
+            <div className="pointer-events-none absolute -left-10 top-24 h-16 w-16 rounded-full border border-emerald-300/80 bg-gradient-to-br from-emerald-200/70 to-emerald-500/35 shadow-[0_0_24px_rgba(16,185,129,0.25)]" />
+            <div className="pointer-events-none absolute right-1/4 top-2 h-10 w-10 rounded-full border border-teal-300/80 bg-gradient-to-br from-teal-200/70 to-teal-500/35 shadow-[0_0_20px_rgba(20,184,166,0.25)]" />
+            <div className="pointer-events-none absolute -right-6 top-28 h-20 w-20 rounded-full border border-emerald-200/70 bg-gradient-to-br from-emerald-100/80 to-emerald-400/30" />
+            <div className="pointer-events-none absolute left-1/3 bottom-3 h-12 w-12 rounded-full border border-teal-200/70 bg-gradient-to-br from-teal-100/80 to-teal-400/25" />
             <div className="pointer-events-none absolute right-10 bottom-8 h-14 w-14 rounded-full border border-emerald-200/70 bg-gradient-to-br from-emerald-100/80 to-emerald-400/30" />
             <div className="pointer-events-none absolute left-[18%] top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border border-emerald-200/80 bg-gradient-to-br from-emerald-100/75 to-emerald-500/30" />
-            <div className="pointer-events-none absolute right-[12%] top-1/3 h-7 w-7 rounded-full border border-blue-200/80 bg-gradient-to-br from-blue-50/90 to-blue-500/25" />
-            <div className="pointer-events-none absolute left-[45%] top-10 h-6 w-6 rounded-full bg-white/90 ring-2 ring-blue-200/60" />
+            <div className="pointer-events-none absolute right-[12%] top-1/3 h-7 w-7 rounded-full border border-teal-200/80 bg-gradient-to-br from-teal-50/90 to-teal-500/25" />
+            <div className="pointer-events-none absolute left-[45%] top-10 h-6 w-6 rounded-full bg-white/90 ring-2 ring-emerald-200/60" />
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="relative h-full overflow-hidden rounded-3xl border-blue-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className={cn(studentPortalStatCardClass, "h-full rounded-3xl hover:shadow-lg")}>
+                <div className={studentPortalStatCardAccentClass} />
                 <CardContent className="p-6 text-center sm:p-7">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-600/10 text-blue-700 ring-1 ring-blue-100">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
                     <ShieldCheck className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-slate-900">Verified listings</h3>
@@ -137,9 +146,10 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className={cn(studentPortalStatCardClass, "h-full rounded-3xl hover:shadow-lg")}>
+                <div className={studentPortalStatCardAccentClass} />
                 <CardContent className="p-6 text-center sm:p-7">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-600/10 text-teal-700 ring-1 ring-teal-100">
                     <Brain className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-slate-900">AI recommendations</h3>
@@ -149,9 +159,10 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-blue-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className={cn(studentPortalStatCardClass, "h-full rounded-3xl hover:shadow-lg")}>
+                <div className={studentPortalStatCardAccentClass} />
                 <CardContent className="p-6 text-center sm:p-7">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-600/10 text-blue-700 ring-1 ring-blue-100">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
                     <ClipboardList className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-slate-900">Track applications</h3>
@@ -161,9 +172,10 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className={cn(studentPortalStatCardClass, "h-full rounded-3xl hover:shadow-lg")}>
+                <div className={studentPortalStatCardAccentClass} />
                 <CardContent className="p-6 text-center sm:p-7">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-600/10 text-teal-700 ring-1 ring-teal-100">
                     <Bookmark className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-slate-900">Save scholarships</h3>
@@ -206,7 +218,7 @@ export default function HomePage() {
             <div className="relative order-2 min-h-[280px] lg:min-h-[400px]">
               {/* Organic blob shapes — blue + emerald */}
               <svg
-                className="pointer-events-none absolute -right-4 top-0 h-[min(100%,420px)] w-[min(100%,480px)] text-blue-100/90 opacity-90 lg:-right-8"
+                className="pointer-events-none absolute -right-4 top-0 h-[min(100%,420px)] w-[min(100%,480px)] text-emerald-100/90 opacity-90 lg:-right-8"
                 viewBox="0 0 400 420"
                 fill="none"
                 aria-hidden="true"
@@ -227,11 +239,11 @@ export default function HomePage() {
                   d="M180 100c0 55-45 100-100 100S0 155 0 100 40 20 100 0c70-24 180 45 80 100z"
                 />
               </svg>
-              <div className="pointer-events-none absolute right-12 top-8 h-16 w-16 rounded-full bg-blue-200/60 blur-xl" />
+              <div className="pointer-events-none absolute right-12 top-8 h-16 w-16 rounded-full bg-emerald-200/60 blur-xl" />
               <div className="pointer-events-none absolute bottom-20 right-4 h-12 w-12 rounded-full bg-emerald-200/50 blur-lg" />
 
               <div className="relative z-10 mx-auto max-w-md lg:max-w-none">
-                <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl ring-1 ring-slate-200/80">
+                <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl ring-1 ring-emerald-100/80">
                   <img
                     src="/hero.png"
                     alt="EthioScholar platform preview"
@@ -246,7 +258,7 @@ export default function HomePage() {
 
       {/* HOW IT WORKS */}
       <section className="relative overflow-hidden pb-24 pt-12">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-100 via-white to-white" />
         <div className="relative z-10 mx-auto max-w-6xl px-6">
 
           <div className="mx-auto max-w-3xl text-center">
@@ -268,7 +280,7 @@ export default function HomePage() {
               <path
                 d="M70 70 C 220 10, 320 110, 460 60 S 700 20, 850 70"
                 fill="none"
-                stroke="rgba(37, 99, 235, 0.35)"
+                stroke="rgba(16, 185, 129, 0.35)"
                 strokeWidth="2"
                 strokeDasharray="2 10"
                 strokeLinecap="round"
@@ -277,7 +289,7 @@ export default function HomePage() {
 
             <div className="grid gap-10 md:grid-cols-3">
               <div className="text-center">
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-blue-600/10 text-blue-700 shadow-sm ring-1 ring-blue-100">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-emerald-600/10 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
                   <UserPlus className="h-9 w-9" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold text-slate-900">Create Account</h3>
@@ -287,7 +299,7 @@ export default function HomePage() {
               </div>
 
               <div className="text-center">
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-emerald-600/10 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-teal-600/10 text-teal-700 shadow-sm ring-1 ring-teal-100">
                   <Search className="h-9 w-9" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold text-slate-900">Enter Information</h3>
@@ -297,7 +309,7 @@ export default function HomePage() {
               </div>
 
               <div className="text-center">
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-blue-600/10 text-blue-700 shadow-sm ring-1 ring-blue-100">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-emerald-600/10 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
                   <Send className="h-9 w-9" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold text-slate-900">Apply & Track</h3>
@@ -311,23 +323,22 @@ export default function HomePage() {
       </section>
 
       {/* CALL TO ACTION */}
-      <section className="mx-auto max-w-4xl px-6 py-20 text-center">
-        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-12 shadow-lg md:px-10">
-          <h2 className="text-3xl font-bold text-white">
+      <section className="mx-auto max-w-4xl px-6 py-20">
+        <div className={cn(studentPortalHeroCardClass, "text-center")}>
+          <div className={cn(studentPortalHeroAccentClass, "mx-auto max-w-2xl border-l-0 border-t-4 pt-6 text-center")}>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
             Start Your Scholarship Journey Today
           </h2>
 
-          <p className="mt-4 text-blue-50">
-            Join thousands of Ethiopian students discovering opportunities
-            worldwide.
+          <p className="mt-4 text-slate-600">
+            Join thousands of Ethiopian students discovering opportunities worldwide.
           </p>
 
           <div className="mt-8">
-            <Button asChild size="lg" className="bg-white text-blue-700 hover:bg-blue-50">
-              <Link href="/signup">
-                Create Free Account
-              </Link>
+            <Button asChild size="lg" className="bg-emerald-600 text-white hover:bg-emerald-700">
+              <Link href="/signup">Create Free Account</Link>
             </Button>
+          </div>
           </div>
         </div>
       </section>

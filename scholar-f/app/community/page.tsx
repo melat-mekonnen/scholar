@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { MessageCircle, Send, Trash2 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import {
@@ -15,16 +14,9 @@ import {
   type CommunityMessage,
 } from "@/lib/community"
 import { clearToken, getToken } from "@/lib/auth"
-import { useStudentI18n } from "@/lib/student-i18n"
-import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Skeleton } from "@/components/ui/skeleton"
+import { CommunityChat } from "@/components/student-portal/community-chat"
 
 type MeResponse = {
   id: string
@@ -33,17 +25,9 @@ type MeResponse = {
   role?: string
 }
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return "?"
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
 export default function CommunityPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { t } = useStudentI18n()
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   const [me, setMe] = useState<MeResponse | null>(null)
@@ -63,7 +47,7 @@ export default function CommunityPage() {
 
   const selectedChannel = useMemo(
     () => channels.find((c) => c.id === channelId) ?? null,
-    [channels, channelId],
+    [channels, channelId]
   )
 
   useEffect(() => {
@@ -130,10 +114,7 @@ export default function CommunityPage() {
       }
       if (!res.ok || !data) {
         setLoadingMessages(false)
-        toast({
-          title: "Could not load messages",
-          variant: "destructive",
-        })
+        toast({ title: "Could not load messages", variant: "destructive" })
         return
       }
       setMessages(data.messages ?? [])
@@ -142,7 +123,7 @@ export default function CommunityPage() {
       setLoadingMessages(false)
       requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
     },
-    [router, toast],
+    [router, toast]
   )
 
   useEffect(() => {
@@ -174,8 +155,9 @@ export default function CommunityPage() {
           if (prev.some((m) => m.id === msg.id)) return prev
           return [...prev, msg]
         })
+        requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
       } catch {
-        // ignore malformed
+        /* ignore */
       }
     })
     streamRef.current = source
@@ -199,8 +181,7 @@ export default function CommunityPage() {
     const older = data.messages ?? []
     setMessages((prev) => {
       const seen = new Set(prev.map((m) => m.id))
-      const merged = [...older.filter((m) => !seen.has(m.id)), ...prev]
-      return merged
+      return [...older.filter((m) => !seen.has(m.id)), ...prev]
     })
     setHasMore(data.pagination?.hasMore ?? false)
     setOldestCursor(data.pagination?.oldestCreatedAt ?? null)
@@ -211,13 +192,8 @@ export default function CommunityPage() {
     const text = draft.trim()
     if (!channelId || !text || sending) return
     setSending(true)
-    const parentReply =
-      replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
-    const { res, data, errorMessage } = await postCommunityMessage(
-      channelId,
-      text,
-      parentReply,
-    )
+    const parentReply = replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
+    const { res, data, errorMessage } = await postCommunityMessage(channelId, text, parentReply)
     if (res.status === 401 || res.status === 403) {
       clearToken()
       router.replace("/signin")
@@ -257,13 +233,17 @@ export default function CommunityPage() {
 
   async function reportMessage(m: CommunityMessage) {
     const reason = window.prompt("Why are you reporting this message?")
-    if (!reason || !reason.trim()) return
+    if (!reason?.trim()) return
     const { res, errorMessage } = await reportCommunityMessage(m.id, reason.trim())
     if (!res.ok) {
-      toast({ title: "Could not submit report", description: errorMessage || "Try again.", variant: "destructive" })
+      toast({
+        title: "Could not submit report",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      })
       return
     }
-    toast({ title: "Report submitted", description: "Owner moderators will review this message." })
+    toast({ title: "Report submitted", description: "Moderators will review this message." })
   }
 
   const canPost = me?.role === "student" || me?.role === "admin"
@@ -274,232 +254,32 @@ export default function CommunityPage() {
       subtitle="Peer tips, experiences, and constructive feedback — stay kind and on-topic."
       role={me?.role}
       mainClassName="flex min-h-0 flex-1 flex-col p-0"
+      showFooter={false}
     >
-        <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 md:flex-row md:gap-0 md:p-0">
-          <div className="w-full shrink-0 rounded-2xl border border-blue-100/80 bg-white p-4 shadow-sm md:w-72">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-600">Channels</p>
-            {loadingChannels && (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            )}
-            {!loadingChannels && (
-              <>
-                {channelsError ? (
-                  <p className="text-sm text-destructive">{channelsError}</p>
-                ) : channels.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No community channels found. Try running <code>npm run migrate:community</code> again,
-                    or reload the page.
-                  </p>
-                ) : (
-                  <ul className="space-y-1">
-                    {channels.map((c) => (
-                      <li key={c.id}>
-                        <button
-                          type="button"
-                          onClick={() => setChannelId(c.id)}
-                          className={cn(
-                            "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                            channelId === c.id
-                              ? "bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-sm"
-                              : "hover:bg-slate-100",
-                          )}
-                        >
-                          <span className="font-medium">{c.name}</span>
-                          {c.description && (
-                            <span
-                              className={cn(
-                                "mt-0.5 block text-xs opacity-90",
-                                channelId === c.id ? "text-blue-50" : "text-muted-foreground",
-                              )}
-                            >
-                              {c.description}
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </div>
-
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b px-4 py-3">
-              {selectedChannel ? (
-                <>
-                  <h2 className="font-semibold">{selectedChannel.name}</h2>
-                  {selectedChannel.description && (
-                    <p className="text-sm text-muted-foreground">{selectedChannel.description}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground">Select a channel to get started.</p>
-              )}
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-4">
-              <div className="space-y-3 py-4">
-                {hasMore && (
-                  <div className="flex justify-center pb-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={loadingMore || loadingMessages}
-                      onClick={() => void loadOlder()}
-                    >
-                      {loadingMore ? "Loading…" : "Load earlier messages"}
-                    </Button>
-                  </div>
-                )}
-
-                {loadingMessages && (
-                  <div className="space-y-3">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                  </div>
-                )}
-
-                {!loadingMessages &&
-                  messages.map((m) => (
-                    <Card
-                      key={m.id}
-                      className={cn(
-                        "overflow-hidden",
-                        m.parentMessageId ? "ml-6 border-l-2 border-blue-200" : "",
-                      )}
-                    >
-                      <CardHeader className="flex flex-row items-start gap-3 space-y-0 p-4 pb-2">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="text-xs">{initials(m.authorFullName)}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <CardTitle className="text-sm font-medium">{m.authorFullName}</CardTitle>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(m.createdAt).toLocaleString()}
-                            </span>
-                          </div>
-                          {m.parentMessageId && (
-                            <CardDescription className="text-xs">Reply</CardDescription>
-                          )}
-                        </div>
-                        <div className="flex shrink-0 gap-1">
-                          {!m.parentMessageId && canPost && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setReplyTo(m)}
-                              aria-label="Reply"
-                            >
-                              <MessageCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {me?.id === m.userId && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive"
-                              onClick={() => void removeMessage(m)}
-                              aria-label="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {me?.id !== m.userId && me?.role === "student" && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2 text-xs"
-                              onClick={() => void reportMessage(m)}
-                            >
-                              Report
-                            </Button>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0">
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                {!loadingMessages && channelId && messages.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-8">
-                    No messages yet. Be the first to share a tip or ask a question.
-                  </p>
-                )}
-
-                <div ref={bottomRef} />
-              </div>
-            </div>
-
-            <div className="border-t border-blue-100/70 bg-white p-4">
-              {replyTo && (
-                <div className="mb-2 flex items-center justify-between rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                  <span className="truncate text-muted-foreground">
-                    Replying to <strong>{replyTo.authorFullName}</strong>
-                  </span>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setReplyTo(null)}>
-                    Cancel
-                  </Button>
-                </div>
-              )}
-              {!canPost && me && (
-                <p className="mb-2 text-xs text-muted-foreground">
-                  Community posting is available to students. Sign in with a student account to participate.
-                </p>
-              )}
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                <Textarea
-                  placeholder={
-                    canPost
-                      ? "Share experience, ask for feedback, or offer guidanceÃ¢â‚¬Â¦"
-                      : "Read-only for this account type."
-                  }
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  disabled={!canPost || !channelId || sending}
-                  className="min-h-[88px] flex-1 resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                      e.preventDefault()
-                      void sendMessage()
-                    }
-                  }}
-                />
-                <Button
-                  type="button"
-                  className="sm:mb-0.5"
-                  disabled={!canPost || !channelId || sending || !draft.trim()}
-                  onClick={() => void sendMessage()}
-                >
-                  {sending ? (
-                    "SendingÃ¢â‚¬Â¦"
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Send
-                    </>
-                  )}
-                </Button>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Tip: <kbd className="rounded border px-1">Ctrl</kbd> + <kbd className="rounded border px-1">Enter</kbd>{" "}
-                to send. Replies are one level deep.
-              </p>
-            </div>
-          </div>
-        </div>
+      <CommunityChat
+        channels={channels}
+        channelId={channelId}
+        onChannelSelect={setChannelId}
+        selectedChannel={selectedChannel}
+        messages={messages}
+        meId={me?.id ?? null}
+        loadingChannels={loadingChannels}
+        loadingMessages={loadingMessages}
+        channelsError={channelsError}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadOlder={() => void loadOlder()}
+        draft={draft}
+        onDraftChange={setDraft}
+        replyTo={replyTo}
+        onReplyToChange={setReplyTo}
+        sending={sending}
+        canPost={canPost}
+        onSend={() => void sendMessage()}
+        onDelete={(m) => void removeMessage(m)}
+        onReport={(m) => void reportMessage(m)}
+        bottomRef={bottomRef}
+      />
     </StudentPortalShell>
   )
 }
-

@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 
 export default function DocumentEditorPage() {
   const params = useParams()
@@ -184,7 +186,7 @@ export default function DocumentEditorPage() {
           </div>
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-blue-600">Preview</p>
-            <div className="min-h-[520px] overflow-auto rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
+            <div className={cn(studentPortalCardClass, "min-h-[520px] overflow-auto rounded-xl p-6")}>
               <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-800">
                 {content}
               </pre>

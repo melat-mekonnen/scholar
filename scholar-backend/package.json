@@ -15,6 +15,7 @@
     "migrate:documents": "node scripts/migrate-documents-table.js",
     "migrate:documents-pro": "node scripts/migrate-documents-requires-pro.js",
     "migrate:community": "node scripts/migrate-community-tables.js",
+    "migrate:student-notifications": "node scripts/migrate-student-notifications.js",
     "migrate:profile-nullable": "node scripts/migrate-student-profiles-nullable.js",
     "migrate:manager-profiles": "node scripts/migrate-manager-profiles-table.js",
     "migrate:admin-audit-logs": "node scripts/migrate-admin-audit-logs-table.js",

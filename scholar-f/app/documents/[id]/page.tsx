@@ -23,9 +23,11 @@ import {
   StudentPortalFrame,
   StudentPortalTopHeader,
 } from "@/components/student-portal/student-portal-frame"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 export default function DocumentDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -118,7 +120,7 @@ export default function DocumentDetailPage() {
       ) : (
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="mx-auto w-full max-w-md lg:sticky lg:top-6">
-            <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-lg ring-1 ring-slate-100">
+            <div className={cn(studentPortalCardClass, "p-4 shadow-lg ring-1 ring-slate-100")}>
               <DocumentTemplatePreview
                 title={doc.title}
                 type={formatDocumentType(doc.type)}
@@ -136,7 +138,7 @@ export default function DocumentDetailPage() {
             <div>
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {requiresPro ? (
-                  <Badge className="gap-1 bg-gradient-to-r from-blue-600 to-emerald-600 text-white">
+                  <Badge className="gap-1 bg-emerald-600 text-white">
                     <Crown className="h-3 w-3" />
                     Pro template
                   </Badge>
@@ -173,7 +175,7 @@ export default function DocumentDetailPage() {
             <div className="flex flex-wrap gap-3">
               <Button
                 size="lg"
-                className="rounded-full bg-gradient-to-r from-blue-600 to-emerald-600 px-8 text-white hover:from-blue-700 hover:to-emerald-700"
+                className="rounded-full bg-emerald-600 px-8 text-white hover:bg-emerald-700"
                 onClick={handleUseTemplate}
               >
                 {doc.editable ? (
@@ -199,7 +201,7 @@ export default function DocumentDetailPage() {
             </p>
 
             {!canEdit && requiresPro && !isPro ? (
-              <div className="rounded-xl border border-blue-100 bg-blue-50/80 p-4">
+              <div className="rounded-xl border border-emerald-100 bg-emerald-50/80 p-4">
                 <p className="flex items-center gap-2 text-sm font-medium text-blue-900">
                   <Sparkles className="h-4 w-4" />
                   Unlock editing & profile fusion with Pro

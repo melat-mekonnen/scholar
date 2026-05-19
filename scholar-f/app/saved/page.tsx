@@ -25,7 +25,7 @@ import { clearToken } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { apiFetchJson } from "@/lib/api"
-import { createApplication, updateApplicationStatus } from "@/lib/applications"
+import { confirmTrackedApplication, startTrackedApplication } from "@/lib/applications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,6 +51,14 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
+import { StudentPortalHeroSection } from "@/components/student-portal/student-portal-hero"
+import {
+  studentPortalCardClass,
+  studentPortalHeaderClass,
+  studentPortalPageBg,
+  studentPortalStatCardClass,
+} from "@/components/student-portal/student-portal-ui"
+import { cn } from "@/lib/utils"
 
 type MeResponse = {
   id: string
@@ -117,6 +125,23 @@ export default function SavedScholarshipsPage() {
   }, [])
 
   async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
+    const tracked = await startTrackedApplication(s.id)
+    if (tracked.res.status === 401 || tracked.res.status === 403) {
+      clearToken()
+      router.replace("/signin")
+      return
+    }
+    if (!tracked.res.ok && tracked.res.status !== 409) {
+      toast({
+        title: "Could not start tracking",
+        description: tracked.errorMessage || "Failed to save this application in your tracker.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const applicationId = tracked.data?.id
+
     const ok = await openScholarshipApplication(s)
     if (!ok) {
       toast({
@@ -138,28 +163,33 @@ export default function SavedScholarshipsPage() {
         if (!applied) {
           toast({
             title: "No problem",
-            description: "Kept in listing only. It was not added to My Applications.",
+            description: "Your application stays pending in the tracker until you confirm.",
           })
           return
         }
 
-        const created = await createApplication(s.id)
-        if (created.res.status === 401 || created.res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
-        }
-        if (!created.res.ok && created.res.status !== 409) {
+        if (!applicationId) {
           toast({
-            title: "Could not track application",
-            description: created.errorMessage || "Failed to save this application in your tracker.",
+            title: "Could not confirm",
+            description: "Application record was not found. Try Apply again.",
             variant: "destructive",
           })
           return
         }
 
-        if (created.data?.id) {
-          await updateApplicationStatus(created.data.id, "submitted")
+        const confirmed = await confirmTrackedApplication(applicationId)
+        if (confirmed.res.status === 401 || confirmed.res.status === 403) {
+          clearToken()
+          router.replace("/signin")
+          return
+        }
+        if (!confirmed.res.ok) {
+          toast({
+            title: "Could not update status",
+            description: confirmed.errorMessage || "Try again from My Applications.",
+            variant: "destructive",
+          })
+          return
         }
 
         toast({
@@ -172,11 +202,11 @@ export default function SavedScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
         <StudentPortalSidebar />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-blue-100/70 bg-white/95 p-4 backdrop-blur">
+        <header className={studentPortalHeaderClass}>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">Saved scholarships</h1>
             {me?.role && (
@@ -203,19 +233,17 @@ export default function SavedScholarshipsPage() {
         </header>
 
         <main className="min-h-0 flex-1 space-y-6 p-6">
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-            <h2 className="text-2xl font-semibold tracking-tight">Saved for later</h2>
-            <p className="mt-1 text-sm text-blue-50">
-              Scholarships you bookmarked. Remove the bookmark to take them off this list.
-            </p>
-          </div>
+          <StudentPortalHeroSection
+            title="Saved for later"
+            description="Scholarships you bookmarked. Remove the bookmark to take them off this list."
+          />
 
           {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>}
 
           {loading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+                <Card key={i} className={studentPortalCardClass}>
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
@@ -247,7 +275,7 @@ export default function SavedScholarshipsPage() {
                 {results.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className={cn(studentPortalStatCardClass, "hover:shadow-lg")}
                   >
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="space-y-3">

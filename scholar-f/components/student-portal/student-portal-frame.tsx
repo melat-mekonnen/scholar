@@ -6,6 +6,7 @@ import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-li
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
 import { Badge } from "@/components/ui/badge"
+import { studentPortalHeaderClass, studentPortalPageBg } from "@/components/student-portal/student-portal-ui"
 import { cn } from "@/lib/utils"
 
 type StudentPortalFrameProps = {
@@ -23,7 +24,7 @@ export function StudentPortalFrame({
   showFooter = true,
 }: StudentPortalFrameProps) {
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
       <StudentPortalSidebar />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -43,7 +44,7 @@ type StudentPortalTopHeaderProps = {
 
 export function StudentPortalTopHeader({ title, role, end }: StudentPortalTopHeaderProps) {
   return (
-    <header className="flex shrink-0 items-center justify-between border-b border-blue-100/70 bg-white/95 px-4 py-4 backdrop-blur">
+    <header className={studentPortalHeaderClass}>
       <div className="flex min-w-0 items-center gap-3">
         <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
         {role ? (

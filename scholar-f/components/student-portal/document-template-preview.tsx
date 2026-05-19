@@ -225,7 +225,7 @@ export function DocumentTemplatePreview({
   return (
     <div
       className={cn(
-        "pointer-events-none aspect-[8.5/11] w-full overflow-hidden rounded-lg border border-blue-100/80 bg-white shadow-md ring-1 ring-slate-100",
+        "pointer-events-none aspect-[8.5/11] w-full overflow-hidden rounded-lg border border-emerald-100/80 bg-white shadow-md ring-1 ring-slate-100",
         className
       )}
       aria-hidden

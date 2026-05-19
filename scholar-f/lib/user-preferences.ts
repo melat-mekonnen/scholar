@@ -4,12 +4,14 @@ export type NotificationPreferences = {
   emailUpdates: boolean
   deadlineReminders: boolean
   matchAlerts: boolean
+  applyFollowups: boolean
 }
 
 const defaults: NotificationPreferences = {
   emailUpdates: true,
   deadlineReminders: true,
   matchAlerts: true,
+  applyFollowups: true,
 }
 
 function safeParse(raw: string | null): NotificationPreferences {
@@ -21,6 +23,8 @@ function safeParse(raw: string | null): NotificationPreferences {
       deadlineReminders:
         typeof v.deadlineReminders === "boolean" ? v.deadlineReminders : defaults.deadlineReminders,
       matchAlerts: typeof v.matchAlerts === "boolean" ? v.matchAlerts : defaults.matchAlerts,
+      applyFollowups:
+        typeof v.applyFollowups === "boolean" ? v.applyFollowups : defaults.applyFollowups,
     }
   } catch {
     return defaults
