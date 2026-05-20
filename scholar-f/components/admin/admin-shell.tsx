@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken, logoutFromServer } from "@/lib/auth"
+import { clearToken, getToken, logoutFromServer } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -84,11 +84,37 @@ function NavLinks({
   )
 }
 
+type MeResponse = { role?: string }
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    async function guard() {
+      if (!getToken()) {
+        router.replace("/signin")
+        return
+      }
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
+      if (cancelled) return
+      if (res.status === 401 || res.status === 403) {
+        clearToken()
+        router.replace("/signin")
+        return
+      }
+      if (data?.role !== "admin") {
+        router.replace(data?.role === "owner" ? "/owner" : "/dashboard")
+      }
+    }
+    void guard()
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   useEffect(() => {
     let cancelled = false

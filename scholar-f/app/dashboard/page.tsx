@@ -20,14 +20,12 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { apiFetchJson } from "@/lib/api"
 import {
-  getApplicationUrl,
   normalizeScholarship,
-  openScholarshipApplication,
+  formatScholarshipDeadlineLabel,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication } from "@/lib/applications"
+import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { clearToken } from "@/lib/auth"
-import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StudentPortalFooter } from "@/components/student-portal/student-footer"
 import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
@@ -90,8 +88,6 @@ function toScholarshipCard(row: DashboardSummary["recommendedScholarships"][numb
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { toast } = useToast()
-
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [me, setMe] = useState<MeResponse | null>(null)
@@ -256,8 +252,12 @@ export default function DashboardPage() {
 
                     <CardContent className="space-y-3">
                       <p className="text-sm text-slate-500">Country: {s.country}</p>
-                      {s.deadline && (
-                        <p className="text-sm text-slate-500">Deadline: {s.deadline}</p>
+                      {formatScholarshipDeadlineLabel(s) && (
+                        <p className="text-sm text-slate-500">
+                          {s.isRolling && !s.deadline && !s.endDate
+                            ? formatScholarshipDeadlineLabel(s)
+                            : `Deadline: ${formatScholarshipDeadlineLabel(s)}`}
+                        </p>
                       )}
 
                       <div className="flex gap-2 pt-3">
@@ -268,47 +268,10 @@ export default function DashboardPage() {
                         >
                           <Link href={`/scholarships?q=${encodeURIComponent(s.title)}`}>View</Link>
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
+                        <ScholarshipApplyButton
+                          scholarship={s}
                           className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
-                          disabled={!getApplicationUrl(s)}
-                          onClick={async () => {
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description:
-                                  created.errorMessage ||
-                                  "Failed to save this application in your tracker.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              toast({
-                                title: "Application started",
-                                description: "Saved to your application tracker.",
-                              })
-                            }
-                          }}
-                        >
-                          {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
-                        </Button>
+                        />
                       </div>
                     </CardContent>
                   </Card>

@@ -6,6 +6,6 @@ npm-debug.log
 .gitignore
 *.md
 tests
-scripts
 coverage
 .DS_Store
+exports

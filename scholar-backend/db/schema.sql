@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS scholarships (
   application_end_date DATE,
   degree_level TEXT,
   status TEXT NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft', 'pending', 'verified', 'rejected', 'expired')),
+    CHECK (status IN ('draft', 'pending', 'verified', 'rejected', 'expired', 'duplicate', 'needs_review')),
   funding_type TEXT,
   field_of_study TEXT,
   amount TEXT,
@@ -52,13 +52,90 @@ CREATE TABLE IF NOT EXISTS scholarships (
   posted_by_user_id UUID REFERENCES users (id),
   rejection_reason TEXT,
   is_recommended_default BOOLEAN NOT NULL DEFAULT FALSE,
+  is_rolling BOOLEAN NOT NULL DEFAULT FALSE,
+  eligible_regions TEXT[] DEFAULT '{}',
+  ingestion_tier TEXT,
+  normalized_source_url TEXT,
+  quality_score INTEGER,
+  host_country TEXT,
+  title_am TEXT,
+  description_am TEXT,
+  extracted_facts JSONB,
+  record_type TEXT NOT NULL DEFAULT 'scholarship',
+  application_status TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'scholarships_record_type_check') THEN
+    ALTER TABLE scholarships
+      ADD CONSTRAINT scholarships_record_type_check
+      CHECK (record_type IN ('scholarship', 'study_programme'));
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'scholarships_application_status_check') THEN
+    ALTER TABLE scholarships
+      ADD CONSTRAINT scholarships_application_status_check
+      CHECK (
+        application_status IS NULL
+        OR application_status IN ('open', 'closed', 'rolling', 'unknown')
+      );
+  END IF;
+END $$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS ux_scholarships_source_url
   ON scholarships (source_url)
   WHERE source_url IS NOT NULL AND source_url <> '';
+
+-- ---------------------------------------------------------------------------
+-- study_programmes (degree courses — fees apply, not funded scholarships)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS study_programmes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  title_am TEXT,
+  organization_name TEXT,
+  country TEXT NOT NULL,
+  host_country TEXT,
+  degree_level TEXT,
+  field_of_study TEXT,
+  funding_type TEXT NOT NULL DEFAULT 'not_funded',
+  programme_start_date DATE,
+  application_start_date DATE,
+  application_end_date DATE,
+  deadline DATE,
+  amount TEXT,
+  description TEXT,
+  description_am TEXT,
+  extracted_facts JSONB,
+  application_url TEXT,
+  source_url TEXT,
+  external_id TEXT,
+  status TEXT NOT NULL DEFAULT 'verified'
+    CHECK (status IN ('draft', 'pending', 'verified', 'rejected', 'expired')),
+  is_rolling BOOLEAN NOT NULL DEFAULT FALSE,
+  quality_score INTEGER,
+  normalized_source_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_study_programmes_source_url
+  ON study_programmes (source_url)
+  WHERE source_url IS NOT NULL AND source_url <> '';
+
+CREATE TABLE IF NOT EXISTS programme_scholarships (
+  programme_id UUID NOT NULL REFERENCES study_programmes (id) ON DELETE CASCADE,
+  scholarship_id UUID NOT NULL REFERENCES scholarships (id) ON DELETE CASCADE,
+  link_type TEXT NOT NULL DEFAULT 'related',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (programme_id, scholarship_id)
+);
 
 -- ---------------------------------------------------------------------------
 -- documents (file resources; was previously only in migrate-documents-table.js)
@@ -231,6 +308,7 @@ CREATE TABLE IF NOT EXISTS scholarship_import_runs (
   records_fetched INTEGER NOT NULL DEFAULT 0,
   records_upserted INTEGER NOT NULL DEFAULT 0,
   records_failed INTEGER NOT NULL DEFAULT 0,
+  records_skipped INTEGER NOT NULL DEFAULT 0,
   error_message TEXT
 );
 
@@ -263,6 +341,35 @@ CREATE INDEX IF NOT EXISTS idx_import_raw_run
   ON scholarship_raw_imports(run_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_import_errors_run
   ON scholarship_import_errors(run_id, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- scholarship_staging (capture → enrich → publish pipeline)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS scholarship_staging (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  run_id UUID REFERENCES scholarship_import_runs(id) ON DELETE SET NULL,
+  canonical_key TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  source_url TEXT,
+  external_id TEXT,
+  pipeline_status TEXT NOT NULL DEFAULT 'captured'
+    CHECK (pipeline_status IN ('captured', 'validated', 'ready', 'published', 'quarantined')),
+  validation_errors JSONB NOT NULL DEFAULT '[]'::jsonb,
+  gate_reasons JSONB NOT NULL DEFAULT '[]'::jsonb,
+  quality_score INTEGER,
+  normalized_payload JSONB NOT NULL,
+  raw_payload JSONB NOT NULL,
+  scholarship_id UUID REFERENCES scholarships(id) ON DELETE SET NULL,
+  published_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (canonical_key, source_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_staging_pipeline_status
+  ON scholarship_staging (pipeline_status, source_name);
+CREATE INDEX IF NOT EXISTS idx_staging_scholarship_id
+  ON scholarship_staging (scholarship_id);
 
 -- ---------------------------------------------------------------------------
 -- subscriptions (AI chat freemium / Pro)

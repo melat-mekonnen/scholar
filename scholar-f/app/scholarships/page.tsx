@@ -22,16 +22,19 @@ import {
 } from "@/components/student-portal/student-portal-frame"
 import { apiFetchJson } from "@/lib/api"
 import {
-  getApplicationUrl,
   normalizeScholarship,
-  openScholarshipApplication,
+  formatScholarshipDeadlineLabel,
+  hasScholarshipDateInfo,
+  fundingTypeLabel,
+  isStudyProgramme,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication, getMyApplications } from "@/lib/applications"
+import { useStudentI18n } from "@/lib/student-i18n"
+import { getMyApplications } from "@/lib/applications"
+import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { clearToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
-import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -127,7 +130,7 @@ function buildParams(options: {
 
 export default function ScholarshipsPage() {
   const router = useRouter()
-  const { toast } = useToast()
+  const { lang, t } = useStudentI18n()
 
   const [filters, setFilters] = useState<FiltersResponse | null>(null)
 
@@ -240,7 +243,7 @@ export default function ScholarshipsPage() {
       setLoading(true)
       setError(null)
       const { res, data, errorMessage } = await apiFetchJson<SearchResponse>(
-        `/api/scholarships/search?${params.toString()}`,
+        `/api/scholarships/search?${params.toString()}&lang=${lang}`,
         { method: "GET" },
       )
       if (!res.ok || !data) {
@@ -253,7 +256,7 @@ export default function ScholarshipsPage() {
       setLoading(false)
     }
     search()
-  }, [params, urlSynced])
+  }, [params, urlSynced, lang])
 
   useEffect(() => {
     async function loadApplied() {
@@ -632,7 +635,7 @@ export default function ScholarshipsPage() {
                             {s.fieldOfStudy ? ` Â· ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
-                        {!s.startDate && !(s.endDate || s.deadline) && (
+                        {!hasScholarshipDateInfo(s) && (
                           <span className="shrink-0 text-xs text-slate-500">
                             Dates not specified
                           </span>
@@ -647,18 +650,35 @@ export default function ScholarshipsPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">Verified</Badge>
+                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                          {isStudyProgramme(s) ? t("Study programme") : t("Verified")}
+                        </Badge>
                         {appliedScholarshipIds.has(s.id) && (
                           <Badge className="bg-blue-600 text-white">Applied</Badge>
                         )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline">{s.bookmarkCount} saved</Badge>
                         )}
-                        {s.fundingType && <Badge variant="outline">{s.fundingType}</Badge>}
+                        {s.fundingType && (
+                          <Badge variant="outline">{t(fundingTypeLabel(s.fundingType))}</Badge>
+                        )}
                         {s.amount && <Badge variant="outline">{s.amount}</Badge>}
                         {s.startDate && <Badge variant="outline">Start: {s.startDate}</Badge>}
-                        {(s.endDate || s.deadline) && (
-                          <Badge variant="outline">End: {s.endDate || s.deadline}</Badge>
+                        {formatScholarshipDeadlineLabel(s) && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              s.isRolling && !s.deadline && !s.endDate
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                                : undefined
+                            }
+                          >
+                            {s.isRolling && (s.deadline || s.endDate)
+                              ? `Deadline: ${formatScholarshipDeadlineLabel(s)}`
+                              : s.isRolling
+                                ? formatScholarshipDeadlineLabel(s)
+                                : `End: ${formatScholarshipDeadlineLabel(s)}`}
+                          </Badge>
                         )}
                       </div>
 
@@ -671,51 +691,13 @@ export default function ScholarshipsPage() {
                         >
                           View
                         </Button>
-                        <Button
-                          size="sm"
+                        <ScholarshipApplyButton
+                          scholarship={s}
                           className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
-                          disabled={!getApplicationUrl(s)}
-                          onClick={async () => {
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description:
-                                  created.errorMessage || "Failed to save this application in your tracker.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              if (created.res.status === 201) {
-                                setAppliedScholarshipIds((prev) => new Set(prev).add(s.id))
-                              }
-                              toast({
-                                title: "Application started",
-                                description:
-                                  created.res.status === 409
-                                    ? "Already in your application tracker."
-                                    : "Saved to your application tracker.",
-                              })
-                            }
-                          }}
-                        >
-                          {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
-                        </Button>
+                          onTracked={(id) =>
+                            setAppliedScholarshipIds((prev) => new Set(prev).add(id))
+                          }
+                        />
                       </div>
                     </CardContent>
                   </Card>

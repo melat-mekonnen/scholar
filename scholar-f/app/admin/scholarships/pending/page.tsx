@@ -20,6 +20,7 @@ import {
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
+import { ScholarshipLinks } from "@/components/admin/scholarship-links"
 
 type VerificationStatus = "draft" | "pending" | "verified" | "rejected" | "expired"
 
@@ -30,6 +31,11 @@ type PendingScholarship = {
   degreeLevel?: "high_school" | "bachelor" | "master" | "phd" // <-- make optional
   deadline: string
   status: VerificationStatus
+  applicationUrl?: string
+  sourceUrl?: string
+  organizationName?: string
+  sourceName?: string
+  qualityScore?: number
 }
 
 type PendingResponse = {
@@ -210,8 +216,11 @@ export default function PendingScholarshipsPage() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Country</TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Score</TableHead>
                   <TableHead>Degree level</TableHead>
                   <TableHead>Deadline</TableHead>
+                  <TableHead>Links</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -220,7 +229,7 @@ export default function PendingScholarshipsPage() {
               <TableBody>
                 {scholarships.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={9} className="py-6 text-center text-sm text-muted-foreground">
                       No pending scholarships at the moment.
                     </TableCell>
                   </TableRow>
@@ -239,11 +248,33 @@ export default function PendingScholarshipsPage() {
 
                     <TableCell>{s.country}</TableCell>
 
+                    <TableCell className="max-w-[140px] truncate text-xs text-muted-foreground">
+                      {s.organizationName || s.sourceName || "—"}
+                    </TableCell>
+
+                    <TableCell>
+                      {s.qualityScore != null ? (
+                        <Badge variant={s.qualityScore >= 60 ? "default" : "secondary"}>
+                          {s.qualityScore}
+                        </Badge>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+
                     <TableCell className="capitalize">
                       {s.degreeLevel ? s.degreeLevel.replace("_", " ") : "N/A"}
                     </TableCell>
 
-                    <TableCell>{s.deadline}</TableCell>
+                    <TableCell>{s.deadline ?? "—"}</TableCell>
+
+                    <TableCell>
+                      <ScholarshipLinks
+                        applicationUrl={s.applicationUrl}
+                        sourceUrl={s.sourceUrl}
+                        compact
+                      />
+                    </TableCell>
 
                     <TableCell>{renderStatusBadge(s.status)}</TableCell>
 
@@ -275,7 +306,7 @@ export default function PendingScholarshipsPage() {
 
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={9} className="py-6 text-center text-sm text-muted-foreground">
                       Loading...
                     </TableCell>
                   </TableRow>

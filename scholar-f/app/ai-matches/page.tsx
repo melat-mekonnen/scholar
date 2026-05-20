@@ -7,14 +7,13 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
 import { clearToken, getToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
-import { createApplication } from "@/lib/applications"
-import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
+import { normalizeScholarship, type ScholarshipPublic } from "@/lib/scholarship"
+import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 
 type RecommendationItem = {
   scholarship: ScholarshipPublic
@@ -42,7 +41,6 @@ function formatDate(date?: string) {
 export default function AiMatchesPage() {
   const router = useRouter()
   const { t } = useStudentI18n()
-  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<RecommendationItem[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +69,12 @@ export default function AiMatchesPage() {
         return
       }
       if (res.ok && Array.isArray(data?.results)) {
-        setItems(data.results)
+        setItems(
+          data.results.map((item) => ({
+            ...item,
+            scholarship: normalizeScholarship(item.scholarship),
+          })),
+        )
       } else {
         setItems([])
         setError(
@@ -148,38 +151,10 @@ export default function AiMatchesPage() {
                         <Button size="sm" variant="outline" asChild>
                           <Link href={`/scholarships?q=${encodeURIComponent(item.scholarship.title)}`}>{t("View")}</Link>
                         </Button>
-                        <Button
-                          size="sm"
-                          disabled={!getApplicationUrl(item.scholarship)}
-                          onClick={async () => {
-                            const created = await createApplication(item.scholarship.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description: created.errorMessage || "Failed to save to your tracker.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-                            const ok = await openScholarshipApplication(item.scholarship)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description: "This listing has no official application URL yet.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              toast({ title: "Application started", description: "Saved to your application tracker." })
-                            }
-                          }}
-                        >
-                          {getApplicationUrl(item.scholarship) ? t("Apply") : "Apply (no link)"}
-                        </Button>
+                        <ScholarshipApplyButton
+                          scholarship={item.scholarship}
+                          unavailableLabel="Apply (no link)"
+                        />
                       </div>
                     </li>
                   ))}

@@ -11,7 +11,13 @@ const {
   listImportRuns,
   listImportErrors,
   runImport,
+  listImportSources,
+  listImportSourceHealth,
 } = require("../usecases/admin/adminScholarships");
+const { mapAdminScholarship } = require("../utils/mapAdminScholarship");
+const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+
+const scholarshipRepo = new ScholarshipRepository();
 
 const adminAuditRepo = new AdminAuditLogRepository();
 
@@ -70,7 +76,7 @@ async function getPendingScholarships(req, res, next) {
   try {
     const { search } = req.query;
     const scholarships = await listPendingScholarships({ search });
-    return res.json({ scholarships });
+    return res.json({ scholarships: scholarships.map(mapAdminScholarship) });
   } catch (err) {
     return next(err);
   }
@@ -80,7 +86,7 @@ async function listScholarships(req, res, next) {
   try {
     const { search, status } = req.query;
     const scholarships = await listScholarshipsUsecase({ search, status });
-    return res.json({ scholarships });
+    return res.json({ scholarships: scholarships.map(mapAdminScholarship) });
   } catch (err) {
     return next(err);
   }
@@ -89,29 +95,7 @@ async function listScholarships(req, res, next) {
 async function getScholarship(req, res, next) {
   try {
     const scholarship = await getScholarshipById(req.params.id);
-    return res.json({
-      id: scholarship.id,
-      title: scholarship.title,
-      country: scholarship.country,
-      degreeLevel: scholarship.degree_level,
-      status: scholarship.status,
-      deadline: scholarship.deadline,
-      fundingType: scholarship.funding_type,
-      fieldOfStudy: scholarship.field_of_study,
-      amount: scholarship.amount,
-      description: scholarship.description,
-      applicationUrl: scholarship.application_url,
-      rejectionReason: scholarship.rejection_reason,
-      createdAt: scholarship.created_at,
-      updatedAt: scholarship.updated_at,
-      postedBy: scholarship.posted_by_id
-        ? {
-            id: scholarship.posted_by_id,
-            fullName: scholarship.posted_by_full_name,
-            email: scholarship.posted_by_email,
-          }
-        : null,
-    });
+    return res.json(mapAdminScholarship(scholarship));
   } catch (err) {
     return next(err);
   }
@@ -165,6 +149,43 @@ async function getImportErrors(req, res, next) {
   }
 }
 
+async function deleteScholarship(req, res, next) {
+  try {
+    const { id } = req.params;
+    const current = await scholarshipRepo.findById(id);
+    if (!current) {
+      const err = new Error("Scholarship not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    await scholarshipRepo.deleteScholarshipCascade(id);
+    await logAdminAction(req.user, "scholarship.delete", "scholarship", id, {
+      title: current.title,
+    });
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getImportSources(req, res, next) {
+  try {
+    const sources = listImportSources();
+    return res.json({ sources });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getImportHealth(req, res, next) {
+  try {
+    const health = await listImportSourceHealth();
+    return res.json({ health });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function triggerImport(req, res, next) {
   try {
     const { source, publishStatus } = req.body || {};
@@ -174,7 +195,7 @@ async function triggerImport(req, res, next) {
       fetched: result.fetched,
       upserted: result.upserted,
       failed: result.failed,
-      publishStatus: result.publishStatus,
+      skipped: result.skipped,
       runId: result.runId,
     });
     return res.status(201).json(result);
@@ -193,8 +214,11 @@ module.exports = {
   getScholarship,
   verify,
   reject,
+  deleteScholarship,
   getImportRuns,
   getImportErrors,
+  getImportSources,
+  getImportHealth,
   triggerImport,
 };
 

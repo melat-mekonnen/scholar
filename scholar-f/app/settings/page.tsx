@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
@@ -53,7 +53,7 @@ type MeResponse = {
   role?: string
 }
 
-export default function SettingsPage() {
+function SettingsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
@@ -373,5 +373,17 @@ export default function SettingsPage() {
         <StudentPortalFooter />
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="text-muted-foreground p-6 text-sm">Loading settings…</div>
+      }
+    >
+      <SettingsPageContent />
+    </Suspense>
   )
 }

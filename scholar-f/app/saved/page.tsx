@@ -18,6 +18,7 @@ import { fetchBookmarksPage } from "@/lib/bookmarks"
 import {
   getApplicationUrl,
   normalizeScholarship,
+  formatScholarshipDeadlineLabel,
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
@@ -117,11 +118,20 @@ export default function SavedScholarshipsPage() {
   }, [])
 
   async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
-    const ok = await openScholarshipApplication(s)
-    if (!ok) {
+    const opened = await openScholarshipApplication(s)
+    if (opened === "no_url") {
       toast({
         title: "Application link unavailable",
         description: "This scholarship does not have an official application URL yet.",
+        variant: "destructive",
+      })
+      return
+    }
+    if (opened === "blocked") {
+      toast({
+        title: "Could not open application site",
+        description:
+          "Allow pop-ups for this site, or use View and open the link under “Apply on”.",
         variant: "destructive",
       })
       return
@@ -275,8 +285,19 @@ export default function SavedScholarshipsPage() {
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline">{s.bookmarkCount} saved</Badge>
                         )}
-                        {s.deadline && (
-                          <Badge variant="outline">Deadline: {s.deadline}</Badge>
+                        {formatScholarshipDeadlineLabel(s) && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              s.isRolling && !s.deadline && !s.endDate
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                                : undefined
+                            }
+                          >
+                            {s.isRolling && !s.deadline && !s.endDate
+                              ? formatScholarshipDeadlineLabel(s)
+                              : `Deadline: ${formatScholarshipDeadlineLabel(s)}`}
+                          </Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 pt-1">

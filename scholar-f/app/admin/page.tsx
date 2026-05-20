@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScholarshipLinks } from "@/components/admin/scholarship-links"
 
 type AdminDashboardResponse = {
   totals: {
@@ -55,6 +56,8 @@ type AdminScholarship = {
   status: "pending" | "verified" | "rejected" | "draft" | "expired"
   fundingType?: string
   deadline?: string
+  applicationUrl?: string
+  sourceUrl?: string
 }
 
 type PendingResponse = {
@@ -154,6 +157,28 @@ export default function AdminDashboardPage() {
       if (res.ok) {
         setScholarships((prev) => prev.map((s) => (s.id === id ? { ...s, status: "rejected" } : s)))
       }
+    } finally {
+      setMutatingIds((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
+  async function deleteScholarship(id: string) {
+    if (!window.confirm("Delete this scholarship permanently?")) return
+    setMutatingIds((prev) => ({ ...prev, [id]: true }))
+    setError(null)
+    try {
+      const { res, errorMessage } = await apiFetchJson(`/api/admin/scholarships/${id}`, {
+        method: "DELETE",
+      })
+      if (res.status === 204 || res.ok) {
+        setScholarships((prev) => prev.filter((s) => s.id !== id))
+        const dash = await apiFetchJson<AdminDashboardResponse>("/api/admin/dashboard", {
+          method: "GET",
+        })
+        if (dash.res.ok && dash.data) setDashboard(dash.data)
+        return
+      }
+      setError(errorMessage || "Failed to delete scholarship")
     } finally {
       setMutatingIds((prev) => ({ ...prev, [id]: false }))
     }
@@ -300,6 +325,7 @@ export default function AdminDashboardPage() {
                         <TableHead>Status</TableHead>
                         <TableHead>Funding</TableHead>
                         <TableHead>Deadline</TableHead>
+                        <TableHead>Links</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -308,7 +334,7 @@ export default function AdminDashboardPage() {
                       {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
                           <TableRow key={i}>
-                            <TableCell colSpan={5}>
+                            <TableCell colSpan={6}>
                               <Skeleton className="h-6 w-full" />
                             </TableCell>
                           </TableRow>
@@ -322,6 +348,13 @@ export default function AdminDashboardPage() {
                             <TableCell>{getStatusBadge(s.status)}</TableCell>
                             <TableCell>{s.fundingType ?? "N/A"}</TableCell>
                             <TableCell>{s.deadline ?? "N/A"}</TableCell>
+                            <TableCell>
+                              <ScholarshipLinks
+                                applicationUrl={s.applicationUrl}
+                                sourceUrl={s.sourceUrl}
+                                compact
+                              />
+                            </TableCell>
                             <TableCell className="text-right">
                               <div className="inline-flex items-center gap-2">
                                 <Button size="icon-sm" variant="outline" asChild className="border-slate-300 bg-white hover:bg-slate-50">
@@ -350,7 +383,13 @@ export default function AdminDashboardPage() {
                                   <X className="h-4 w-4" />
                                 </Button>
 
-                                <Button size="icon-sm" variant="outline" disabled aria-label="Delete scholarship">
+                                <Button
+                                  size="icon-sm"
+                                  variant="outline"
+                                  disabled={!!mutatingIds[s.id]}
+                                  onClick={() => void deleteScholarship(s.id)}
+                                  aria-label="Delete scholarship"
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -359,7 +398,7 @@ export default function AdminDashboardPage() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="py-10 text-center text-gray-500">
+                          <TableCell colSpan={6} className="py-10 text-center text-gray-500">
                             No scholarships found.
                           </TableCell>
                         </TableRow>

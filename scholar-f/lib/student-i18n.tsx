@@ -37,6 +37,13 @@ const AMHARIC: Record<string, string> = {
   "Mark all read": "ሁሉንም እንደተነበበ አድርግ",
   "AI Matches": "AI ማዕከለኛ ውጤቶች",
   "AI Chatbot": "AI ደብረ ተዋናይ",
+  Verified: "የተረጋገጠ",
+  "Study programme": "የትምህርት ፕሮግራም",
+  "Fees apply": "ክፍያ ይጠይቃል",
+  "About this scholarship": "ስለዚህ ስኮላርሺፕ",
+  "About this programme": "ስለዚህ ፕሮግራም",
+  "Apply on official site": "በኦፊሴላዊ ጣቢያ ያመልክቱ",
+  "View details": "ዝርዝር ይመልከቱ",
 }
 
 type StudentI18nContextValue = {

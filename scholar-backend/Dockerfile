@@ -9,6 +9,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 COPY src ./src
+COPY scripts ./scripts
+COPY db ./db
 
 RUN chown -R node:node /app
 USER node

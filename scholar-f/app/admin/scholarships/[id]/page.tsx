@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
+import { ScholarshipLinks } from "@/components/admin/scholarship-links"
 
 type VerificationStatus = "draft" | "pending" | "verified" | "rejected" | "expired"
 
@@ -23,6 +24,15 @@ type ScholarshipDetail = {
   fieldOfStudy?: string
   amount?: string
   description?: string
+  applicationUrl?: string
+  sourceUrl?: string
+  sourceName?: string
+  organizationName?: string
+  isRolling?: boolean
+  qualityScore?: number
+  hostCountry?: string
+  sourceName?: string
+  organizationName?: string
   createdAt?: string
   updatedAt?: string
   postedBy?: {
@@ -190,8 +200,43 @@ export default function ScholarshipReviewPage() {
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">
                         Deadline
                       </p>
-                      <p className="font-medium">{scholarship.deadline}</p>
+                      <p className="font-medium">
+                        {scholarship.isRolling ? "Open / rolling" : scholarship.deadline || "—"}
+                      </p>
                     </div>
+                    {scholarship.qualityScore != null ? (
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                          Quality score
+                        </p>
+                        <p className="font-medium">{scholarship.qualityScore} / 100</p>
+                      </div>
+                    ) : null}
+                    {(scholarship.organizationName || scholarship.sourceName) && (
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                          Provider
+                        </p>
+                        <p className="font-medium">
+                          {scholarship.organizationName || scholarship.sourceName}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-blue-900 mb-3">
+                      Official links
+                    </p>
+                    <ScholarshipLinks
+                      applicationUrl={scholarship.applicationUrl}
+                      sourceUrl={scholarship.sourceUrl}
+                    />
+                    {scholarship.sourceName ? (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Import source: {scholarship.sourceName}
+                      </p>
+                    ) : null}
                   </div>
 
                   {scholarship.description && (
@@ -199,7 +244,7 @@ export default function ScholarshipReviewPage() {
                       <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                         Description
                       </p>
-                      <p className="whitespace-pre-line text-sm">
+                      <p className="whitespace-pre-line text-sm max-h-64 overflow-y-auto">
                         {scholarship.description}
                       </p>
                     </div>
@@ -226,12 +271,23 @@ export default function ScholarshipReviewPage() {
             <section className="space-y-4">
               <Card>
                 <CardHeader>
+                  <CardTitle className="text-sm">Quick links</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScholarshipLinks
+                    applicationUrl={scholarship.applicationUrl}
+                    sourceUrl={scholarship.sourceUrl}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle className="text-sm">Verification actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <p className="text-muted-foreground">
-                    Approve verified, high-quality scholarships. Reject those that do
-                    not meet platform standards.
+                    Open the official links above, then approve or reject.
                   </p>
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -267,4 +323,3 @@ export default function ScholarshipReviewPage() {
     </main>
   )
 }
-
