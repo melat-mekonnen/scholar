@@ -81,6 +81,12 @@ Chatbot Response (+ citations)
 
 - `knowledge_base.jsonl` (or merged build) includes DB slice + curated rows with provenance fields.
 
+**Implementation (scholar-ml)**
+
+- DB export: `data/knowledge_base.jsonl` via `python -m scripts.export_scholarships`.
+- Curated file: `curated/trusted_sources.jsonl` (copy from `curated/trusted_sources.jsonl.example`).
+- Merged build: `data/knowledge_base.merged.jsonl` via `python -m scripts.merge_knowledge_base` (optional URL dedupe vs DB rows; see `MERGE_DEDUPE_CURATED_BY_URL_DEFAULT` in `src/config.py`).
+
 ---
 
 ## Milestone 3 — Text Preprocessing
@@ -96,6 +102,12 @@ Chatbot Response (+ citations)
 **Exit criteria**
 
 - Clean file passes schema validation; no silent data loss without logging.
+
+**Implementation (scholar-ml)**
+
+- Cleaning helpers: `src/preprocess.py` (HTML stripping, whitespace/URL normalization, dedupe key).
+- Runner: `python -m scripts.preprocess_knowledge_base`.
+- Outputs: `data/knowledge_base.clean.jsonl` and `data/knowledge_base.clean.stats.json`.
 
 ---
 
@@ -114,6 +126,12 @@ Chatbot Response (+ citations)
 
 - Chunks load in a smoke test; metadata sufficient for filtering and citations.
 
+**Implementation (scholar-ml)**
+
+- Chunk helpers: `src/chunking.py`.
+- Runner: `python -m scripts.chunk_knowledge_base`.
+- Outputs: `data/chunks.jsonl` and `data/chunks.stats.json`.
+
 ---
 
 ## Milestone 5 — Embeddings & FAISS Index (Offline)
@@ -126,6 +144,12 @@ Chatbot Response (+ citations)
 **Exit criteria**
 
 - `python -m scripts.build_index` completes end-to-end; manual nearest-neighbor checks for sample queries look reasonable.
+
+**Implementation (scholar-ml)**
+
+- Index helpers: `src/indexing.py`.
+- Runner: `python -m scripts.build_index`.
+- Outputs: `artifacts/index.faiss`, `artifacts/chunks_meta.json`, `artifacts/index.stats.json`.
 
 ---
 
@@ -140,6 +164,11 @@ Chatbot Response (+ citations)
 
 - CLI or script prints retrieved chunks and scores; human review of relevance.
 
+**Implementation (scholar-ml)**
+
+- Retrieval + filters: `src/retrieve.py` (`retrieve`, `RetrievalFilters`, `passes_filters`).
+- CLI: `python -m scripts.retrieve_once "<query>"` with optional `--country`, `--degree-level`, `--funding-type`, `--field`.
+
 ---
 
 ## Milestone 7 — Prompt Construction + Local LLM
@@ -153,6 +182,11 @@ Chatbot Response (+ citations)
 **Exit criteria**
 
 - `python -m scripts.chat_once "..."` returns a grounded answer with traceable chunk IDs or titles.
+
+**Implementation (scholar-ml)**
+
+- Prompt + Ollama client: `src/chat.py`.
+- CLI: `python -m scripts.chat_once "<message>"` (supports retrieval filters and dry-run mode).
 
 ---
 
@@ -171,6 +205,12 @@ Chatbot Response (+ citations)
 **Exit criteria**
 
 - Service runs on `localhost:PORT`; testable with curl/Postman without touching Scholar frontend or backend.
+
+**Implementation (scholar-ml)**
+
+- Shared orchestration: `src/chat_service.py`.
+- FastAPI app: `src/api.py` (`/health`, `/v1/version`, `/v1/chat`).
+- Server runner: `python -m scripts.run_server` (default port `8020`).
 
 ---
 

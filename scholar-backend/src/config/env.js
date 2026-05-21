@@ -31,6 +31,7 @@ const env = {
   googleClientSecret: required("GOOGLE_CLIENT_SECRET"),
   googleRedirectUri: required("GOOGLE_REDIRECT_URI"),
   aiServiceUrl: optional("AI_SERVICE_URL", "http://127.0.0.1:8010"),
+  scholarMlChatUrl: optional("SCHOLAR_ML_CHAT_URL", ""),
   smtpHost: optional("SMTP_HOST", ""),
   smtpPort: parseInt(optional("SMTP_PORT", "587"), 10),
   smtpUser: optional("SMTP_USER", ""),

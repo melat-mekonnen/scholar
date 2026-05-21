@@ -176,7 +176,23 @@ class ScholarshipRepository {
       `SELECT id, title, country, deadline, application_url
        FROM scholarships
        WHERE is_recommended_default = TRUE
-       ORDER BY deadline ASC
+         AND status = 'verified'
+         AND (deadline IS NULL OR deadline >= CURRENT_DATE)
+       ORDER BY deadline ASC NULLS LAST
+       LIMIT $1`,
+      [limit]
+    );
+    return result.rows;
+  }
+
+  /** Fallback when no scholarships are flagged is_recommended_default. */
+  async getUpcomingVerified(limit = 3) {
+    const result = await query(
+      `SELECT id, title, country, deadline, application_url
+       FROM scholarships
+       WHERE status = 'verified'
+         AND (deadline IS NULL OR deadline >= CURRENT_DATE)
+       ORDER BY deadline ASC NULLS LAST
        LIMIT $1`,
       [limit]
     );

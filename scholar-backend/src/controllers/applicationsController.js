@@ -1,6 +1,10 @@
 const { ApplicationRepository } = require("../repositories/ApplicationRepository");
+const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { UserActivityRepository } = require("../repositories/UserActivityRepository");
 
 const repo = new ApplicationRepository();
+const scholarshipRepo = new ScholarshipRepository();
+const activityRepo = new UserActivityRepository();
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -24,12 +28,13 @@ async function create(req, res, next) {
       throw err;
     }
 
-    const scholarship = await repo.findEligibleScholarshipById(scholarshipId);
-    if (!scholarship) {
+    const eligible = await repo.findEligibleScholarshipById(scholarshipId);
+    if (!eligible) {
       const err = new Error("Scholarship not found or not eligible for applications");
       err.statusCode = 404;
       throw err;
     }
+    const scholarship = await scholarshipRepo.findPublicById(scholarshipId);
 
     const existing = await repo.findByUserAndScholarship(userId, scholarshipId);
     if (existing) {
@@ -52,6 +57,13 @@ async function create(req, res, next) {
       scholarshipId,
       status,
     });
+
+    const title = scholarship?.title || "scholarship";
+    const activityLabel =
+      status === "submitted"
+        ? `Submitted application: ${title}`
+        : `Started application: ${title}`;
+    void activityRepo.record(userId, activityLabel).catch(() => {});
 
     return res.status(201).json({
       id: created.id,
@@ -118,6 +130,16 @@ async function updateStatus(req, res, next) {
     }
 
     const updated = await repo.updateStatus(applicationId, userId, status);
+    const scholarship = await scholarshipRepo.findPublicById(updated.scholarship_id);
+    const title = scholarship?.title || "scholarship";
+    const statusLabels = {
+      submitted: `Submitted application: ${title}`,
+      accepted: `Application accepted: ${title}`,
+      rejected: `Application not selected: ${title}`,
+      pending: `Updated application: ${title}`,
+    };
+    void activityRepo.record(userId, statusLabels[status] || statusLabels.pending).catch(() => {});
+
     return res.json({
       id: updated.id,
       userId: updated.user_id,
