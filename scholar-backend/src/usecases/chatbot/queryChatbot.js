@@ -3,6 +3,9 @@ const { env } = require("../../config/env");
 const { StudentProfileRepository } = require("../../repositories/StudentProfileRepository");
 const { ScholarshipRepository } = require("../../repositories/ScholarshipRepository");
 const { fetchScholarshipPoolForAi } = require("../recommendations/scholarshipPoolForAi");
+const { checkAiChatQuota } = require("../subscription/checkAiChatQuota");
+const { consumeAiChatQuota } = require("../subscription/consumeAiChatQuota");
+const { createChatQuotaExceededError } = require("../subscription/chatQuotaError");
 
 const profileRepo = new StudentProfileRepository();
 const scholarshipRepo = new ScholarshipRepository();
@@ -31,6 +34,11 @@ async function queryChatbot({ userId, message, topK = 5 }) {
     throw err;
   }
 
+  const quota = await checkAiChatQuota(userId);
+  if (!quota.allowed) {
+    throw createChatQuotaExceededError(quota);
+  }
+
   const profile = await profileRepo.findByUserId(userId);
   const scholarships = await fetchScholarshipPoolForAi(scholarshipRepo, userId, profile, 300);
 
@@ -52,6 +60,8 @@ async function queryChatbot({ userId, message, topK = 5 }) {
   };
 
   try {
+    await consumeAiChatQuota(userId);
+
     // Chat uses fast TF‑IDF retrieval by default on the AI service; allow headroom for cold DB / large payloads.
     const { data } = await axios.post(aiUrl, payload, { timeout: 90000 });
     return data;

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { Button } from "@/components/ui/button"
 
-const STUDENT_ROUTES = new Set([
+const STUDENT_ROUTE_PREFIXES = [
   "/dashboard",
   "/scholarships",
   "/applications",
@@ -14,13 +14,18 @@ const STUDENT_ROUTES = new Set([
   "/profile",
   "/settings",
   "/documents",
-])
+  "/ai-matches",
+  "/ai-chat",
+]
 
 export function StudentLanguageToggle() {
   const pathname = usePathname()
   const { lang, setLang } = useStudentI18n()
 
-  if (!STUDENT_ROUTES.has(pathname)) return null
+  const onStudentRoute = STUDENT_ROUTE_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  )
+  if (!onStudentRoute) return null
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1 rounded-full border bg-background p-1 shadow-sm">

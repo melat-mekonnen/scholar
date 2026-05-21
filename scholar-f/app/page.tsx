@@ -68,7 +68,7 @@ export default function HomePage() {
               <span className="mt-2 block font-semibold">dreams come true.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/95 drop-shadow-sm sm:text-base">
-              Access trusted scholarships, intelligent recommendations, and seamless application tracking to achieve
+              Access trusted scholarships, intelligent AI recommendations, and seamless application tracking to achieve
               your academic goals.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">

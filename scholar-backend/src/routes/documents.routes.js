@@ -32,8 +32,10 @@ function requireAdminManagerOrOwner(req, res, next) {
 }
 
 router.get("/", documentsController.list);
-router.get("/:id", documentsController.getById);
+router.get("/:id/content", authMiddleware, documentsController.getContent);
+router.post("/:id/fuse", authMiddleware, documentsController.fuseWithProfile);
 router.get("/:id/download", documentsController.download);
+router.get("/:id", documentsController.getById);
 
 router.post(
   "/",

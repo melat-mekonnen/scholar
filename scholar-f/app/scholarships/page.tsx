@@ -21,6 +21,7 @@ import {
 
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
+import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -28,7 +29,7 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication, getMyApplications } from "@/lib/applications"
+import { getMyApplications, startTrackedApplication } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -482,10 +483,13 @@ export default function ScholarshipsPage() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <h1 className="text-lg font-semibold text-emerald-950">Browse Scholarships</h1>
-          <ProfileAvatarLink />
+          <div className="flex items-center gap-2">
+            <StudentLanguageToggle />
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <main className="relative flex-1 space-y-6 p-6">
@@ -693,9 +697,12 @@ export default function ScholarshipsPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">{s.title}</p>
                           <p className="mt-1 text-sm text-slate-500">
-                            {s.organizationName ? `${s.organizationName} · ` : ""}
-                            {s.country} · {s.degreeLevel.replace("_", " ")}
-                            {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
+                            {s.organizationName ? `${s.organizationName} 
+ · ` : ""}
+                            {s.country} 
+ · {s.degreeLevel.replace("_", " ")}
+                            {s.fieldOfStudy ? ` 
+ · ${s.fieldOfStudy}` : ""}
                           </p>
                         </div>
                         {!s.startDate && !(s.endDate || s.deadline) && (
@@ -742,6 +749,13 @@ export default function ScholarshipsPage() {
                           className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
+                            const created = await startTrackedApplication(s.id)
+                            if (created.res.status === 401 || created.res.status === 403) {
+                              clearToken()
+                              router.replace("/signin")
+                              return
+                            }
+
                             const ok = await openScholarshipApplication(s)
                             if (!ok) {
                               toast({
@@ -753,29 +767,24 @@ export default function ScholarshipsPage() {
                               return
                             }
 
-                            const created = await createApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
+                            const tracked = created
+                            if (!tracked.res.ok && tracked.res.status !== 409) {
                               toast({
                                 title: "Could not track application",
                                 description:
-                                  created.errorMessage || "Failed to save this application in your tracker.",
+                                  tracked.errorMessage || "Failed to save this application in your tracker.",
                                 variant: "destructive",
                               })
                             } else {
-                              if (created.res.status === 201) {
+                              if (tracked.res.status === 201 || tracked.res.status === 200) {
                                 setAppliedScholarshipIds((prev) => new Set(prev).add(s.id))
                               }
                               toast({
                                 title: "Application started",
                                 description:
-                                  created.res.status === 409
+                                  tracked.res.status === 409
                                     ? "Already in your application tracker."
-                                    : "Saved to your application tracker.",
+                                    : "Saved as pending — confirm when you finish on the official site.",
                               })
                             }
                           }}

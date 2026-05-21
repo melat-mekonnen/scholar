@@ -76,6 +76,7 @@ class DocumentRepository {
               d.scholarship_id,
               d.uploaded_by_user_id,
               d.download_count,
+              COALESCE(d.requires_pro, false) AS requires_pro,
               d.created_at,
               d.updated_at,
               u.full_name AS uploaded_by_name
@@ -100,6 +101,7 @@ class DocumentRepository {
               d.scholarship_id,
               d.uploaded_by_user_id,
               d.download_count,
+              COALESCE(d.requires_pro, false) AS requires_pro,
               d.created_at,
               d.updated_at,
               u.full_name AS uploaded_by_name

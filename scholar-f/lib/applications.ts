@@ -18,16 +18,30 @@ export type StudentApplication = {
   }
 }
 
-export async function createApplication(scholarshipId: string) {
+export async function createApplication(
+  scholarshipId: string,
+  status: ApplicationStatus = "pending",
+) {
   return apiFetchJson<{
     id: string
     scholarshipId: string
     status: ApplicationStatus
+    existing?: boolean
   }>("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scholarshipId, status: "submitted" }),
+    body: JSON.stringify({ scholarshipId, status }),
   })
+}
+
+/** Start tracking an application (pending) before opening the official site. */
+export async function startTrackedApplication(scholarshipId: string) {
+  return createApplication(scholarshipId, "pending")
+}
+
+/** Mark a pending application as submitted after the student confirms they applied. */
+export async function confirmTrackedApplication(applicationId: string) {
+  return updateApplicationStatus(applicationId, "submitted")
 }
 
 export async function getMyApplications() {

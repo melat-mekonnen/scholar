@@ -27,6 +27,7 @@ import { StudentPortalSidebarLogout } from "@/components/student-portal/student-
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { Skeleton } from "@/components/ui/skeleton"
+
 type MeResponse = {
   role?: string
 }
@@ -149,7 +150,7 @@ function ProfilePageInner() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           {(role === "manager" || role === "owner") && intentStudent ? (
             <Button asChild variant="outline" className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">

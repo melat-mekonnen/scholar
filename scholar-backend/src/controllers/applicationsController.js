@@ -11,7 +11,7 @@ async function create(req, res, next) {
   try {
     const userId = req.user?.id;
     const scholarshipId = String(req.body?.scholarshipId || "");
-    const status = req.body?.status ? String(req.body.status) : "submitted";
+    const status = req.body?.status ? String(req.body.status) : "pending";
 
     if (!UUID_V4.test(scholarshipId)) {
       const err = new Error("Invalid scholarship id");
@@ -33,6 +33,17 @@ async function create(req, res, next) {
 
     const existing = await repo.findByUserAndScholarship(userId, scholarshipId);
     if (existing) {
+      if (existing.status === "pending") {
+        return res.status(200).json({
+          id: existing.id,
+          userId: existing.user_id,
+          scholarshipId: existing.scholarship_id,
+          status: existing.status,
+          createdAt: existing.created_at,
+          updatedAt: existing.updated_at,
+          existing: true,
+        });
+      }
       return res.status(409).json({ message: "Application already exists for this scholarship" });
     }
 

@@ -28,7 +28,7 @@ import { clearToken, getToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
-import { createApplication } from "@/lib/applications"
+import { startTrackedApplication } from "@/lib/applications"
 import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
 
 type RecommendationItem = {
@@ -287,7 +287,7 @@ export default function AiMatchesPage() {
                         className="bg-emerald-600 text-white hover:bg-emerald-700"
                         disabled={!getApplicationUrl(item.scholarship)}
                         onClick={async () => {
-                          const created = await createApplication(item.scholarship.id)
+                          const created = await startTrackedApplication(item.scholarship.id)
                           if (created.res.status === 401 || created.res.status === 403) {
                             clearToken()
                             router.replace("/signin")
@@ -311,7 +311,8 @@ export default function AiMatchesPage() {
                           } else {
                             toast({
                               title: "Application started",
-                              description: "Saved to your application tracker.",
+                              description:
+                                "Saved as pending — confirm when you finish on the official site.",
                             })
                           }
                         }}

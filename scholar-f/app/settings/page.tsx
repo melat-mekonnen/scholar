@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   Bell,
@@ -27,9 +27,14 @@ import { clearToken, logoutFromServer } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
 import {
   loadNotificationPreferences,
-  saveNotificationPreferences,
+  saveNotificationPreferences as saveLocalNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/user-preferences"
+import {
+  fetchNotificationPreferences,
+  saveNotificationPreferences as saveServerNotificationPreferences,
+} from "@/lib/notification-preferences-api"
+import type { SubscriptionStatus } from "@/lib/subscription-types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -60,6 +65,7 @@ type MeResponse = {
 
 export default function SettingsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
   const { t } = useStudentI18n()
   const [mounted, setMounted] = useState(false)
@@ -67,6 +73,19 @@ export default function SettingsPage() {
   const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [prefs, setPrefs] = useState<NotificationPreferences>(loadNotificationPreferences)
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null)
+
+  async function loadSubscription() {
+    const { res, data } = await apiFetchJson<SubscriptionStatus>("/api/billing/subscription", {
+      method: "GET",
+      auth: true,
+    })
+    if (res.ok && data) {
+      setSubscription(data)
+    }
+  }
+
+  const chatQuota = subscription?.chat ?? null
 
   useEffect(() => {
     setMounted(true)
@@ -82,20 +101,48 @@ export default function SettingsPage() {
       }
       if (res.ok && data) {
         setMe(data)
+        if (data.role === "student" || !data.role) {
+          const prefsRes = await fetchNotificationPreferences()
+          if (prefsRes.res.ok && prefsRes.data) {
+            const serverPrefs: NotificationPreferences = {
+              emailUpdates: prefsRes.data.emailUpdates,
+              deadlineReminders: prefsRes.data.deadlineReminders,
+              matchAlerts: prefsRes.data.matchAlerts,
+              applyFollowups: prefsRes.data.applyFollowups,
+            }
+            setPrefs(serverPrefs)
+            saveLocalNotificationPreferences(serverPrefs)
+          } else {
+            setPrefs(loadNotificationPreferences())
+          }
+        } else {
+          setPrefs(loadNotificationPreferences())
+        }
       }
       setLoading(false)
     }
     void load()
+    void loadSubscription()
   }, [router])
 
   useEffect(() => {
     setPrefs(loadNotificationPreferences())
   }, [])
 
+  useEffect(() => {
+    const billing = searchParams.get("billing")
+    if (billing === "success" || billing === "cancel") {
+      router.replace(`/settings/subscription?billing=${billing}`)
+    }
+  }, [searchParams, router])
+
   function updatePrefs(partial: Partial<NotificationPreferences>) {
     setPrefs((prev) => {
       const next = { ...prev, ...partial }
-      saveNotificationPreferences(next)
+      saveLocalNotificationPreferences(next)
+      if (me?.role === "student" || !me?.role) {
+        void saveServerNotificationPreferences(next)
+      }
       return next
     })
   }
@@ -158,7 +205,7 @@ export default function SettingsPage() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -199,6 +246,64 @@ export default function SettingsPage() {
               </Button>
             </div>
           </div>
+
+          {/* AI Chat subscription */}
+          <Card className={settingsCardClass}>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-emerald-500 opacity-90" />
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-violet-600" />
+                <CardTitle className="text-base text-slate-900">AI Chat subscription</CardTitle>
+              </div>
+              <CardDescription>
+                Free: 3 messages per day. Pro: unlimited AI chat. Manage plans, payments, and billing on the
+                subscription page.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {chatQuota ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className={
+                        chatQuota.unlimited
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-slate-100 text-slate-700"
+                      }
+                    >
+                      {chatQuota.unlimited ? "Pro" : "Free"}
+                    </Badge>
+                    {!chatQuota.unlimited ? (
+                      <span className="text-sm text-slate-600">
+                        {chatQuota.remaining ?? 0} of {chatQuota.limit ?? 3} messages left today
+                      </span>
+                    ) : (
+                      <span className="text-sm text-slate-600">Unlimited AI chat</span>
+                    )}
+                  </div>
+                  {subscription?.expiresAt ? (
+                    <p className="text-xs text-slate-500">
+                      Pro until {new Date(subscription.expiresAt).toLocaleDateString()}
+                      {subscription.provider ? ` · ${subscription.provider}` : ""}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                      <Link href="/settings/subscription">
+                        {chatQuota.unlimited ? "Manage subscription" : "View plans & upgrade"}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50">
+                      <Link href="/ai-chat">Open AI Chat</Link>
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-slate-500">Loading subscription status…</p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Account */}
           <Card className={settingsCardClass}>
@@ -250,7 +355,8 @@ export default function SettingsPage() {
                 <CardTitle className="text-base text-slate-900">Notifications</CardTitle>
               </div>
               <CardDescription>
-                Choose what we remind you about. Stored on this device until your account syncs with the server.
+                Email and reminder preferences for your account. Changes sync to the server when you
+                are signed in as a student.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -288,6 +394,19 @@ export default function SettingsPage() {
                   checked={prefs.matchAlerts}
                   onCheckedChange={(v) => updatePrefs({ matchAlerts: v })}
                   className="data-[state=checked]:bg-emerald-600"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="apply-followups">Application follow-up emails</Label>
+                  <p className="text-slate-500 text-xs">
+                    Email to confirm you applied after starting from a saved scholarship
+                  </p>
+                </div>
+                <Switch
+                  id="apply-followups"
+                  checked={prefs.applyFollowups}
+                  onCheckedChange={(v) => updatePrefs({ applyFollowups: v })}
                 />
               </div>
             </CardContent>

@@ -2,8 +2,58 @@ const fs = require("fs");
 const path = require("path");
 const { randomUUID } = require("crypto");
 const { DocumentRepository } = require("../repositories/DocumentRepository");
+const { UserRepository } = require("../repositories/UserRepository");
+const { StudentProfileRepository } = require("../repositories/StudentProfileRepository");
+const { getSubscriptionStatus } = require("../usecases/subscription/getSubscriptionStatus");
+const {
+  fuseTemplateContent,
+  readTextFile,
+} = require("../usecases/documents/fuseDocumentWithProfile");
 
 const repo = new DocumentRepository();
+const userRepo = new UserRepository();
+const profileRepo = new StudentProfileRepository();
+
+function mapDocumentRow(d) {
+  const mime = d.mime_type || "";
+  const editable =
+    mime.startsWith("text/") ||
+    (d.original_name || "").toLowerCase().endsWith(".txt");
+  return {
+    id: d.id,
+    title: d.title,
+    type: d.type,
+    originalName: d.original_name,
+    mimeType: d.mime_type,
+    fileSize: Number(d.file_size || 0),
+    scholarshipId: d.scholarship_id,
+    uploadedByUserId: d.uploaded_by_user_id,
+    uploadedByName: d.uploaded_by_name,
+    downloadCount: Number(d.download_count || 0),
+    requiresPro: Boolean(d.requires_pro),
+    editable,
+    createdAt: d.created_at,
+    updatedAt: d.updated_at,
+  };
+}
+
+function assertCanUseTemplate(doc, proActive) {
+  if (doc.requires_pro && !proActive) {
+    const err = new Error("This template requires an active Pro subscription");
+    err.statusCode = 403;
+    err.code = "PRO_REQUIRED";
+    throw err;
+  }
+}
+
+function assertEditable(doc) {
+  const mapped = mapDocumentRow(doc);
+  if (!mapped.editable) {
+    const err = new Error("This document type cannot be edited in the browser. Download the file instead.");
+    err.statusCode = 400;
+    throw err;
+  }
+}
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -125,20 +175,7 @@ async function list(req, res, next) {
     });
 
     return res.json({
-      documents: rows.map((d) => ({
-        id: d.id,
-        title: d.title,
-        type: d.type,
-        originalName: d.original_name,
-        mimeType: d.mime_type,
-        fileSize: Number(d.file_size || 0),
-        scholarshipId: d.scholarship_id,
-        uploadedByUserId: d.uploaded_by_user_id,
-        uploadedByName: d.uploaded_by_name,
-        downloadCount: Number(d.download_count || 0),
-        createdAt: d.created_at,
-        updatedAt: d.updated_at,
-      })),
+      documents: rows.map((d) => mapDocumentRow(d)),
     });
   } catch (err) {
     return next(err);
@@ -159,19 +196,85 @@ async function getById(req, res, next) {
       err.statusCode = 404;
       throw err;
     }
+    return res.json(mapDocumentRow(d));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getContent(req, res, next) {
+  try {
+    const id = String(req.params?.id || "");
+    if (!UUID_V4.test(id)) {
+      const err = new Error("Invalid document id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const d = await repo.findById(id);
+    if (!d) {
+      const err = new Error("Document not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    assertEditable(d);
+
+    let proActive = false;
+    if (req.user?.id) {
+      try {
+        const sub = await getSubscriptionStatus(req.user.id);
+        proActive = sub.proActive;
+      } catch {
+        proActive = false;
+      }
+    }
+    assertCanUseTemplate(d, proActive);
+
+    const content = readTextFile(d.file_path);
     return res.json({
-      id: d.id,
-      title: d.title,
-      type: d.type,
-      originalName: d.original_name,
-      mimeType: d.mime_type,
-      fileSize: Number(d.file_size || 0),
-      scholarshipId: d.scholarship_id,
-      uploadedByUserId: d.uploaded_by_user_id,
-      uploadedByName: d.uploaded_by_name,
-      downloadCount: Number(d.download_count || 0),
-      createdAt: d.created_at,
-      updatedAt: d.updated_at,
+      ...mapDocumentRow(d),
+      content,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function fuseWithProfile(req, res, next) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      const err = new Error("Authentication required");
+      err.statusCode = 401;
+      throw err;
+    }
+    const id = String(req.params?.id || "");
+    if (!UUID_V4.test(id)) {
+      const err = new Error("Invalid document id");
+      err.statusCode = 400;
+      throw err;
+    }
+    const d = await repo.findById(id);
+    if (!d) {
+      const err = new Error("Document not found");
+      err.statusCode = 404;
+      throw err;
+    }
+    assertEditable(d);
+
+    const sub = await getSubscriptionStatus(userId);
+    assertCanUseTemplate(d, sub.proActive);
+
+    const user = await userRepo.findById(userId);
+    const profile = await profileRepo.findByUserId(userId);
+    const base = req.body?.content
+      ? String(req.body.content)
+      : readTextFile(d.file_path);
+    const fused = fuseTemplateContent(base, { user, profile });
+
+    return res.json({
+      documentId: d.id,
+      fused,
+      profileUsed: Boolean(profile),
     });
   } catch (err) {
     return next(err);
@@ -291,6 +394,8 @@ module.exports = {
   upload,
   list,
   getById,
+  getContent,
+  fuseWithProfile,
   download,
   update,
   remove,

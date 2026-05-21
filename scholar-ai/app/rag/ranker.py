@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from typing import List, Dict, Any
 
+from app.rag.semantic_model import build_semantic_facets, semantic_alignment_score
 from app.utils.deadline_utils import deadline_meta
 
 _COUNTRY_CANON = {
@@ -89,10 +90,14 @@ def rank_results(candidates: List[Dict[str, Any]], filters: Dict[str, Any]) -> L
 
     ranked = []
     for c in working:
+        facets = build_semantic_facets(c)
         vec = float(c.get("similarity") or 0.0)
         rules = _rule_score(c, filters)
-        combined = (0.65 * vec) + (0.35 * rules)
+        sem = semantic_alignment_score(filters, facets)
+        # Hybrid scoring: 55% lexical retrieval + 30% rule-based entity match + 15% typed semantic alignment
+        combined = (0.55 * vec) + (0.30 * rules) + (0.15 * sem)
         row = dict(c)
+        row["semantic"] = facets
         row["score"] = round(combined, 4)
         row.update(deadline_meta(row.get("deadline")))
         ranked.append(row)

@@ -27,7 +27,7 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { createApplication } from "@/lib/applications"
+import { startTrackedApplication } from "@/lib/applications"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -193,9 +193,9 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-<div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-slate-200/80 bg-white px-4 py-3 shadow-sm md:px-6">
-          <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+          <h1 className="text-lg font-semibold text-emerald-950">Dashboard</h1>
           <ProfileAvatarLink />
         </header>
 
@@ -306,7 +306,7 @@ export default function DashboardPage() {
                           className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
                           disabled={!getApplicationUrl(s)}
                           onClick={async () => {
-                            const created = await createApplication(s.id)
+                            const created = await startTrackedApplication(s.id)
                             if (created.res.status === 401 || created.res.status === 403) {
                               clearToken()
                               router.replace("/signin")
@@ -334,7 +334,8 @@ export default function DashboardPage() {
                             } else {
                               toast({
                                 title: "Application started",
-                                description: "Saved to your application tracker.",
+                                description:
+                                  "Saved as pending — confirm when you finish on the official site.",
                               })
                             }
                           }}

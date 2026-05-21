@@ -18,8 +18,12 @@ const applicationsRoutes = require("./routes/applications.routes");
 const communityRoutes = require("./routes/community.routes");
 const recommendationsRoutes = require("./routes/recommendations.routes");
 const chatbotRoutes = require("./routes/chatbot.routes");
+const billingRoutes = require("./routes/billing.routes");
+const billingWebhookRoutes = require("./routes/billing.webhook.routes");
+const billingChapaWebhookRoutes = require("./routes/billing.chapa.webhook.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
+const notificationPreferencesRoutes = require("./routes/notification-preferences.routes");
 const ownerCommunityRoutes = require("./routes/owner.community.routes");
 const { errorHandler } = require("./middleware/errorHandler");
 
@@ -33,6 +37,17 @@ app.use(
   })
 );
 app.use(morgan("dev"));
+
+// Chapa callback (JSON) — mount before Stripe raw parser (path prefix overlap).
+app.use("/api/billing/webhooks/chapa", express.json(), billingChapaWebhookRoutes);
+
+// Stripe webhooks need the raw body for signature verification (must be before express.json).
+app.use(
+  "/api/billing/webhooks",
+  express.raw({ type: "application/json" }),
+  billingWebhookRoutes
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -55,8 +70,10 @@ app.use("/api/applications", applicationsRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/billing", billingRoutes);
 app.use("/api/discovery", discoveryRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/notification-preferences", notificationPreferencesRoutes);
 app.use("/api/owner/community", ownerCommunityRoutes);
 
 app.use(errorHandler);

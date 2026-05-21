@@ -24,7 +24,8 @@ import {
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { clearToken } from "@/lib/auth"
-import { createApplication, updateApplicationStatus } from "@/lib/applications"
+import { apiFetchJson } from "@/lib/api"
+import { confirmTrackedApplication, startTrackedApplication } from "@/lib/applications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +51,15 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
+import { StudentLanguageToggle } from "@/components/student-language-toggle"
+
+type MeResponse = {
+  id: string
+  fullName?: string
+  email: string
+  role?: string
+}
+
 function formatDegreeLevel(value?: string | null) {
   if (!value) return "N/A"
   return value.replace("_", " ")
@@ -59,6 +69,7 @@ export default function SavedScholarshipsPage() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState<ScholarshipPublic[]>([])
@@ -97,7 +108,32 @@ export default function SavedScholarshipsPage() {
     void loadBookmarks()
   }, [loadBookmarks])
 
+  useEffect(() => {
+    async function loadMe() {
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
+      if (res.ok && data) setMe(data)
+    }
+    void loadMe()
+  }, [])
+
   async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
+    const tracked = await startTrackedApplication(s.id)
+    if (tracked.res.status === 401 || tracked.res.status === 403) {
+      clearToken()
+      router.replace("/signin")
+      return
+    }
+    if (!tracked.res.ok && tracked.res.status !== 409) {
+      toast({
+        title: "Could not start tracking",
+        description: tracked.errorMessage || "Failed to save this application in your tracker.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const applicationId = tracked.data?.id
+
     const ok = await openScholarshipApplication(s)
     if (!ok) {
       toast({
@@ -119,28 +155,33 @@ export default function SavedScholarshipsPage() {
         if (!applied) {
           toast({
             title: "No problem",
-            description: "Kept in listing only. It was not added to My Applications.",
+            description: "Your application stays pending in the tracker until you confirm.",
           })
           return
         }
 
-        const created = await createApplication(s.id)
-        if (created.res.status === 401 || created.res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
-        }
-        if (!created.res.ok && created.res.status !== 409) {
+        if (!applicationId) {
           toast({
-            title: "Could not track application",
-            description: created.errorMessage || "Failed to save this application in your tracker.",
+            title: "Could not confirm",
+            description: "Application record was not found. Try Apply again.",
             variant: "destructive",
           })
           return
         }
 
-        if (created.data?.id) {
-          await updateApplicationStatus(created.data.id, "submitted")
+        const confirmed = await confirmTrackedApplication(applicationId)
+        if (confirmed.res.status === 401 || confirmed.res.status === 403) {
+          clearToken()
+          router.replace("/signin")
+          return
+        }
+        if (!confirmed.res.ok) {
+          toast({
+            title: "Could not update status",
+            description: confirmed.errorMessage || "Try again from My Applications.",
+            variant: "destructive",
+          })
+          return
         }
 
         toast({
@@ -152,6 +193,7 @@ export default function SavedScholarshipsPage() {
     }, 800)
   }
 
+  return (
   const sidebarLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
     { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: false },
@@ -210,10 +252,20 @@ export default function SavedScholarshipsPage() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">Saved Scholarships</h1>
-          <ProfileAvatarLink />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg font-semibold text-emerald-950">Saved Scholarships</h1>
+            {me?.role ? (
+              <Badge className="capitalize border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100">
+                {me.role}
+              </Badge>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <StudentLanguageToggle />
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <main className="relative flex-1 space-y-6 p-6">

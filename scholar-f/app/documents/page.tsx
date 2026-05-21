@@ -1,9 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
 import {
-  Download,
   FileText,
   FolderOpen,
   LayoutDashboard,
@@ -16,35 +15,17 @@ import {
   Settings,
 } from "lucide-react"
 
-import { apiFetchJson, API_BASE_URL } from "@/lib/api"
-import { useStudentI18n } from "@/lib/student-i18n"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
+import { apiFetchJson } from "@/lib/api"
+import {
+  DocumentResourcesGallery,
+  type DocumentResource,
+} from "@/components/student-portal/document-resources-gallery"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 
-type DocumentItem = {
-  id: string
-  title: string
-  type: string
-  originalName: string
-  downloadCount: number
-  createdAt: string
-}
-
-function formatDocDate(iso: string) {
-  const parsed = new Date(iso)
-  if (Number.isNaN(parsed.getTime())) return ""
-  return parsed.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-}
-
 export default function DocumentsPage() {
-  const { t } = useStudentI18n()
-  const [docs, setDocs] = useState<DocumentItem[]>([])
+  const [docs, setDocs] = useState<DocumentResource[]>([])
   const [q, setQ] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -55,7 +36,7 @@ export default function DocumentsPage() {
       setError(null)
       const params = new URLSearchParams()
       if (q.trim()) params.set("q", q.trim())
-      const { res, data, errorMessage } = await apiFetchJson<{ documents: DocumentItem[] }>(
+      const { res, data, errorMessage } = await apiFetchJson<{ documents: DocumentResource[] }>(
         `/api/documents${params.toString() ? `?${params.toString()}` : ""}`,
         { method: "GET", auth: false },
       )
@@ -69,11 +50,6 @@ export default function DocumentsPage() {
     }
     void load()
   }, [q])
-
-  const sorted = useMemo(
-    () => [...docs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [docs],
-  )
 
   const sidebarLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
@@ -133,8 +109,8 @@ export default function DocumentsPage() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <div>
             <h1 className="text-lg font-semibold text-emerald-950">Document Resources</h1>
             <p className="text-xs text-slate-600">Templates and guides for your scholarship applications.</p>
@@ -145,151 +121,17 @@ export default function DocumentsPage() {
           </div>
         </header>
 
-        <main className="relative flex-1 space-y-6 p-6">
+        <main className="relative min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
-                  <FolderOpen className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Application resources</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                    CV templates, recommendation guides, and other documents to support your applications.
-                  </p>
-                </div>
-              </div>
-              <Button asChild variant="outline" size="sm" className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50">
-                <Link href="/applications">My Applications</Link>
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm shadow-emerald-900/5 sm:p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="relative w-full md:max-w-xl">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
-                <Input
-                  placeholder="Search documents..."
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  className="h-11 rounded-xl border-emerald-200/80 bg-white pl-9 shadow-sm focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60"
-                />
-              </div>
-              <Button asChild variant="outline" className="h-11 shrink-0 rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50">
-                <Link href="/scholarships">{t("Browse Scholarships")}</Link>
-              </Button>
-            </div>
-          </div>
-
-          {!loading && sorted.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm ring-1 ring-emerald-50">
-              <p className="text-sm text-slate-600">
-                <span className="font-semibold text-emerald-700">{sorted.length}</span> document
-                {sorted.length === 1 ? "" : "s"}
-                {q.trim() ? (
-                  <span className="text-slate-500">
-                    {" "}
-                    matching &ldquo;{q.trim()}&rdquo;
-                  </span>
-                ) : null}
-              </p>
-            </div>
-          ) : null}
-
-          {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
-          ) : null}
-
-          {loading ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
-                  <CardContent className="space-y-3 p-6">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-9 w-28" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : sorted.length === 0 ? (
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
-              <CardContent className="space-y-4 p-6 text-center sm:text-left">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 sm:mx-0">
-                  <FolderOpen className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900">No documents found</p>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {q.trim()
-                      ? "Try a different search term or clear the search to see all resources."
-                      : "Check back later — new templates and guides are added by the team."}
-                  </p>
-                </div>
-                {q.trim() ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
-                    onClick={() => setQ("")}
-                  >
-                    Clear search
-                  </Button>
-                ) : (
-                  <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
-                    <Link href="/scholarships">{t("Browse Scholarships")}</Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {sorted.map((d) => (
-                <Card
-                  key={d.id}
-                  className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <CardTitle className="line-clamp-2 text-base text-slate-900 transition-colors group-hover:text-emerald-800">
-                          {d.title}
-                        </CardTitle>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {d.type} · {d.originalName}
-                        </p>
-                        {d.createdAt ? (
-                          <p className="mt-1 text-xs text-slate-400">Added {formatDocDate(d.createdAt)}</p>
-                        ) : null}
-                      </div>
-                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80">
-                        <FileText className="h-5 w-5" />
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-0">
-                    <Badge variant="outline" className="border-emerald-200 bg-emerald-50/50 text-xs font-medium text-emerald-800">
-                      {d.downloadCount} download{d.downloadCount === 1 ? "" : "s"}
-                    </Badge>
-                    <a
-                      className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
-                      href={`${API_BASE_URL}/api/documents/${d.id}/download`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <DocumentResourcesGallery
+            documents={docs}
+            loading={loading}
+            error={error}
+            search={q}
+            onSearchChange={setQ}
+          />
         </main>
       </div>
     </div>
