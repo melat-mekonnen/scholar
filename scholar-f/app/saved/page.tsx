@@ -25,7 +25,7 @@ import {
 } from "@/lib/scholarship"
 import { clearToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
-import { confirmTrackedApplication, startTrackedApplication } from "@/lib/applications"
+import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/empty"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
+import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 
 type MeResponse = {
@@ -116,141 +116,17 @@ export default function SavedScholarshipsPage() {
     void loadMe()
   }, [])
 
-  async function handleApplyWithReturnCheck(s: ScholarshipPublic) {
-    const tracked = await startTrackedApplication(s.id)
-    if (tracked.res.status === 401 || tracked.res.status === 403) {
-      clearToken()
-      router.replace("/signin")
-      return
-    }
-    if (!tracked.res.ok && tracked.res.status !== 409) {
-      toast({
-        title: "Could not start tracking",
-        description: tracked.errorMessage || "Failed to save this application in your tracker.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const applicationId = tracked.data?.id
-
-    const ok = await openScholarshipApplication(s)
-    if (!ok) {
-      toast({
-        title: "Application link unavailable",
-        description: "This scholarship does not have an official application URL yet.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    toast({
-      title: "Application opened",
-      description: "After you finish and come back, we will ask if you applied.",
+  function handleApplyWithReturnCheck(s: ScholarshipPublic) {
+    void applyWithReturnConfirmation({
+      scholarship: s,
+      toast,
+      onUnauthorized: () => unauthorizedHandler(router),
     })
-
-    window.setTimeout(() => {
-      const onFocus = async () => {
-        const applied = window.confirm("Did you submit your application on the official site?")
-        if (!applied) {
-          toast({
-            title: "No problem",
-            description: "Your application stays pending in the tracker until you confirm.",
-          })
-          return
-        }
-
-        if (!applicationId) {
-          toast({
-            title: "Could not confirm",
-            description: "Application record was not found. Try Apply again.",
-            variant: "destructive",
-          })
-          return
-        }
-
-        const confirmed = await confirmTrackedApplication(applicationId)
-        if (confirmed.res.status === 401 || confirmed.res.status === 403) {
-          clearToken()
-          router.replace("/signin")
-          return
-        }
-        if (!confirmed.res.ok) {
-          toast({
-            title: "Could not update status",
-            description: confirmed.errorMessage || "Try again from My Applications.",
-            variant: "destructive",
-          })
-          return
-        }
-
-        toast({
-          title: "Added to My Applications",
-          description: "Saved as submitted in your application tracker.",
-        })
-      }
-      window.addEventListener("focus", onFocus, { once: true })
-    }, 800)
   }
 
   return (
-  const sidebarLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, active: false },
-    { href: "/scholarships", label: "Browse Scholarships", icon: Search, active: false },
-    { href: "/applications", label: "My Applications", icon: FileText, active: false },
-    { href: "/community", label: "Community", icon: Users, active: false },
-    { href: "/saved", label: "Saved Scholarships", icon: Bookmark, active: true },
-    { href: "/ai-matches", label: "AI Matches", icon: Sparkles, active: false },
-    { href: "/ai-chat", label: "AI Chatbot", icon: MessageSquare, active: false },
-    { href: "/profile", label: "Profile", icon: UserCircle2, active: false },
-    { href: "/settings", label: "Settings", icon: Settings, active: false },
-    { href: "/documents", label: "Document Resources", icon: FolderOpen, active: false },
-  ]
-
-  return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
-            <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col p-6">
-          <div className="mb-8 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-          </div>
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Student Portal</p>
-
-          <nav className="flex flex-col gap-0.5">
-            {sidebarLinks.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={
-                    item.active
-                      ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
-                      : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
-                  }
-                >
-                  <span
-                    className={
-                      item.active
-                        ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
-                        : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.active ? (
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
-                  ) : (
-                    <span className="w-1.5 shrink-0" aria-hidden />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
-          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
-        </div>
-      </aside>
+      <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
