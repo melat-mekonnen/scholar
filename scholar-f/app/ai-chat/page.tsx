@@ -1,20 +1,6 @@
 "use client"
 
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-  Bot,
-  Send,
-  User,
-} from "lucide-react"
+import { Bot, MessageSquare, Send, User } from "lucide-react"
 
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
@@ -33,8 +19,35 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 
+type EligibilityMatch = {
+  profile_field: string
+  profile_value?: string | null
+  scholarship_field: string
+  scholarship_value?: string | null
+  status: string
+  detail: string
+}
+
+type ScholarshipEligibility = {
+  scholarship_id?: string
+  title?: string
+  overall: string
+  matches: EligibilityMatch[]
+}
+
 type ChatApiResponse = {
-  intent: string
+  source?: "scholar-ml" | "scholar-ai"
+  answer?: string
+  mode?: string
+  profile_loaded?: boolean
+  citations?: Array<{
+    scholarship_id?: string
+    title?: string
+    url?: string
+    chunk_id?: string
+  }>
+  eligibility?: string | ScholarshipEligibility[]
+  intent?: string
   recommendations: Array<{
     name?: string
     country?: string
@@ -43,8 +56,8 @@ type ChatApiResponse = {
     deadline?: string | null
     funding_type?: string
     score?: number
+    url?: string
   }>
-  eligibility: string
   deadlines: Array<{
     name?: string
     deadline?: string | null
@@ -83,11 +96,54 @@ const QUICK_PROMPTS = [
   "Am I eligible for master's funding abroad?",
 ]
 
-function formatAssistantReply(data: ChatApiResponse): string {
-  const parts: string[] = []
-  parts.push(`Intent: ${data.intent}`)
+function matchStatusLabel(status: string): string {
+  if (status === "match") return "Match"
+  if (status === "partial") return "Partial"
+  if (status === "mismatch") return "Mismatch"
+  return "Unknown"
+}
 
-  if (data.eligibility?.trim()) {
+function formatAssistantReply(data: ChatApiResponse): string {
+  if (data.source === "scholar-ml" || data.answer) {
+    const parts: string[] = []
+
+    if (data.answer?.trim()) {
+      parts.push(data.answer.trim())
+    }
+
+    if (Array.isArray(data.eligibility) && data.eligibility.length > 0) {
+      parts.push("\n--- Your profile vs scholarships ---")
+      if (data.profile_loaded === false) {
+        parts.push(
+          "Complete your student profile in Settings for personalized eligibility matching.",
+        )
+      }
+      for (const item of data.eligibility) {
+        parts.push(
+          `\n${item.title || "Scholarship"} — ${(item.overall || "unknown").replace(/_/g, " ")}`,
+        )
+        for (const match of item.matches || []) {
+          parts.push(`• ${matchStatusLabel(match.status)}: ${match.detail}`)
+        }
+      }
+    }
+
+    if (data.citations?.length) {
+      parts.push("\nSources:")
+      for (const citation of data.citations) {
+        parts.push(`• ${citation.title || "Scholarship"}${citation.url ? ` — ${citation.url}` : ""}`)
+      }
+    }
+
+    return parts.join("\n").trim()
+  }
+
+  const parts: string[] = []
+  if (data.intent) {
+    parts.push(`Intent: ${data.intent}`)
+  }
+
+  if (typeof data.eligibility === "string" && data.eligibility.trim()) {
     parts.push("\n" + data.eligibility.trim())
   }
 
@@ -184,6 +240,7 @@ export default function AiChatPage() {
       auth: true,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text, topK: 8 }),
+      signal: AbortSignal.timeout(300_000),
     })
 
     if (res.status === 401 || res.status === 403) {
@@ -217,7 +274,9 @@ export default function AiChatPage() {
     if (!res.ok || !data) {
       toast({
         title: "Chat failed",
-        description: errorMessage || "Is the Scholar AI service running? Check AI_SERVICE_URL on the backend.",
+        description:
+          errorMessage ||
+          "Is the chat service running? Check SCHOLAR_ML_CHAT_URL or AI_SERVICE_URL on the backend.",
         variant: "destructive",
       })
       setMessages((m) => [
@@ -226,7 +285,7 @@ export default function AiChatPage() {
           role: "assistant",
           content:
             errorMessage?.trim() ||
-            "Sorry, the assistant could not respond. Is the Scholar AI service running on the URL set in AI_SERVICE_URL?",
+            "Sorry, the assistant could not respond. Ensure scholar-ml (8020) or scholar-ai (8010) is running and the backend env URL matches.",
         },
       ])
       setSending(false)

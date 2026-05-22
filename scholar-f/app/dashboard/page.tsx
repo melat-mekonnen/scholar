@@ -196,10 +196,14 @@ export default function DashboardPage() {
             {!loading && recommended.length === 0 && (
               <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                 <CardContent className="pt-6 text-sm text-slate-500">
-                  No featured scholarships yet. Managers can mark scholarships as recommended in the database
-                  (<code className="text-xs">is_recommended_default</code>), or you can{" "}
+                  No verified scholarships are available to show yet. Once listings are published, upcoming
+                  deadlines will appear here. You can also{" "}
                   <Link href="/scholarships" className="text-emerald-600 underline underline-offset-2">
                     browse all scholarships
+                  </Link>{" "}
+                  or try{" "}
+                  <Link href="/ai-matches" className="text-emerald-600 underline underline-offset-2">
+                    AI Matches
                   </Link>
                   .
                 </CardContent>
@@ -270,7 +274,10 @@ export default function DashboardPage() {
                   </>
                 )}
                 {!loading && activities.length === 0 && (
-                  <p className="text-sm text-slate-500">No recent activity yet.</p>
+                  <p className="text-sm text-slate-500">
+                    No activity yet. Save a scholarship, start an application, or update an application status
+                    to see updates here.
+                  </p>
                 )}
                 {!loading &&
                   activities.map((activity, index) => (

@@ -22,23 +22,41 @@ function mapScholarship(row) {
   };
 }
 
-async function queryChatbot({ userId, message, topK = 5 }) {
-  if (!userId) {
-    const err = new Error("Authentication required");
-    err.statusCode = 401;
-    throw err;
-  }
-  if (!message || !String(message).trim()) {
-    const err = new Error("Message is required");
-    err.statusCode = 400;
-    throw err;
-  }
+function mapMlResponse(data) {
+  const citations = Array.isArray(data?.citations) ? data.citations : [];
+  const eligibility = Array.isArray(data?.eligibility) ? data.eligibility : [];
+  return {
+    source: "scholar-ml",
+    answer: data?.answer || "",
+    mode: data?.mode || "scholarship",
+    profile_loaded: Boolean(data?.profile_loaded),
+    citations,
+    eligibility,
+    intent: data?.mode || "scholarship",
+    recommendations: citations.map((c) => ({
+      name: c.title || "",
+      url: c.url || "",
+    })),
+    deadlines: [],
+  };
+}
 
-  const quota = await checkAiChatQuota(userId);
-  if (!quota.allowed) {
-    throw createChatQuotaExceededError(quota);
-  }
+async function queryScholarMl({ userId, message, topK = 5 }) {
+  const mlUrl = `${env.scholarMlChatUrl.replace(/\/+$/, "")}/v1/chat`;
+  const { data } = await axios.post(
+    mlUrl,
+    {
+      message: String(message).trim(),
+      user_id: userId,
+      filters: {},
+      dry_run: false,
+    },
+    { timeout: 300000 }
+  );
+  return mapMlResponse(data);
+}
 
+async function queryLegacyAi({ userId, message, topK = 5 }) {
   const profile = await profileRepo.findByUserId(userId);
   const scholarships = await fetchScholarshipPoolForAi(scholarshipRepo, userId, profile, 300);
 
@@ -59,19 +77,43 @@ async function queryChatbot({ userId, message, topK = 5 }) {
     includePublicDataset: true,
   };
 
+  const { data } = await axios.post(aiUrl, payload, { timeout: 90000 });
+  return { ...data, source: "scholar-ai" };
+}
+
+async function queryChatbot({ userId, message, topK = 5 }) {
+  if (!userId) {
+    const err = new Error("Authentication required");
+    err.statusCode = 401;
+    throw err;
+  }
+  if (!message || !String(message).trim()) {
+    const err = new Error("Message is required");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const quota = await checkAiChatQuota(userId);
+  if (!quota.allowed) {
+    throw createChatQuotaExceededError(quota);
+  }
+
+  const useScholarMl = Boolean(env.scholarMlChatUrl && String(env.scholarMlChatUrl).trim());
+
   try {
     await consumeAiChatQuota(userId);
 
-    // Chat uses fast TF‑IDF retrieval by default on the AI service; allow headroom for cold DB / large payloads.
-    const { data } = await axios.post(aiUrl, payload, { timeout: 90000 });
-    return data;
+    if (useScholarMl) {
+      return await queryScholarMl({ userId, message, topK });
+    }
+    return await queryLegacyAi({ userId, message, topK });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const upstreamMessage =
         error.response?.data?.message ||
         error.response?.data?.detail ||
         error.message ||
-        "AI chatbot service is unavailable";
+        (useScholarMl ? "Scholar-ML chat service is unavailable" : "AI chatbot service is unavailable");
       const err = new Error(`Chatbot service error: ${upstreamMessage}`);
       err.statusCode = error.response?.status || 503;
       throw err;
@@ -81,4 +123,3 @@ async function queryChatbot({ userId, message, topK = 5 }) {
 }
 
 module.exports = { queryChatbot };
-

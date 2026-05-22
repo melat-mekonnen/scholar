@@ -1,0 +1,23 @@
+# Scholar-ML — Python 3.10+
+# Milestone 0: install venv only; full stack used from M1 onward.
+
+python-dotenv>=1.0.0
+
+# M1+ export
+psycopg2-binary>=2.9.9
+
+# M3+ text
+beautifulsoup4>=4.12.0
+
+# M5+ embeddings & FAISS
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+numpy>=1.26.0
+
+# M7+ HTTP to Ollama
+httpx>=0.27.0
+
+# M8+ API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0

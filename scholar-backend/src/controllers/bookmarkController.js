@@ -1,8 +1,10 @@
 const { BookmarkRepository } = require("../repositories/BookmarkRepository");
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { UserActivityRepository } = require("../repositories/UserActivityRepository");
 
 const bookmarkRepo = new BookmarkRepository();
 const scholarshipRepo = new ScholarshipRepository();
+const activityRepo = new UserActivityRepository();
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -48,6 +50,10 @@ async function addBookmark(req, res, next) {
       }
       throw e;
     }
+
+    void activityRepo
+      .record(req.user.id, `Saved scholarship: ${exists.title}`)
+      .catch(() => {});
 
     return res.status(201).json({ message: "Bookmarked" });
   } catch (err) {
