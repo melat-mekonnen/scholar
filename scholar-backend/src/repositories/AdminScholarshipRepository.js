@@ -27,7 +27,8 @@ class AdminScholarshipRepository {
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     const result = await query(
-      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status,
+              rejection_reason, application_url, source_url, source_name, is_rolling
        FROM scholarships
        ${whereClause}
        ORDER BY created_at DESC`,
@@ -47,7 +48,8 @@ class AdminScholarshipRepository {
     }
 
     const result = await query(
-      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status, rejection_reason
+      `SELECT id, title, organization_name, country, degree_level, funding_type, deadline, status,
+              rejection_reason, application_url, source_url, source_name, is_rolling
        FROM scholarships
        ${where}
        ORDER BY deadline ASC NULLS LAST`,
@@ -70,6 +72,10 @@ class AdminScholarshipRepository {
               s.amount,
               s.description,
               s.application_url,
+              s.source_url,
+              s.source_name,
+              s.organization_name,
+              s.is_rolling,
               s.rejection_reason,
               s.created_at,
               s.updated_at,

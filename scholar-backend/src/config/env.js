@@ -39,6 +39,21 @@ const env = {
   smtpFrom: optional("SMTP_FROM", ""),
   ingestionEnabled: optionalBool("INGESTION_ENABLED", false),
   ingestDaadEnabled: optionalBool("INGEST_DAAD_ENABLED", false),
+  ingestErasmusEnabled: optionalBool("INGEST_ERASMUS_ENABLED", false),
+  ingestFulbrightEnabled: optionalBool("INGEST_FULBRIGHT_ENABLED", false),
+  ingestCheveningEnabled: optionalBool("INGEST_CHEVENING_ENABLED", false),
+  ingestCommonwealthEnabled: optionalBool("INGEST_COMMONWEALTH_ENABLED", false),
+  ingestFastwebEnabled: optionalBool("INGEST_FASTWEB_ENABLED", false),
+  ingestAustraliaAwardsEnabled: optionalBool("INGEST_AUSTRALIA_AWARDS_ENABLED", false),
+  ingestMastercardFoundationEnabled: optionalBool("INGEST_MASTERCARD_FOUNDATION_ENABLED", false),
+  ingestAfricanMinistriesEnabled: optionalBool("INGEST_AFRICAN_MINISTRIES_ENABLED", false),
+  ingestAfricanUniversitiesEnabled: optionalBool("INGEST_AFRICAN_UNIVERSITIES_ENABLED", false),
+  ingestAfricanAggregatorsEnabled: optionalBool("INGEST_AFRICAN_AGGREGATORS_ENABLED", false),
+  ingestAfricanResearchEnabled: optionalBool("INGEST_AFRICAN_RESEARCH_ENABLED", false),
+  /** staging = capture all rows then publish; direct = legacy immediate upsert */
+  ingestPipelineMode: optional("INGEST_PIPELINE_MODE", "staging").toLowerCase(),
+  /** merge = enrich existing rows instead of skipping duplicates */
+  ingestDedupMode: optional("INGEST_DEDUP_MODE", "merge").toLowerCase(),
   chatFreeDailyLimit: Math.max(
     1,
     parseInt(optional("CHAT_FREE_DAILY_LIMIT", "3"), 10) || 3
@@ -66,7 +81,10 @@ const env = {
     optional("CHAPA_RETURN_URL", "") ||
     `${optional("FRONTEND_APP_URL", "http://localhost:3000")}/settings/subscription?billing=success`,
   chapaFallbackEmail: optional("CHAPA_FALLBACK_EMAIL", ""),
+  openRouterApiKey: optional("OPENROUTER_API_KEY", ""),
+  openRouterModel: optional("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
+  aiDescriptionRefineEnabled: optionalBool("AI_DESCRIPTION_REFINE_ENABLED", false),
+  aiTranslationEnabled: optionalBool("AI_TRANSLATION_ENABLED", false),
 };
 
 module.exports = { env };
-

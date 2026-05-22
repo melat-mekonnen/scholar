@@ -1,4 +1,6 @@
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
+const { StudyProgrammeRepository } = require("../repositories/StudyProgrammeRepository");
+const { mapPublicScholarship } = require("../utils/mapPublicOpportunity");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
 const {
   initialStatusForCreator,
@@ -8,6 +10,18 @@ const {
 } = require("../usecases/scholarships/scholarshipCrudRules");
 
 const repo = new ScholarshipRepository();
+const programmeRepo = new StudyProgrammeRepository();
+
+function parseLang(query) {
+  const lang = String(query?.lang || "en").toLowerCase();
+  return lang === "am" ? "am" : "en";
+}
+
+function shouldIncludeProgrammes(query, degreeLevels) {
+  if (String(query?.include_programmes || "1") === "0") return false;
+  if (!degreeLevels?.length) return true;
+  return degreeLevels.some((d) => d === "bachelor" || d === "high_school");
+}
 
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -168,6 +182,7 @@ async function search(req, res, next) {
       status,
     } = req.query;
 
+    const lang = parseLang(req.query);
     const countries = normalizeMulti(req.query.country);
     const degreeLevels = normalizeMulti(req.query.degree_level);
     const fieldsOfStudy = normalizeMulti(req.query.field_of_study);
@@ -179,7 +194,9 @@ async function search(req, res, next) {
     const bookmarkUserId = getBookmarkUserId(req);
 
     const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
-    const result = await repo.searchPublic({
+    const includeProgrammes = shouldIncludeProgrammes(req.query, degreeLevels);
+
+    const scholarshipResult = await repo.searchPublic({
       q,
       countries,
       degreeLevels,
@@ -189,33 +206,39 @@ async function search(req, res, next) {
       deadlineTo,
       sort,
       page: parsedPage,
-      limit: parsedLimit,
+      limit: includeProgrammes ? Math.ceil(parsedLimit / 2) : parsedLimit,
       status: isPrivileged ? status : undefined,
       bookmarkUserId,
     });
 
+    let programmeResults = [];
+    let programmeTotal = 0;
+    if (includeProgrammes) {
+      const programmeSearch = await programmeRepo.searchPublic({
+        q,
+        countries,
+        degreeLevels,
+        fieldsOfStudy,
+        fundingTypes: fundingTypes.length ? fundingTypes : undefined,
+        page: parsedPage,
+        limit: Math.floor(parsedLimit / 2) || parsedLimit,
+        lang,
+      });
+      programmeResults = programmeSearch.results;
+      programmeTotal = programmeSearch.total;
+    }
+
+    const scholarshipRows = scholarshipResult.results.map((r) => mapPublicScholarship(r, lang));
+    const merged = [...scholarshipRows, ...programmeResults]
+      .sort((a, b) => String(a.title).localeCompare(String(b.title)))
+      .slice(0, parsedLimit);
+
     return res.json({
-      results: result.results.map((r) => ({
-        id: r.id,
-        title: r.title,
-        organizationName: r.organization_name,
-        country: r.country,
-        degreeLevel: r.degree_level,
-        fieldOfStudy: r.field_of_study,
-        fundingType: r.funding_type,
-        deadline: r.deadline,
-        startDate: r.application_start_date,
-        endDate: r.application_end_date,
-        amount: r.amount,
-        applicationUrl: r.application_url,
-        bookmark_count: r.bookmark_count,
-        bookmarkCount: r.bookmark_count,
-        is_bookmarked: Boolean(r.is_bookmarked),
-        isBookmarked: Boolean(r.is_bookmarked),
-      })),
-      total: result.total,
-      page: result.page,
-      limit: result.limit,
+      results: merged,
+      total: scholarshipResult.total + programmeTotal,
+      page: parsedPage,
+      limit: parsedLimit,
+      lang,
     });
   }
   catch (err) {
@@ -266,30 +289,20 @@ async function getById(req, res, next) {
       }
     }
     if (!row) {
+      const lang = parseLang(req.query);
+      const programme = await programmeRepo.findPublicById(id, { lang });
+      if (programme) {
+        return res.json(programme);
+      }
       const err = new Error("Scholarship not found");
       err.statusCode = 404;
       throw err;
     }
 
+    const lang = parseLang(req.query);
     return res.json({
-      id: row.id,
-      title: row.title,
-      organizationName: row.organization_name,
-      country: row.country,
-      degreeLevel: row.degree_level,
-      fieldOfStudy: row.field_of_study,
-      fundingType: row.funding_type,
-      deadline: row.deadline,
-      startDate: row.application_start_date,
-      endDate: row.application_end_date,
-      amount: row.amount,
-      description: row.description,
-      applicationUrl: row.application_url,
+      ...mapPublicScholarship(row, lang),
       createdAt: row.created_at,
-      bookmark_count: row.bookmark_count,
-      bookmarkCount: row.bookmark_count,
-      is_bookmarked: Boolean(row.is_bookmarked),
-      isBookmarked: Boolean(row.is_bookmarked),
       postedBy: row.posted_by_id
         ? { id: row.posted_by_id, fullName: row.posted_by_full_name }
         : null,

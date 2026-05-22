@@ -43,11 +43,13 @@ services:
     environment:
       PORT: "4000"
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL:-postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-scholarship_db}?sslmode=disable}
-      JWT_SECRET: ${JWT_SECRET}
+      # Use DOCKER_DATABASE_URL for the api container (hostname `db`). Host-side scripts
+      # should use DATABASE_URL with localhost and the published DB port instead.
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-scholarship_db}?sslmode=disable}
+      JWT_SECRET: ${JWT_SECRET:-docker-dev-jwt-secret-change-me}
       FRONTEND_APP_URL: ${FRONTEND_APP_URL:-http://localhost:3000}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-docker-dev-not-configured}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-docker-dev-not-configured}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:4000/auth/google/callback}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://127.0.0.1:8010}
       SMTP_HOST: ${SMTP_HOST:-}
@@ -57,10 +59,54 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       INGESTION_ENABLED: ${INGESTION_ENABLED:-false}
       INGEST_DAAD_ENABLED: ${INGEST_DAAD_ENABLED:-false}
+      INGEST_ERASMUS_ENABLED: ${INGEST_ERASMUS_ENABLED:-false}
+      INGEST_FULBRIGHT_ENABLED: ${INGEST_FULBRIGHT_ENABLED:-false}
+      INGEST_CHEVENING_ENABLED: ${INGEST_CHEVENING_ENABLED:-false}
+      INGEST_COMMONWEALTH_ENABLED: ${INGEST_COMMONWEALTH_ENABLED:-false}
+      INGEST_FASTWEB_ENABLED: ${INGEST_FASTWEB_ENABLED:-false}
+      INGEST_AUSTRALIA_AWARDS_ENABLED: ${INGEST_AUSTRALIA_AWARDS_ENABLED:-false}
+      INGEST_MASTERCARD_FOUNDATION_ENABLED: ${INGEST_MASTERCARD_FOUNDATION_ENABLED:-false}
+      INGEST_AFRICAN_MINISTRIES_ENABLED: ${INGEST_AFRICAN_MINISTRIES_ENABLED:-false}
+      INGEST_AFRICAN_UNIVERSITIES_ENABLED: ${INGEST_AFRICAN_UNIVERSITIES_ENABLED:-false}
+      INGEST_AFRICAN_AGGREGATORS_ENABLED: ${INGEST_AFRICAN_AGGREGATORS_ENABLED:-false}
+      INGEST_AFRICAN_RESEARCH_ENABLED: ${INGEST_AFRICAN_RESEARCH_ENABLED:-false}
+      INGEST_PIPELINE_MODE: ${INGEST_PIPELINE_MODE:-staging}
+      INGEST_DEDUP_MODE: ${INGEST_DEDUP_MODE:-merge}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+      AI_DESCRIPTION_REFINE_ENABLED: ${AI_DESCRIPTION_REFINE_ENABLED:-false}
+      AI_TRANSLATION_ENABLED: ${AI_TRANSLATION_ENABLED:-false}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+
+  # One-shot ingest + seed (run: docker compose --profile setup run --rm setup)
+  setup:
+    profiles: ["setup"]
+    build:
+      context: ./scholar-backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-scholarship_db}?sslmode=disable}
+      JWT_SECRET: ${JWT_SECRET:-docker-dev-jwt-secret-change-me}
+      FRONTEND_APP_URL: ${FRONTEND_APP_URL:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-docker-dev-not-configured}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-docker-dev-not-configured}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:4000/auth/google/callback}
+      INGESTION_ENABLED: "true"
+      INGEST_PIPELINE_MODE: ${INGEST_PIPELINE_MODE:-staging}
+      INGEST_DEDUP_MODE: ${INGEST_DEDUP_MODE:-merge}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+      AI_DESCRIPTION_REFINE_ENABLED: ${AI_DESCRIPTION_REFINE_ENABLED:-false}
+      AI_TRANSLATION_ENABLED: ${AI_TRANSLATION_ENABLED:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    command: ["node", "scripts/docker-first-run.js"]
 
   web:
     build:

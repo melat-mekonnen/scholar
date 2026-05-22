@@ -39,6 +39,13 @@ const AMHARIC: Record<string, string> = {
   "AI Chatbot": "AI ደብረ ተዋናይ",
   "Student Portal": "የተማሪ ፖርታል",
   "Document Resources": "ሰነድ ሀብቶች",
+  Verified: "የተረጋገጠ",
+  "Study programme": "የትምህርት ፕሮግራም",
+  "Fees apply": "ክፍያ ይጠይቃል",
+  "About this scholarship": "ስለዚህ ስኮላርሺፕ",
+  "About this programme": "ስለዚህ ፕሮግራም",
+  "Apply on official site": "በኦፊሴላዊ ጣቢያ ያመልክቱ",
+  "View details": "ዝርዝር ይመልከቱ",
 }
 
 type StudentI18nContextValue = {

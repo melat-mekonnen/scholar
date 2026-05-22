@@ -17,6 +17,9 @@ router.get("/scholarships/pending", requireAdminOrOwner, adminController.getPend
 router.get("/scholarships/:id", requireAdminOrOwner, adminController.getScholarship);
 router.put("/scholarships/:id/verify", requireAdminOrOwner, adminController.verify);
 router.put("/scholarships/:id/reject", requireAdminOrOwner, adminController.reject);
+router.delete("/scholarships/:id", requireAdmin, adminController.deleteScholarship);
+router.get("/imports/sources", requireAdmin, adminController.getImportSources);
+router.get("/imports/health", requireAdmin, adminController.getImportHealth);
 router.get("/imports/runs", requireAdmin, adminController.getImportRuns);
 router.get("/imports/errors", requireAdmin, adminController.getImportErrors);
 router.post("/imports/run", requireAdmin, adminController.triggerImport);

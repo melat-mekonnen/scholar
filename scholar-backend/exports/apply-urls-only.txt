@@ -1,0 +1,155 @@
+1	https://www.aber.ac.uk/en/postgrad/	Commonwealth Shared Scholarship — Aberystwyth University (2 awards)
+2	https://www.bangor.ac.uk/international/future/commonwealth/	Commonwealth Shared Scholarship — Bangor University (8 awards)
+3	https://www.bournemouth.ac.uk/	Commonwealth Shared Scholarship — Bournemouth University (2 awards)
+4	https://www.brunel.ac.uk/	Commonwealth Shared Scholarship — Brunel University London (2 awards)
+5	https://www.cranfield.ac.uk/funding/funding-opportunities/commonwealth-shared-scholarship-scheme/	Commonwealth Shared Scholarship — Cranfield University (6 awards)
+6	https://www.durham.ac.uk/study/scholarships/postgraduate/commonwealth-shared-scholarships/	Commonwealth Shared Scholarship — Durham University (2 awards)
+7	https://www.harper-adams.ac.uk/	Commonwealth Shared Scholarship — Harper Adams University (2 awards)
+8	https://www.imperial.ac.uk/study/fees-and-funding/scholarships-search/	Commonwealth Shared Scholarship — Imperial College London (2 awards)
+9	https://www.kcl.ac.uk/	Commonwealth Shared Scholarship — King's College London (2 awards)
+10	https://www.lancaster.ac.uk/	Commonwealth Shared Scholarship — Lancaster University (2 awards)
+11	https://www.hope.ac.uk/	Commonwealth Shared Scholarship — Liverpool Hope University (2 awards)
+12	https://www.lstmed.ac.uk/	Commonwealth Shared Scholarship — Liverpool School of Tropical Medicine (2 awards)
+13	https://www.lse.ac.uk/study-at-lse/Graduate/fees-and-funding/csss/	Commonwealth Shared Scholarship — London School of Economics and Political Science (4 awards)
+14	https://www.lshtm.ac.uk/study/fees-and-funding/funding-scholarships/masters-funding/	Commonwealth Shared Scholarship — London School of Hygiene and Tropical Medicine (6 awards)
+15	https://www.ncl.ac.uk/	Commonwealth Shared Scholarship — Newcastle University (6 awards)
+16	https://www.qub.ac.uk/Study/funding-scholarships/	Commonwealth Shared Scholarship — Queen's University Belfast (2 awards)
+17	https://www.rgu.ac.uk/	Commonwealth Shared Scholarship — Robert Gordon University (2 awards)
+18	https://www.rau.ac.uk/courses/postgraduate/msc-sustainable-agriculture-and-food-security/	Commonwealth Shared Scholarship — Royal Agricultural University (2 awards)
+19	https://www.rvc.ac.uk/study/postgraduate/	Commonwealth Shared Scholarship — Royal Veterinary College (2 awards)
+20	https://www.shu.ac.uk/funding/scholarships-and-bursaries/commonwealth-shared-scholarship-scheme/	Commonwealth Shared Scholarship — Sheffield Hallam University (2 awards)
+21	https://www.soas.ac.uk/	Commonwealth Shared Scholarship — SOAS, University of London (8 awards)
+22	https://www.ucl.ac.uk/scholarships/	Commonwealth Shared Scholarship — University College London (UCL) (8 awards)
+23	https://www.abdn.ac.uk/	Commonwealth Shared Scholarship — University of Aberdeen (4 awards)
+24	https://www.bath.ac.uk/	Commonwealth Shared Scholarship — University of Bath (3 awards)
+25	https://www.birmingham.ac.uk/funding/postgraduate/commonwealth-shared-scholarship-scheme/	Commonwealth Shared Scholarship — University of Birmingham (2 awards)
+26	https://www.bristol.ac.uk/	Commonwealth Shared Scholarship — University of Bristol (6 awards)
+27	https://www.cambridgetrust.org/	Commonwealth Shared Scholarship — University of Cambridge (8 awards)
+28	https://www.chester.ac.uk/	Commonwealth Shared Scholarship — University of Chester (4 awards)
+29	https://www.uea.ac.uk/study/postgraduate/	Commonwealth Shared Scholarship — University of East Anglia (2 awards)
+30	https://www.registryservices.ed.ac.uk/student-funding/postgraduate/international/other-funding/commonwealth-shared/	Commonwealth Shared Scholarship — University of Edinburgh (2 awards)
+31	https://www.exeter.ac.uk/	Commonwealth Shared Scholarship — University of Exeter (3 awards)
+32	https://www.gla.ac.uk/scholarships/	Commonwealth Shared Scholarship — University of Glasgow (5 awards)
+33	https://www.leeds.ac.uk/masters-additional-funding-support/doc/scholarships-charities-trusts/	Commonwealth Shared Scholarship — University of Leeds (4 awards)
+34	https://www.liverpool.ac.uk/	Commonwealth Shared Scholarship — University of Liverpool (2 awards)
+35	https://www.nottingham.ac.uk/pgstudy/funding/commonwealth-shared-scholarship/	Commonwealth Shared Scholarship — University of Nottingham (3 awards)
+36	https://www.ox.ac.uk/	Commonwealth Shared Scholarship — University of Oxford (8 awards)
+37	https://www.reading.ac.uk/ready-to-study/study/fees-and-funding/fees-and-funding-pg/commonwealth-shared-scholarships/	Commonwealth Shared Scholarship — University of Reading (2 awards)
+38	https://www.southampton.ac.uk/courses/funding/scholarships-awards/commonwealth-shared.page/	Commonwealth Shared Scholarship — University of Southampton (2 awards)
+39	https://www.st-andrews.ac.uk/study/fees-and-funding/scholarships/scholarships-catalogue/postgraduate-scholarships/commonwealth-shared-scholarship-scheme/	Commonwealth Shared Scholarship — University of St Andrews (2 awards)
+40	https://www.stir.ac.uk/scholarships/general/postgraduate/commonwealth-shared-scholarships/	Commonwealth Shared Scholarship — University of Stirling (2 awards)
+41	https://www.strath.ac.uk/studywithus/scholarships/commonwealthsharedscholarship/	Commonwealth Shared Scholarship — University of Strathclyde (6 awards)
+42	https://www.surrey.ac.uk/fees-and-funding/scholarships-and-bursaries/	Commonwealth Shared Scholarship — University of Surrey (2 awards)
+43	https://www.ids.ac.uk/	Commonwealth Shared Scholarship — University of Sussex (Institute of Development Studies) (2 awards)
+44	https://www.warwick.ac.uk/	Commonwealth Shared Scholarship — University of Warwick (6 awards)
+45	https://www.leedsbeckett.ac.uk/courses/responsible-tourism-management-msc/	Commonwealth Distance Learning — MSc Responsible Tourism Management (Leeds Beckett University)
+46	https://www.open.ac.uk/postgraduate/qualifications/f98/	Commonwealth Distance Learning — MA Online Teaching (Open University)
+47	https://www.london.ac.uk/study/courses/postgraduate/ma-human-rights/	Commonwealth Distance Learning — MA Human Rights (School of Advanced Study, University of London)
+48	https://www.leeds.ac.uk/homepage/275/online-masters-and-postgraduate-courses-in-disability-studies-rights-and-inclusion/	Commonwealth Distance Learning — MSc Disability Studies, Rights and Inclusion (University of Leeds)
+49	https://www.southampton.ac.uk/courses/gerontology-distance-learning-masters-msc/	Commonwealth Distance Learning — MSc Gerontology (University of Southampton)
+50	https://www.southampton.ac.uk/courses/global-ageing-policy-distance-learning-masters-msc/	Commonwealth Distance Learning — MSc Global Ageing and Policy (University of Southampton)
+51	https://www.cranfield.ac.uk/sustainabilitymsc/	Commonwealth Distance Learning — MSc Sustainability (Cranfield University)
+52	https://www.bangor.ac.uk/courses/postgraduate-taught/agroforestry-and-food-security-msc-msc/	Commonwealth Distance Learning — MSc Agroforestry and Food Security (Bangor University)
+53	https://www.bangor.ac.uk/courses/postgraduate-taught/tropical-forestry-msc-msc/	Commonwealth Distance Learning — MSc Tropical Forestry (Bangor University)
+54	https://www.hw.ac.uk/study/postgraduate/renewable-sustainable-energy-transition/	Commonwealth Distance Learning — MSc Renewable and Sustainable Energy Transition (Heriot-Watt University)
+55	https://www.hw.ac.uk/online/study/postgraduate/construction-project-management/	Commonwealth Distance Learning — MSc Construction Project Management (Heriot-Watt University)
+56	https://www.lboro.ac.uk/study/postgraduate/masters-degrees/a-z/water-engineering-development-distance/	Commonwealth Distance Learning — MSc Water Engineering for Development (Loughborough University)
+57	https://www.lboro.ac.uk/study/postgraduate/masters-degrees/a-z/water-management-development-distance-learning-pt/	Commonwealth Distance Learning — MSc Water Management for Development (Loughborough University)
+58	https://www.st-andrews.ac.uk/subjects/marine-biology/sustainable-aquaculture/	Commonwealth Distance Learning — MSc Sustainable Aquaculture (University of St Andrews)
+59	https://www.strath.ac.uk/courses/postgraduatetaught/hydrogeology/	Commonwealth Distance Learning — MSc Hydrogeology (University of Strathclyde)
+60	https://www.open.ac.uk/postgraduate/qualifications/f86/	Commonwealth Distance Learning — MSc Global Development (Open University)
+61	https://www.ox.ac.uk/admissions/graduate/courses/msc-international-human-rights-law/	Commonwealth Distance Learning — MSc International Human Rights Law (University of Oxford)
+62	https://www.port.ac.uk/study/courses/postgraduate-taught/ma-journalism/	Commonwealth Distance Learning — MA Journalism (University of Portsmouth)
+63	https://www.port.ac.uk/study/courses/postgraduate-taught/msc-economic-crime/	Commonwealth Distance Learning — MSc Economic Crime (University of Portsmouth)
+64	https://www.wbs.ac.uk/courses/masters/global-central-banking-and-financial-regulation/	Commonwealth Distance Learning — MSc Global Central Banking and Financial Regulation (University of Warwick)
+65	https://www.imperial.ac.uk/study/courses/postgraduate-taught/mph-online/	Commonwealth Distance Learning — MPH Public Health (Imperial College London)
+66	https://www.lancaster.ac.uk/study/postgraduate/postgraduate-courses/healthcare-leadership-msc/2025/	Commonwealth Distance Learning — MSc Healthcare Leadership (Lancaster University)
+67	https://www.lstmed.ac.uk/study/courses/msc-pgdip-pgcert-global-health/	Commonwealth Distance Learning — MSc Global Health (Liverpool School of Tropical Medicine)
+68	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&id=886/	Commonwealth Distance Learning — MPH Public Health (University of Edinburgh)
+69	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&edition=2025&id=820/	Commonwealth Distance Learning — MSc Clinical Management of Pain (University of Edinburgh)
+70	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&edition=2025&id=975/	Commonwealth Distance Learning — MSc Critical Care (University of Edinburgh)
+71	https://study.ed.ac.uk/programmes/postgraduate-taught/809-clinical-trials-online-learning/	Commonwealth Distance Learning — MSc Clinical Trials (University of Edinburgh)
+72	https://study.ed.ac.uk/programmes/postgraduate-taught/962-patient-safety-and-clinical-human-factors-online-learning/	Commonwealth Distance Learning — MSc Patient Safety and Clinical Human Factors (University of Edinburgh)
+73	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&id=1041/	Commonwealth Distance Learning — MSc Data Science for Health and Social Care (University of Edinburgh)
+74	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&edition=2025&id=1042/	Commonwealth Distance Learning — MSc Epidemiology (University of Edinburgh)
+75	https://postgraduate.degrees.ed.ac.uk/index.php?r=site/view&edition=2025&id=692/	Commonwealth Distance Learning — MSc Internal Medicine (University of Edinburgh)
+76	https://study.ed.ac.uk/programmes/postgraduate-taught/786-conservation-medicine-online-learning/	Commonwealth Distance Learning — MSc Conservation Medicine (University of Edinburgh)
+77	https://study.ed.ac.uk/programmes/postgraduate-taught/1134-data-driven-breeding-and-genetics-online-learning/	Commonwealth Distance Learning — MSc Data-Driven Breeding and Genetics (University of Edinburgh)
+78	https://study.ed.ac.uk/programmes/postgraduate-taught/241-international-animal-health-online-learning/	Commonwealth Distance Learning — MSc International Animal Health (University of Edinburgh)
+79	https://study.ed.ac.uk/programmes/postgraduate-taught/814-one-health-online-learning/	Commonwealth Distance Learning — MSc One Health (University of Edinburgh)
+80	https://online.liverpool.ac.uk/programmes/master-of-public-health/	Commonwealth Distance Learning — MPH Public Health (University of Liverpool)
+81	https://online.liverpool.ac.uk/programmes/master-of-public-health-online-global-health/	Commonwealth Distance Learning — MPH Public Health (Global Health) (University of Liverpool)
+82	https://online.liverpool.ac.uk/programmes/master-of-public-health-health-economics-and-policy/	Commonwealth Distance Learning — MPH Public Health (Health Economics and Policy) (University of Liverpool)
+83	https://online.liverpool.ac.uk/programmes/master-of-public-health-global-mental-health/	Commonwealth Distance Learning — MPH Public Health (Global Mental Health) (University of Liverpool)
+84	https://www.stir.ac.uk/courses/pg-taught/dementia-studies-online/	Commonwealth Distance Learning — MSc Dementia Studies (University of Stirling)
+85	https://www.strath.ac.uk/courses/postgraduatetaught/prostheticsorthoticsrehabilitationstudies/	Commonwealth Distance Learning — MSc Rehabilitation Studies (University of Strathclyde)
+86	https://www.open.ac.uk/postgraduate/qualifications/f65/	Commonwealth Distance Learning — MSc Environmental Management (Open University)
+87	https://study.ed.ac.uk/programmes/postgraduate-taught/899-climate-change-management-online-learning/	Commonwealth Distance Learning — MSc Climate Change Management (University of Edinburgh)
+88	https://study.ed.ac.uk/programmes/postgraduate-taught/954-applied-conservation-genetics-with-wildlife-forensics-online/	Commonwealth Distance Learning — MSc Applied Conservation Genetics with Wildlife Forensics (University of Edinburgh)
+89	https://study.ed.ac.uk/programmes/postgraduate-taught/646-biodiversity-wildlife-and-ecosystem-health-online-learning/	Commonwealth Distance Learning — MSc Biodiversity, Wildlife and Ecosystem Health (University of Edinburgh)
+90	https://study.ed.ac.uk/programmes/postgraduate-taught/959-global-food-security-and-nutrition-online-learning/	Commonwealth Distance Learning — MSc Global Food Security and Nutrition (University of Edinburgh)
+91	https://study.ed.ac.uk/programmes/postgraduate-taught/413-global-health-and-infectious-diseases-online-learning/	Commonwealth Distance Learning — MSc Global Health and Infectious Diseases (University of Edinburgh)
+92	https://study-online.sussex.ac.uk/online-courses/sustainable-development-msc/scholarship/	Commonwealth Distance Learning — MSc Sustainable Development (University of Sussex)
+93	https://www.york.ac.uk/study/postgraduate-taught/courses/msc-international-humanitarian-affairs-online/	Commonwealth Distance Learning — MSc International Humanitarian Affairs (University of York)
+94	https://education.gov.ng/federal-scholarships-board/	Commonwealth Master's Scholarship — Nigeria (via national nominator)
+95	https://www.education.go.ke/index.php/scholarships/	Commonwealth Master's Scholarship — Kenya (via national nominator)
+96	https://moe.gov.gh/category/scholarships/	Commonwealth Master's Scholarship — Ghana (via national nominator)
+97	https://www.moe.gov.et/en/foreign-study-programs/	Commonwealth Master's Scholarship — Ethiopia (via national nominator)
+98	https://www.dhet.gov.za/	Commonwealth Master's Scholarship — South Africa (via national nominator)
+99	https://www.education.go.ug/	Commonwealth Master's Scholarship — Uganda (via national nominator)
+100	https://www.moe.go.tz/	Commonwealth Master's Scholarship — Tanzania (via national nominator)
+101	https://www.moe.gov.zm/	Commonwealth Master's Scholarship — Zambia (via national nominator)
+102	https://www.education.gov.mw/	Commonwealth Master's Scholarship — Malawi (via national nominator)
+103	https://www.mineduc.gov.rw/	Commonwealth Master's Scholarship — Rwanda (via national nominator)
+104	https://education.gov.ng/federal-scholarships-board/	Commonwealth PhD Scholarship — Nigeria (via national nominator)
+105	https://www.education.go.ke/index.php/scholarships/	Commonwealth PhD Scholarship — Kenya (via national nominator)
+106	https://moe.gov.gh/category/scholarships/	Commonwealth PhD Scholarship — Ghana (via national nominator)
+107	https://www.moe.gov.et/en/foreign-study-programs/	Commonwealth PhD Scholarship — Ethiopia (via national nominator)
+108	https://www.dhet.gov.za/	Commonwealth PhD Scholarship — South Africa (via national nominator)
+109	https://www.education.go.ug/	Commonwealth PhD Scholarship — Uganda (via national nominator)
+110	https://www.moe.go.tz/	Commonwealth PhD Scholarship — Tanzania (via national nominator)
+111	https://www.moe.gov.zm/	Commonwealth PhD Scholarship — Zambia (via national nominator)
+112	https://www.education.gov.mw/	Commonwealth PhD Scholarship — Malawi (via national nominator)
+113	https://www.mineduc.gov.rw/	Commonwealth PhD Scholarship — Rwanda (via national nominator)
+114	https://cscuk.fcdo.gov.uk/apply/	Commonwealth Professional Fellowships
+115	https://www.chevening.org/apply/	Chevening Scholarship — Ethiopia
+116	https://www.chevening.org/apply/	Chevening Scholarship — Kenya
+117	https://www.chevening.org/apply/	Chevening Scholarship — Nigeria
+118	https://www.chevening.org/apply/	Chevening Scholarship — Ghana
+119	https://www.chevening.org/apply/	Chevening Scholarship — South Africa
+120	https://www.chevening.org/apply/	Chevening Scholarship — Uganda
+121	https://www.chevening.org/apply/	Chevening Scholarship — Tanzania
+122	https://www.chevening.org/apply/	Chevening Scholarship — Zambia
+123	https://www.chevening.org/apply/	Chevening Scholarship — Malawi
+124	https://www.chevening.org/apply/	Chevening Scholarship — Rwanda
+125	https://www.chevening.org/apply/	Chevening Scholarship — Sierra Leone
+126	https://www.chevening.org/apply/	Chevening Scholarship — Liberia
+127	https://www.chevening.org/apply/	Chevening Scholarship — Sudan
+128	https://www.chevening.org/apply/	Chevening Scholarship — Egypt
+129	https://www.chevening.org/apply/	Chevening Scholarship — Morocco
+130	https://www.chevening.org/fellowship/lse/	Chevening LSE Fellowship
+131	https://www.chevening.org/fellowship/india-cyber-security/	Chevening India Cyber Security Fellowship
+132	https://www.chevening.org/fellowship/health/	Chevening Healthcare, Health Policy, and Health Reform Fellowship
+133	https://foreign.fulbrightonline.org/apply	Fulbright Foreign Student Program
+134	https://foreign.fulbrightonline.org/about/types-of-awards/fulbright-foreign-language-teaching-assistant-flta-grants	Fulbright FLTA Program
+135	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/in-region-scholarships/	DAAD In-Country / In-Region Scholarships
+136	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/development-related-postgraduate-courses-epos/	DAAD EPOS — Development-Related Postgraduate Courses
+137	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/research-grants/	DAAD Research Grants
+138	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/study-scholarships/	DAAD Study Scholarships
+139	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/study-stipends/	DAAD Study Stipends
+140	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/graduate-schools/	DAAD Graduate Schools
+141	https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/undergraduate-scholarships/	DAAD Undergraduate Scholarships
+142	https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships	Australia Awards Scholarships
+143	https://www.australiaawards.gov.au/	Australia Awards — Africa and Indo-Pacific
+144	https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters	Erasmus Mundus Joint Masters
+145	https://www.eacea.ec.europa.eu/scholarships/emjmd-catalogue_en	Erasmus Mundus Catalogue
+146	https://mastercardfoundation.org/scholars/	Mastercard Foundation Scholars Program
+147	https://mastercardfdn.org/research/scholars-program/	Mastercard Foundation Scholars — Research
+148	https://www.mandelarhodes.org/apply/	Mandela Rhodes Scholarship
+149	https://ashinaga.org/scholarships/	Ashinaga Africa Initiative
+150	https://www.akdn.org/our-agencies/aga-khan-foundation/education	Aga Khan Foundation — Education Scholarships
+151	https://education.gov.ng/federal-scholarships-board/	Federal Scholarships Board (FSB) — Nigeria
+152	https://www.jkf.co.ke/index.php/scholarships	ELIMU & Jomo Kenyatta Foundation Scholarships — Kenya
+153	https://www.nsfas.org.za/content/how-it-works.html	NSFAS — South Africa
+154	https://moe.gov.gh/2024/01/15/government-of-ghana-scholarship-for-tertiary-education/	Government of Ghana Scholarship for Tertiary Education
+155	https://www.moe.gov.et/en/foreign-study-programs	Ethiopia Foreign Study Programmes

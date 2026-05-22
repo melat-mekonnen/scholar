@@ -2,9 +2,17 @@ import { apiFetchJson } from "@/lib/api"
 
 export type DegreeLevel = "high_school" | "bachelor" | "master" | "phd"
 
+export type RecordType = "scholarship" | "study_programme"
+
+export type DescriptionSection = {
+  heading: string
+  body: string
+}
+
 export type ScholarshipPublic = {
   id: string
   title: string
+  recordType?: RecordType
   organizationName?: string
   country: string
   degreeLevel: DegreeLevel
@@ -13,8 +21,11 @@ export type ScholarshipPublic = {
   deadline?: string
   startDate?: string
   endDate?: string
+  isRolling?: boolean
   amount?: string
   description?: string
+  descriptionEn?: string
+  descriptionAm?: string
   applicationUrl?: string
   createdAt?: string
   updatedAt?: string
@@ -35,7 +46,31 @@ function str(v: unknown): string | undefined {
 
 function bool(v: unknown): boolean | undefined {
   if (typeof v === "boolean") return v
+  if (v === 1 || v === "1" || v === "true") return true
+  if (v === 0 || v === "0" || v === "false") return false
   return undefined
+}
+
+/** Deadline badge/label for cards and detail (rolling vs fixed date). */
+export function formatScholarshipDeadlineLabel(s: {
+  deadline?: string
+  endDate?: string
+  isRolling?: boolean
+}): string | null {
+  if (s.isRolling && !s.deadline && !s.endDate) return "Open / rolling"
+  if (s.endDate) return s.endDate
+  if (s.deadline) return s.deadline
+  if (s.isRolling) return "Open / rolling"
+  return null
+}
+
+export function hasScholarshipDateInfo(s: {
+  deadline?: string
+  endDate?: string
+  startDate?: string
+  isRolling?: boolean
+}): boolean {
+  return Boolean(s.startDate || s.endDate || s.deadline || s.isRolling)
 }
 
 function num(v: unknown): number | undefined {
@@ -47,9 +82,15 @@ function num(v: unknown): number | undefined {
 export function normalizeScholarship(raw: unknown): ScholarshipPublic {
   const r = isRecord(raw) ? raw : {}
   const dlRaw = r.degreeLevel ?? r.degree_level
+  const dlNormalized =
+    typeof dlRaw === "string"
+      ? dlRaw.trim().toLowerCase() === "masters"
+        ? "master"
+        : dlRaw.trim().toLowerCase()
+      : ""
   const dl =
-    typeof dlRaw === "string" && ["high_school", "bachelor", "master", "phd"].includes(dlRaw)
-      ? (dlRaw as DegreeLevel)
+    ["high_school", "bachelor", "master", "phd"].includes(dlNormalized)
+      ? (dlNormalized as DegreeLevel)
       : "bachelor"
 
   const url =
@@ -65,9 +106,14 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
   const bookmarkCount =
     num(r.bookmarkCount) ?? num(r.bookmark_count) ?? undefined
 
+  const recordTypeRaw = r.recordType ?? r.record_type
+  const recordType =
+    recordTypeRaw === "study_programme" ? ("study_programme" as RecordType) : ("scholarship" as RecordType)
+
   return {
     id: String(r.id ?? ""),
     title: String(r.title ?? ""),
+    recordType,
     organizationName: str(r.organizationName) ?? str(r.organization_name),
     country: String(r.country ?? ""),
     degreeLevel: dl,
@@ -83,10 +129,12 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
       str(r.endDate) ??
       str(r.end_date) ??
       str(r.applicationEndDate) ??
-      str(r.application_end_date) ??
-      str(r.deadline),
+      str(r.application_end_date),
+    isRolling: bool(r.isRolling) ?? bool(r.is_rolling),
     amount: str(r.amount),
     description: str(r.description),
+    descriptionEn: str(r.descriptionEn) ?? str(r.description_en),
+    descriptionAm: str(r.descriptionAm) ?? str(r.description_am),
     applicationUrl: url,
     createdAt: str(r.createdAt) ?? str(r.created_at),
     updatedAt: str(r.updatedAt) ?? str(r.updated_at),
@@ -102,40 +150,74 @@ export function getApplicationUrl(s: ScholarshipPublic): string | undefined {
   return `https://${u}`
 }
 
+/** Parse ## Section markdown from refined descriptions. */
+export function parseDescriptionSections(description?: string): DescriptionSection[] {
+  const text = String(description || "").trim()
+  if (!text) return []
+
+  const parts = text.split(/^##\s+/m).filter(Boolean)
+  if (parts.length <= 1 && !text.startsWith("##")) {
+    return [{ heading: "About", body: text }]
+  }
+
+  return parts.map((block) => {
+    const nl = block.indexOf("\n")
+    const heading = nl >= 0 ? block.slice(0, nl).trim() : block.trim()
+    const body = nl >= 0 ? block.slice(nl + 1).trim() : ""
+    return { heading, body }
+  })
+}
+
+export function isStudyProgramme(s: Pick<ScholarshipPublic, "recordType" | "fundingType">): boolean {
+  return s.recordType === "study_programme" || s.fundingType === "not_funded"
+}
+
+export function fundingTypeLabel(fundingType?: string): string {
+  if (!fundingType) return "—"
+  if (fundingType === "not_funded") return "Fees apply"
+  return fundingType.replace(/_/g, " ")
+}
+
+export type OpenScholarshipApplicationResult = "opened" | "no_url" | "blocked"
+
+/** Open URL in a new tab; anchor fallback when pop-ups are blocked. */
+function openUrlInNewTab(url: string): boolean {
+  const opened = window.open(url, "_blank", "noopener,noreferrer")
+  if (opened) return true
+
+  try {
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.target = "_blank"
+    anchor.rel = "noopener noreferrer"
+    anchor.click()
+    return true
+  } catch {
+    return false
+  }
+}
+
 /**
  * Opens the official application URL in a new tab.
  * If the list payload has no URL, tries GET `/api/scholarships/:id`.
  */
 export async function openScholarshipApplication(
   s: ScholarshipPublic,
-): Promise<boolean> {
-  const popup = window.open("", "_blank", "noopener,noreferrer")
-  if (!popup) return false
+): Promise<OpenScholarshipApplicationResult> {
+  let url = getApplicationUrl(s)
 
-  const direct = getApplicationUrl(s)
-  if (direct) {
-    popup.location.href = direct
-    return true
+  if (!url && s.id) {
+    const { res, data } = await apiFetchJson<unknown>(`/api/scholarships/${s.id}`, {
+      method: "GET",
+      auth: false,
+    })
+    if (res.ok && data) {
+      url = getApplicationUrl(normalizeScholarship(data))
+    }
   }
-  if (!s.id) {
-    popup.close()
-    return false
-  }
-  const { res, data } = await apiFetchJson<unknown>(`/api/scholarships/${s.id}`, {
-    method: "GET",
-    auth: false,
-  })
-  if (!res.ok || !data) {
-    popup.close()
-    return false
-  }
-  const url = getApplicationUrl(normalizeScholarship(data))
-  if (!url) {
-    popup.close()
-    return false
-  }
-  popup.location.href = url
-  return true
+
+  if (!url) return "no_url"
+  return openUrlInNewTab(url) ? "opened" : "blocked"
 }
 
 export function mergeScholarshipDetail(
@@ -155,6 +237,7 @@ export function mergeScholarshipDetail(
     deadline: detail.deadline ?? list.deadline,
     startDate: detail.startDate ?? list.startDate,
     endDate: detail.endDate ?? list.endDate,
+    isRolling: detail.isRolling ?? list.isRolling,
     amount: detail.amount ?? list.amount,
     isBookmarked: detail.isBookmarked ?? list.isBookmarked,
     bookmarkCount: detail.bookmarkCount ?? list.bookmarkCount,

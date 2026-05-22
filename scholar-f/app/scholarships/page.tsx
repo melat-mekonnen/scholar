@@ -15,15 +15,17 @@ import { StudentPortalInlineAside } from "@/components/student-portal/student-po
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { apiFetchJson } from "@/lib/api"
 import {
-  getApplicationUrl,
+  formatScholarshipDeadlineLabel,
+  fundingTypeLabel,
+  isStudyProgramme,
   normalizeScholarship,
-  openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { getMyApplications } from "@/lib/applications"
-import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { clearToken } from "@/lib/auth"
+import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -121,6 +123,7 @@ function buildParams(options: {
 
 export default function ScholarshipsPage() {
   const router = useRouter()
+  const { t } = useStudentI18n()
   const { toast } = useToast()
 
   const [filters, setFilters] = useState<FiltersResponse | null>(null)
@@ -658,18 +661,30 @@ export default function ScholarshipsPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">Verified</Badge>
+                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                          {isStudyProgramme(s) ? t("Study programme") : t("Verified")}
+                        </Badge>
                         {appliedScholarshipIds.has(s.id) && (
                           <Badge className="bg-teal-600 text-white">Applied</Badge>
                         )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
                         )}
-                        {s.fundingType && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.fundingType}</Badge>}
+                        {s.fundingType && (
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                            {t(fundingTypeLabel(s.fundingType))}
+                          </Badge>
+                        )}
                         {s.amount && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.amount}</Badge>}
                         {s.startDate && <Badge variant="outline" className="border-emerald-200 text-emerald-800">Start: {s.startDate}</Badge>}
-                        {(s.endDate || s.deadline) && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">End: {s.endDate || s.deadline}</Badge>
+                        {formatScholarshipDeadlineLabel(s) && (
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                            {s.isRolling && (s.deadline || s.endDate)
+                              ? `Deadline: ${formatScholarshipDeadlineLabel(s)}`
+                              : s.isRolling
+                                ? formatScholarshipDeadlineLabel(s)!
+                                : `End: ${formatScholarshipDeadlineLabel(s)}`}
+                          </Badge>
                         )}
                       </div>
 
@@ -682,22 +697,13 @@ export default function ScholarshipsPage() {
                         >
                           View
                         </Button>
-                        <Button
-                          size="sm"
+                        <ScholarshipApplyButton
+                          scholarship={s}
                           className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
-                          disabled={!getApplicationUrl(s)}
-                          onClick={() =>
-                            void applyWithReturnConfirmation({
-                              scholarship: s,
-                              toast,
-                              onUnauthorized: () => unauthorizedHandler(router),
-                              onTracked: (id) =>
-                                setAppliedScholarshipIds((prev) => new Set(prev).add(id)),
-                            })
+                          onTracked={(id) =>
+                            setAppliedScholarshipIds((prev) => new Set(prev).add(id))
                           }
-                        >
-                          {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
-                        </Button>
+                        />
                       </div>
                     </CardContent>
                   </Card>
