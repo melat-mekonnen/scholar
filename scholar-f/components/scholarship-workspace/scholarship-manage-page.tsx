@@ -3,12 +3,13 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { CirclePlus, Filter, Search, Sparkles } from "lucide-react"
+import { CirclePlus, Filter, ListChecks, Search, Sparkles } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
 import { useScholarshipWorkspaceGate } from "@/hooks/use-scholarship-workspace-gate"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -60,15 +61,28 @@ type Props = {
 }
 
 function statusBadge(status: ScholarshipRow["status"]) {
-  if (status === "verified") return <Badge className="bg-green-600 text-white">verified</Badge>
-  if (status === "pending") return <Badge className="bg-yellow-600 text-white">pending</Badge>
+  if (status === "verified") {
+    return (
+      <Badge className="border-0 bg-emerald-600 text-white hover:bg-emerald-600">verified</Badge>
+    )
+  }
+  if (status === "pending") {
+    return (
+      <Badge className="border border-teal-200 bg-teal-50 font-medium text-teal-800 hover:bg-teal-50">pending</Badge>
+    )
+  }
   if (status === "rejected") return <Badge variant="destructive">rejected</Badge>
   if (status === "expired") return <Badge variant="secondary">expired</Badge>
-  return <Badge variant="outline">draft</Badge>
+  return (
+    <Badge variant="outline" className="border-slate-200 text-slate-700">
+      draft
+    </Badge>
+  )
 }
 
 export function ScholarshipManagePage({ workspace }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
+  const isManager = workspace === "manager"
   const gate = useScholarshipWorkspaceGate(workspace)
   const router = useRouter()
 
@@ -218,37 +232,48 @@ export function ScholarshipManagePage({ workspace }: Props) {
     return (
       <main className={cfg.standaloneSurfaceClass}>
         <div className="mx-auto max-w-6xl px-4 py-8">
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-slate-600">Loading…</p>
         </div>
       </main>
     )
   }
 
-  return (
-    <main className={cfg.standaloneSurfaceClass}>
-      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
 
-        <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-6 text-white shadow-sm">
+  return (
+    <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
+      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-6 shadow-sm shadow-emerald-900/5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">Manage scholarships</h1>
-              <p className="text-sm text-blue-50">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">
+                <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
+                  <ListChecks className="h-6 w-6" />
+                </div>
+                <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">Manage scholarships</h1>
+              </div>
+              <p className="max-w-xl text-sm text-slate-600">
                 {workspace === "owner"
                   ? "Review and manage all scholarships across managers."
-                  : "Update your scholarships. Manager updates go back to pending review."}
+                  : "Edit listings you publish. Substantive changes return the listing to pending review."}
               </p>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs text-blue-50">
-                <Sparkles className="h-3.5 w-3.5" />
-                Organized workflow for scholarship lifecycle
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                {isManager ? "Search, filter, and keep deadlines accurate" : "Organized workflow for scholarship lifecycle"}
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-              <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
-            </Button>
-              <Button asChild className="bg-white text-blue-700 hover:bg-blue-50">
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
+              <Button
+                variant="outline"
+                asChild
+                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+              >
+                <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
+              </Button>
+              <Button
+                asChild
+                className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-900/20 hover:from-emerald-700 hover:to-teal-700"
+              >
                 <Link href={cfg.newScholarshipPath}>
                   <CirclePlus className="mr-2 h-4 w-4" />
                   New scholarship
@@ -258,28 +283,32 @@ export function ScholarshipManagePage({ workspace }: Props) {
           </div>
         </header>
 
-        {error ? <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p> : null}
+        {error ? (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
+        ) : null}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={cardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Total in view</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{summary.total}</p>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={cardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Pending</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-amber-600">{summary.pending}</p>
+              <p className="mt-1 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-3xl font-semibold tracking-tight text-transparent">
+                {summary.pending}
+              </p>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={cardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Verified</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">{summary.verified}</p>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
+          <Card className={cardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Rejected</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-rose-600">{summary.rejected}</p>
@@ -287,25 +316,25 @@ export function ScholarshipManagePage({ workspace }: Props) {
           </Card>
         </section>
 
-        <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-          <CardHeader className="space-y-4">
+        <Card className={cardShell}>
+          <CardHeader className="space-y-4 border-b border-emerald-100/80 pb-6">
             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base">Scholarship list</CardTitle>
+              <CardTitle className="text-base text-slate-900">Scholarship list</CardTitle>
             </div>
             <div className="flex flex-wrap gap-2">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
                 <Input
                   placeholder="Search title..."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  className="h-10 w-64 rounded-xl border-slate-200 pl-9"
+                  className="h-10 w-64 rounded-xl border-emerald-100/90 pl-9 shadow-sm focus-visible:ring-emerald-500"
                 />
               </div>
               <div className="relative">
-                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
                 <select
-                  className="h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm text-slate-700 shadow-sm"
+                  className="h-10 rounded-xl border border-emerald-100/90 bg-white pl-9 pr-8 text-sm text-slate-700 shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -319,28 +348,31 @@ export function ScholarshipManagePage({ workspace }: Props) {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <Table className="overflow-hidden rounded-xl border border-slate-200">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Deadline</TableHead>
-                  <TableHead>Rejection</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+          <CardContent className="pt-2">
+            <Table className="overflow-hidden rounded-xl border border-emerald-100/80">
+              <TableHeader className="bg-emerald-50/50 [&_tr]:border-emerald-100/80">
+                <TableRow className="border-emerald-100/80 hover:bg-transparent">
+                  <TableHead className="text-emerald-900/90">Title</TableHead>
+                  <TableHead className="text-emerald-900/90">Organization</TableHead>
+                  <TableHead className="text-emerald-900/90">Status</TableHead>
+                  <TableHead className="text-emerald-900/90">Deadline</TableHead>
+                  <TableHead className="text-emerald-900/90">Rejection</TableHead>
+                  <TableHead className="text-right text-emerald-900/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-sm text-muted-foreground">
+                    <TableCell colSpan={6} className="text-sm text-slate-600">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : visible.length ? (
                   visible.map((s) => (
-                    <TableRow key={s.id} className="hover:bg-slate-50/70">
+                    <TableRow
+                      key={s.id}
+                      className="border-emerald-100/60 hover:bg-emerald-50/40"
+                    >
                       <TableCell className="font-medium text-slate-900">{s.title}</TableCell>
                       <TableCell>{s.organizationName || "-"}</TableCell>
                       <TableCell>{statusBadge(s.status)}</TableCell>
@@ -349,7 +381,12 @@ export function ScholarshipManagePage({ workspace }: Props) {
                         {s.rejectionReason || "-"}
                       </TableCell>
                       <TableCell className="space-x-1 text-right">
-                        <Button size="sm" variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => void openEdit(s.id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          onClick={() => void openEdit(s.id)}
+                        >
                           Edit
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => void deleteScholarship(s.id)}>
@@ -360,7 +397,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-sm text-muted-foreground">
+                    <TableCell colSpan={6} className="text-sm text-slate-600">
                       No scholarships found.
                     </TableCell>
                   </TableRow>
@@ -371,78 +408,86 @@ export function ScholarshipManagePage({ workspace }: Props) {
         </Card>
 
         {editing ? (
-          <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">Edit scholarship</CardTitle>
+          <Card className={cardShell}>
+            <CardHeader className="border-b border-emerald-100/80">
+              <CardTitle className="text-base text-slate-900">Edit scholarship</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 pt-2">
               <div className="grid gap-3 md:grid-cols-2">
                 <Input
                   placeholder="Title"
                   value={editForm.title}
                   onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Organization"
                   value={editForm.organizationName}
                   onChange={(e) => setEditForm((p) => ({ ...p, organizationName: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Country"
                   value={editForm.country}
                   onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Degree level"
                   value={editForm.degreeLevel}
                   onChange={(e) => setEditForm((p) => ({ ...p, degreeLevel: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Field of study"
                   value={editForm.fieldOfStudy}
                   onChange={(e) => setEditForm((p) => ({ ...p, fieldOfStudy: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Funding type"
                   value={editForm.fundingType}
                   onChange={(e) => setEditForm((p) => ({ ...p, fundingType: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   type="date"
                   value={editForm.deadline}
                   onChange={(e) => setEditForm((p) => ({ ...p, deadline: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Amount"
                   value={editForm.amount}
                   onChange={(e) => setEditForm((p) => ({ ...p, amount: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
                 />
                 <Input
                   placeholder="Application URL"
                   value={editForm.applicationUrl}
                   onChange={(e) => setEditForm((p) => ({ ...p, applicationUrl: e.target.value }))}
-                  className="h-11 rounded-xl border-slate-200 md:col-span-2"
+                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500 md:col-span-2"
                 />
                 <Textarea
                   placeholder="Description"
                   value={editForm.description}
                   onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
-                  className="min-h-[120px] rounded-xl border-slate-200 md:col-span-2"
+                  className="min-h-[120px] rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500 md:col-span-2"
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" className="border-slate-300 bg-white hover:bg-slate-50" onClick={() => setEditing(null)}>
+                <Button
+                  variant="outline"
+                  className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  onClick={() => setEditing(null)}
+                >
                   Cancel
                 </Button>
-                <Button onClick={() => void saveEdit()} disabled={saving} className="bg-emerald-600 text-white hover:bg-emerald-700">
+                <Button
+                  onClick={() => void saveEdit()}
+                  disabled={saving}
+                  className="bg-emerald-600 text-white shadow-sm shadow-emerald-900/15 ring-1 ring-emerald-500/25 hover:bg-emerald-700"
+                >
                   {saving ? "Saving..." : "Save"}
                 </Button>
               </div>

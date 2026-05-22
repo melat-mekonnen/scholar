@@ -46,11 +46,11 @@ export function ProfileAvatarLink({ className }: { className?: string }) {
       aria-label="Go to profile"
       className={
         className ??
-        "rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        "rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       }
     >
       <Avatar className="transition-transform hover:scale-[1.02]">
-        <AvatarFallback className="bg-gradient-to-br from-blue-50 to-emerald-50 text-blue-700 ring-1 ring-blue-100">
+        <AvatarFallback className="bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-800 ring-1 ring-emerald-200/80">
           {initialsFromName(me?.fullName, me?.email)}
         </AvatarFallback>
       </Avatar>

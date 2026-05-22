@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
-  User,
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
@@ -27,6 +26,7 @@ import {
   getScholarshipWorkspaceConfig,
   type ScholarshipWorkspace,
 } from "@/lib/scholarship-workspace"
+import { cn } from "@/lib/utils"
 
 type DashboardResponse = {
   statistics: {
@@ -47,6 +47,8 @@ type Props = {
 
 export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props) {
   const cfg = getScholarshipWorkspaceConfig(workspace)
+  const isManager = workspace === "manager"
+  const isOwner = workspace === "owner"
   const router = useRouter()
   const gate = useScholarshipWorkspaceGate(workspace)
   const [loading, setLoading] = useState(true)
@@ -84,32 +86,40 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
 
   if (gate !== "ready") {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      <div className="min-h-screen bg-slate-100 p-8">
+        <p className="text-sm text-slate-600">Loading…</p>
       </div>
     )
   }
 
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+  const listWell = "rounded-xl border border-emerald-100/80 bg-emerald-50/30 p-3"
+  const statRow =
+    "flex items-center justify-between rounded-lg border border-emerald-100/60 bg-white px-3 py-2"
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
       <div className="flex">
         {showSidebar ? (
-          <aside
-            className={`hidden md:flex w-72 flex-col border-r ${cfg.shellClassName}`}
-          >
-            <div className="border-b px-6 py-5">
+          <aside className={cn("hidden w-72 shrink-0 flex-col border-r md:flex md:min-h-screen", cfg.shellClassName)}>
+            <div className="border-b border-emerald-100/80 px-6 py-5">
               <div className="mb-4 flex items-center gap-3">
                 <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
               </div>
+              {isManager ? (
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Manager portal</p>
+              ) : isOwner ? (
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Owner portal</p>
+              ) : null}
               <div className="leading-tight">
-                <span className="block font-semibold text-emerald-600">
+                <span className="block font-semibold text-slate-900">
                   {workspace === "manager" ? "University Representative" : cfg.shellTitle}
                 </span>
                 <span className="text-xs text-slate-500">{cfg.shellSubtitle}</span>
               </div>
             </div>
 
-            <nav className="p-4 space-y-1.5 text-sm">
+            <nav className="flex flex-1 flex-col space-y-1 p-6 text-sm">
               <Link
                 href={cfg.basePath}
                 className={`flex items-center gap-2 w-full rounded-xl px-3 py-2.5 font-medium ${cfg.navActiveClass}`}
@@ -156,16 +166,17 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
               ) : null}
             </nav>
 
-            <div className="mt-auto border-t p-4">
+            <div className="mt-auto border-t border-emerald-100/80 px-4 pb-3 pt-2">
               <button
-                className="group flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                type="button"
+                className="group flex w-full items-center justify-between rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-emerald-800 shadow-sm transition-colors hover:bg-emerald-50"
                 onClick={() => {
                   clearToken()
                   router.push("/signin")
                 }}
               >
                 <span className="flex items-center gap-2.5">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors group-hover:bg-rose-100 group-hover:text-rose-700">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 transition-colors group-hover:bg-emerald-100">
                     <LogOut className="h-4 w-4" />
                   </span>
                   <span className="text-sm font-medium">Sign out</span>
@@ -175,31 +186,35 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
           </aside>
         ) : null}
 
-        <div className="relative flex-1">
-          <div className="pointer-events-none absolute -left-16 top-24 h-52 w-52 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-52 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-          <main className="p-6 space-y-6">
-            <header className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-600 to-emerald-600 px-6 py-7 text-white shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-semibold tracking-tight">{cfg.dashboardHeading}</h1>
-                  <p className="mt-1 text-sm text-blue-50">{cfg.dashboardTagline}</p>
+        <div className="relative min-w-0 flex-1">
+          {!isManager ? (
+            <>
+              <div className="pointer-events-none absolute -left-16 top-24 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 top-52 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
+            </>
+          ) : null}
+          <main className="space-y-6 p-6">
+            <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+              <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
+                    <LayoutDashboard className="h-6 w-6" />
+                  </div>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.dashboardHeading}</h1>
                 </div>
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
-                  <User className="h-5 w-5" />
-                </div>
+                <p className="text-sm text-slate-600">{cfg.dashboardTagline}</p>
               </div>
             </header>
 
             {error ? (
-              <p className="text-sm text-destructive bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
             ) : null}
 
             <section className="grid gap-4 md:grid-cols-4">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                    <CardContent className="p-4 space-y-2">
+                  <Card key={i} className={cardShell}>
+                    <CardContent className="space-y-2 p-4">
                       <Skeleton className="h-4 w-28" />
                       <Skeleton className="h-8 w-16" />
                     </CardContent>
@@ -207,31 +222,31 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
                 ))
               ) : (
                 <>
-                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 opacity-80" />
-                    <CardContent className="p-4">
-                      <p className="text-xs text-slate-500">Total Scholarships Posted</p>
+                  <Card className={cn("relative overflow-hidden", cardShell)}>
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+                    <CardContent className="p-4 pt-5">
+                      <p className="text-xs font-medium text-slate-500">Total Scholarships Posted</p>
                       <p className="text-3xl font-semibold tracking-tight text-slate-900">{stats?.totalScholarshipsPosted ?? 0}</p>
                     </CardContent>
                   </Card>
-                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-80" />
-                    <CardContent className="p-4">
-                      <p className="text-xs text-slate-500">Total Applications Received</p>
+                  <Card className={cn("relative overflow-hidden", cardShell)}>
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-90" />
+                    <CardContent className="p-4 pt-5">
+                      <p className="text-xs font-medium text-slate-500">Total Applications Received</p>
                       <p className="text-3xl font-semibold tracking-tight text-slate-900">{stats?.totalApplicationsReceived ?? 0}</p>
                     </CardContent>
                   </Card>
-                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-80" />
-                    <CardContent className="p-4">
-                      <p className="text-xs text-slate-500">Verified Scholarships</p>
+                  <Card className={cn("relative overflow-hidden", cardShell)}>
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-90" />
+                    <CardContent className="p-4 pt-5">
+                      <p className="text-xs font-medium text-slate-500">Verified Scholarships</p>
                       <p className="text-3xl font-semibold tracking-tight text-slate-900">{stats?.scholarshipsByStatus.verified ?? 0}</p>
                     </CardContent>
                   </Card>
-                  <Card className="relative overflow-hidden rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-500 to-slate-700 opacity-80" />
-                    <CardContent className="p-4">
-                      <p className="text-xs text-slate-500">Pending Scholarships</p>
+                  <Card className={cn("relative overflow-hidden", cardShell)}>
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+                    <CardContent className="p-4 pt-5">
+                      <p className="text-xs font-medium text-slate-500">Pending Scholarships</p>
                       <p className="text-3xl font-semibold tracking-tight text-slate-900">{stats?.scholarshipsByStatus.pending ?? 0}</p>
                     </CardContent>
                   </Card>
@@ -240,96 +255,96 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-base">Upcoming Deadlines</CardTitle>
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+              <Card className={cardShell}>
+                <CardHeader className="flex flex-row items-center justify-between border-b border-emerald-100/70 pb-3">
+                  <CardTitle className="text-base text-slate-900">Upcoming Deadlines</CardTitle>
+                  <CalendarClock className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-4">
                   {loading ? (
                     <Skeleton className="h-16 w-full" />
                   ) : topDeadlines.length ? (
                     topDeadlines.map((d) => (
-                      <div key={d.id} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                      <div key={d.id} className={listWell}>
                         <p className="font-medium text-slate-900">{d.title}</p>
                         <p className="text-sm text-slate-500">
                           Deadline: {new Date(d.deadline).toLocaleDateString()}
                         </p>
-                        <Badge variant="outline" className="mt-2">
+                        <Badge variant="outline" className="mt-2 border-emerald-200 text-emerald-800">
                           {d.status}
                         </Badge>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No upcoming deadlines.</p>
+                    <p className="text-sm text-slate-500">No upcoming deadlines.</p>
                   )}
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-base">Most Viewed Scholarships</CardTitle>
-                  <Eye className="h-4 w-4 text-muted-foreground" />
+              <Card className={cardShell}>
+                <CardHeader className="flex flex-row items-center justify-between border-b border-emerald-100/70 pb-3">
+                  <CardTitle className="text-base text-slate-900">Most Viewed Scholarships</CardTitle>
+                  <Eye className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-4">
                   {loading ? (
                     <Skeleton className="h-16 w-full" />
                   ) : dashboard?.mostViewedScholarships?.length ? (
                     dashboard.mostViewedScholarships.map((s) => (
-                      <div key={s.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                      <div key={s.id} className={cn("flex items-center justify-between", listWell)}>
                         <p className="font-medium text-slate-900">{s.title}</p>
                         <span className="text-sm text-slate-500">{s.views} views</span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No scholarship views yet.</p>
+                    <p className="text-sm text-slate-500">No scholarship views yet.</p>
                   )}
                 </CardContent>
               </Card>
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-base">Applications by Status</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <Card className={cardShell}>
+                <CardHeader className="flex flex-row items-center justify-between border-b border-emerald-100/70 pb-3">
+                  <CardTitle className="text-base text-slate-900">Applications by Status</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                <CardContent className="space-y-2 pt-4 text-sm">
+                  <div className={statRow}>
                     <span className="text-slate-600">Pending</span>
                     <span className="font-semibold text-slate-900">{stats?.applicationsByStatus.pending ?? 0}</span>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <div className={statRow}>
                     <span className="text-slate-600">Submitted</span>
                     <span className="font-semibold text-slate-900">{stats?.applicationsByStatus.submitted ?? 0}</span>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <div className={statRow}>
                     <span className="text-slate-600">Accepted</span>
                     <span className="font-semibold text-slate-900">{stats?.applicationsByStatus.accepted ?? 0}</span>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <div className={statRow}>
                     <span className="text-slate-600">Rejected</span>
                     <span className="font-semibold text-slate-900">{stats?.applicationsByStatus.rejected ?? 0}</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border-blue-100/80 bg-white shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-base">Recent Activity</CardTitle>
+              <Card className={cardShell}>
+                <CardHeader className="border-b border-emerald-100/70 pb-3">
+                  <CardTitle className="text-base text-slate-900">Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-4">
                   {loading ? (
                     <Skeleton className="h-16 w-full" />
                   ) : dashboard?.recentActivity?.length ? (
                     dashboard.recentActivity.map((a, idx) => (
-                      <div key={`${a.type}-${idx}`} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                        <p className="text-sm">{a.message}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{new Date(a.at).toLocaleString()}</p>
+                      <div key={`${a.type}-${idx}`} className={listWell}>
+                        <p className="text-sm text-slate-700">{a.message}</p>
+                        <p className="mt-1 text-xs text-slate-500">{new Date(a.at).toLocaleString()}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No recent activity.</p>
+                    <p className="text-sm text-slate-500">No recent activity.</p>
                   )}
                 </CardContent>
               </Card>

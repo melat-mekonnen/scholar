@@ -1,41 +1,35 @@
 "use client"
 
+import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import {
   Bell,
   FileText,
   LayoutDashboard,
   ListChecks,
-  LogOut,
   Menu,
+  PlusCircle,
   ShieldCheck,
   Users,
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
-import { clearToken, logoutFromServer } from "@/lib/auth"
-import { cn } from "@/lib/utils"
+import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
-type NavItem = {
-  href: string
-  label: string
-  icon: ReactNode
-}
-
-const NAV: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { href: "/admin/scholarships/pending", label: "Scholarships", icon: <ShieldCheck className="h-4 w-4" /> },
-  { href: "/admin/scholarships/new", label: "New scholarship", icon: <ShieldCheck className="h-4 w-4" /> },
-  { href: "/admin/users", label: "Users", icon: <Users className="h-4 w-4" /> },
-  { href: "/admin/audit-logs", label: "Audit logs", icon: <ListChecks className="h-4 w-4" /> },
-  { href: "/admin/documents", label: "Documents", icon: <FileText className="h-4 w-4" /> },
-  { href: "/admin/notifications", label: "Notifications", icon: <Bell className="h-4 w-4" /> },
+const NAV: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/scholarships/pending", label: "Scholarships", icon: ShieldCheck },
+  { href: "/admin/scholarships/new", label: "New scholarship", icon: PlusCircle },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/audit-logs", label: "Audit logs", icon: ListChecks },
+  { href: "/admin/documents", label: "Documents", icon: FileText },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
 ]
 
 type NotificationsResponse = { notifications: Array<{ isRead: boolean }> }
@@ -55,28 +49,42 @@ function NavLinks({
   onNavigate?: () => void
 }) {
   return (
-    <nav className="space-y-1 text-sm">
+    <nav className="flex flex-col gap-0.5">
       {NAV.map((item) => {
+        const Icon = item.icon
         const active = isActive(pathname, item.href)
+        const showUnread = item.href === "/admin/notifications" && unreadCount > 0
+
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={cn(
-              "flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 font-medium",
-              active ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100 dark:hover:bg-muted/50",
-            )}
+            className={
+              active
+                ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
+                : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
+            }
           >
-            <span className="inline-flex items-center gap-2">
-              {item.icon}
-              {item.label}
+            <span
+              className={
+                active
+                  ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
+                  : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+              }
+            >
+              <Icon className="h-4 w-4" />
             </span>
-            {item.href === "/admin/notifications" && unreadCount > 0 ? (
-              <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            {showUnread ? (
+              <Badge variant="destructive" className="h-5 shrink-0 px-1.5 text-[10px]">
                 {unreadCount}
               </Badge>
-            ) : null}
+            ) : active ? (
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
+            ) : (
+              <span className="w-1.5 shrink-0" aria-hidden />
+            )}
           </Link>
         )
       })}
@@ -86,7 +94,6 @@ function NavLinks({
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
@@ -105,52 +112,34 @@ export function AdminShell({ children }: { children: ReactNode }) {
     }
   }, [pathname])
 
-  function signOut() {
-    void logoutFromServer()
-    clearToken()
-    router.push("/signin")
-  }
-
   const pageLabel = NAV.find((n) => isActive(pathname, n.href))?.label ?? "Admin"
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <aside className="hidden w-64 shrink-0 flex-col border-r bg-white md:flex dark:bg-card">
-        <div className="border-b px-6 py-4">
-          <div className="mb-4">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-9 w-auto" />
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+      <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col p-6">
+          <div className="mb-8 flex items-center gap-3">
+            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <LayoutDashboard className="h-5 w-5" />
-            </div>
-            <div className="leading-tight">
-              <span className="block font-semibold">Admin workspace</span>
-              <span className="text-xs text-muted-foreground">Platform control center</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-1 flex-col p-4">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Admin Portal</p>
+
           <NavLinks pathname={pathname} unreadCount={unreadCount} />
-        </div>
-        <div className="mt-auto border-t p-4">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 dark:hover:bg-muted/50"
-            onClick={signOut}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
+
+          <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-card px-4 py-3 md:px-5">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white px-4 py-3 shadow-sm md:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden" aria-label="Open menu">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-emerald-200 md:hidden"
+                  aria-label="Open menu"
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -158,36 +147,26 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <SheetHeader className="sr-only">
                   <SheetTitle>Admin menu</SheetTitle>
                 </SheetHeader>
-                <div className="flex h-full flex-col border-r bg-white dark:bg-card">
-                  <div className="border-b px-4 py-3">
-                    <div className="mb-3">
-                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-8 w-auto" />
+                <div className="flex h-full min-h-0 flex-col border-r border-emerald-100/90 bg-white">
+                  <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
+                    <div className="mb-8 flex items-center gap-3">
+                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="rounded-md bg-primary/10 p-2 text-primary">
-                        <LayoutDashboard className="h-5 w-5" />
-                      </div>
-                      <span className="font-semibold">Admin</span>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-3">
+                    <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Admin Portal</p>
                     <NavLinks pathname={pathname} unreadCount={unreadCount} onNavigate={() => setMobileOpen(false)} />
-                  </div>
-                  <div className="border-t p-3">
-                    <Button variant="outline" className="w-full" onClick={signOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign out
-                    </Button>
+                    <StudentPortalSidebarLogout tone="primary" className="mt-10 border-emerald-100/80" />
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 className="truncate text-lg font-semibold">{pageLabel}</h1>
-            <span className="hidden rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground sm:inline">
-              admin
-            </span>
+            <h1 className="truncate text-lg font-semibold text-slate-900">{pageLabel}</h1>
           </div>
-          <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="hidden border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50 sm:inline-flex"
+          >
             <Link href="/admin/notifications">
               <Bell className="mr-1 h-4 w-4" />
               {unreadCount > 0 ? `${unreadCount} unread` : "Alerts"}
@@ -195,9 +174,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </Button>
         </header>
 
-        <div className="flex-1 overflow-auto bg-muted/20">{children}</div>
+        <div className="flex-1 overflow-auto bg-slate-100">{children}</div>
       </div>
     </div>
   )
 }
-

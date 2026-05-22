@@ -16,21 +16,20 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
       documentPageTitle: "Document resources",
       documentPageHeading: "Document resources",
       newScholarshipTitle: "Create scholarship",
-      /** Subtle shell styling — distinct from manager without a full redesign */
-      shellClassName:
-        "border-amber-200/80 bg-gradient-to-b from-amber-50/50 to-white dark:from-amber-950/20 dark:to-background",
-      navActiveClass: "bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-50",
-      navInactiveClass: "text-gray-700 hover:bg-amber-50/80 dark:hover:bg-amber-950/20",
-      badgeClass: "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100",
+      /** Same shell as manager — platform-wide emerald / teal portal */
+      shellClassName: "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5",
+      navActiveClass:
+        "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-900 ring-1 ring-emerald-200/80 font-medium",
+      navInactiveClass:
+        "text-slate-700 transition-colors hover:bg-emerald-50/80 hover:text-emerald-900",
+      badgeClass: "border border-emerald-200 bg-emerald-50 text-emerald-800",
       basePath: "/owner/scholarships",
       profilePath: "/owner/posting-profile",
       documentsPath: "/owner/documents",
       newScholarshipPath: "/owner/scholarships/new",
       manageScholarshipsPath: "/owner/scholarships/manage",
       ownerHomePath: "/owner",
-      /** Standalone ops pages (new scholarship, documents) — subtle owner tint */
-      standaloneSurfaceClass:
-        "min-h-screen bg-gradient-to-b from-amber-50/40 to-background dark:from-amber-950/15 dark:to-background",
+      standaloneSurfaceClass: "min-h-screen bg-slate-100",
     }
   }
 
@@ -45,16 +44,19 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
     documentPageTitle: "Document resources",
     documentPageHeading: "Manager document resources",
     newScholarshipTitle: "Create scholarship",
-    shellClassName: "border-border bg-white dark:bg-card",
-    navActiveClass: "bg-primary/10 text-primary",
-    navInactiveClass: "text-gray-700 hover:bg-gray-100 dark:hover:bg-muted/50",
-    badgeClass: "bg-primary/10 text-primary",
+      /** Manager shell — aligned with student / admin portal emerald theme */
+      shellClassName: "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5",
+      navActiveClass:
+        "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-900 ring-1 ring-emerald-200/80 font-medium",
+      navInactiveClass:
+        "text-slate-700 transition-colors hover:bg-emerald-50/80 hover:text-emerald-900",
+      badgeClass: "border border-emerald-200 bg-emerald-50 text-emerald-800",
     basePath: "/manager",
     profilePath: "/manager/profile",
     documentsPath: "/manager/documents",
     newScholarshipPath: "/manager/scholarships/new",
     manageScholarshipsPath: "/manager/scholarships",
     ownerHomePath: "/owner",
-    standaloneSurfaceClass: "min-h-screen bg-background",
+    standaloneSurfaceClass: "min-h-screen bg-slate-100",
   }
 }

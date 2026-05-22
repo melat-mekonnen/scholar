@@ -10,7 +10,9 @@ import { cn } from "@/lib/utils"
 type StudentPortalSidebarLogoutProps = {
   label?: string
   className?: string
+  /** Dark green sidebar: white pill button + light divider */
   variant?: "light" | "darkSidebar"
+  /** Solid emerald CTA — same as homepage “Apply Now” */
   tone?: "outline" | "primary"
 }
 
@@ -21,6 +23,7 @@ export function StudentPortalSidebarLogout({
   tone = "outline",
 }: StudentPortalSidebarLogoutProps) {
   const router = useRouter()
+
   const isPrimary = tone === "primary"
 
   return (
@@ -28,7 +31,7 @@ export function StudentPortalSidebarLogout({
       className={cn(
         "mt-4 border-t pt-4",
         variant === "darkSidebar" ? "border-white/15" : "border-emerald-100/80",
-        className
+        className,
       )}
     >
       <Button
@@ -42,7 +45,7 @@ export function StudentPortalSidebarLogout({
             "flex h-11 w-full items-center justify-center gap-2 rounded-full border-0 bg-white px-4 text-sm font-semibold text-emerald-600 shadow-md hover:bg-white hover:text-emerald-700",
           !isPrimary &&
             variant !== "darkSidebar" &&
-            "w-full justify-start gap-2 border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+            "w-full justify-start gap-2 border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50",
         )}
         onClick={() => {
           void logoutFromServer()

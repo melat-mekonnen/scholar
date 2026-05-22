@@ -1,23 +1,13 @@
 "use client"
 
+
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
@@ -25,23 +15,10 @@ import {
   openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
-import { startTrackedApplication } from "@/lib/applications"
+import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { StudentPortalFooter } from "@/components/student-portal/student-footer"
-import { StudentPortalSidebar } from "@/components/student-portal/student-portal-sidebar"
-import {
-  studentPortalHeaderClass,
-  studentPortalHeroAccentClass,
-  studentPortalHeroCardClass,
-  studentPortalPageBg,
-  studentPortalStatCardAccentClass,
-  studentPortalStatCardClass,
-  studentPortalCardClass,
-} from "@/components/student-portal/student-portal-ui"
-import { cn } from "@/lib/utils"
-
 type DashboardStats = {
   activeApplications: number
   savedScholarships: number
@@ -65,19 +42,6 @@ type MeResponse = {
   fullName?: string
   email?: string
   role?: string
-}
-
-function initialsFromName(fullName?: string | null, email?: string | null) {
-  const name = (fullName ?? "").trim()
-  if (name) {
-    const parts = name.split(/\s+/).filter(Boolean)
-    const first = parts[0]?.[0] ?? ""
-    const second = parts[1]?.[0] ?? ""
-    const out = `${first}${second}`.toUpperCase()
-    return out || "U"
-  }
-  const e = (email ?? "").trim()
-  return (e[0]?.toUpperCase() ?? "U")
 }
 
 function firstNameFromFullName(fullName?: string | null) {
@@ -160,31 +124,21 @@ export default function DashboardPage() {
   const activities = summary?.recentActivity ?? []
 
   return (
-    <div className={cn("flex min-h-screen", studentPortalPageBg)}>
-      <StudentPortalSidebar />
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+      <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className={studentPortalHeaderClass}>
-          <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
-
-          <Link
-            href="/profile"
-            aria-label="Go to profile"
-            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Avatar className="transition-transform hover:scale-[1.02]">
-              <AvatarFallback className="bg-gradient-to-br from-blue-50 to-emerald-50 text-blue-700 ring-1 ring-blue-100">
-                {initialsFromName(me?.fullName, me?.email)}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+          <h1 className="text-lg font-semibold text-emerald-950">Dashboard</h1>
+          <ProfileAvatarLink />
         </header>
 
-        <main className="p-6 space-y-8">
-          <div className={studentPortalHeroCardClass}>
-            <div className={studentPortalHeroAccentClass}>
+        <main className="flex-1 space-y-8 p-6">
+          <div className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
+            <div className="border-l-4 border-emerald-500 pl-4">
               <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""} 👋
+                Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""}{" "}
+                👋
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 Discover scholarships that match your profile.
@@ -205,9 +159,9 @@ export default function DashboardPage() {
               : statCards.map((stat) => (
                   <Card
                     key={stat.title}
-                    className={studentPortalStatCardClass}
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <div className={studentPortalStatCardAccentClass} />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
                     <CardContent className="pt-6">
                       <p className="text-sm font-medium text-slate-500">{stat.title}</p>
                       <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
@@ -240,7 +194,7 @@ export default function DashboardPage() {
             )}
 
             {!loading && recommended.length === 0 && (
-              <Card className={studentPortalCardClass}>
+              <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
                 <CardContent className="pt-6 text-sm text-slate-500">
                   No verified scholarships are available to show yet. Once listings are published, upcoming
                   deadlines will appear here. You can also{" "}
@@ -261,11 +215,11 @@ export default function DashboardPage() {
                 {recommended.map((s) => (
                   <Card
                     key={s.id}
-                    className={cn(studentPortalStatCardClass, "hover:shadow-lg")}
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="pb-3">
-                      <CardTitle className="line-clamp-2 text-slate-900 transition-colors group-hover:text-blue-700">
+                      <CardTitle className="line-clamp-2 text-slate-900 transition-colors group-hover:text-emerald-800">
                         {s.title}
                       </CardTitle>
                     </CardHeader>
@@ -289,39 +243,13 @@ export default function DashboardPage() {
                           variant="outline"
                           className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
                           disabled={!getApplicationUrl(s)}
-                          onClick={async () => {
-                            const created = await startTrackedApplication(s.id)
-                            if (created.res.status === 401 || created.res.status === 403) {
-                              clearToken()
-                              router.replace("/signin")
-                              return
-                            }
-                            if (!created.res.ok && created.res.status !== 409) {
-                              toast({
-                                title: "Could not track application",
-                                description:
-                                  created.errorMessage ||
-                                  "Failed to save this application in your tracker.",
-                                variant: "destructive",
-                              })
-                              return
-                            }
-
-                            const ok = await openScholarshipApplication(s)
-                            if (!ok) {
-                              toast({
-                                title: "Application link unavailable",
-                                description:
-                                  "This scholarship does not have an official application URL yet.",
-                                variant: "destructive",
-                              })
-                            } else {
-                              toast({
-                                title: "Application started",
-                                description: "Saved to your application tracker.",
-                              })
-                            }
-                          }}
+                          onClick={() =>
+                            void applyWithReturnConfirmation({
+                              scholarship: s,
+                              toast,
+                              onUnauthorized: () => unauthorizedHandler(router),
+                            })
+                          }
                         >
                           {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
                         </Button>
@@ -336,7 +264,7 @@ export default function DashboardPage() {
           <div>
             <h3 className="mb-4 text-xl font-semibold text-slate-900">Recent Activity</h3>
 
-            <Card className={studentPortalCardClass}>
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
               <CardContent className="pt-6 space-y-3">
                 {loading && (
                   <>
@@ -361,7 +289,6 @@ export default function DashboardPage() {
             </Card>
           </div>
         </main>
-        <StudentPortalFooter />
       </div>
     </div>
   )

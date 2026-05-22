@@ -1,112 +1,24 @@
-"use client"
+# -*- coding: utf-8 -*-
+from pathlib import Path
 
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-} from "lucide-react"
+p = Path(__file__).resolve().parents[1] / "app/ai-matches/page.tsx"
+t = p.read_text(encoding="utf-8")
 
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
+marker_start = '<motion.div className="flex min-h-screen flex-1 flex-col">'
+marker_start = '<motion.div className="flex min-h-screen flex-1 flex-col">'
+marker_start = '<div className="flex min-h-screen flex-1 flex-col">'
+marker_end = "      </div>\n    </motion.div>\n  )\n}"
+marker_end = "      </div>\n    </div>\n  )\n}"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
-import { clearToken, getToken } from "@/lib/auth"
-import { apiFetchJson } from "@/lib/api"
-import { useStudentI18n } from "@/lib/student-i18n"
-import { StudentLanguageToggle } from "@/components/student-language-toggle"
-import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
-import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
+start = t.find(marker_start)
+if start < 0:
+    raise SystemExit(f"start marker not found")
 
-type RecommendationItem = {
-  scholarship: ScholarshipPublic
-  matchPercentage: number
-  matchedInterests?: string[]
-}
+end = t.find(marker_end, start)
+if end < 0:
+    raise SystemExit("end marker not found")
 
-type RecommendationsResponse = {
-  source?: string
-  studentText?: string
-  results?: RecommendationItem[]
-}
-
-function formatDate(date?: string) {
-  if (!date) return ""
-  const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return date
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-export default function AiMatchesPage() {
-  const router = useRouter()
-  const { t } = useStudentI18n()
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [items, setItems] = useState<RecommendationItem[]>([])
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!getToken()) {
-      router.replace("/signin")
-    }
-  }, [router])
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setError(null)
-      const { res, data, errorMessage } = await apiFetchJson<RecommendationsResponse>(
-        "/api/recommendations?topN=12",
-        {
-          method: "GET",
-          auth: true,
-        },
-      )
-      if (cancelled) return
-      if (res.status === 401 || res.status === 403) {
-        clearToken()
-        router.replace("/signin")
-        return
-      }
-      if (res.ok && Array.isArray(data?.results)) {
-        setItems(data.results)
-      } else {
-        setItems([])
-        setError(
-          errorMessage ||
-            "Could not load AI matches. Start the Scholar AI service (see scholar-ai/README) and ensure AI_SERVICE_URL matches its port (default backend: http://127.0.0.1:8010).",
-        )
-      }
-      setLoading(false)
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [router])
-
-  return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
-      <StudentPortalInlineAside />
-
-      <div className="flex min-h-screen flex-1 flex-col">
+new_block = """      <div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
           <div>
             <h1 className="text-lg font-semibold text-emerald-950">{t("AI Matches")}</h1>
@@ -124,7 +36,7 @@ export default function AiMatchesPage() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <motion.div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Personalized matches</h2>
@@ -232,13 +144,35 @@ export default function AiMatchesPage() {
                         size="sm"
                         className="bg-emerald-600 text-white hover:bg-emerald-700"
                         disabled={!getApplicationUrl(item.scholarship)}
-                        onClick={() =>
-                          void applyWithReturnConfirmation({
-                            scholarship: item.scholarship,
-                            toast,
-                            onUnauthorized: () => unauthorizedHandler(router),
-                          })
-                        }
+                        onClick={async () => {
+                          const created = await createApplication(item.scholarship.id)
+                          if (created.res.status === 401 || created.res.status === 403) {
+                            clearToken()
+                            router.replace("/signin")
+                            return
+                          }
+                          if (!created.res.ok && created.res.status !== 409) {
+                            toast({
+                              title: "Could not track application",
+                              description: created.errorMessage || "Failed to save to your tracker.",
+                              variant: "destructive",
+                            })
+                            return
+                          }
+                          const ok = await openScholarshipApplication(item.scholarship)
+                          if (!ok) {
+                            toast({
+                              title: "Application link unavailable",
+                              description: "This listing has no official application URL yet.",
+                              variant: "destructive",
+                            })
+                          } else {
+                            toast({
+                              title: "Application started",
+                              description: "Saved to your application tracker.",
+                            })
+                          }
+                        }}
                       >
                         {getApplicationUrl(item.scholarship) ? t("Apply") : "Apply (no link)"}
                       </Button>
@@ -249,7 +183,13 @@ export default function AiMatchesPage() {
             </div>
           )}
         </main>
-      </div>
-    </div>
-  )
-}
+"""
+
+new_block = new_block.replace(
+    '          <motion.div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">',
+    '          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">',
+)
+
+t = t[:start] + new_block + t[end:]
+p.write_text(t, encoding="utf-8", newline="\n")
+print("Updated", p)

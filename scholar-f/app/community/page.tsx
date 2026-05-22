@@ -1,5 +1,19 @@
 "use client"
 
+import {
+  LayoutDashboard,
+  Search,
+  FileText,
+  Users,
+  Bookmark,
+  Sparkles,
+  MessageSquare,
+  UserCircle2,
+  Settings,
+  FolderOpen,
+} from "lucide-react"
+
+import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -15,8 +29,10 @@ import {
 } from "@/lib/community"
 import { clearToken, getToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
-import { StudentPortalShell } from "@/components/student-portal/student-portal-shell"
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { CommunityChat } from "@/components/student-portal/community-chat"
+import { Badge } from "@/components/ui/badge"
 
 type MeResponse = {
   id: string
@@ -161,125 +177,68 @@ export default function CommunityPage() {
       }
     })
     streamRef.current = source
-    return () => {
-      source.close()
-      if (streamRef.current === source) streamRef.current = null
-    }
-  }, [channelId])
-
-  async function loadOlder() {
-    if (!channelId || !oldestCursor || loadingMore) return
-    setLoadingMore(true)
-    const { res, data } = await fetchCommunityMessages(channelId, {
-      before: oldestCursor,
-      limit: 50,
-    })
-    if (!res.ok || !data) {
-      setLoadingMore(false)
-      return
-    }
-    const older = data.messages ?? []
-    setMessages((prev) => {
-      const seen = new Set(prev.map((m) => m.id))
-      return [...older.filter((m) => !seen.has(m.id)), ...prev]
-    })
-    setHasMore(data.pagination?.hasMore ?? false)
-    setOldestCursor(data.pagination?.oldestCreatedAt ?? null)
-    setLoadingMore(false)
-  }
-
-  async function sendMessage() {
-    const text = draft.trim()
-    if (!channelId || !text || sending) return
-    setSending(true)
-    const parentReply = replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
-    const { res, data, errorMessage } = await postCommunityMessage(channelId, text, parentReply)
-    if (res.status === 401 || res.status === 403) {
-      clearToken()
-      router.replace("/signin")
-      setSending(false)
-      return
-    }
-    if (!res.ok || !data) {
-      setSending(false)
-      toast({
-        title: "Message not sent",
-        description: errorMessage ?? "Please try again.",
-        variant: "destructive",
-      })
-      return
-    }
-    setMessages((prev) => [...prev, data])
-    setDraft("")
-    setReplyTo(null)
-    setSending(false)
-    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
-  }
-
-  async function removeMessage(m: CommunityMessage) {
-    if (!me || m.userId !== me.id) return
-    const { res } = await deleteCommunityMessage(m.id)
-    if (res.status === 401) {
-      clearToken()
-      router.replace("/signin")
-      return
-    }
-    if (!res.ok) {
-      toast({ title: "Could not delete", variant: "destructive" })
-      return
-    }
-    setMessages((prev) => prev.filter((x) => x.id !== m.id))
-  }
-
-  async function reportMessage(m: CommunityMessage) {
-    const reason = window.prompt("Why are you reporting this message?")
-    if (!reason?.trim()) return
-    const { res, errorMessage } = await reportCommunityMessage(m.id, reason.trim())
-    if (!res.ok) {
-      toast({
-        title: "Could not submit report",
-        description: errorMessage || "Try again.",
-        variant: "destructive",
-      })
-      return
-    }
-    toast({ title: "Report submitted", description: "Moderators will review this message." })
-  }
-
-  const canPost = me?.role === "student" || me?.role === "admin"
-
+  
   return (
-    <StudentPortalShell
-      title="Community"
-      subtitle="Peer tips, experiences, and constructive feedback — stay kind and on-topic."
-      role={me?.role}
-      mainClassName="flex min-h-0 flex-1 flex-col p-0"
-      showFooter={false}
-    >
-      <CommunityChat
-        channels={channels}
-        channelId={channelId}
-        onChannelSelect={setChannelId}
-        selectedChannel={selectedChannel}
-        messages={messages}
-        meId={me?.id ?? null}
-        loadingChannels={loadingChannels}
-        loadingMessages={loadingMessages}
-        channelsError={channelsError}
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        onLoadOlder={() => void loadOlder()}
-        draft={draft}
-        onDraftChange={setDraft}
-        replyTo={replyTo}
-        onReplyToChange={setReplyTo}
-        sending={sending}
-        canPost={canPost}
-        onSend={() => void sendMessage()}
-        onDelete={(m) => void removeMessage(m)}
-        onReport={(m) => void reportMessage(m)}
-        bottomRef={bottomRef}
-      />
-    </StudentPortalShell>
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+      <StudentPortalInlineAside />
+
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+          <div>
+            <h1 className="text-lg font-semibold text-emerald-950">Community</h1>
+            <p className="text-xs text-slate-600">
+              Peer tips, experiences, and constructive feedback — stay kind and on-topic.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {me?.role ? (
+              <Badge className="border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100">
+                {me.role}
+              </Badge>
+            ) : null}
+            <ProfileAvatarLink />
+          </div>
+        </header>
+
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="pointer-events-none absolute -left-20 top-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 top-32 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
+          <div className="relative shrink-0 border-b border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-4 shadow-sm shadow-emerald-900/5 md:px-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            <div className="border-l-4 border-emerald-500 pl-4">
+              <h2 className="text-base font-semibold tracking-tight text-slate-900">Community support</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Join a channel, share experiences, and help other students on their scholarship journey.
+              </p>
+            </div>
+          </div>
+
+          <CommunityChat
+            channels={channels}
+            channelId={channelId}
+            onChannelSelect={setChannelId}
+            selectedChannel={selectedChannel}
+            messages={messages}
+            meId={me?.id ?? null}
+            loadingChannels={loadingChannels}
+            loadingMessages={loadingMessages}
+            channelsError={channelsError}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadOlder={() => void loadOlder()}
+            draft={draft}
+            onDraftChange={setDraft}
+            replyTo={replyTo}
+            onReplyToChange={setReplyTo}
+            sending={sending}
+            canPost={canPost}
+            onSend={() => void sendMessage()}
+            onDelete={(m) => void removeMessage(m)}
+            onReport={(m) => void reportMessage(m)}
+            bottomRef={bottomRef}
+          />
+        </div>
+      </div>
+    </div>
   )
 }
