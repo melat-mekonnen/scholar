@@ -1,48 +1,65 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import type { LucideIcon } from "lucide-react"
 import {
   ArrowLeft,
-  Hash,
+  BookOpen,
+  ListChecks,
   MessageCircle,
-  MoreVertical,
+  MessageSquareQuote,
+  Link2,
+  Paperclip,
+  Pin,
+  RefreshCw,
   Search,
   Send,
-  Trash2,
+  Shield,
+  Sparkles,
+  Users,
   X,
 } from "lucide-react"
 
 import type { CommunityChannel, CommunityMessage } from "@/lib/community"
+import {
+  COMMUNITY_ACCEPT_FILES,
+  COMMUNITY_MAX_FILES,
+  COMMUNITY_MAX_FILE_MB,
+  searchCommunityMessages,
+} from "@/lib/community"
+import { CommunityMessageActions } from "@/components/student-portal/community-message-actions"
+import { CommunityMessageAttachments } from "@/components/student-portal/community-message-attachments"
+import { CommunityMessageBody } from "@/components/student-portal/community-message-body"
+import { CommunityShareLinkDialog } from "@/components/student-portal/community-share-link-dialog"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Textarea } from "@/components/ui/textarea"
+
+const CHANNEL_META: Record<string, { icon: LucideIcon; gradient: string }> = {
+  welcome: { icon: Sparkles, gradient: "from-violet-500 to-purple-600" },
+  "application-steps": { icon: ListChecks, gradient: "from-blue-500 to-indigo-600" },
+  experiences: { icon: BookOpen, gradient: "from-emerald-500 to-teal-600" },
+  feedback: { icon: MessageSquareQuote, gradient: "from-amber-500 to-orange-600" },
+}
+
+function channelMeta(slug: string) {
+  return (
+    CHANNEL_META[slug] ?? {
+      icon: Users,
+      gradient: "from-emerald-500 to-teal-600",
+    }
+  )
+}
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return "?"
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
-function channelAvatarColor(slug: string) {
-  const hues = [
-    "from-blue-500 to-blue-600",
-    "from-emerald-500 to-emerald-600",
-    "from-violet-500 to-violet-600",
-    "from-amber-500 to-amber-600",
-    "from-rose-500 to-rose-600",
-  ]
-  let h = 0
-  for (let i = 0; i < slug.length; i++) h = (h + slug.charCodeAt(i)) % hues.length
-  return hues[h]!
 }
 
 function formatMessageTime(iso: string) {
@@ -89,15 +106,30 @@ type CommunityChatProps = {
   hasMore: boolean
   loadingMore: boolean
   onLoadOlder: () => void
+  onRetryChannels?: () => void
   draft: string
   onDraftChange: (v: string) => void
   replyTo: CommunityMessage | null
   onReplyToChange: (m: CommunityMessage | null) => void
+  editingMessage: CommunityMessage | null
+  onEdit: (m: CommunityMessage) => void
+  onCancelEdit: () => void
+  pendingFiles: File[]
+  onPendingFilesChange: (files: File[]) => void
   sending: boolean
   canPost: boolean
+  isModerator: boolean
+  pinnedMessage: CommunityMessage | null
   onSend: () => void
+  onCopy: (text: string) => void
   onDelete: (m: CommunityMessage) => void
   onReport: (m: CommunityMessage) => void
+  onPin: (m: CommunityMessage) => void
+  onUnpin: () => void
+  onHide: (m: CommunityMessage) => void
+  onScrollToMessage?: (messageId: string) => void
+  onJumpToMessage?: (message: CommunityMessage) => void
+  onShareLink: (url: string, note: string) => void
   bottomRef: React.RefObject<HTMLDivElement | null>
 }
 
@@ -114,36 +146,116 @@ export function CommunityChat({
   hasMore,
   loadingMore,
   onLoadOlder,
+  onRetryChannels,
   draft,
   onDraftChange,
   replyTo,
   onReplyToChange,
+  editingMessage,
+  onEdit,
+  onCancelEdit,
+  pendingFiles,
+  onPendingFilesChange,
   sending,
   canPost,
+  isModerator,
+  pinnedMessage,
   onSend,
+  onCopy,
   onDelete,
   onReport,
+  onPin,
+  onUnpin,
+  onHide,
+  onScrollToMessage,
+  onJumpToMessage,
+  onShareLink,
   bottomRef,
 }: CommunityChatProps) {
-  const [search, setSearch] = useState("")
+  const [channelSearch, setChannelSearch] = useState("")
+  const [messageSearchOpen, setMessageSearchOpen] = useState(false)
+  const [messageQuery, setMessageQuery] = useState("")
+  const [messageSearchLoading, setMessageSearchLoading] = useState(false)
+  const [messageSearchResults, setMessageSearchResults] = useState<CommunityMessage[]>([])
   const [mobileShowChat, setMobileShowChat] = useState(false)
+  const [shareLinkOpen, setShareLinkOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const messageSearchInputRef = useRef<HTMLInputElement | null>(null)
+  const isEditing = Boolean(editingMessage)
+  const canSendMessage = isEditing
+    ? Boolean(draft.trim())
+    : Boolean(draft.trim() || pendingFiles.length)
 
   const filteredChannels = useMemo(() => {
-    const q = search.trim().toLowerCase()
+    const q = channelSearch.trim().toLowerCase()
     if (!q) return channels
     return channels.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.description ?? "").toLowerCase().includes(q) ||
-        c.slug.toLowerCase().includes(q)
+        c.slug.toLowerCase().includes(q),
     )
-  }, [channels, search])
+  }, [channels, channelSearch])
+
+  useEffect(() => {
+    setMessageSearchOpen(false)
+    setMessageQuery("")
+    setMessageSearchResults([])
+  }, [channelId])
+
+  useEffect(() => {
+    if (!messageSearchOpen || !channelId) return
+    const q = messageQuery.trim()
+    if (q.length < 2) {
+      setMessageSearchResults([])
+      setMessageSearchLoading(false)
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setMessageSearchLoading(true)
+        const { res, data } = await searchCommunityMessages(channelId, q)
+        setMessageSearchResults(res.ok && data ? data.messages : [])
+        setMessageSearchLoading(false)
+      })()
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [messageQuery, channelId, messageSearchOpen])
+
+  useEffect(() => {
+    if (messageSearchOpen) {
+      requestAnimationFrame(() => messageSearchInputRef.current?.focus())
+    }
+  }, [messageSearchOpen])
+
+  function toggleMessageSearch() {
+    setMessageSearchOpen((open) => {
+      if (open) {
+        setMessageQuery("")
+        setMessageSearchResults([])
+      }
+      return !open
+    })
+  }
+
+  function selectSearchResult(message: CommunityMessage) {
+    if (onJumpToMessage) {
+      onJumpToMessage(message)
+    } else {
+      onScrollToMessage?.(message.id)
+    }
+    setMessageSearchOpen(false)
+    setMessageQuery("")
+    setMessageSearchResults([])
+  }
 
   const lastPreviewByChannel = useMemo(() => {
     const map: Record<string, string> = {}
     if (channelId && messages.length > 0) {
       const last = messages[messages.length - 1]
-      map[channelId] = `${last.authorFullName}: ${last.body.slice(0, 60)}${last.body.length > 60 ? "…" : ""}`
+      map[channelId] = `${last.authorFullName}: ${last.body.slice(0, 72)}${last.body.length > 72 ? "…" : ""}`
     }
     return map
   }, [channelId, messages])
@@ -153,78 +265,116 @@ export function CommunityChat({
     setMobileShowChat(true)
   }
 
+  const selectedMeta = selectedChannel ? channelMeta(selectedChannel.slug) : null
+  const SelectedIcon = selectedMeta?.icon ?? MessageCircle
+
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden rounded-none border-t border-emerald-100/80 bg-slate-100 md:rounded-b-2xl">
-      {/* Channel list — Telegram-style sidebar */}
+    <div className="flex min-h-0 flex-1 overflow-hidden">
+      {/* Channel sidebar */}
       <aside
         className={cn(
-          "flex w-full shrink-0 flex-col border-r border-emerald-100/80 bg-white md:w-[340px]",
-          mobileShowChat && channelId ? "hidden md:flex" : "flex"
+          "flex w-full shrink-0 flex-col border-r border-emerald-100/80 bg-slate-50/80 md:w-[min(100%,360px)]",
+          mobileShowChat && channelId ? "hidden md:flex" : "flex",
         )}
       >
-        <div className="border-b border-emerald-100/70 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 px-3 py-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-            Student community
-          </p>
+        <div className="border-b border-emerald-100/70 bg-white px-4 py-4">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+              <Users className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Channels</p>
+              <p className="text-xs text-slate-500">
+                {loadingChannels ? "Loading…" : `${channels.length} discussion topics`}
+              </p>
+            </div>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search channels…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-10 rounded-xl border-emerald-100 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
+              value={channelSearch}
+              onChange={(e) => setChannelSearch(e.target.value)}
+              className="h-10 rounded-xl border-emerald-100/90 bg-white pl-9 text-sm shadow-sm focus-visible:ring-emerald-500/30"
             />
           </div>
         </div>
 
-        <ul className="min-h-0 flex-1 overflow-y-auto">
+        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
           {loadingChannels &&
             Array.from({ length: 4 }).map((_, i) => (
-              <li key={i} className="border-b border-slate-100 px-3 py-3">
-                <Skeleton className="h-12 w-full rounded-lg" />
+              <li key={i} className="px-1 py-1">
+                <Skeleton className="h-[4.5rem] w-full rounded-xl" />
               </li>
             ))}
 
           {!loadingChannels && channelsError && (
-            <li className="p-4 text-sm text-destructive">{channelsError}</li>
+            <li className="m-2 rounded-xl border border-red-100 bg-red-50/80 p-4 text-center">
+              <p className="text-sm font-medium text-red-800">{channelsError}</p>
+              {onRetryChannels ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 border-red-200 text-red-800 hover:bg-red-100"
+                  onClick={onRetryChannels}
+                >
+                  <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                  Try again
+                </Button>
+              ) : null}
+            </li>
           )}
+
+          {!loadingChannels &&
+            !channelsError &&
+            filteredChannels.length === 0 && (
+              <li className="px-3 py-8 text-center text-sm text-slate-500">No channels match your search.</li>
+            )}
 
           {!loadingChannels &&
             filteredChannels.map((c) => {
               const active = c.id === channelId
-              const preview = lastPreviewByChannel[c.id] ?? c.description ?? "Tap to open channel"
+              const meta = channelMeta(c.slug)
+              const Icon = meta.icon
+              const preview = lastPreviewByChannel[c.id] ?? c.description ?? "Open to join the discussion"
+
               return (
                 <li key={c.id}>
                   <button
                     type="button"
                     onClick={() => selectChannel(c.id)}
                     className={cn(
-                      "flex w-full items-center gap-3 border-b border-slate-100 px-3 py-3 text-left transition-colors",
+                      "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-all",
                       active
-                        ? "bg-gradient-to-r from-blue-50 to-emerald-50/80"
-                        : "hover:bg-slate-50"
+                        ? "bg-white shadow-md shadow-emerald-900/5 ring-1 ring-emerald-200/90"
+                        : "hover:bg-white/80 hover:shadow-sm",
                     )}
                   >
                     <div
                       className={cn(
-                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white shadow-sm",
-                        channelAvatarColor(c.slug)
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm",
+                        meta.gradient,
                       )}
                     >
-                      {c.name.slice(0, 1).toUpperCase()}
+                      <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className={cn("truncate font-semibold", active ? "text-blue-800" : "text-slate-900")}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={cn(
+                            "truncate text-sm font-semibold",
+                            active ? "text-emerald-900" : "text-slate-900",
+                          )}
+                        >
                           {c.name}
                         </span>
-                        <Hash className="h-3 w-3 shrink-0 text-slate-300" />
+                        {active ? (
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+                        ) : null}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{preview}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">{preview}</p>
                     </div>
-                    {active && (
-                      <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
-                    )}
                   </button>
                 </li>
               )
@@ -232,69 +382,194 @@ export function CommunityChat({
         </ul>
       </aside>
 
-      {/* Conversation pane */}
+      {/* Conversation */}
       <section
         className={cn(
-          "flex min-w-0 flex-1 flex-col bg-[#e8edf5]",
+          "flex min-w-0 flex-1 flex-col bg-gradient-to-b from-slate-50 via-white to-emerald-50/20",
           !mobileShowChat && !channelId ? "hidden md:flex" : "flex",
-          !channelId && "md:flex"
+          !channelId && "md:flex",
         )}
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 20%, rgba(37,99,235,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(5,150,105,0.06) 0%, transparent 50%)",
-        }}
       >
         {!channelId ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-emerald-100">
-              <MessageCircle className="h-8 w-8 text-blue-600" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-full bg-emerald-400/10 blur-2xl" />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-900/15">
+                <MessageCircle className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <p className="font-medium text-slate-700">Select a channel</p>
-            <p className="max-w-sm text-sm text-slate-500">
-              Choose a topic on the left to read tips, share experiences, and connect with other applicants.
-            </p>
+            <div className="max-w-md space-y-2">
+              <h3 className="text-lg font-semibold text-slate-900">Choose a channel to begin</h3>
+              <p className="text-sm leading-relaxed text-slate-600">
+                Connect with other applicants, share timelines, and get constructive feedback on your
+                scholarship journey.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {["Be respectful", "Stay on-topic", "No spam"].map((rule) => (
+                <Badge
+                  key={rule}
+                  variant="secondary"
+                  className="border-emerald-100 bg-white text-emerald-800 ring-1 ring-emerald-100"
+                >
+                  {rule}
+                </Badge>
+              ))}
+            </div>
           </div>
         ) : (
           <>
-            {/* Chat header */}
-            <header className="flex shrink-0 items-center gap-3 border-b border-emerald-100/80 bg-white/95 px-3 py-2.5 backdrop-blur md:px-4">
+            <header className="flex shrink-0 items-center gap-3 border-b border-emerald-100/80 bg-white/95 px-3 py-3 backdrop-blur-sm md:px-5">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="shrink-0 md:hidden"
                 onClick={() => setMobileShowChat(false)}
                 aria-label="Back to channels"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              {selectedChannel && (
+              {selectedChannel && selectedMeta && (
                 <div
                   className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white",
-                    channelAvatarColor(selectedChannel.slug)
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm",
+                    selectedMeta.gradient,
                   )}
                 >
-                  {selectedChannel.name.slice(0, 1).toUpperCase()}
+                  <SelectedIcon className="h-5 w-5" />
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <h2 className="truncate font-semibold text-slate-900">{selectedChannel?.name}</h2>
-                <p className="truncate text-xs text-emerald-600">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="truncate text-base font-semibold text-slate-900">{selectedChannel?.name}</h2>
+                  <Badge
+                    variant="secondary"
+                    className="shrink-0 border-emerald-100 bg-emerald-50 text-[10px] font-medium uppercase tracking-wide text-emerald-800"
+                  >
+                    Live
+                  </Badge>
+                </div>
+                <p className="truncate text-xs text-slate-500">
                   {selectedChannel?.description ?? "Peer discussion"}
                 </p>
               </div>
+              <Button
+                type="button"
+                variant={messageSearchOpen ? "secondary" : "outline"}
+                size="icon"
+                className={cn(
+                  "h-10 w-10 shrink-0 rounded-xl border-emerald-100",
+                  messageSearchOpen && "bg-emerald-50 text-emerald-800",
+                )}
+                onClick={toggleMessageSearch}
+                aria-label={messageSearchOpen ? "Close message search" : "Search messages"}
+                aria-expanded={messageSearchOpen}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+              <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-emerald-100/80 bg-emerald-50/50 px-2.5 py-1.5 text-emerald-800 lg:flex">
+                <Shield className="h-3.5 w-3.5" />
+                <span className="text-[11px] font-medium">Moderated</span>
+              </div>
             </header>
 
-            {/* Messages */}
+            {messageSearchOpen ? (
+              <div className="shrink-0 border-b border-emerald-100/80 bg-white px-3 py-3 md:px-5">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    ref={messageSearchInputRef}
+                    placeholder={`Search in ${selectedChannel?.name ?? "this channel"}…`}
+                    value={messageQuery}
+                    onChange={(e) => setMessageQuery(e.target.value)}
+                    className="h-10 rounded-xl border-emerald-100/90 bg-slate-50/80 pl-9 pr-9 text-sm"
+                  />
+                  {messageQuery ? (
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                      onClick={() => {
+                        setMessageQuery("")
+                        setMessageSearchResults([])
+                      }}
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : null}
+                </div>
+                <div className="mt-2 max-h-52 overflow-y-auto rounded-xl border border-emerald-100/80 bg-slate-50/50">
+                  {messageQuery.trim().length < 2 ? (
+                    <p className="px-3 py-4 text-center text-xs text-slate-500">
+                      Type at least 2 characters to search messages, names, and file names.
+                    </p>
+                  ) : messageSearchLoading ? (
+                    <div className="space-y-2 p-2">
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                    </div>
+                  ) : messageSearchResults.length === 0 ? (
+                    <p className="px-3 py-4 text-center text-xs text-slate-500">
+                      No messages match &ldquo;{messageQuery.trim()}&rdquo;.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-emerald-100/60 p-1">
+                      {messageSearchResults.map((m) => (
+                        <li key={m.id}>
+                          <button
+                            type="button"
+                            onClick={() => selectSearchResult(m)}
+                            className="flex w-full flex-col gap-0.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white"
+                          >
+                            <span className="text-xs font-semibold text-emerald-900">
+                              {m.authorFullName}
+                              <span className="ml-2 font-normal text-slate-400">
+                                {formatMessageTime(m.createdAt)}
+                              </span>
+                            </span>
+                            <span className="line-clamp-2 text-sm text-slate-700">{m.body}</span>
+                            {(m.attachments?.length ?? 0) > 0 ? (
+                              <span className="text-[11px] text-slate-500">
+                                {m.attachments!.length} attachment
+                                {m.attachments!.length === 1 ? "" : "s"}
+                              </span>
+                            ) : null}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6">
+              {pinnedMessage ? (
+                <button
+                  type="button"
+                  onClick={() => onScrollToMessage?.(pinnedMessage.id)}
+                  className="mb-4 flex w-full items-start gap-3 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50/90 to-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-amber-50"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                    <Pin className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                      Pinned · {pinnedMessage.authorFullName}
+                    </p>
+                    <p className="mt-0.5 line-clamp-2 text-sm text-slate-700">{pinnedMessage.body}</p>
+                  </div>
+                </button>
+              ) : null}
+
               {hasMore && (
                 <div className="mb-4 flex justify-center">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="rounded-full border-white bg-white/90 text-xs shadow-sm"
+                    className="rounded-full border-emerald-200/80 bg-white text-xs shadow-sm hover:bg-emerald-50"
                     disabled={loadingMore || loadingMessages}
                     onClick={onLoadOlder}
                   >
@@ -304,9 +579,10 @@ export function CommunityChat({
               )}
 
               {loadingMessages && (
-                <div className="space-y-3">
-                  <Skeleton className="ml-auto h-14 w-[70%] rounded-2xl rounded-br-md" />
-                  <Skeleton className="h-14 w-[65%] rounded-2xl rounded-bl-md" />
+                <div className="space-y-4">
+                  <Skeleton className="ml-auto h-16 w-[72%] rounded-2xl rounded-br-md" />
+                  <Skeleton className="h-16 w-[68%] rounded-2xl rounded-bl-md" />
+                  <Skeleton className="ml-auto h-12 w-[55%] rounded-2xl rounded-br-md" />
                 </div>
               )}
 
@@ -318,119 +594,115 @@ export function CommunityChat({
                   const parent = m.parentMessageId
                     ? messages.find((x) => x.id === m.parentMessageId)
                     : null
+                  const isPinned = pinnedMessage?.id === m.id
 
                   return (
-                    <div key={m.id}>
+                    <div key={m.id} id={`msg-${m.id}`}>
                       {showDate && (
-                        <div className="my-4 flex justify-center">
-                          <span className="rounded-full bg-white/80 px-3 py-1 text-[11px] font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/80">
+                        <div className="my-5 flex justify-center">
+                          <span className="rounded-full bg-white px-4 py-1 text-[11px] font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/80">
                             {formatDateSeparator(m.createdAt)}
                           </span>
                         </div>
                       )}
                       <div
                         className={cn(
-                          "mb-2 flex gap-2",
+                          "group mb-3 flex gap-2.5",
                           isOwn ? "flex-row-reverse" : "flex-row",
-                          m.parentMessageId && !isOwn && "ml-4"
+                          m.parentMessageId && !isOwn && "ml-6 md:ml-10",
                         )}
                       >
                         {!isOwn && (
-                          <Avatar className="mt-1 h-8 w-8 shrink-0 ring-2 ring-white">
-                            <AvatarFallback className="bg-gradient-to-br from-blue-50 to-emerald-50 text-[10px] font-semibold text-blue-800">
+                          <Avatar className="mt-0.5 h-9 w-9 shrink-0 ring-2 ring-white shadow-sm">
+                            <AvatarFallback className="bg-gradient-to-br from-emerald-50 to-teal-50 text-[10px] font-semibold text-emerald-800">
                               {initials(m.authorFullName)}
                             </AvatarFallback>
                           </Avatar>
                         )}
                         <div
                           className={cn(
-                            "group relative max-w-[min(100%,28rem)]",
-                            isOwn ? "items-end" : "items-start"
+                            "relative max-w-[min(100%,32rem)]",
+                            isOwn ? "items-end" : "items-start",
                           )}
                         >
                           {!isOwn && (
-                            <p className="mb-0.5 px-1 text-[11px] font-semibold text-blue-800">
+                            <p className="mb-1 px-1 text-[11px] font-semibold text-emerald-900/90">
                               {m.authorFullName}
                             </p>
                           )}
                           <div
                             className={cn(
-                              "relative rounded-2xl px-3.5 py-2 shadow-sm",
+                              "relative rounded-2xl px-4 py-2.5 shadow-sm",
                               isOwn
-                                ? "rounded-br-md bg-gradient-to-br from-emerald-600 to-teal-600 text-white"
-                                : "rounded-bl-md border border-white/80 bg-white text-slate-900"
+                                ? "rounded-br-md bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-emerald-900/10"
+                                : "rounded-bl-md border border-slate-200/80 bg-white text-slate-900",
+                              isPinned && "ring-2 ring-amber-300/90 ring-offset-1",
                             )}
                           >
+                            {isPinned ? (
+                              <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                                <Pin className="h-3 w-3" />
+                                Pinned
+                              </span>
+                            ) : null}
                             {parent && (
                               <div
                                 className={cn(
-                                  "mb-2 border-l-2 pl-2 text-[11px] opacity-90",
-                                  isOwn ? "border-blue-200" : "border-emerald-500"
+                                  "mb-2 rounded-lg border-l-[3px] px-2 py-1.5 text-[11px]",
+                                  isOwn
+                                    ? "border-emerald-200/80 bg-white/10"
+                                    : "border-emerald-500 bg-emerald-50/80 text-slate-700",
                                 )}
                               >
                                 <span className="font-semibold">{parent.authorFullName}</span>
-                                <p className="line-clamp-2">{parent.body}</p>
+                                <p className="line-clamp-2 opacity-90">{parent.body}</p>
                               </div>
                             )}
-                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>
-                            <div
+                            {m.body &&
+                            !(m.body === "Shared files" && (m.attachments?.length ?? 0) > 0) ? (
+                              <CommunityMessageBody
+                                body={m.body}
+                                isOwn={isOwn}
+                                editedAt={m.editedAt}
+                              />
+                            ) : null}
+                            {m.attachments && m.attachments.length > 0 ? (
+                              <CommunityMessageAttachments
+                                attachments={m.attachments}
+                                isOwn={isOwn}
+                              />
+                            ) : null}
+                            <p
                               className={cn(
-                                "mt-1 flex items-center justify-end gap-1 text-[10px]",
-                                isOwn ? "text-blue-100" : "text-slate-400"
+                                "mt-1.5 text-right text-[10px]",
+                                isOwn ? "text-emerald-100/90" : "text-slate-400",
                               )}
                             >
-                              <span>{formatMessageTime(m.createdAt)}</span>
-                            </div>
+                              {formatMessageTime(m.createdAt)}
+                            </p>
                           </div>
+
                           <div
                             className={cn(
-                              "absolute top-0 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100",
-                              isOwn ? "left-0 -translate-x-full pr-1" : "right-0 translate-x-full pl-1"
+                              "mt-1 flex",
+                              isOwn ? "justify-end" : "justify-start",
                             )}
                           >
-                            {!m.parentMessageId && canPost && !isOwn && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 rounded-full bg-white shadow-sm"
-                                onClick={() => onReplyToChange(m)}
-                                aria-label="Reply"
-                              >
-                                <MessageCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                            {isOwn && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 rounded-full bg-white text-destructive shadow-sm"
-                                onClick={() => onDelete(m)}
-                                aria-label="Delete"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                            {!isOwn && meId && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 rounded-full bg-white shadow-sm"
-                                  >
-                                    <MoreVertical className="h-3.5 w-3.5" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => onReport(m)}>
-                                    Report message
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
+                            <CommunityMessageActions
+                              message={m}
+                              isOwn={isOwn}
+                              canPost={canPost}
+                              isModerator={isModerator}
+                              isPinned={isPinned}
+                              onCopy={onCopy}
+                              onReply={onReplyToChange}
+                              onEdit={onEdit}
+                              onDelete={onDelete}
+                              onReport={onReport}
+                              onPin={onPin}
+                              onUnpin={onUnpin}
+                              onHide={onHide}
+                            />
                           </div>
                         </div>
                       </div>
@@ -439,65 +711,177 @@ export function CommunityChat({
                 })}
 
               {!loadingMessages && messages.length === 0 && (
-                <p className="py-12 text-center text-sm text-slate-500">
-                  No messages yet. Say hello and start the conversation.
-                </p>
+                <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                    <MessageCircle className="h-7 w-7" />
+                  </div>
+                  <p className="font-medium text-slate-800">Start the conversation</p>
+                  <p className="max-w-xs text-sm text-slate-500">
+                    Be the first to share a tip, question, or experience in this channel.
+                  </p>
+                </div>
               )}
 
-              <div ref={bottomRef} />
+              <div ref={bottomRef} className="h-1" />
             </div>
 
-            {/* Composer */}
-            <div className="shrink-0 border-t border-emerald-100/80 bg-white px-3 py-3 md:px-4">
-              {replyTo && (
-                <div className="mb-2 flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2 text-sm">
-                  <div className="min-w-0 flex-1 border-l-2 border-emerald-500 pl-2">
-                    <p className="text-xs font-medium text-blue-800">Reply to {replyTo.authorFullName}</p>
+            <div className="shrink-0 border-t border-emerald-100/80 bg-white px-3 py-3 md:px-5 md:py-4">
+              {editingMessage ? (
+                <div className="mb-3 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/60 px-3 py-2.5">
+                  <div className="min-w-0 flex-1 border-l-[3px] border-blue-500 pl-2.5">
+                    <p className="text-xs font-semibold text-blue-900">Editing your message</p>
+                    <p className="truncate text-xs text-slate-600">
+                      Changes sync for everyone in this channel
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 rounded-lg"
+                    onClick={onCancelEdit}
+                    aria-label="Cancel edit"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : null}
+              {replyTo && !editingMessage ? (
+                <div className="mb-3 flex items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3 py-2.5">
+                  <div className="min-w-0 flex-1 border-l-[3px] border-emerald-500 pl-2.5">
+                    <p className="text-xs font-semibold text-emerald-900">
+                      Replying to {replyTo.authorFullName}
+                    </p>
                     <p className="truncate text-xs text-slate-600">{replyTo.body}</p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 shrink-0"
+                    className="h-8 w-8 shrink-0 rounded-lg"
                     onClick={() => onReplyToChange(null)}
+                    aria-label="Cancel reply"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-              )}
+              ) : null}
               {!canPost && (
                 <p className="mb-2 text-center text-xs text-slate-500">
                   Sign in as a student to post in this channel.
                 </p>
               )}
-              <div className="flex items-end gap-2">
-                <Input
-                  placeholder={canPost ? "Write a message…" : "Read-only"}
+              {pendingFiles.length > 0 ? (
+                <ul className="mb-2 flex flex-wrap gap-2">
+                  {pendingFiles.map((file, index) => (
+                    <li
+                      key={`${file.name}-${index}`}
+                      className="flex max-w-full items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-2.5 py-1.5 text-xs text-slate-700"
+                    >
+                      <Paperclip className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                      <span className="truncate">{file.name}</span>
+                      <button
+                        type="button"
+                        className="shrink-0 text-slate-500 hover:text-red-600"
+                        onClick={() =>
+                          onPendingFilesChange(pendingFiles.filter((_, i) => i !== index))
+                        }
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                multiple
+                accept={COMMUNITY_ACCEPT_FILES}
+                onChange={(e) => {
+                  const picked = Array.from(e.target.files ?? [])
+                  e.target.value = ""
+                  if (!picked.length) return
+                  const merged = [...pendingFiles, ...picked].slice(0, COMMUNITY_MAX_FILES)
+                  onPendingFilesChange(merged)
+                }}
+              />
+              <CommunityShareLinkDialog
+                open={shareLinkOpen}
+                onOpenChange={setShareLinkOpen}
+                onShare={onShareLink}
+                sending={sending}
+              />
+              <div className="flex items-end gap-0 rounded-2xl border border-slate-200/90 bg-slate-50/80 py-1 pl-3 pr-1 shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-500/20">
+                <Textarea
+                  placeholder={
+                    !canPost
+                      ? "Read-only"
+                      : isEditing
+                        ? "Edit your message…"
+                        : "Write a message…"
+                  }
                   value={draft}
                   onChange={(e) => onDraftChange(e.target.value)}
                   disabled={!canPost || sending}
-                  className="min-h-11 flex-1 rounded-2xl border-slate-200 bg-slate-50 px-4 focus-visible:ring-emerald-500"
+                  rows={1}
+                  className="max-h-32 min-h-10 min-w-0 flex-1 resize-none border-0 bg-transparent px-0 py-2 text-sm shadow-none focus-visible:ring-0"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
                       onSend()
                     }
+                    if (e.key === "Escape" && isEditing) {
+                      e.preventDefault()
+                      onCancelEdit()
+                    }
                   }}
                 />
-                <Button
-                  type="button"
-                  size="icon"
-                  className="h-11 w-11 shrink-0 rounded-full bg-emerald-600 shadow-md hover:bg-emerald-700"
-                  disabled={!canPost || sending || !draft.trim()}
-                  onClick={onSend}
-                  aria-label="Send"
-                >
-                  <Send className="h-5 w-5 text-white" />
-                </Button>
+                <div className="flex shrink-0 items-center gap-0.5 self-end pb-0.5">
+                  {!isEditing ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        disabled={!canPost || sending}
+                        onClick={() => setShareLinkOpen(true)}
+                        aria-label="Share a link"
+                      >
+                        <Link2 className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        disabled={!canPost || sending || pendingFiles.length >= COMMUNITY_MAX_FILES}
+                        onClick={() => fileInputRef.current?.click()}
+                        aria-label="Attach files"
+                      >
+                        <Paperclip className="h-5 w-5" />
+                      </Button>
+                    </>
+                  ) : null}
+                  <Button
+                    type="button"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-lg bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40"
+                    disabled={!canPost || sending || !canSendMessage}
+                    onClick={onSend}
+                    aria-label={isEditing ? "Save edit" : "Send message"}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <p className="mt-1.5 text-center text-[10px] text-slate-400">
-                Enter to send · Shift+Enter for new line
+              <p className="mt-2 text-center text-[10px] leading-relaxed text-slate-400">
+                <Shield className="mr-1 inline h-3 w-3" />
+                Share links, files (PDF, CV, images), or text · up to {COMMUNITY_MAX_FILES} files,{" "}
+                {COMMUNITY_MAX_FILE_MB} MB each
               </p>
             </div>
           </>

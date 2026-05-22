@@ -238,6 +238,10 @@ CREATE TABLE IF NOT EXISTS community_channels (
   name TEXT NOT NULL,
   description TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  pinned_message_id UUID REFERENCES community_messages (id) ON DELETE SET NULL,
+  pinned_at TIMESTAMPTZ,
+  pinned_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -247,12 +251,47 @@ CREATE TABLE IF NOT EXISTS community_messages (
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   parent_message_id UUID REFERENCES community_messages (id) ON DELETE CASCADE,
   body TEXT NOT NULL,
+  is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+  hidden_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
+  hidden_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT community_messages_body_len CHECK (char_length(body) >= 1 AND char_length(body) <= 8000)
+  CONSTRAINT community_messages_body_len CHECK (char_length(body) >= 0 AND char_length(body) <= 8000)
 );
+
+CREATE TABLE IF NOT EXISTS community_message_attachments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  message_id UUID NOT NULL REFERENCES community_messages (id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('image', 'pdf', 'cv')),
+  file_path TEXT NOT NULL,
+  original_name TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_message_attachments_message
+  ON community_message_attachments (message_id);
 
 CREATE INDEX IF NOT EXISTS idx_community_messages_channel_created ON community_messages (channel_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_community_messages_parent ON community_messages (parent_message_id);
+CREATE INDEX IF NOT EXISTS idx_community_messages_visible
+  ON community_messages (channel_id, is_hidden, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS community_reports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  message_id UUID NOT NULL REFERENCES community_messages (id) ON DELETE CASCADE,
+  reporter_user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'dismissed')),
+  reviewed_by_user_id UUID REFERENCES users (id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_reports_status_created
+  ON community_reports (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_community_reports_message
+  ON community_reports (message_id);
 
 -- Default channels (idempotent)
 INSERT INTO community_channels (slug, name, description, sort_order)

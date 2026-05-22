@@ -100,7 +100,7 @@ export default function DocumentDetailPage() {
       mainClassName="min-h-0 flex-1 space-y-8 p-4 md:p-8"
     >
       <nav className="text-sm text-slate-500">
-        <Link href="/documents" className="hover:text-blue-700">
+        <Link href="/documents" className="hover:text-emerald-700">
           Document resources
         </Link>
         <span className="mx-2">/</span>
@@ -154,7 +154,7 @@ export default function DocumentDetailPage() {
               </h1>
               <p className="mt-3 text-slate-600">
                 Use EthioScholar&apos;s document workspace to open this template,{" "}
-                <strong className="font-medium text-blue-700">fuse your profile</strong> into
+                <strong className="font-medium text-emerald-700">fuse your profile</strong> into
                 placeholders, edit in the browser, and download when you&apos;re ready.
               </p>
             </div>
@@ -202,7 +202,7 @@ export default function DocumentDetailPage() {
 
             {!canEdit && requiresPro && !isPro ? (
               <div className="rounded-xl border border-emerald-100 bg-emerald-50/80 p-4">
-                <p className="flex items-center gap-2 text-sm font-medium text-blue-900">
+                <p className="flex items-center gap-2 text-sm font-medium text-emerald-900">
                   <Sparkles className="h-4 w-4" />
                   Unlock editing & profile fusion with Pro
                 </p>

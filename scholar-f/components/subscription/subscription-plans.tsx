@@ -28,11 +28,35 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
+
+/** Platform cards (usage, payments, etc.) — emerald theme. */
+const emeraldCard =
+  "relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+
+const emeraldTopBar =
+  "pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90"
+
+/** Payment panels — same light tint as Stripe / Chapa tiles. */
+const tintedPanel = "rounded-2xl border border-emerald-100/80 bg-emerald-50/25 shadow-sm"
+
+/** Plan tier cards — neutral border only; tier colour on icon, title, and status badges. */
+const planCard = "relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm"
 
 const FREE_DAILY_LIMIT = 3
 const PRO_CHAPA_ETB = 149
 const PRO_DAYS = 30
+
+const freeTier = {
+  badge: "bg-sky-600 hover:bg-sky-600",
+  icon: "text-sky-600",
+  title: "text-sky-700",
+}
+
+const proTier = {
+  badge: "bg-violet-600 hover:bg-violet-600",
+  icon: "text-violet-600",
+  title: "text-violet-700",
+}
 
 type SubscriptionPlansProps = {
   subscription: SubscriptionStatus | null
@@ -92,7 +116,8 @@ export function SubscriptionPlans({
 
   if (loading) {
     return (
-      <Card className={studentPortalCardClass}>
+      <Card className={emeraldCard}>
+        <div className={emeraldTopBar} />
         <CardContent className="py-12 text-center text-sm text-slate-500">
           Loading your plan…
         </CardContent>
@@ -102,17 +127,20 @@ export function SubscriptionPlans({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center gap-3">
-        <Button asChild variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
-          <Link href="/settings" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to settings
-          </Link>
-        </Button>
-      </div>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+      >
+        <Link href="/settings" className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to settings
+        </Link>
+      </Button>
 
-      {/* Current status */}
-      <Card className={studentPortalCardClass}>
+      <Card className={emeraldCard}>
+        <div className={emeraldTopBar} />
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-900">Your usage today</CardTitle>
           <CardDescription>
@@ -126,13 +154,16 @@ export function SubscriptionPlans({
               <span className="text-sm text-slate-600">Unlimited messages</span>
               {subscription?.expiresAt ? (
                 <span className="text-sm text-slate-500">
-                  · until {new Date(subscription.expiresAt).toLocaleDateString(undefined, {
+                  · until{" "}
+                  {new Date(subscription.expiresAt).toLocaleDateString(undefined, {
                     dateStyle: "medium",
                   })}
                 </span>
               ) : null}
               {subscription?.provider ? (
-                <span className="text-sm text-slate-500 capitalize">· paid via {subscription.provider}</span>
+                <span className="text-sm capitalize text-slate-500">
+                  · paid via {subscription.provider}
+                </span>
               ) : null}
             </div>
           ) : (
@@ -143,9 +174,9 @@ export function SubscriptionPlans({
                 </span>
                 <span className="text-slate-500">{used} used</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 overflow-hidden rounded-full bg-emerald-100/80">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all"
                   style={{ width: `${usagePercent}%` }}
                 />
               </div>
@@ -155,20 +186,16 @@ export function SubscriptionPlans({
         </CardContent>
       </Card>
 
-      {/* Plan cards */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card
-          className={cn(
-            "relative rounded-2xl border shadow-sm transition-shadow",
-            !isPro ? "border-emerald-200 ring-2 ring-emerald-100" : "border-slate-200 bg-white"
-          )}
-        >
-          {!isPro ? (
-            <Badge className="absolute -top-3 left-6 bg-blue-600 hover:bg-blue-600">Current plan</Badge>
-          ) : null}
+      <div className="grid gap-6 overflow-visible lg:grid-cols-2">
+        <Card className={cn(planCard, "overflow-visible transition-shadow hover:shadow-md")}>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-              <MessageSquare className="h-5 w-5 text-slate-500" />
+            {!isPro ? (
+              <Badge className={cn("mb-3 w-fit", freeTier.badge)}>Current plan</Badge>
+            ) : null}
+            <CardTitle className={cn("flex items-center gap-2 text-xl font-semibold", freeTier.title)}>
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 ring-1 ring-slate-200">
+                <MessageSquare className={cn("h-5 w-5", freeTier.icon)} />
+              </span>
               Free
             </CardTitle>
             <CardDescription>Get started with daily AI guidance</CardDescription>
@@ -180,30 +207,20 @@ export function SubscriptionPlans({
           <CardContent>
             <FeatureList items={FREE_FEATURES} />
             {!isPro ? (
-              <p className="mt-6 text-sm font-medium text-blue-700">You are on this plan</p>
+              <p className="mt-6 text-sm font-medium text-slate-600">You are on this plan</p>
             ) : null}
           </CardContent>
         </Card>
 
-        <Card
-          className={cn(
-            "relative rounded-2xl border shadow-md transition-shadow",
-            isPro
-              ? "border-emerald-200 bg-gradient-to-b from-emerald-50/80 to-white ring-2 ring-emerald-100"
-              : "border-violet-200 bg-gradient-to-b from-violet-50/50 to-white"
-          )}
-        >
-          <Badge
-            className={cn(
-              "absolute -top-3 left-6",
-              isPro ? "bg-emerald-600 hover:bg-emerald-600" : "bg-violet-600 hover:bg-violet-600"
-            )}
-          >
-            {isPro ? "Current plan" : "Recommended"}
-          </Badge>
+        <Card className={cn(planCard, "overflow-visible transition-shadow hover:shadow-md")}>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-              <Sparkles className="h-5 w-5 text-violet-600" />
+            <Badge className={cn("mb-3 w-fit", proTier.badge)}>
+              {isPro ? "Current plan" : "Recommended"}
+            </Badge>
+            <CardTitle className={cn("flex items-center gap-2 text-xl font-semibold", proTier.title)}>
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 ring-1 ring-slate-200">
+                <Sparkles className={cn("h-5 w-5", proTier.icon)} />
+              </span>
               Pro
             </CardTitle>
             <CardDescription>Unlimited AI chat for serious applicants</CardDescription>
@@ -219,9 +236,8 @@ export function SubscriptionPlans({
         </Card>
       </div>
 
-      {/* Payment methods */}
       {!isPro ? (
-        <Card className={studentPortalCardClass}>
+        <Card className={tintedPanel}>
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Choose payment method</CardTitle>
             <CardDescription>
@@ -229,16 +245,16 @@ export function SubscriptionPlans({
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col rounded-xl border border-slate-200 bg-slate-50/50 p-5">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
-                <CreditCard className="h-5 w-5" />
+            <div className="flex flex-col rounded-xl border border-emerald-100/80 bg-emerald-50/25 p-5">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 ring-1 ring-slate-200">
+                <CreditCard className="h-5 w-5 text-[#635BFF]" />
               </div>
               <h3 className="font-semibold text-slate-900">Stripe</h3>
               <p className="mt-1 flex-1 text-sm text-slate-600">
                 Visa, Mastercard, and international cards. Monthly subscription billing.
               </p>
               <Button
-                className="mt-5 w-full"
+                className="mt-5 w-full bg-emerald-600 hover:bg-emerald-700"
                 disabled={stripeLoading || chapaLoading}
                 onClick={onStripeCheckout}
               >
@@ -246,17 +262,17 @@ export function SubscriptionPlans({
               </Button>
             </div>
 
-            <div className="flex flex-col rounded-xl border border-slate-200 bg-slate-50/50 p-5">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                <Wallet className="h-5 w-5" />
+            <div className="flex flex-col rounded-xl border border-emerald-100/80 bg-emerald-50/25 p-5">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 ring-1 ring-slate-200">
+                <Wallet className="h-5 w-5 text-green-600" />
               </div>
               <h3 className="font-semibold text-slate-900">Chapa</h3>
               <p className="mt-1 flex-1 text-sm text-slate-600">
                 Pay in ETB. Telebirr, mobile money, and local banks when enabled on Chapa.
               </p>
               <Button
-                variant="secondary"
-                className="mt-5 w-full"
+                variant="outline"
+                className="mt-5 w-full border-emerald-200 text-emerald-800 hover:bg-emerald-50"
                 disabled={chapaLoading || stripeLoading}
                 onClick={onChapaCheckout}
               >
@@ -266,7 +282,7 @@ export function SubscriptionPlans({
           </CardContent>
         </Card>
       ) : (
-        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+        <Card className={tintedPanel}>
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Manage Pro</CardTitle>
             <CardDescription>
@@ -274,7 +290,7 @@ export function SubscriptionPlans({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Button asChild>
+            <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
               <Link href="/ai-chat" className="gap-2">
                 <Zap className="h-4 w-4" />
                 Open AI Chat
@@ -322,11 +338,11 @@ export function SubscriptionPlans({
         </Card>
       )}
 
-      <Card className="rounded-2xl border-slate-200 bg-slate-50/80 shadow-sm">
+      <Card className="rounded-2xl border border-emerald-100/70 bg-emerald-50/25 shadow-sm">
         <CardContent className="flex gap-4 py-5">
-          <Shield className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
+          <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
           <div className="text-sm text-slate-600">
-            <p className="font-medium text-slate-800">Secure payments</p>
+            <p className="font-medium text-emerald-900">Secure payments</p>
             <p className="mt-1">
               Card details are handled by Stripe or Chapa. EthioScholar does not store your card
               number. Pro applies to AI Chat only; scholarships and other features stay unchanged.
