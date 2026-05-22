@@ -35,6 +35,9 @@ type RecommendationItem = {
   scholarship: ScholarshipPublic
   matchPercentage: number
   matchedInterests?: string[]
+  matchedTerms?: string[]
+  weightedMatchPercentage?: number
+  tfidfMatchPercentage?: number
 }
 
 type RecommendationsResponse = {
@@ -129,7 +132,7 @@ export default function AiMatchesPage() {
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Personalized matches</h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  Scholarships ranked by how closely they fit your profile — field, degree, country, and interests.
+                  
                 </p>
               </div>
               <Button asChild variant="outline" className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50">
@@ -197,7 +200,7 @@ export default function AiMatchesPage() {
                         {item.scholarship.title}
                       </CardTitle>
                       <Badge className="shrink-0 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80 hover:bg-emerald-100">
-                        {item.matchPercentage}% match
+                        {Math.round(item.matchPercentage)}% match
                       </Badge>
                     </div>
                   </CardHeader>
@@ -208,13 +211,13 @@ export default function AiMatchesPage() {
                     </p>
                     {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
-                        {item.matchedInterests.slice(0, 6).map((interest) => (
+                        {item.matchedInterests.slice(0, 4).map((label) => (
                           <Badge
-                            key={`${item.scholarship.id}-${interest}`}
+                            key={`${item.scholarship.id}-match-${label}`}
                             variant="outline"
                             className="border-emerald-200 bg-emerald-50/50 text-xs font-medium text-emerald-800"
                           >
-                            {interest}
+                            {label}
                           </Badge>
                         ))}
                       </div>
