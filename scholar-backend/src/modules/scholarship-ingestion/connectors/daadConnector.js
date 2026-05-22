@@ -1,14 +1,15 @@
 const { discoverProgrammeLinks } = require("./discoverProgrammeLinks");
 const { buildRecordsFromProgrammeList } = require("./buildRecordsFromProgrammeList");
-
-const DAAD_BASE = "https://www.daad.de/en/study-and-research-in-germany/scholarships";
-const DAAD_HUB = `${DAAD_BASE}/daad-scholarships/`;
+const {
+  DAAD_SCHOLARSHIP_DATABASE_HUB,
+  DAAD_PROGRAMME_URL_BY_EXTERNAL_ID,
+} = require("./daadProgrammeUrls");
 
 /** Curated Africa-relevant and major DAAD programme pages (English site). */
 const CURATED_DAAD_PROGRAMMES = [
   {
     externalId: "daad-in-region",
-    url: `${DAAD_HUB}in-region-scholarships/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-in-region"],
     organizationName: "DAAD",
     country: "Ethiopia",
     degreeLevel: "master",
@@ -18,7 +19,7 @@ const CURATED_DAAD_PROGRAMMES = [
   },
   {
     externalId: "daad-epos",
-    url: `${DAAD_HUB}development-related-postgraduate-courses-epos/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-epos"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "master",
@@ -28,7 +29,7 @@ const CURATED_DAAD_PROGRAMMES = [
   },
   {
     externalId: "daad-research-grants",
-    url: `${DAAD_HUB}research-grants/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-research-grants"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "phd",
@@ -38,7 +39,7 @@ const CURATED_DAAD_PROGRAMMES = [
   },
   {
     externalId: "daad-study-scholarships",
-    url: `${DAAD_HUB}study-scholarships/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-study-scholarships"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "master",
@@ -48,43 +49,43 @@ const CURATED_DAAD_PROGRAMMES = [
   },
   {
     externalId: "daad-study-stipends",
-    url: `${DAAD_HUB}study-stipends/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-study-stipends"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "bachelor",
     fieldOfStudy: "multi-disciplinary",
     fundingType: "fully_funded",
-    titleHint: "DAAD Study Stipends",
+    titleHint: "DAAD University Summer Courses",
   },
   {
     externalId: "daad-graduate-schools",
-    url: `${DAAD_HUB}graduate-schools/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-graduate-schools"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "phd",
     fieldOfStudy: "multi-disciplinary",
     fundingType: "fully_funded",
-    titleHint: "DAAD Graduate Schools",
+    titleHint: "DAAD Doctoral Programmes in Germany",
   },
   {
     externalId: "daad-undergraduate",
-    url: `${DAAD_HUB}undergraduate-scholarships/`,
+    url: DAAD_PROGRAMME_URL_BY_EXTERNAL_ID["daad-undergraduate"],
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "bachelor",
     fieldOfStudy: "multi-disciplinary",
     fundingType: "fully_funded",
-    titleHint: "DAAD Undergraduate Scholarships",
+    titleHint: "Deutschlandstipendium (Germany Scholarship)",
   },
   {
     externalId: "daad-funding-database",
-    url: `${DAAD_BASE}/database-of-international-programmes/`,
+    url: DAAD_SCHOLARSHIP_DATABASE_HUB,
     organizationName: "DAAD",
     country: "Germany",
     degreeLevel: "master",
     fieldOfStudy: "multi-disciplinary",
     fundingType: "fully_funded",
-    titleHint: "DAAD Scholarship Database — International Programmes",
+    titleHint: "DAAD Scholarship Database",
   },
 ];
 
@@ -106,10 +107,9 @@ function programmeFromUrl(url) {
 async function fetchDaadScholarships() {
   let discovered = [];
   try {
-    discovered = await discoverProgrammeLinks(DAAD_HUB, {
-      max: 12,
+    discovered = await discoverProgrammeLinks(DAAD_SCHOLARSHIP_DATABASE_HUB, {
+      max: 8,
       hostMustInclude: "daad.de",
-      pathMustInclude: "/scholarships/daad-scholarships/",
       relaxMatch: true,
       timeout: 25000,
       extraUrls: CURATED_DAAD_PROGRAMMES.map((p) => p.url),
@@ -121,7 +121,7 @@ async function fetchDaadScholarships() {
   const curatedUrls = new Set(CURATED_DAAD_PROGRAMMES.map((p) => p.url.replace(/\/+$/, "")));
   const discoveredOnly = discovered
     .filter((url) => !curatedUrls.has(url.replace(/\/+$/, "")))
-    .slice(0, 6)
+    .slice(0, 4)
     .map(programmeFromUrl);
 
   const curatedRecords = await buildRecordsFromProgrammeList(CURATED_DAAD_PROGRAMMES, {
@@ -146,4 +146,9 @@ async function fetchDaadScholarships() {
   return [...byUrl.values()];
 }
 
-module.exports = { fetchDaadScholarships, CURATED_DAAD_PROGRAMMES, DAAD_HUB };
+module.exports = {
+  fetchDaadScholarships,
+  CURATED_DAAD_PROGRAMMES,
+  DAAD_PROGRAMME_URL_BY_EXTERNAL_ID,
+  DAAD_SCHOLARSHIP_DATABASE_HUB,
+};

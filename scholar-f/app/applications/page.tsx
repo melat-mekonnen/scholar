@@ -25,9 +25,12 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { useStudentI18n, translateLabel } from "@/lib/student-i18n"
+import { StudentLanguageToggle } from "@/components/student-language-toggle"
 export default function ApplicationsPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t, lang } = useStudentI18n()
   const [items, setItems] = useState<StudentApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,7 +39,7 @@ export default function ApplicationsPage() {
     async function load() {
       setLoading(true)
       setError(null)
-      const { res, data, errorMessage } = await getMyApplications()
+      const { res, data, errorMessage } = await getMyApplications(lang)
       if (res.status === 401 || res.status === 403) {
         clearToken()
         router.replace("/signin")
@@ -51,7 +54,7 @@ export default function ApplicationsPage() {
       setLoading(false)
     }
     void load()
-  }, [router])
+  }, [router, lang])
 
   async function changeStatus(id: string, status: ApplicationStatus) {
     const { res, errorMessage } = await updateApplicationStatus(id, status)
@@ -92,8 +95,11 @@ export default function ApplicationsPage() {
 
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">My Applications</h1>
-          <ProfileAvatarLink />
+          <h1 className="text-lg font-semibold text-emerald-950">{t("My Applications")}</h1>
+          <div className="flex items-center gap-2">
+            <StudentLanguageToggle />
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <main className="relative flex-1 space-y-6 p-6">
@@ -207,7 +213,7 @@ export default function ApplicationsPage() {
                         {statusBadge(a.status)}
                         {a.scholarship.country ? (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">
-                            {a.scholarship.country}
+                            {translateLabel(lang, a.scholarship.country)}
                           </Badge>
                         ) : null}
                         {a.scholarship.startDate ? (

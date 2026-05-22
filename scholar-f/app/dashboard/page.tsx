@@ -12,6 +12,7 @@ import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
   normalizeScholarship,
+  formatScholarshipMetaLine,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
@@ -19,6 +20,8 @@ import { ScholarshipDates } from "@/components/scholarship-dates"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useStudentI18n } from "@/lib/student-i18n"
+import { StudentLanguageToggle } from "@/components/student-language-toggle"
 type DashboardStats = {
   activeApplications: number
   savedScholarships: number
@@ -31,6 +34,7 @@ type DashboardSummary = {
   recommendedScholarships: Array<{
     id: string
     title: string
+    organizationName?: string
     country: string
     deadline?: string
     applicationUrl?: string
@@ -55,6 +59,7 @@ function toScholarshipCard(row: DashboardSummary["recommendedScholarships"][numb
   return normalizeScholarship({
     id: row.id,
     title: row.title,
+    organizationName: row.organizationName,
     country: row.country,
     deadline: row.deadline,
     applicationUrl: row.applicationUrl,
@@ -65,6 +70,7 @@ function toScholarshipCard(row: DashboardSummary["recommendedScholarships"][numb
 export default function DashboardPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t, lang } = useStudentI18n()
 
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
@@ -73,7 +79,8 @@ export default function DashboardPage() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { res, data } = await apiFetchJson<DashboardSummary>("/dashboard/summary", {
+      const params = new URLSearchParams({ lang })
+      const { res, data } = await apiFetchJson<DashboardSummary>(`/dashboard/summary?${params.toString()}`, {
         method: "GET",
         auth: true,
       })
@@ -94,7 +101,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [router])
+  }, [router, lang])
 
   useEffect(() => {
     let cancelled = false
@@ -113,10 +120,10 @@ export default function DashboardPage() {
   const stats = summary?.stats
   const statCards = stats
     ? [
-        { title: "Active Applications", value: String(stats.activeApplications) },
-        { title: "Saved Scholarships", value: String(stats.savedScholarships) },
-        { title: "Recommended Matches", value: String(stats.recommendedMatches) },
-        { title: "Upcoming Deadlines", value: String(stats.upcomingDeadlines) },
+        { title: t("Active Applications"), value: String(stats.activeApplications) },
+        { title: t("Saved Scholarships"), value: String(stats.savedScholarships) },
+        { title: t("Recommended Matches"), value: String(stats.recommendedMatches) },
+        { title: t("Upcoming Deadlines"), value: String(stats.upcomingDeadlines) },
       ]
     : []
 
@@ -129,19 +136,23 @@ export default function DashboardPage() {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">Dashboard</h1>
-          <ProfileAvatarLink />
+          <h1 className="text-lg font-semibold text-emerald-950">{t("Dashboard")}</h1>
+          <div className="flex items-center gap-2">
+            <StudentLanguageToggle />
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <main className="flex-1 space-y-8 p-6">
           <div className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
             <div className="border-l-4 border-emerald-500 pl-4">
               <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""}{" "}
+                {t("Welcome back")}
+                {firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""}{" "}
                 👋
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Discover scholarships that match your profile.
+                {t("Discover scholarships that match your profile.")}
               </p>
             </div>
           </div>
@@ -171,7 +182,7 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-slate-900">Recommended Scholarships</h3>
+            <h3 className="mb-4 text-xl font-semibold text-slate-900">{t("Recommended Scholarships")}</h3>
 
             {loading && (
               <div className="grid md:grid-cols-3 gap-4">
@@ -225,7 +236,7 @@ export default function DashboardPage() {
                     </CardHeader>
 
                     <CardContent className="space-y-3">
-                      <p className="text-sm text-slate-500">Country: {s.country}</p>
+                      <p className="text-sm text-slate-500">{formatScholarshipMetaLine(t, s)}</p>
                       <ScholarshipDates scholarship={s} />
 
                       <div className="flex gap-2 pt-3">
@@ -234,7 +245,7 @@ export default function DashboardPage() {
                           asChild
                           className="rounded-md bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
                         >
-                          <Link href={`/scholarships?q=${encodeURIComponent(s.title)}`}>View</Link>
+                          <Link href={`/scholarships?q=${encodeURIComponent(s.title)}`}>{t("View")}</Link>
                         </Button>
                         <Button
                           size="sm"
@@ -249,7 +260,7 @@ export default function DashboardPage() {
                             })
                           }
                         >
-                          {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
+                          {getApplicationUrl(s) ? t("Apply") : t("Apply (link unavailable)")}
                         </Button>
                       </div>
                     </CardContent>

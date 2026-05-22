@@ -1,7 +1,23 @@
 const { query } = require("../infra/db/neonClient");
 const { curatedLeafSourceNames } = require("../modules/scholarship-ingestion/sourceNames");
+const { normalizeUrl } = require("../modules/scholarship-ingestion/urlNormalize");
+const { resolveFieldCategory } = require("../utils/fieldCategory");
+const { aggregateHostRegionFacets } = require("../utils/hostRegion");
 
 const CURATED_LEAF_SOURCES = curatedLeafSourceNames();
+
+const PUBLIC_SCHOLARSHIP_WHERE = `
+  status = 'verified'
+  AND COALESCE(record_type, 'scholarship') = 'scholarship'
+  AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE)
+`;
+
+function mapFacetRows(rows) {
+  return rows.map((row) => ({
+    value: row.value,
+    count: Number(row.count || 0),
+  }));
+}
 
 class ScholarshipRepository {
   async expirePastDeadline() {
@@ -33,6 +49,7 @@ class ScholarshipRepository {
     postedByUserId,
     status,
   }) {
+    const fieldCategory = resolveFieldCategory({ fieldOfStudy, title, degreeLevel });
     const result = await query(
       `INSERT INTO scholarships (
          title,
@@ -40,6 +57,7 @@ class ScholarshipRepository {
          country,
          degree_level,
          field_of_study,
+         field_category,
          funding_type,
          deadline,
          application_start_date,
@@ -50,7 +68,7 @@ class ScholarshipRepository {
          status,
          posted_by_user_id
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING id,
                  title,
                  organization_name,
@@ -73,6 +91,7 @@ class ScholarshipRepository {
         country,
         degreeLevel,
         fieldOfStudy,
+        fieldCategory,
         fundingType,
         deadline,
         applicationStartDate,
@@ -179,7 +198,8 @@ class ScholarshipRepository {
 
   async getDefaultRecommended(limit = 3) {
     const result = await query(
-      `SELECT id, title, country, deadline, application_url
+      `SELECT id, title, title_am, description, description_am, organization_name, organization_name_am,
+              country, country_am, field_of_study, field_of_study_am, deadline, application_url
        FROM scholarships
        WHERE is_recommended_default = TRUE
          AND status = 'verified'
@@ -194,7 +214,8 @@ class ScholarshipRepository {
   /** Fallback when no scholarships are flagged is_recommended_default. */
   async getUpcomingVerified(limit = 3) {
     const result = await query(
-      `SELECT id, title, country, deadline, application_url
+      `SELECT id, title, title_am, description, description_am, organization_name, organization_name_am,
+              country, country_am, field_of_study, field_of_study_am, deadline, application_url
        FROM scholarships
        WHERE status = 'verified'
          AND (deadline IS NULL OR deadline >= CURRENT_DATE)
@@ -206,50 +227,76 @@ class ScholarshipRepository {
   }
 
   async getPublicFilters() {
-    const countriesResult = await query(
-      `SELECT DISTINCT country
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND country IS NOT NULL
-       ORDER BY country ASC`,
-      []
-    );
+    const [hostCountriesResult, eligibleRegionsResult, degreeLevelsResult, fieldsResult, fundingTypesResult] =
+      await Promise.all([
+        query(
+          `SELECT COALESCE(host_country, country) AS value, COUNT(*)::int AS count
+           FROM scholarships
+           WHERE ${PUBLIC_SCHOLARSHIP_WHERE}
+             AND COALESCE(host_country, country) IS NOT NULL
+           GROUP BY 1
+           ORDER BY count DESC, value ASC`,
+          [],
+        ),
+        query(
+          `SELECT LOWER(TRIM(region)) AS value, COUNT(*)::int AS count
+           FROM scholarships, UNNEST(eligible_regions) AS region
+           WHERE ${PUBLIC_SCHOLARSHIP_WHERE}
+             AND eligible_regions IS NOT NULL
+             AND eligible_regions <> '{}'
+           GROUP BY 1
+           ORDER BY count DESC, value ASC`,
+          [],
+        ),
+        query(
+          `SELECT degree_level AS value, COUNT(*)::int AS count
+           FROM scholarships
+           WHERE ${PUBLIC_SCHOLARSHIP_WHERE}
+             AND degree_level IS NOT NULL
+           GROUP BY degree_level
+           ORDER BY count DESC, degree_level ASC`,
+          [],
+        ),
+        query(
+          `SELECT field_category AS value, COUNT(*)::int AS count
+           FROM scholarships
+           WHERE ${PUBLIC_SCHOLARSHIP_WHERE}
+             AND field_category IS NOT NULL
+           GROUP BY field_category
+           ORDER BY count DESC, field_category ASC`,
+          [],
+        ),
+        query(
+          `SELECT funding_type AS value, COUNT(*)::int AS count
+           FROM scholarships
+           WHERE ${PUBLIC_SCHOLARSHIP_WHERE}
+             AND funding_type IS NOT NULL
+           GROUP BY funding_type
+           ORDER BY count DESC, funding_type ASC`,
+          [],
+        ),
+      ]);
 
-    const degreeLevelsResult = await query(
-      `SELECT DISTINCT degree_level
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND degree_level IS NOT NULL
-       ORDER BY degree_level ASC`,
-      []
-    );
-
-    const fieldsResult = await query(
-      `SELECT DISTINCT field_of_study
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND field_of_study IS NOT NULL
-       ORDER BY field_of_study ASC`,
-      []
-    );
-
-    const fundingTypesResult = await query(
-      `SELECT DISTINCT funding_type
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND funding_type IS NOT NULL
-       ORDER BY funding_type ASC`,
-      []
-    );
+    const hostCountries = mapFacetRows(hostCountriesResult.rows);
 
     return {
-      countries: countriesResult.rows.map((r) => r.country),
-      degreeLevels: degreeLevelsResult.rows.map((r) => r.degree_level),
-      fieldsOfStudy: fieldsResult.rows.map((r) => r.field_of_study),
-      fundingTypes: fundingTypesResult.rows.map((r) => r.funding_type),
+      hostCountries,
+      hostRegions: aggregateHostRegionFacets(hostCountries),
+      eligibleRegions: mapFacetRows(eligibleRegionsResult.rows),
+      degreeLevels: mapFacetRows(degreeLevelsResult.rows),
+      fieldsOfStudy: mapFacetRows(fieldsResult.rows),
+      fieldCategories: mapFacetRows(fieldsResult.rows),
+      fundingTypes: mapFacetRows(fundingTypesResult.rows),
     };
   }
 
   async searchPublic({
     q,
-    countries,
+    hostCountries,
+    eligibleRegions,
+    availability,
     degreeLevels,
+    fieldCategories,
     fieldsOfStudy,
     fundingTypes,
     deadlineFrom,
@@ -259,6 +306,9 @@ class ScholarshipRepository {
     limit,
     status,
     bookmarkUserId,
+    applicationFilter,
+    applicationUserId,
+    shuffleSeed,
   }) {
     const where = [];
     const params = [];
@@ -277,9 +327,34 @@ class ScholarshipRepository {
       );
     }
 
-    if (countries && countries.length) {
-      params.push(countries);
-      where.push(`s.country = ANY($${params.length})`);
+    if (hostCountries && hostCountries.length) {
+      params.push(hostCountries);
+      where.push(`COALESCE(s.host_country, s.country) = ANY($${params.length})`);
+    }
+
+    if (eligibleRegions && eligibleRegions.length) {
+      params.push(eligibleRegions.map((r) => String(r).toLowerCase()));
+      where.push(`s.eligible_regions && $${params.length}::text[]`);
+    }
+
+    if (availability === "rolling") {
+      where.push(`(s.is_rolling = TRUE OR s.application_status = 'rolling')`);
+    } else if (availability === "open") {
+      where.push(`(
+        COALESCE(s.application_status, 'open') <> 'closed'
+        AND (
+          s.is_rolling = TRUE
+          OR s.application_status IN ('open', 'rolling')
+          OR s.deadline IS NULL
+          OR s.deadline >= CURRENT_DATE
+        )
+      )`);
+    } else if (availability === "closing_soon") {
+      where.push(`(
+        s.deadline IS NOT NULL
+        AND s.deadline >= CURRENT_DATE
+        AND s.deadline <= CURRENT_DATE + INTERVAL '30 days'
+      )`);
     }
 
     if (degreeLevels && degreeLevels.length) {
@@ -287,7 +362,10 @@ class ScholarshipRepository {
       where.push(`s.degree_level = ANY($${params.length})`);
     }
 
-    if (fieldsOfStudy && fieldsOfStudy.length) {
+    if (fieldCategories && fieldCategories.length) {
+      params.push(fieldCategories);
+      where.push(`s.field_category = ANY($${params.length})`);
+    } else if (fieldsOfStudy && fieldsOfStudy.length) {
       params.push(fieldsOfStudy);
       where.push(`s.field_of_study = ANY($${params.length})`);
     }
@@ -305,6 +383,30 @@ class ScholarshipRepository {
     if (deadlineTo) {
       params.push(deadlineTo);
       where.push(`s.deadline <= $${params.length}`);
+    }
+
+    if (applicationFilter === "applied" && applicationUserId) {
+      params.push(applicationUserId);
+      params.push(["submitted", "accepted"]);
+      where.push(
+        `EXISTS (
+           SELECT 1 FROM applications app
+           WHERE app.scholarship_id = s.id
+             AND app.user_id = $${params.length - 1}
+             AND app.status = ANY($${params.length})
+         )`,
+      );
+    } else if (applicationFilter === "not_applied" && applicationUserId) {
+      params.push(applicationUserId);
+      params.push(["submitted", "accepted"]);
+      where.push(
+        `NOT EXISTS (
+           SELECT 1 FROM applications app
+           WHERE app.scholarship_id = s.id
+             AND app.user_id = $${params.length - 1}
+             AND app.status = ANY($${params.length})
+         )`,
+      );
     }
 
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -335,13 +437,15 @@ class ScholarshipRepository {
         break;
       case "relevance":
       default:
-        // Basic relevance: if q present, prioritize title matches then recent
         if (q) {
           const qParamIndex = params.findIndex((v) => typeof v === "string" && v === `%${q.toLowerCase()}%`);
           const p = qParamIndex >= 0 ? `$${qParamIndex + 1}` : null;
           if (p) {
             orderBy = `ORDER BY (CASE WHEN LOWER(s.title) LIKE ${p} THEN 0 ELSE 1 END), s.created_at DESC`;
           }
+        } else {
+          params.push(shuffleSeed || "browse-default");
+          orderBy = `ORDER BY (CASE WHEN s.title ILIKE 'Commonwealth%' THEN 1 ELSE 0 END), md5(s.id::text || $${params.length})`;
         }
         break;
     }
@@ -367,9 +471,15 @@ class ScholarshipRepository {
               s.title,
               s.title_am,
               s.organization_name,
+              s.organization_name_am,
               s.country,
+              s.country_am,
+              s.host_country,
+              s.host_country_am,
               s.degree_level,
               s.field_of_study,
+              s.field_of_study_am,
+              s.field_category,
               s.funding_type,
               s.deadline,
               s.application_start_date,
@@ -381,6 +491,8 @@ class ScholarshipRepository {
               s.is_rolling,
               s.record_type,
               s.application_status,
+              s.created_at,
+              s.quality_score,
               (SELECT COUNT(*)::int FROM bookmarks bcnt WHERE bcnt.scholarship_id = s.id) AS bookmark_count,
               ${isBookmarkedSelect}
        FROM scholarships s
@@ -411,9 +523,15 @@ class ScholarshipRepository {
               s.title,
               s.title_am,
               s.organization_name,
+              s.organization_name_am,
               s.country,
+              s.country_am,
+              s.host_country,
+              s.host_country_am,
               s.degree_level,
               s.field_of_study,
+              s.field_of_study_am,
+              s.field_category,
               s.funding_type,
               s.deadline,
               s.application_start_date,
@@ -443,8 +561,8 @@ class ScholarshipRepository {
 
   async findById(id) {
     const result = await query(
-      `SELECT id, title, organization_name, country, degree_level, field_of_study, funding_type, deadline,
-              application_start_date, application_end_date, amount, description, application_url, status, rejection_reason, posted_by_user_id, created_at, updated_at
+      `SELECT id, title, title_am, organization_name, country, degree_level, field_of_study, funding_type, deadline,
+              application_start_date, application_end_date, amount, description, description_am, application_url, status, rejection_reason, posted_by_user_id, created_at, updated_at
        FROM scholarships
        WHERE id = $1
        LIMIT 1`,
@@ -453,23 +571,26 @@ class ScholarshipRepository {
     return result.rows[0] || null;
   }
 
-  async findImportDuplicate({ sourceUrl, externalId, normalizedSourceUrl }) {
+  async findContentForTranslation(id) {
+    const result = await query(
+      `SELECT id, title, title_am, description, description_am, status,
+              organization_name, organization_name_am, country, country_am,
+              host_country, host_country_am, field_of_study, field_of_study_am
+       FROM scholarships
+       WHERE id = $1
+       LIMIT 1`,
+      [id],
+    );
+    return result.rows[0] || null;
+  }
+
+  async findImportDuplicate({ sourceUrl, externalId, normalizedSourceUrl, sourceName }) {
     if (!sourceUrl && !externalId && !normalizedSourceUrl) return null;
-    if (externalId) {
-      const byExt = await query(
-        `SELECT id, title, source_url, application_url, external_id, status, country,
-                degree_level, description, ingestion_tier
-         FROM scholarships
-         WHERE external_id = $1
-         LIMIT 1`,
-        [externalId],
-      );
-      if (byExt.rows[0]) return byExt.rows[0];
-    }
     if (sourceUrl) {
       const bySource = await query(
         `SELECT id, title, source_url, application_url, external_id, status, country,
-                degree_level, description, ingestion_tier
+                degree_level, description, ingestion_tier, source_name, organization_name,
+                quality_score, normalized_source_url
          FROM scholarships
          WHERE source_url = $1
          LIMIT 1`,
@@ -480,7 +601,8 @@ class ScholarshipRepository {
     if (normalizedSourceUrl) {
       const byNorm = await query(
         `SELECT id, title, source_url, application_url, external_id, status, country,
-                degree_level, description, ingestion_tier
+                degree_level, description, ingestion_tier, source_name, organization_name,
+                quality_score, normalized_source_url
          FROM scholarships
          WHERE normalized_source_url = $1
          LIMIT 1`,
@@ -488,20 +610,54 @@ class ScholarshipRepository {
       );
       if (byNorm.rows[0]) return byNorm.rows[0];
     }
+    if (externalId && sourceName) {
+      const bySourceExt = await query(
+        `SELECT id, title, source_url, application_url, external_id, status, country,
+                degree_level, description, ingestion_tier, source_name, organization_name,
+                quality_score, normalized_source_url
+         FROM scholarships
+         WHERE external_id = $1
+           AND source_name = $2
+         LIMIT 1`,
+        [externalId, sourceName],
+      );
+      if (bySourceExt.rows[0]) return bySourceExt.rows[0];
+    }
     return null;
   }
 
   async findByApplicationUrl(applicationUrl) {
     if (!applicationUrl) return null;
-    const result = await query(
+    const normalizedTarget = normalizeUrl(applicationUrl);
+    if (!normalizedTarget) return null;
+
+    const exact = await query(
       `SELECT id, title, source_url, application_url, external_id, status, country,
-              degree_level, description, ingestion_tier
+              degree_level, description, ingestion_tier, source_name, organization_name,
+              quality_score, normalized_source_url
        FROM scholarships
        WHERE application_url = $1
        LIMIT 1`,
       [applicationUrl],
     );
-    return result.rows[0] || null;
+    if (exact.rows[0] && normalizeUrl(exact.rows[0].application_url) === normalizedTarget) {
+      return exact.rows[0];
+    }
+
+    const { rows } = await query(
+      `SELECT id, title, source_url, application_url, external_id, status, country,
+              degree_level, description, ingestion_tier, source_name, organization_name,
+              quality_score, normalized_source_url
+       FROM scholarships
+       WHERE application_url IS NOT NULL
+         AND status NOT IN ('duplicate', 'rejected', 'expired')`,
+    );
+    for (const row of rows) {
+      if (normalizeUrl(row.application_url) === normalizedTarget) {
+        return row;
+      }
+    }
+    return null;
   }
 
   async listImportCandidatesByCountry(country, limit = 100) {
@@ -547,7 +703,9 @@ class ScholarshipRepository {
     extractedFacts = null,
     recordType = "scholarship",
     applicationStatus = null,
+    replaceDescription = false,
   }) {
+    const fieldCategory = resolveFieldCategory({ fieldOfStudy, title, degreeLevel });
     const result = await query(
       `INSERT INTO scholarships (
          title,
@@ -557,6 +715,7 @@ class ScholarshipRepository {
          host_country,
          degree_level,
          field_of_study,
+         field_category,
          funding_type,
          deadline,
          application_start_date,
@@ -580,7 +739,7 @@ class ScholarshipRepository {
          application_status,
          discovered_at
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,NOW())
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,NOW())
        ON CONFLICT (source_url) WHERE source_url IS NOT NULL AND source_url <> ''
        DO UPDATE SET
          title = EXCLUDED.title,
@@ -590,12 +749,14 @@ class ScholarshipRepository {
          host_country = COALESCE(EXCLUDED.host_country, scholarships.host_country),
          degree_level = EXCLUDED.degree_level,
          field_of_study = EXCLUDED.field_of_study,
+         field_category = EXCLUDED.field_category,
          funding_type = EXCLUDED.funding_type,
          deadline = COALESCE(EXCLUDED.deadline, scholarships.deadline),
          application_start_date = EXCLUDED.application_start_date,
          application_end_date = EXCLUDED.application_end_date,
          amount = EXCLUDED.amount,
          description = CASE
+           WHEN $30::boolean THEN EXCLUDED.description
            WHEN scholarships.description ILIKE '%Fulbright U.S. Student Program provides grants%'
              THEN EXCLUDED.description
            WHEN scholarships.description ILIKE '%Open toolbar Accessibility%'
@@ -603,6 +764,7 @@ class ScholarshipRepository {
            WHEN scholarships.description ILIKE '%Increase Text Decrease Text%'
              THEN EXCLUDED.description
            WHEN LENGTH(COALESCE(EXCLUDED.description, '')) > LENGTH(COALESCE(scholarships.description, ''))
+             AND LENGTH(COALESCE(EXCLUDED.description, '')) < LENGTH(COALESCE(scholarships.description, '')) * 3
              THEN EXCLUDED.description
            ELSE scholarships.description
          END,
@@ -641,6 +803,7 @@ class ScholarshipRepository {
         hostCountry || country,
         degreeLevel || null,
         fieldOfStudy || null,
+        fieldCategory,
         fundingType || null,
         deadline || null,
         applicationStartDate || null,
@@ -662,6 +825,7 @@ class ScholarshipRepository {
         qualityScore != null ? Number(qualityScore) : null,
         recordType || "scholarship",
         applicationStatus || null,
+        Boolean(replaceDescription),
       ],
     );
     return result.rows[0] || null;
@@ -786,7 +950,17 @@ class ScholarshipRepository {
     ];
 
     if (onlyMissingAm) {
-      where.push(`(description_am IS NULL OR title_am IS NULL)`);
+      where.push(`(
+        description_am IS NULL OR title_am IS NULL
+        OR (organization_name IS NOT NULL AND organization_name <> '' AND organization_name_am IS NULL)
+        OR (country IS NOT NULL AND country <> '' AND country_am IS NULL)
+        OR (field_of_study IS NOT NULL AND field_of_study <> '' AND field_of_study_am IS NULL)
+        OR (
+          host_country IS NOT NULL AND host_country <> ''
+          AND host_country IS DISTINCT FROM country
+          AND host_country_am IS NULL
+        )
+      )`);
     }
     if (onlyUnrefined) {
       where.push(`(extracted_facts IS NULL OR description NOT LIKE '## Overview%')`);
@@ -818,12 +992,16 @@ class ScholarshipRepository {
        SET description = COALESCE($2, description),
            title_am = COALESCE($3, title_am),
            description_am = COALESCE($4, description_am),
-           extracted_facts = COALESCE($5, extracted_facts),
-           application_status = COALESCE($6, application_status),
-           deadline = COALESCE($7, deadline),
-           application_start_date = COALESCE($8, application_start_date),
-           application_end_date = COALESCE($9, application_end_date),
-           is_rolling = COALESCE($10, is_rolling),
+           organization_name_am = COALESCE($5, organization_name_am),
+           country_am = COALESCE($6, country_am),
+           host_country_am = COALESCE($7, host_country_am),
+           field_of_study_am = COALESCE($8, field_of_study_am),
+           extracted_facts = COALESCE($9, extracted_facts),
+           application_status = COALESCE($10, application_status),
+           deadline = COALESCE($11, deadline),
+           application_start_date = COALESCE($12, application_start_date),
+           application_end_date = COALESCE($13, application_end_date),
+           is_rolling = COALESCE($14, is_rolling),
            updated_at = NOW()
        WHERE id = $1
        RETURNING id, title`,
@@ -832,6 +1010,10 @@ class ScholarshipRepository {
         fields.description || null,
         fields.titleAm || null,
         fields.descriptionAm || null,
+        fields.organizationNameAm || null,
+        fields.countryAm || null,
+        fields.hostCountryAm || null,
+        fields.fieldOfStudyAm || null,
         fields.extractedFacts ? JSON.stringify(fields.extractedFacts) : null,
         fields.applicationStatus || null,
         fields.deadline || null,

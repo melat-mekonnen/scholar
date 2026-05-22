@@ -33,6 +33,8 @@ function normalizeScholarshipRecord(raw) {
     eligibleRegions: Array.isArray(raw.eligibleRegions) ? raw.eligibleRegions : [],
     hostCountry: raw.hostCountry ? String(raw.hostCountry).trim() : null,
     descriptionFromSite: raw.descriptionFromSite !== false,
+    extractedFacts:
+      raw.extractedFacts && typeof raw.extractedFacts === "object" ? raw.extractedFacts : null,
   };
 }
 

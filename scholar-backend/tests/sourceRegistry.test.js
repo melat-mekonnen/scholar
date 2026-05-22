@@ -57,6 +57,20 @@ test("parseRequestedSources legacy phase1 alias still resolves", () => {
   assert.deepEqual(keys, CURATED_LEAF_SOURCE_IDS);
 });
 
+test("parseRequestedSources phase2 alias runs US aggregator discovery only", () => {
+  const { US_AGGREGATOR_DISCOVERY_SOURCE_IDS } = require("../src/modules/scholarship-ingestion/sourceRegistry");
+  const keys = parseRequestedSources("phase2");
+  assert.deepEqual(keys, US_AGGREGATOR_DISCOVERY_SOURCE_IDS);
+  assert.ok(keys.includes("us_aggregator_discovery"));
+  assert.ok(!keys.includes("curated_leaf"));
+});
+
+test("getSourceConfig us_aggregator_discovery is aggregator type", () => {
+  const config = getSourceConfig("us_aggregator_discovery");
+  assert.equal(config.sourceType, SOURCE_TYPES.AGGREGATOR);
+  assert.equal(config.sourceName, "US_AGGREGATOR_DISCOVERY");
+});
+
 test("getSourceConfigBySourceName resolves registry entry", () => {
   const config = getSourceConfigBySourceName("AFRICAN_MINISTRIES");
   assert.equal(config.sourceType, SOURCE_TYPES.GOVERNMENT);

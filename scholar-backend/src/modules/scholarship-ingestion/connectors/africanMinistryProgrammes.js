@@ -23,7 +23,7 @@ const AFRICAN_MINISTRY_PROGRAMME_URLS = {
   ethiopia: [],
   south_africa: [
     {
-      url: "https://www.nsfas.org.za/content/how-it-works.html",
+      url: "https://www.nsfas.org.za/content/index.html",
       titleHint: "NSFAS Financial Aid for South African Students",
       organizationName: "National Student Financial Aid Scheme — South Africa",
       externalId: "za-nsfas-how-it-works",

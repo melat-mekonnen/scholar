@@ -2,6 +2,7 @@ const { CURATED_DAAD_PROGRAMMES } = require("../connectors/daadConnector");
 const { commonwealthSharedLeafProgrammes } = require("./commonwealthSharedUniversities");
 const { commonwealthDistanceLeafProgrammes } = require("./commonwealthDistanceCourses");
 const { cheveningLeafProgrammes } = require("./cheveningProgrammes");
+const { usInternationalLeafProgrammes } = require("./usInternationalLeafProgrammes");
 const {
   commonwealthMastersNominatorLeafProgrammes,
   commonwealthPhdNominatorLeafProgrammes,
@@ -13,28 +14,6 @@ const { sharedUniversityCourseProgrammes } = require("./sharedUniversityCourses"
 
 /** Programmes fetched from official pages (already leaf-level URLs). */
 const SCRAPE_PROGRAMME_DEFINITIONS = [
-  // —— United States ——
-  {
-    externalId: "fulbright-foreign-student",
-    url: "https://foreign.fulbrightonline.org/apply",
-    organizationName: "Fulbright Program",
-    country: "United States",
-    degreeLevel: "master",
-    fieldOfStudy: "multiple disciplines",
-    fundingType: "fully_funded",
-    titleHint: "Fulbright Foreign Student Program",
-  },
-  {
-    externalId: "fulbright-flta",
-    url: "https://foreign.fulbrightonline.org/about/types-of-awards/fulbright-foreign-language-teaching-assistant-flta-grants",
-    organizationName: "Fulbright Program",
-    country: "United States",
-    degreeLevel: "bachelor",
-    fieldOfStudy: "language teaching",
-    fundingType: "fully_funded",
-    titleHint: "Fulbright FLTA Program",
-  },
-
   // —— Germany (DAAD curated — no open-ended hub crawl) ——
   ...CURATED_DAAD_PROGRAMMES.filter((p) => p.externalId !== "daad-funding-database"),
 
@@ -90,7 +69,7 @@ const SCRAPE_PROGRAMME_DEFINITIONS = [
   },
   {
     externalId: "mastercard-fdn-scholars",
-    url: "https://mastercardfdn.org/research/scholars-program/",
+    url: "https://mastercardfdn.org/all/scholars/",
     organizationName: "Mastercard Foundation",
     country: "Canada",
     degreeLevel: "master",
@@ -99,7 +78,7 @@ const SCRAPE_PROGRAMME_DEFINITIONS = [
   },
   {
     externalId: "mandelarhodes",
-    url: "https://www.mandelarhodes.org/apply/",
+    url: "https://www.mandelarhodes.org/scholarship/apply/",
     organizationName: "Mandela Rhodes Foundation",
     country: "South Africa",
     degreeLevel: "master",
@@ -108,7 +87,7 @@ const SCRAPE_PROGRAMME_DEFINITIONS = [
   },
   {
     externalId: "ashinaga-africa",
-    url: "https://ashinaga.org/scholarships/",
+    url: "https://www.ashinaga.org/en/our-work/ashinaga-africa-initiative/",
     organizationName: "Ashinaga Africa Initiative",
     country: "Japan",
     degreeLevel: "bachelor",
@@ -146,7 +125,7 @@ const SCRAPE_PROGRAMME_DEFINITIONS = [
   },
   {
     externalId: "za-nsfas",
-    url: "https://www.nsfas.org.za/content/how-it-works.html",
+    url: "https://www.nsfas.org.za/content/index.html",
     organizationName: "National Student Financial Aid Scheme",
     country: "South Africa",
     degreeLevel: "bachelor",
@@ -162,15 +141,6 @@ const SCRAPE_PROGRAMME_DEFINITIONS = [
     fundingType: "fully_funded",
     titleHint: "Government of Ghana Scholarship for Tertiary Education",
   },
-  {
-    externalId: "et-moe-foreign-study",
-    url: "https://www.moe.gov.et/en/foreign-study-programs",
-    organizationName: "Ministry of Education — Ethiopia",
-    country: "Ethiopia",
-    degreeLevel: "master",
-    fundingType: "fully_funded",
-    titleHint: "Ethiopia Foreign Study Programmes",
-  },
 ];
 
 const SCRAPE_PROGRAMME_DESCRIPTIONS = {
@@ -179,19 +149,19 @@ const SCRAPE_PROGRAMME_DESCRIPTIONS = {
   "fulbright-flta":
     "Fulbright Foreign Language Teaching Assistant (FLTA) grants place early-career teachers of English or foreign languages at US colleges for one academic year to teach language and culture.",
   "daad-in-region":
-    "DAAD In-Country and In-Region scholarships support postgraduate study for candidates in Sub-Saharan Africa at selected universities, often with a development-focused master's curriculum.",
+    "DAAD In-Country and In-Region scholarships provide fully funded postgraduate study for candidates in Sub-Saharan Africa at selected universities. Check eligibility and apply through the official DAAD scholarship programme page.",
   "daad-epos":
-    "DAAD Development-Related Postgraduate Courses (EPOS) fund international graduates from developing countries to pursue development-oriented master's degrees at German universities.",
+    "DAAD Development-Related Postgraduate Courses (EPOS) offer fully funded scholarships for international graduates from developing countries to pursue development-oriented master's degrees at German universities. Apply via the official programme page.",
   "daad-research-grants":
-    "DAAD Research Grants support highly qualified doctoral candidates and young academics to carry out research or doctoral work in Germany at universities or research institutions.",
+    "DAAD Research Grants provide fully funded scholarship support for doctoral candidates and young academics to carry out research in Germany at universities or research institutes. Review eligibility and apply on the official page.",
   "daad-study-scholarships":
     "DAAD Study Scholarships provide funding for international graduates to complete a full master's degree programme or additional study at a state or state-recognised German university.",
   "daad-study-stipends":
-    "DAAD Study Stipends support individual semesters or short study visits for international students at German higher education institutions under defined programme rules.",
+    "DAAD University Summer Courses offer scholarship funding for international students and graduates to attend intensive German-language and subject courses at German universities. Apply through the official DAAD programme page.",
   "daad-graduate-schools":
-    "DAAD funding for structured graduate schools supports doctoral researchers within organised programmes at German universities, often with interdisciplinary training.",
+    "DAAD Doctoral Programmes in Germany provide fully funded PhD scholarships for international candidates at state or state-recognised universities and research institutes. Check eligibility and apply via the official page.",
   "daad-undergraduate":
-    "DAAD undergraduate scholarships support international students for bachelor's-level study or preparatory programmes at German higher education institutions where offered.",
+    "The Deutschlandstipendium supports high-achieving students at German higher education institutions with monthly scholarship funding alongside private and public co-financing.",
   "australia-awards-scholarships":
     "Australia Awards Scholarships are long-term development awards funded by the Australian Government. They support study at participating Australian institutions for people from partner countries in the Indo-Pacific and beyond.",
   "australia-awards-africa":
@@ -218,8 +188,6 @@ const SCRAPE_PROGRAMME_DESCRIPTIONS = {
     "NSFAS provides financial aid to eligible South African students at public universities and TVET colleges, covering tuition and allowances according to means-tested criteria.",
   "gh-moe-scholarship":
     "The Government of Ghana scholarship for tertiary education supports eligible Ghanaian students pursuing approved programmes at accredited institutions according to Ministry of Education guidelines.",
-  "et-moe-foreign-study":
-    "Ethiopia's Ministry of Education foreign study programmes coordinate government-sponsored opportunities for Ethiopian students to pursue higher education abroad in priority disciplines.",
 };
 
 function leafProgrammeDefinitions() {
@@ -232,6 +200,7 @@ function leafProgrammeDefinitions() {
     ...commonwealthPhdNominatorLeafProgrammes(),
     ...commonwealthProfessionalFellowshipLeafProgramme(),
     ...cheveningLeafProgrammes(),
+    ...usInternationalLeafProgrammes(),
   ];
 }
 
@@ -261,6 +230,7 @@ function catalogSummary() {
       commonwealthMastersNominators: commonwealthMastersNominatorLeafProgrammes().length,
       commonwealthPhdNominators: commonwealthPhdNominatorLeafProgrammes().length,
       chevening: cheveningLeafProgrammes().length,
+      usInternational: usInternationalLeafProgrammes().length,
       scrapeProgrammes: scrape.length,
     },
   };

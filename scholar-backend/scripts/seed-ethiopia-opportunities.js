@@ -41,7 +41,7 @@ const opportunities = [
     amount: "Full tuition + living allowance + return flights",
     description:
       "Fully funded UK government leadership scholarship for one-year Masters degrees. Usually opens in August and closes in early November. Standard eligibility includes a completed Bachelor's degree and around two years of work experience.",
-    application_url: "https://www.chevening.org/apply/",
+    application_url: "https://www.chevening.org/scholarship/ethiopia/",
     status: "verified",
   },
   {

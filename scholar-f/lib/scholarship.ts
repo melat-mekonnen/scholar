@@ -1,5 +1,77 @@
 import { apiFetchJson } from "@/lib/api"
 
+export type FilterFacet = {
+  value: string
+  count: number
+}
+
+export function normalizeFilterFacets(
+  items?: Array<string | FilterFacet> | null,
+): FilterFacet[] {
+  if (!items?.length) return []
+  return items.map((item) =>
+    typeof item === "string" ? { value: item, count: 0 } : item,
+  )
+}
+
+export function formatFacetLabel(value: string, count: number): string {
+  if (count > 0) return `${value} (${count.toLocaleString()})`
+  return value
+}
+
+export function degreeLevelLabel(level: string): string {
+  return level.replace(/_/g, " ")
+}
+
+export function hostRegionLabel(region: string): string {
+  switch (region.toLowerCase()) {
+    case "united_kingdom":
+      return "United Kingdom"
+    case "north_america":
+      return "North America"
+    case "europe":
+      return "Europe"
+    case "africa":
+      return "Africa"
+    case "asia_pacific":
+      return "Asia-Pacific"
+    case "global":
+      return "Global / multi-country"
+    default:
+      return region.replace(/_/g, " ")
+  }
+}
+
+export function eligibleRegionLabel(region: string): string {
+  switch (region.toLowerCase()) {
+    case "africa":
+      return "Africa"
+    case "commonwealth":
+      return "Commonwealth"
+    case "developing":
+      return "Developing countries"
+    case "asia":
+      return "Asia"
+    default:
+      return region.replace(/_/g, " ")
+  }
+}
+
+export function availabilityFilterLabel(value: AvailabilityFilter): string {
+  switch (value) {
+    case "open":
+      return "Open now"
+    case "rolling":
+      return "Rolling"
+    case "closing_soon":
+      return "Closing soon"
+    default:
+      return value
+  }
+}
+
+export type AvailabilityFilter = "" | "open" | "rolling" | "closing_soon"
+
 export type DegreeLevel = "high_school" | "bachelor" | "master" | "phd"
 
 export type RecordType = "scholarship" | "study_programme"
@@ -17,6 +89,7 @@ export type ScholarshipPublic = {
   country: string
   degreeLevel: DegreeLevel
   fieldOfStudy?: string
+  fieldCategory?: string
   fundingType?: string
   deadline?: string
   startDate?: string
@@ -151,6 +224,7 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
     country: String(r.country ?? ""),
     degreeLevel: dl,
     fieldOfStudy: str(r.fieldOfStudy) ?? str(r.field_of_study),
+    fieldCategory: str(r.fieldCategory) ?? str(r.field_category),
     fundingType: str(r.fundingType) ?? str(r.funding_type),
     deadline: str(r.deadline),
     startDate:
@@ -222,6 +296,18 @@ export function filterDescriptionSectionsForDisplay(
   )
 }
 
+const URL_ONLY_LINE = /^https?:\/\/\S+\/?$/i
+
+/** Strip bare URL lines from description prose (apply link lives in the footer). */
+export function formatDescriptionBodyForDisplay(body: string): string {
+  return body
+    .split("\n")
+    .filter((line) => !URL_ONLY_LINE.test(line.trim()))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+}
+
 export function isStudyProgramme(s: Pick<ScholarshipPublic, "recordType" | "fundingType">): boolean {
   return s.recordType === "study_programme" || s.fundingType === "not_funded"
 }
@@ -242,10 +328,66 @@ export function applicationStatusLabel(status?: string): string | null {
   }
 }
 
+export function fieldCategoryLabel(category?: string): string {
+  if (!category) return "General / multi-disciplinary"
+  switch (category.toLowerCase()) {
+    case "public_health":
+      return "Public health"
+    case "international_development":
+      return "International development"
+    case "business":
+      return "Business & management"
+    case "data_science":
+      return "Data science & analytics"
+    case "law":
+      return "Law"
+    case "education":
+      return "Education"
+    case "engineering":
+      return "Engineering & technology"
+    case "research":
+      return "Doctoral research"
+    case "professional_development":
+      return "Professional development"
+    case "general":
+      return "General / multi-disciplinary"
+    default:
+      return category.replace(/_/g, " ")
+  }
+}
+
 export function fundingTypeLabel(fundingType?: string): string {
   if (!fundingType) return "—"
   if (fundingType === "not_funded") return "Fees apply"
   return fundingType.replace(/_/g, " ")
+}
+
+export function formatScholarshipMetaLine(
+  t: (text: string) => string,
+  s: Pick<
+    ScholarshipPublic,
+    "organizationName" | "country" | "degreeLevel" | "fieldCategory" | "fieldOfStudy"
+  >,
+): string {
+  return [
+    s.organizationName ? t(s.organizationName.trim()) : null,
+    s.country ? t(s.country.trim()) : null,
+    s.degreeLevel ? t(degreeLevelLabel(s.degreeLevel)) : null,
+    s.fieldCategory
+      ? t(fieldCategoryLabel(s.fieldCategory))
+      : s.fieldOfStudy
+        ? t(s.fieldOfStudy.trim())
+        : null,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+}
+
+export function translateFundingTypeLabel(
+  t: (text: string) => string,
+  fundingType?: string,
+): string {
+  return t(fundingTypeLabel(fundingType))
 }
 
 export type OpenScholarshipApplicationResult = "opened" | "no_url" | "blocked"

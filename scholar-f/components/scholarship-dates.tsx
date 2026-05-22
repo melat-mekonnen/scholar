@@ -1,8 +1,9 @@
+"use client"
+
 import { CalendarDays } from "lucide-react"
 
 import {
   applicationStatusLabel,
-  formatScholarshipDeadlineLabel,
   getScholarshipDateLines,
   hasScholarshipDateInfo,
   type ScholarshipPublic,
@@ -67,7 +68,7 @@ export function ScholarshipDates({ scholarship, className, compact = false }: Pr
               line.variant === "rolling" && "text-emerald-700",
             )}
           >
-            {line.value}
+            {t(line.value)}
           </span>
         </div>
       ))}

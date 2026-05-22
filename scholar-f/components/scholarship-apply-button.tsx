@@ -1,5 +1,6 @@
 "use client"
 
+import { ExternalLink } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,8 @@ type Props = {
   /** Called when the application is saved to the tracker (201 or 409). */
   onTracked?: (scholarshipId: string) => void
   unavailableLabel?: string
+  label?: string
+  showExternalIcon?: boolean
 }
 
 /**
@@ -28,6 +31,8 @@ export function ScholarshipApplyButton({
   size = "sm",
   onTracked,
   unavailableLabel = "Apply (link unavailable)",
+  label = "Apply",
+  showExternalIcon = false,
 }: Props) {
   const router = useRouter()
   const { toast } = useToast()
@@ -76,7 +81,8 @@ export function ScholarshipApplyButton({
           void trackApplication()
         }}
       >
-        Apply
+        {showExternalIcon && <ExternalLink className="mr-2 h-4 w-4 shrink-0" />}
+        {label}
       </a>
     </Button>
   )

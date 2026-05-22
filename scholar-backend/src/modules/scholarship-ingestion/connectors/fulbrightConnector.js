@@ -1,9 +1,16 @@
 const { buildRecordFromOfficialPage } = require("./officialPageRecord");
+const {
+  FULBRIGHT_FOREIGN_STUDENT_URL,
+  FULBRIGHT_FLTA_URL,
+  FULBRIGHT_FOREIGN_STUDENT_APPLY_URL,
+  FULBRIGHT_FLTA_APPLY_URL,
+} = require("../leafProgrammes/fulbrightProgrammeUrls");
 
 const PROGRAMMES = [
   {
     externalId: "fulbright-foreign-student",
-    url: "https://foreign.fulbrightonline.org/apply",
+    url: FULBRIGHT_FOREIGN_STUDENT_URL,
+    applicationUrl: FULBRIGHT_FOREIGN_STUDENT_APPLY_URL,
     organizationName: "Fulbright Program",
     country: "United States",
     degreeLevel: "master",
@@ -12,7 +19,8 @@ const PROGRAMMES = [
   },
   {
     externalId: "fulbright-flta",
-    url: "https://foreign.fulbrightonline.org/",
+    url: FULBRIGHT_FLTA_URL,
+    applicationUrl: FULBRIGHT_FLTA_APPLY_URL,
     organizationName: "Fulbright Program",
     country: "United States",
     degreeLevel: "bachelor",

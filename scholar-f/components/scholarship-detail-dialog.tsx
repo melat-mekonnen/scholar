@@ -1,17 +1,17 @@
 "use client"
 
 import { useEffect, useState, type ReactNode } from "react"
-import { ExternalLink } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import {
   mergeScholarshipDetail,
   normalizeScholarship,
-  getApplicationUrl,
   parseDescriptionSections,
   filterDescriptionSectionsForDisplay,
-  fundingTypeLabel,
+  formatDescriptionBodyForDisplay,
+  formatScholarshipMetaLine,
   isStudyProgramme,
+  translateFundingTypeLabel,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { useStudentI18n } from "@/lib/student-i18n"
@@ -20,11 +20,13 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { ScholarshipDates } from "@/components/scholarship-dates"
 
 type Props = {
@@ -79,11 +81,8 @@ export function ScholarshipDetailDialog({
   }, [open, summary, lang])
 
   const merged = detail ?? summary
-  const applyUrl = merged ? getApplicationUrl(merged) : undefined
-  const degreeLevelLabel =
-    merged && typeof merged.degreeLevel === "string"
-      ? merged.degreeLevel.replace("_", " ")
-      : "—"
+  const metaLine = merged ? formatScholarshipMetaLine(t, merged) : ""
+
   const sections = merged?.description
     ? filterDescriptionSectionsForDisplay(parseDescriptionSections(merged.description))
     : []
@@ -91,102 +90,99 @@ export function ScholarshipDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(90vh,720px)] max-w-lg flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="shrink-0 border-b px-6 py-4 text-left">
-          <DialogTitle className="pr-8 text-left leading-snug">
-            {merged?.title ?? "Scholarship"}
+      <DialogContent className="flex max-h-[min(90vh,720px)] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <div className="pointer-events-none h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
+
+        <DialogHeader className="shrink-0 space-y-2 border-b px-6 py-4 text-left">
+          <DialogTitle className="pr-8 text-left text-lg leading-snug text-slate-900">
+            {merged?.title ?? t("Scholarship")}
           </DialogTitle>
           {merged && (
-            <p className="text-muted-foreground pt-1 text-sm">
-              {merged.country} · {degreeLevelLabel}
-              {merged.fieldOfStudy ? ` · ${merged.fieldOfStudy}` : ""}
-            </p>
+            <DialogDescription className="text-left text-sm text-slate-500">
+              {metaLine}
+            </DialogDescription>
           )}
-          {merged && <ScholarshipDates scholarship={merged} className="pt-2" compact />}
+          {merged && <ScholarshipDates scholarship={merged} className="pt-1" compact />}
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-hidden">
-          <ScrollArea className="h-full max-h-[min(52vh,480px)]">
-            <div className="space-y-4 px-6 py-4 pb-6 pr-4">
-              {loading && (
-                <p className="text-muted-foreground text-sm">Loading full details…</p>
-              )}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="space-y-4 px-6 py-5">
+            {loading && (
+              <div className="space-y-3" aria-live="polite" aria-busy="true">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            )}
 
-              {merged && (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">
-                      {isProgramme ? t("Study programme") : t("Verified")}
+            {merged && !loading && (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                    {isProgramme ? t("Study programme") : t("Verified")}
+                  </Badge>
+                  {merged.fundingType && (
+                    <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                      {translateFundingTypeLabel(t, merged.fundingType)}
                     </Badge>
-                    {merged.fundingType && (
-                      <Badge variant="outline">{t(fundingTypeLabel(merged.fundingType))}</Badge>
-                    )}
-                    {merged.amount && <Badge variant="outline">{merged.amount}</Badge>}
-                  </div>
-
-                  {sections.length > 0 ? (
-                    <div className="space-y-4">
-                      {sections.map((section) => (
-                        <div key={section.heading} className="space-y-1">
-                          <p className="text-sm font-medium">{section.heading}</p>
-                          <p className="text-muted-foreground whitespace-pre-wrap break-words text-sm leading-relaxed">
-                            {section.body}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : merged.description ? (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">
-                        {isProgramme ? t("About this programme") : t("About this scholarship")}
-                      </p>
-                      <p className="text-muted-foreground whitespace-pre-wrap break-words text-sm leading-relaxed">
-                        {merged.description}
-                      </p>
-                    </div>
-                  ) : (
-                    !loading && (
-                      <p className="text-muted-foreground text-sm">
-                        No extended description is available for this listing.
-                      </p>
-                    )
                   )}
-                </>
-              )}
-            </div>
-          </ScrollArea>
+                  {merged.amount && (
+                    <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                      {merged.amount}
+                    </Badge>
+                  )}
+                </div>
+
+                {sections.length > 0 ? (
+                  <div className="space-y-5">
+                    {sections.map((section) => {
+                      const body = formatDescriptionBodyForDisplay(section.body)
+                      if (!body) return null
+                      return (
+                        <section key={section.heading} className="space-y-2">
+                          <h3 className="text-sm font-semibold text-slate-900">{t(section.heading)}</h3>
+                          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-600">
+                            {body}
+                          </p>
+                        </section>
+                      )
+                    })}
+                  </div>
+                ) : merged.description ? (
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      {isProgramme ? t("About this programme") : t("About this scholarship")}
+                    </h3>
+                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-600">
+                      {formatDescriptionBodyForDisplay(merged.description)}
+                    </p>
+                  </section>
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    {t("No extended description is available for this listing.")}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
-        <DialogFooter className="relative z-10 shrink-0 flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-end sm:justify-between">
+        <DialogFooter className="shrink-0 flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Close
+              {t("Close")}
             </Button>
             {footerStartExtra}
           </div>
           {merged && (
-            <div className="flex w-full min-w-0 flex-col items-stretch gap-2 sm:w-auto sm:max-w-[min(100%,280px)] sm:items-end">
-              <Button
-                size="sm"
-                className="w-full shrink-0 sm:w-auto"
-                asChild={Boolean(applyUrl)}
-                disabled={!applyUrl}
-              >
-                {applyUrl ? (
-                  <a href={applyUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 h-4 w-4 shrink-0" />
-                    {t("Apply on official site")}
-                  </a>
-                ) : (
-                  <span>Apply (link unavailable)</span>
-                )}
-              </Button>
-              {applyUrl && (
-                <p className="text-muted-foreground truncate text-xs" title={applyUrl}>
-                  {applyUrl}
-                </p>
-              )}
-            </div>
+            <ScholarshipApplyButton
+              scholarship={merged}
+              size="sm"
+              label={t("Apply on official site")}
+              showExternalIcon
+              className="w-full shrink-0 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
+            />
           )}
         </DialogFooter>
       </DialogContent>

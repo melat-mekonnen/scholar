@@ -9,12 +9,12 @@ const { query, pool } = require("../src/infra/db/neonClient");
 const {
   isPollutedDescription,
   isLowQualityTitle,
-  isListingHubUrl,
+  isNonProgrammeHubUrl,
 } = require("../src/modules/scholarship-ingestion/descriptionQuality");
 
 async function main() {
   const { rows } = await query(
-    `SELECT id, title, description, source_url, application_url, status, source_name
+    `SELECT id, title, description, source_url, application_url, status, source_name, external_id
      FROM scholarships
      WHERE status IN ('verified', 'pending')
      ORDER BY updated_at DESC`,
@@ -25,8 +25,11 @@ async function main() {
     const polluted =
       isPollutedDescription(row.description) ||
       isLowQualityTitle(row.title) ||
-      isListingHubUrl(row.source_url) ||
-      isListingHubUrl(row.application_url);
+      isNonProgrammeHubUrl(row.source_url) ||
+      isNonProgrammeHubUrl(row.application_url) ||
+      /^(Ethiopia Foreign Study Programmes|FDRE Ministry of Education)$/i.test(String(row.title || "").trim()) ||
+      String(row.external_id || "").startsWith("et-moe-en") ||
+      row.external_id === "et-moe-foreign-study";
     if (polluted) toReject.push(row);
   }
 

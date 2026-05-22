@@ -177,7 +177,93 @@ export default function CommunityPage() {
       }
     })
     streamRef.current = source
-  
+    return () => {
+      source.close()
+      if (streamRef.current === source) streamRef.current = null
+    }
+  }, [channelId])
+
+  async function loadOlder() {
+    if (!channelId || !oldestCursor || loadingMore) return
+    setLoadingMore(true)
+    const { res, data } = await fetchCommunityMessages(channelId, {
+      before: oldestCursor,
+      limit: 50,
+    })
+    if (!res.ok || !data) {
+      setLoadingMore(false)
+      return
+    }
+    const older = data.messages ?? []
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id))
+      return [...older.filter((m) => !seen.has(m.id)), ...prev]
+    })
+    setHasMore(data.pagination?.hasMore ?? false)
+    setOldestCursor(data.pagination?.oldestCreatedAt ?? null)
+    setLoadingMore(false)
+  }
+
+  async function sendMessage() {
+    const text = draft.trim()
+    if (!channelId || !text || sending) return
+    setSending(true)
+    const parentReply = replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
+    const { res, data, errorMessage } = await postCommunityMessage(channelId, text, parentReply)
+    if (res.status === 401 || res.status === 403) {
+      clearToken()
+      router.replace("/signin")
+      setSending(false)
+      return
+    }
+    if (!res.ok || !data) {
+      setSending(false)
+      toast({
+        title: "Message not sent",
+        description: errorMessage ?? "Please try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    setMessages((prev) => [...prev, data])
+    setDraft("")
+    setReplyTo(null)
+    setSending(false)
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
+  }
+
+  async function removeMessage(m: CommunityMessage) {
+    if (!me || m.userId !== me.id) return
+    const { res } = await deleteCommunityMessage(m.id)
+    if (res.status === 401) {
+      clearToken()
+      router.replace("/signin")
+      return
+    }
+    if (!res.ok) {
+      toast({ title: "Could not delete", variant: "destructive" })
+      return
+    }
+    setMessages((prev) => prev.filter((x) => x.id !== m.id))
+  }
+
+  async function reportMessage(m: CommunityMessage) {
+    const reason = window.prompt("Why are you reporting this message?")
+    if (!reason?.trim()) return
+    const { res, errorMessage } = await reportCommunityMessage(m.id, reason.trim())
+    if (!res.ok) {
+      toast({
+        title: "Could not submit report",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    toast({ title: "Report submitted", description: "Moderators will review this message." })
+  }
+
+  const canPost = me?.role === "student" || me?.role === "admin"
+
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
       <StudentPortalInlineAside />

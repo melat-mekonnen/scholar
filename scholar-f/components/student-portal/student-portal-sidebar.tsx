@@ -11,28 +11,23 @@ type StudentPortalSidebarProps = {
   documentsLabel?: string
 }
 
-export function StudentPortalSidebar({
-  documentsLabel = "Document Resources",
-}: StudentPortalSidebarProps) {
+export function StudentPortalSidebar({ documentsLabel }: StudentPortalSidebarProps) {
   const pathname = usePathname()
   const { t } = useStudentI18n()
 
-  const links = getStudentSidebarLinks(
-    {
-      dashboard: t("Dashboard"),
-      scholarships: t("Browse Scholarships"),
-      applications: t("My Applications"),
-      community: t("Community"),
-      saved: t("Saved Scholarships"),
-      aiMatches: t("AI Matches"),
-      aiChat: t("AI Chatbot"),
-      profile: t("Profile"),
-      billing: t("Billing"),
-      settings: t("Settings"),
-      documents: t("Documents"),
-    },
-    { documentsLabel }
-  )
+  const links = getStudentSidebarLinks({
+    dashboard: t("Dashboard"),
+    scholarships: t("Browse Scholarships"),
+    applications: t("My Applications"),
+    community: t("Community"),
+    saved: t("Saved Scholarships"),
+    aiMatches: t("AI Matches"),
+    aiChat: t("AI Chatbot"),
+    profile: t("Profile"),
+    billing: t("Billing"),
+    settings: t("Settings"),
+    documents: documentsLabel ? t(documentsLabel) : t("Document Resources"),
+  })
 
   return (
     <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">

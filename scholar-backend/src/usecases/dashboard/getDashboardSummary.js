@@ -1,6 +1,7 @@
 const { query } = require("../../infra/db/neonClient");
 const { ScholarshipRepository } = require("../../repositories/ScholarshipRepository");
 const { UserActivityRepository } = require("../../repositories/UserActivityRepository");
+const { mapPublicScholarship } = require("../../utils/mapPublicOpportunity");
 
 const scholarshipRepo = new ScholarshipRepository();
 const activityRepo = new UserActivityRepository();
@@ -56,7 +57,7 @@ async function getDashboardStats(userId) {
   };
 }
 
-async function getDashboardSummary(userId) {
+async function getDashboardSummary(userId, lang = "en") {
   let recommended = await scholarshipRepo.getDefaultRecommended(3);
   let usingFeatured = recommended.length > 0;
 
@@ -76,13 +77,17 @@ async function getDashboardSummary(userId) {
 
   return {
     stats,
-    recommendedScholarships: recommended.map((s) => ({
-      id: s.id,
-      title: s.title,
-      country: s.country,
-      deadline: s.deadline,
-      applicationUrl: s.application_url,
-    })),
+    recommendedScholarships: recommended.map((s) => {
+      const mapped = mapPublicScholarship(s, lang);
+      return {
+        id: mapped.id,
+        title: mapped.title,
+        organizationName: mapped.organizationName,
+        country: mapped.country,
+        deadline: mapped.deadline,
+        applicationUrl: mapped.applicationUrl,
+      };
+    }),
     recentActivity,
     meta: {
       recommendedSource: usingFeatured ? "featured" : recommended.length > 0 ? "upcoming" : "none",

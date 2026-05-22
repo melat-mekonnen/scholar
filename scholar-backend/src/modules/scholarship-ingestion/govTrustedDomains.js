@@ -18,6 +18,19 @@ const GOV_TRUSTED_DOMAINS = [
   "international.gc.ca",
   "educationusa.state.gov",
   "state.gov",
+  "humphreyfellowship.org",
+  "aauw.org",
+  "stanford.edu",
+  "harvard.edu",
+  "mit.edu",
+  "yale.edu",
+  "clarku.edu",
+  "american.edu",
+  "peointernational.org",
+  "techwomen.org",
+  "techgirlsglobal.org",
+  "mandelawashingtonfellowship.org",
+  "exchanges.state.gov",
   "oas.org",
   "mastercardfdn.org",
   "mastercardfoundation.org",
@@ -66,6 +79,9 @@ const AGGREGATOR_DOMAINS = [
   "afterschoolafrica.com",
   "opportunitydesk.org",
   "opportunityportal.africa",
+  "scholarshiptab.com",
+  "uscholarships.us",
+  "scholarshipunion.com",
 ];
 
 const HUB_TITLE_BLOCKLIST = [
@@ -81,6 +97,8 @@ const HUB_TITLE_BLOCKLIST = [
   /^scholars program$/i,
   /^elimu scholarship \d+$/i,
   /toto|casino|slot|bandar|togel|betting/i,
+  /^foreign study programmes?$/i,
+  /^ethiopia foreign study programmes?$/i,
   /^department of higher education and training$/i,
   /^internationalscholarships\./i,
 ];

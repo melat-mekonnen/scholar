@@ -35,3 +35,17 @@ test("classifyScholarshipRecord rejects advertise pages", () => {
   });
   assert.equal(r.reject, true);
 });
+
+test("classifyScholarshipRecord rejects Ethiopia ministry hub pages", () => {
+  const r = classifyScholarshipRecord({
+    title: "Ethiopia Foreign Study Programmes",
+    country: "Ethiopia",
+    applicationUrl: "https://www.moe.gov.et/en",
+    sourceUrl: "https://www.moe.gov.et/en",
+    description:
+      "Ethiopia's Ministry of Education foreign study programmes coordinate government-sponsored opportunities for Ethiopian students to pursue higher education abroad in priority disciplines.",
+    fundingType: "fully_funded",
+    degreeLevel: "master",
+  });
+  assert.equal(r.reject, true);
+});

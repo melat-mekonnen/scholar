@@ -23,6 +23,7 @@ import {
   StudentPortalFrame,
   StudentPortalTopHeader,
 } from "@/components/student-portal/student-portal-frame"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +32,7 @@ import { cn } from "@/lib/utils"
 export default function DocumentDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useStudentI18n()
   const id = String(params?.id ?? "")
 
   const [doc, setDoc] = useState<DocumentMeta | null>(null)
@@ -96,7 +98,7 @@ export default function DocumentDetailPage() {
 
   return (
     <StudentPortalFrame
-      header={<StudentPortalTopHeader title="Document Resources" />}
+      header={<StudentPortalTopHeader title={t("Document Resources")} />}
       mainClassName="min-h-0 flex-1 space-y-8 p-4 md:p-8"
     >
       <nav className="text-sm text-slate-500">

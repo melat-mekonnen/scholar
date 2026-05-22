@@ -44,8 +44,9 @@ export async function confirmTrackedApplication(applicationId: string) {
   return updateApplicationStatus(applicationId, "submitted")
 }
 
-export async function getMyApplications() {
-  return apiFetchJson<{ applications: StudentApplication[] }>("/api/applications", {
+export async function getMyApplications(lang = "en") {
+  const params = new URLSearchParams({ lang })
+  return apiFetchJson<{ applications: StudentApplication[] }>(`/api/applications?${params.toString()}`, {
     method: "GET",
   })
 }

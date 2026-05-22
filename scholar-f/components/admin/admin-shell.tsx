@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Bell,
   FileText,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
+import { clearToken, getToken } from "@/lib/auth"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -97,6 +98,7 @@ type MeResponse = { role?: string }
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 

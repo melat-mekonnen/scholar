@@ -9,13 +9,9 @@ const MINISTRY_SOURCES = [
     country: "Ethiopia",
     organizationName: "Ministry of Education — Ethiopia",
     externalIdPrefix: "et-moe",
-    curated: [
-      "https://www.moe.gov.et/en",
-      "https://www.moe.gov.et/en/announcement",
-      "https://www.moe.gov.et/en/scholarships",
-      "https://www.moe.gov.et/en/foreign-study-programs",
-    ],
-    pathMustInclude: null,
+    curated: [],
+    programmeUrls: programmeUrlsForSource("ethiopia"),
+    pathMustInclude: "scholarship",
   },
   {
     key: "kenya",

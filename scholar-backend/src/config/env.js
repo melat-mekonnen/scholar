@@ -44,12 +44,14 @@ const env = {
   ingestCheveningEnabled: optionalBool("INGEST_CHEVENING_ENABLED", false),
   ingestCommonwealthEnabled: optionalBool("INGEST_COMMONWEALTH_ENABLED", false),
   ingestFastwebEnabled: optionalBool("INGEST_FASTWEB_ENABLED", false),
+  ingestMastersportalEnabled: optionalBool("INGEST_MASTERSPORTAL_ENABLED", false),
   ingestAustraliaAwardsEnabled: optionalBool("INGEST_AUSTRALIA_AWARDS_ENABLED", false),
   ingestMastercardFoundationEnabled: optionalBool("INGEST_MASTERCARD_FOUNDATION_ENABLED", false),
   ingestAfricanMinistriesEnabled: optionalBool("INGEST_AFRICAN_MINISTRIES_ENABLED", false),
   ingestAfricanUniversitiesEnabled: optionalBool("INGEST_AFRICAN_UNIVERSITIES_ENABLED", false),
   ingestAfricanAggregatorsEnabled: optionalBool("INGEST_AFRICAN_AGGREGATORS_ENABLED", false),
   ingestAfricanResearchEnabled: optionalBool("INGEST_AFRICAN_RESEARCH_ENABLED", false),
+  ingestUsAggregatorDiscoveryEnabled: optionalBool("INGEST_US_AGGREGATOR_DISCOVERY_ENABLED", false),
   /** staging = capture all rows then publish; direct = legacy immediate upsert */
   ingestPipelineMode: optional("INGEST_PIPELINE_MODE", "staging").toLowerCase(),
   /** merge = enrich existing rows instead of skipping duplicates */
@@ -85,6 +87,8 @@ const env = {
   openRouterModel: optional("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
   aiDescriptionRefineEnabled: optionalBool("AI_DESCRIPTION_REFINE_ENABLED", false),
   aiTranslationEnabled: optionalBool("AI_TRANSLATION_ENABLED", false),
+  /** When true (default), use Google Translate if OpenRouter is unavailable. */
+  aiTranslationGoogleFallback: optionalBool("AI_TRANSLATION_GOOGLE_FALLBACK", true),
 };
 
 module.exports = { env };

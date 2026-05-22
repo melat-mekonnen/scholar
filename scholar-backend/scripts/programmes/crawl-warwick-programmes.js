@@ -7,6 +7,7 @@ require("dotenv").config();
 const axios = require("axios");
 const { pool } = require("../../src/infra/db/neonClient");
 const { StudyProgrammeRepository } = require("../../src/repositories/StudyProgrammeRepository");
+const { maybeTranslateStudyProgramme } = require("../../src/services/scholarshipAmharicContent");
 const { extractScholarshipFacts } = require("../../src/modules/scholarship-ingestion/ai/extractScholarshipFacts");
 const { formatDescriptionFromFacts } = require("../../src/modules/scholarship-ingestion/ai/formatDescriptionSections");
 
@@ -89,7 +90,7 @@ async function main() {
       isRolling: true,
     };
     const facts = extractScholarshipFacts(record);
-    await repo.upsertProgramme({
+    const saved = await repo.upsertProgramme({
       ...record,
       hostCountry: "United Kingdom",
       description: formatDescriptionFromFacts(facts),
@@ -97,6 +98,7 @@ async function main() {
       externalId: `warwick-ug-${slug}`,
       status: "verified",
     });
+    if (saved?.id) maybeTranslateStudyProgramme(saved.id);
     upserted += 1;
   }
 
@@ -116,7 +118,7 @@ async function main() {
       isRolling: true,
     };
     const facts = extractScholarshipFacts(record);
-    await repo.upsertProgramme({
+    const saved = await repo.upsertProgramme({
       ...record,
       hostCountry: "United Kingdom",
       description: formatDescriptionFromFacts(facts),
@@ -124,6 +126,7 @@ async function main() {
       externalId: `warwick-pg-${slug}`,
       status: "verified",
     });
+    if (saved?.id) maybeTranslateStudyProgramme(saved.id);
     upserted += 1;
   }
 

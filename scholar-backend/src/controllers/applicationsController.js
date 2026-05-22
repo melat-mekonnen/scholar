@@ -1,6 +1,7 @@
 const { ApplicationRepository } = require("../repositories/ApplicationRepository");
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
 const { UserActivityRepository } = require("../repositories/UserActivityRepository");
+const { resolveLangContent } = require("../utils/mapPublicOpportunity");
 
 const repo = new ApplicationRepository();
 const scholarshipRepo = new ScholarshipRepository();
@@ -10,6 +11,39 @@ const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const ALLOWED_STATUS = new Set(["pending", "submitted", "accepted", "rejected"]);
+
+function parseLang(query) {
+  const lang = String(query?.lang || "en").toLowerCase();
+  return lang === "am" ? "am" : "en";
+}
+
+function mapApplicationScholarship(row, lang = "en") {
+  const localized = resolveLangContent(
+    {
+      title: row.scholarship_title,
+      title_am: row.scholarship_title_am,
+      description: null,
+      description_am: row.scholarship_description_am,
+      organization_name: row.scholarship_organization_name,
+      organization_name_am: row.scholarship_organization_name_am,
+      country: row.scholarship_country,
+      country_am: row.scholarship_country_am,
+      field_of_study: row.scholarship_field_of_study,
+      field_of_study_am: row.scholarship_field_of_study_am,
+    },
+    lang,
+  );
+  return {
+    title: localized.title,
+    organizationName: localized.organizationName,
+    country: localized.country,
+    fieldOfStudy: localized.fieldOfStudy,
+    startDate: row.scholarship_start_date,
+    endDate: row.scholarship_end_date,
+    deadline: row.scholarship_deadline,
+    applicationUrl: row.scholarship_application_url,
+  };
+}
 
 async function create(req, res, next) {
   try {
@@ -81,6 +115,7 @@ async function create(req, res, next) {
 async function listMine(req, res, next) {
   try {
     const userId = req.user?.id;
+    const lang = parseLang(req.query);
     const rows = await repo.listByUserId(userId);
     return res.json({
       applications: rows.map((a) => ({
@@ -90,14 +125,7 @@ async function listMine(req, res, next) {
         status: a.status,
         createdAt: a.created_at,
         updatedAt: a.updated_at,
-        scholarship: {
-          title: a.scholarship_title,
-          country: a.scholarship_country,
-          startDate: a.scholarship_start_date,
-          endDate: a.scholarship_end_date,
-          deadline: a.scholarship_deadline,
-          applicationUrl: a.scholarship_application_url,
-        },
+        scholarship: mapApplicationScholarship(a, lang),
       })),
     });
   } catch (err) {

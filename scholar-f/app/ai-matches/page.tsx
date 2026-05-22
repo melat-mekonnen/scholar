@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { clearToken, getToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
-import { useStudentI18n } from "@/lib/student-i18n"
+import { useStudentI18n, translateLabel } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
@@ -56,7 +56,7 @@ function formatDate(date?: string) {
 
 export default function AiMatchesPage() {
   const router = useRouter()
-  const { t } = useStudentI18n()
+  const { t, lang } = useStudentI18n()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<RecommendationItem[]>([])
@@ -72,8 +72,9 @@ export default function AiMatchesPage() {
     let cancelled = false
     async function load() {
       setError(null)
+      const params = new URLSearchParams({ topN: "12", lang })
       const { res, data, errorMessage } = await apiFetchJson<RecommendationsResponse>(
-        "/api/recommendations?topN=12",
+        `/api/recommendations?${params.toString()}`,
         {
           method: "GET",
           auth: true,
@@ -100,7 +101,7 @@ export default function AiMatchesPage() {
     return () => {
       cancelled = true
     }
-  }, [router])
+  }, [router, lang])
 
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
@@ -203,7 +204,7 @@ export default function AiMatchesPage() {
                   </CardHeader>
                   <CardContent className="space-y-3 pt-0">
                     <p className="text-sm text-slate-500">
-                      {item.scholarship.country || "N/A"}
+                      {translateLabel(lang, item.scholarship.country || "N/A")}
                       {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
                     </p>
                     {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (

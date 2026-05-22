@@ -1,7 +1,7 @@
 /**
  * Scholarships & study programmes content schema (i18n, facts, programmes).
  */
-const { query, pool } = require("../../src/infra/db/neonClient");
+const { query, pool } = require("../../../src/infra/db/neonClient");
 
 async function main() {
   await query(

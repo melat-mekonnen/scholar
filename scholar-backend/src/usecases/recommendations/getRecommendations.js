@@ -3,6 +3,7 @@ const { env } = require("../../config/env");
 const { ScholarshipRepository } = require("../../repositories/ScholarshipRepository");
 const { StudentProfileRepository } = require("../../repositories/StudentProfileRepository");
 const { fetchScholarshipPoolForAi } = require("./scholarshipPoolForAi");
+const { mapPublicScholarship } = require("../../utils/mapPublicOpportunity");
 
 const scholarshipRepo = new ScholarshipRepository();
 const profileRepo = new StudentProfileRepository();
@@ -18,7 +19,7 @@ function buildStudentText(profile) {
   return parts.join(" ").trim();
 }
 
-async function getRecommendations({ userId, topN = 10 }) {
+async function getRecommendations({ userId, topN = 10, lang = "en" }) {
   if (!userId) {
     const err = new Error("Authentication required");
     err.statusCode = 401;
@@ -70,7 +71,7 @@ async function getRecommendations({ userId, topN = 10 }) {
             ? Number(r.matchPercent)
             : Math.round(Math.min(1, Math.max(0, Number(r.score) || 0)) * 10000) / 100;
         return {
-          scholarship: s,
+          scholarship: mapPublicScholarship(s, lang),
           score: r.score,
           matchedTerms: matched,
           matchPercentage,

@@ -3,10 +3,7 @@ const { buildRecordsFromLinks } = require("./buildProgrammeRecords");
 const { buildRecordFromOfficialPage } = require("./officialPageRecord");
 
 const HUB_URL = "https://mastercardfdn.org/all/scholars/";
-const EXTRA_URLS = [
-  "https://mastercardfdn.org/research/scholars-program/",
-  "https://mastercardfoundation.org/scholars/",
-];
+const EXTRA_URLS = ["https://mastercardfoundation.org/scholars/"];
 
 async function fetchMastercardFoundationScholarships() {
   const links = await discoverProgrammeLinks(HUB_URL, {

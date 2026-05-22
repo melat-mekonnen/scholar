@@ -2,8 +2,14 @@ const { isBareHomepageUrl } = require("../descriptionQuality");
 
 const CSC_SHARED_SCHEME =
   "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-shared-scholarships/";
+const CSC_SHARED_CONTACTS =
+  "https://cscuk.fcdo.gov.uk/commonwealth-shared-scholarships-university-contact-details/";
 
-/** Leaf funding pages for Shared Scholarship university placements (not homepages). */
+/**
+ * Curated leaf URLs for universities where CSC lists only a bare homepage.
+ * Source: CSC Shared Scholarship university contact details (2026 cycle).
+ * @see https://cscuk.fcdo.gov.uk/commonwealth-shared-scholarships-university-contact-details/
+ */
 const SHARED_SCHOLARSHIP_LEAF_URLS = {
   bournemouth: "https://www.bournemouth.ac.uk/study/fees-funding/scholarships",
   brunel:
@@ -31,16 +37,20 @@ const SHARED_SCHOLARSHIP_LEAF_URLS = {
   sussex: "https://www.ids.ac.uk/study/fees-and-funding/scholarships/",
 };
 
+/** Apply URL = CSC-listed university website (contact details page), not the generic CSC scheme portal. */
 function resolveSharedUniversityUrl(entry) {
   if (SHARED_SCHOLARSHIP_LEAF_URLS[entry.slug]) {
     return SHARED_SCHOLARSHIP_LEAF_URLS[entry.slug];
   }
   const candidate = entry.website;
   if (candidate && !isBareHomepageUrl(candidate)) return candidate;
+  if (candidate) return candidate;
   return CSC_SHARED_SCHEME;
 }
 
 module.exports = {
+  CSC_SHARED_SCHEME,
+  CSC_SHARED_CONTACTS,
   SHARED_SCHOLARSHIP_LEAF_URLS,
   resolveSharedUniversityUrl,
 };

@@ -9,6 +9,11 @@ const ALLOWED_SORT = new Set([
 const ALLOWED_DEGREE_LEVELS = new Set(["high_school", "bachelor", "master", "phd"]);
 const ALLOWED_FUNDING_TYPES = new Set(["fully_funded", "partially_funded", "self_funded"]);
 const ALLOWED_STATUS = new Set(["all", "draft", "pending", "verified", "rejected", "expired"]);
+const ALLOWED_APPLICATION_FILTER = new Set(["all", "applied", "not_applied"]);
+const ALLOWED_AVAILABILITY = new Set(["open", "rolling", "closing_soon"]);
+const ELIGIBLE_REGION_PATTERN = /^[a-z0-9_-]+$/;
+const { ALLOWED_FIELD_CATEGORIES } = require("../../utils/fieldCategory");
+const { ALLOWED_HOST_REGIONS } = require("../../utils/hostRegion");
 
 function ensureDateLike(value, fieldName) {
   if (!value) return;
@@ -24,9 +29,14 @@ function validateSearchInputs({
   sort,
   degreeLevels,
   fundingTypes,
+  fieldCategories,
+  eligibleRegions,
+  hostRegions,
+  availability,
   deadlineFrom,
   deadlineTo,
   status,
+  applicationFilter,
   isPrivileged,
 }) {
   if (sort && !ALLOWED_SORT.has(String(sort))) {
@@ -49,6 +59,37 @@ function validateSearchInputs({
       err.statusCode = 400;
       throw err;
     }
+  }
+
+  for (const category of fieldCategories || []) {
+    if (!ALLOWED_FIELD_CATEGORIES.has(String(category).toLowerCase())) {
+      const err = new Error("Invalid field_category filter value");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  for (const region of eligibleRegions || []) {
+    const normalized = String(region).toLowerCase();
+    if (!ELIGIBLE_REGION_PATTERN.test(normalized)) {
+      const err = new Error("Invalid eligible_region filter value");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  for (const region of hostRegions || []) {
+    if (!ALLOWED_HOST_REGIONS.includes(String(region).toLowerCase())) {
+      const err = new Error("Invalid host_region filter value");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  if (availability != null && availability !== "" && !ALLOWED_AVAILABILITY.has(String(availability))) {
+    const err = new Error("Invalid availability filter value");
+    err.statusCode = 400;
+    throw err;
   }
 
   ensureDateLike(deadlineFrom, "deadline_from");
@@ -74,6 +115,12 @@ function validateSearchInputs({
       err.statusCode = 400;
       throw err;
     }
+  }
+
+  if (applicationFilter != null && applicationFilter !== "" && !ALLOWED_APPLICATION_FILTER.has(String(applicationFilter))) {
+    const err = new Error("Invalid application_filter value");
+    err.statusCode = 400;
+    throw err;
   }
 }
 
