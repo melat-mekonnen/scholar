@@ -1,11 +1,6 @@
 /**
  * Discover UK university bursary/scholarship links from Shared Scholarship funding hubs.
- *
- * NOTE: Commonwealth Shared universities are fully covered by the curated leaf catalog
- * (sync-leaf-catalog.js). This crawl previously created duplicate cards with generic CSC
- * application URLs. It is disabled by default — pass --force to run for manual experiments.
- *
- * Usage: node scripts/scholarships/crawl-uk-funding-pages.js [--force] [--max-per-hub=5]
+ * Usage: node scripts/scholarships/crawl-uk-funding-pages.js [--max-per-hub=5]
  */
 require("dotenv").config();
 
@@ -19,7 +14,6 @@ const { resolveSharedUniversityUrl } = require("../../src/modules/scholarship-in
 const { buildLeafProgrammeRecord } = require("../../src/modules/scholarship-ingestion/leafProgrammes/buildLeafProgrammeRecord");
 const { normalizeScholarshipRecord } = require("../../src/modules/scholarship-ingestion/normalizeScholarship");
 const { isBareHomepageUrl } = require("../../src/modules/scholarship-ingestion/descriptionQuality");
-const { isCscSharedGenericUrl } = require("../../src/modules/scholarship-ingestion/leafProgrammes/leafApplyUrl");
 const {
   discoverProgrammeLinks,
   slugToTitle,
@@ -30,10 +24,7 @@ const SOURCE = UK_FUNDING_DISCOVERY_SOURCE;
 
 function parseArgs() {
   const maxArg = process.argv.find((a) => a.startsWith("--max-per-hub="));
-  return {
-    maxPerHub: maxArg ? parseInt(maxArg.split("=")[1], 10) : 5,
-    force: process.argv.includes("--force"),
-  };
+  return { maxPerHub: maxArg ? parseInt(maxArg.split("=")[1], 10) : 5 };
 }
 
 function sleep(ms) {
@@ -42,24 +33,6 @@ function sleep(ms) {
 
 function urlHash(url) {
   return crypto.createHash("md5").update(url).digest("hex").slice(0, 10);
-}
-
-function hubHostRoot(hubUrl) {
-  const host = new URL(hubUrl).hostname.replace(/^www\./, "");
-  const parts = host.split(".");
-  return parts.length >= 2 ? parts.slice(-2).join(".") : host;
-}
-
-function isAcceptableDiscoveredUrl(url, hubUrl) {
-  if (!url || isBareHomepageUrl(url)) return false;
-  if (/cscuk\.fcdo\.gov\.uk/i.test(url)) return false;
-  if (/linkedin\.com/i.test(url)) return false;
-  if (isCscSharedGenericUrl(url)) return false;
-  if (/#/.test(url) && !/#nominator-/i.test(url)) return false;
-
-  const linkHost = new URL(url).hostname.replace(/^www\./, "");
-  const hubRoot = hubHostRoot(hubUrl);
-  return linkHost === hubRoot || linkHost.endsWith(`.${hubRoot}`);
 }
 
 async function upsertRecord(repo, raw) {
@@ -85,7 +58,8 @@ async function upsertRecord(repo, raw) {
     applicationUrl: normalized.applicationUrl,
     sourceUrl: normalized.sourceUrl,
     externalId: normalized.externalId,
-    publishStatus: "needs_review",
+    status: "verified",
+    publishStatus: "verified",
     eligibleRegions: normalized.eligibleRegions,
     isRolling: normalized.isRolling,
     recordType: "scholarship",
@@ -94,24 +68,7 @@ async function upsertRecord(repo, raw) {
 }
 
 async function main() {
-  const { maxPerHub, force } = parseArgs();
-  if (!force) {
-    // eslint-disable-next-line no-console
-    console.log(
-      JSON.stringify(
-        {
-          skipped: true,
-          reason:
-            "Commonwealth Shared placements are curated in sync-leaf-catalog; crawl disabled (use --force to override).",
-        },
-        null,
-        2,
-      ),
-    );
-    await pool.end();
-    return;
-  }
-
+  const { maxPerHub } = parseArgs();
   const repo = new ScholarshipRepository();
   let discovered = 0;
   let upserted = 0;
@@ -119,15 +76,10 @@ async function main() {
   for (const entry of COMMONWEALTH_SHARED_UNIVERSITIES) {
     const hub = resolveSharedUniversityUrl(entry);
     // eslint-disable-next-line no-await-in-loop
-    const links = await discoverProgrammeLinks(hub, {
-      max: maxPerHub,
-      hostMustInclude: hubHostRoot(hub),
-    });
+    const links = await discoverProgrammeLinks(hub, { max: maxPerHub });
     discovered += links.length;
 
     for (const url of links) {
-      if (!isAcceptableDiscoveredUrl(url, hub)) continue;
-
       const slug = url.split("/").filter(Boolean).pop() || urlHash(url);
       const record = buildLeafProgrammeRecord({
         externalId: `bursary-${entry.slug}-${urlHash(url)}`,

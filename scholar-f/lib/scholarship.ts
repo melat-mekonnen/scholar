@@ -296,18 +296,6 @@ export function filterDescriptionSectionsForDisplay(
   )
 }
 
-const URL_ONLY_LINE = /^https?:\/\/\S+\/?$/i
-
-/** Strip bare URL lines from description prose (apply link lives in the footer). */
-export function formatDescriptionBodyForDisplay(body: string): string {
-  return body
-    .split("\n")
-    .filter((line) => !URL_ONLY_LINE.test(line.trim()))
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim()
-}
-
 export function isStudyProgramme(s: Pick<ScholarshipPublic, "recordType" | "fundingType">): boolean {
   return s.recordType === "study_programme" || s.fundingType === "not_funded"
 }
@@ -325,34 +313,6 @@ export function applicationStatusLabel(status?: string): string | null {
       return null
     default:
       return null
-  }
-}
-
-export function fieldCategoryLabel(category?: string): string {
-  if (!category) return "General / multi-disciplinary"
-  switch (category.toLowerCase()) {
-    case "public_health":
-      return "Public health"
-    case "international_development":
-      return "International development"
-    case "business":
-      return "Business & management"
-    case "data_science":
-      return "Data science & analytics"
-    case "law":
-      return "Law"
-    case "education":
-      return "Education"
-    case "engineering":
-      return "Engineering & technology"
-    case "research":
-      return "Doctoral research"
-    case "professional_development":
-      return "Professional development"
-    case "general":
-      return "General / multi-disciplinary"
-    default:
-      return category.replace(/_/g, " ")
   }
 }
 

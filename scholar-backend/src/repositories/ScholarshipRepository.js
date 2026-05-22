@@ -1,23 +1,7 @@
 const { query } = require("../infra/db/neonClient");
 const { curatedLeafSourceNames } = require("../modules/scholarship-ingestion/sourceNames");
-const { normalizeUrl } = require("../modules/scholarship-ingestion/urlNormalize");
-const { resolveFieldCategory } = require("../utils/fieldCategory");
-const { aggregateHostRegionFacets } = require("../utils/hostRegion");
 
 const CURATED_LEAF_SOURCES = curatedLeafSourceNames();
-
-const PUBLIC_SCHOLARSHIP_WHERE = `
-  status = 'verified'
-  AND COALESCE(record_type, 'scholarship') = 'scholarship'
-  AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE)
-`;
-
-function mapFacetRows(rows) {
-  return rows.map((row) => ({
-    value: row.value,
-    count: Number(row.count || 0),
-  }));
-}
 
 class ScholarshipRepository {
   async expirePastDeadline() {
@@ -950,17 +934,7 @@ class ScholarshipRepository {
     ];
 
     if (onlyMissingAm) {
-      where.push(`(
-        description_am IS NULL OR title_am IS NULL
-        OR (organization_name IS NOT NULL AND organization_name <> '' AND organization_name_am IS NULL)
-        OR (country IS NOT NULL AND country <> '' AND country_am IS NULL)
-        OR (field_of_study IS NOT NULL AND field_of_study <> '' AND field_of_study_am IS NULL)
-        OR (
-          host_country IS NOT NULL AND host_country <> ''
-          AND host_country IS DISTINCT FROM country
-          AND host_country_am IS NULL
-        )
-      )`);
+      where.push(`(description_am IS NULL OR title_am IS NULL)`);
     }
     if (onlyUnrefined) {
       where.push(`(extracted_facts IS NULL OR description NOT LIKE '## Overview%')`);
@@ -992,16 +966,12 @@ class ScholarshipRepository {
        SET description = COALESCE($2, description),
            title_am = COALESCE($3, title_am),
            description_am = COALESCE($4, description_am),
-           organization_name_am = COALESCE($5, organization_name_am),
-           country_am = COALESCE($6, country_am),
-           host_country_am = COALESCE($7, host_country_am),
-           field_of_study_am = COALESCE($8, field_of_study_am),
-           extracted_facts = COALESCE($9, extracted_facts),
-           application_status = COALESCE($10, application_status),
-           deadline = COALESCE($11, deadline),
-           application_start_date = COALESCE($12, application_start_date),
-           application_end_date = COALESCE($13, application_end_date),
-           is_rolling = COALESCE($14, is_rolling),
+           extracted_facts = COALESCE($5, extracted_facts),
+           application_status = COALESCE($6, application_status),
+           deadline = COALESCE($7, deadline),
+           application_start_date = COALESCE($8, application_start_date),
+           application_end_date = COALESCE($9, application_end_date),
+           is_rolling = COALESCE($10, is_rolling),
            updated_at = NOW()
        WHERE id = $1
        RETURNING id, title`,

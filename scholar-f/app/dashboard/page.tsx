@@ -12,7 +12,6 @@ import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
   normalizeScholarship,
-  formatScholarshipMetaLine,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
@@ -236,7 +235,7 @@ export default function DashboardPage() {
                     </CardHeader>
 
                     <CardContent className="space-y-3">
-                      <p className="text-sm text-slate-500">{formatScholarshipMetaLine(t, s)}</p>
+                      <p className="text-sm text-slate-500">Country: {s.country}</p>
                       <ScholarshipDates scholarship={s} />
 
                       <div className="flex gap-2 pt-3">

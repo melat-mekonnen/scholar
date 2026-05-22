@@ -21,7 +21,7 @@ async function main() {
   if (!row.scholarships) {
     // eslint-disable-next-line no-console
     console.log("Applying db/schema.sql (first run)...");
-    await runSqlFile(path.join(__dirname, "../../db/schema.sql"));
+    await runSqlFile(path.join(__dirname, "../../../db/schema.sql"));
   } else {
     // eslint-disable-next-line no-console
     console.log("Base schema present — running content migrations only.");

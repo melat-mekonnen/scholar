@@ -5,16 +5,13 @@ require("dotenv").config();
 
 const { pool } = require("../../src/infra/db/neonClient");
 const { ScholarshipRepository } = require("../../src/repositories/ScholarshipRepository");
-const { maybeTranslateScholarship } = require("../../src/services/scholarshipAmharicContent");
 const {
   buildLeafImportRecords,
   scrapeProgrammesWithDescriptions,
 } = require("../../src/modules/scholarship-ingestion/leafProgrammes/assembleLeafCatalog");
 const { buildLeafProgrammeRecord } = require("../../src/modules/scholarship-ingestion/leafProgrammes/buildLeafProgrammeRecord");
 const { normalizeScholarshipRecord } = require("../../src/modules/scholarship-ingestion/normalizeScholarship");
-const { isBareHomepageUrl, isNonProgrammeHubUrl } = require("../../src/modules/scholarship-ingestion/descriptionQuality");
-const { auditCuratedApplyRecord } = require("../../src/modules/scholarship-ingestion/leafProgrammes/leafApplyUrl");
-const { classifyScholarshipRecord } = require("../../src/modules/scholarship-ingestion/scholarshipClassifier");
+const { isBareHomepageUrl } = require("../../src/modules/scholarship-ingestion/descriptionQuality");
 const { CURATED_LEAF_SOURCE } = require("../../src/modules/scholarship-ingestion/sourceNames");
 
 const SOURCE = CURATED_LEAF_SOURCE;
@@ -36,7 +33,6 @@ function scrapeProgrammeRecords() {
         fundingType: programme.fundingType || "fully_funded",
         url: programme.url,
         description: description.length >= 120 ? description : `${description} ${description}`.slice(0, 400),
-        descriptionFromSite: false,
         eligibleRegions: ["africa", "commonwealth", "developing"],
         isRolling: true,
       });
@@ -44,31 +40,14 @@ function scrapeProgrammeRecords() {
     .filter(Boolean);
 }
 
-async function upsertRecord(repo, raw, { validateClassification = false } = {}) {
+async function upsertRecord(repo, raw) {
   const normalized = normalizeScholarshipRecord({ ...raw, sourceName: SOURCE });
   const apply = normalized.applicationUrl || normalized.sourceUrl;
-  if (!apply || isBareHomepageUrl(apply) || isNonProgrammeHubUrl(apply)) {
+  if (!apply || isBareHomepageUrl(apply)) {
     return { ok: false, reason: "bare_url", title: normalized.title };
   }
 
-  const urlIssues = auditCuratedApplyRecord({
-    externalId: normalized.externalId,
-    title: normalized.title,
-    applicationUrl: normalized.applicationUrl,
-    sourceUrl: normalized.sourceUrl,
-  });
-  if (urlIssues.length > 0) {
-    return { ok: false, reason: urlIssues.join(","), title: normalized.title };
-  }
-
-  if (validateClassification) {
-    const classification = classifyScholarshipRecord(normalized);
-    if (classification.reject) {
-      return { ok: false, reason: classification.reason || "not_scholarship", title: normalized.title };
-    }
-  }
-
-  const saved = await repo.upsertImportedScholarship({
+  await repo.upsertImportedScholarship({
     title: normalized.title,
     organizationName: normalized.organizationName,
     country: normalized.country,
@@ -89,47 +68,44 @@ async function upsertRecord(repo, raw, { validateClassification = false } = {}) 
     isRolling: normalized.isRolling ?? true,
     eligibleRegions: normalized.eligibleRegions,
     normalizedSourceUrl: normalized.normalizedSourceUrl,
-    replaceDescription: true,
   });
-  if (saved?.id) {
-    maybeTranslateScholarship(saved.id);
-  }
-  return { ok: true, title: normalized.title, id: saved?.id };
+  return { ok: true, title: normalized.title };
 }
 
 async function main() {
   const repo = new ScholarshipRepository();
 
   const purged = await pool.query(
-    `UPDATE scholarships
-     SET status = 'rejected', updated_at = NOW()
-     WHERE status IN ('verified', 'pending', 'needs_review')
+    `DELETE FROM scholarships
+     WHERE source_name = $1
        AND (
-         external_id = 'et-moe-foreign-study'
-         OR external_id LIKE 'et-moe-en%'
-         OR external_id LIKE 'et-moe-announcement%'
-         OR title ILIKE 'Ethiopia Foreign Study Programmes'
-         OR application_url ~* '^https?://(www\\.)?moe\\.gov\\.et/en/?$'
-         OR source_url ~* '^https?://(www\\.)?moe\\.gov\\.et/en/?$'
-         OR source_url ~* '^https?://(www\\.)?moe\\.gov\\.et/en/announcement'
+         (status = 'rejected' AND (
+           application_url ~* '^https?://[^/]+/?$'
+           OR source_url ~* '^https?://[^/]+/?$'
+         ))
+         OR id IN (
+           SELECT s.id
+           FROM scholarships s
+           INNER JOIN scholarships newer
+             ON newer.source_name = s.source_name
+            AND newer.external_id = s.external_id
+            AND newer.id <> s.id
+            AND newer.updated_at >= s.updated_at
+           WHERE s.source_name = $1
+             AND s.external_id IS NOT NULL
+         )
        )
      RETURNING id`,
+    [SOURCE],
   );
 
   const records = [...buildLeafImportRecords(), ...scrapeProgrammeRecords()];
   let upserted = 0;
   const skipped = [];
 
-  for (const raw of buildLeafImportRecords()) {
+  for (const raw of records) {
     // eslint-disable-next-line no-await-in-loop
     const result = await upsertRecord(repo, raw);
-    if (result.ok) upserted += 1;
-    else skipped.push(result);
-  }
-
-  for (const raw of scrapeProgrammeRecords()) {
-    // eslint-disable-next-line no-await-in-loop
-    const result = await upsertRecord(repo, raw, { validateClassification: true });
     if (result.ok) upserted += 1;
     else skipped.push(result);
   }
@@ -148,13 +124,6 @@ async function main() {
       2,
     ),
   );
-
-  const { execSync } = require("child_process");
-  execSync("node scripts/purge-stale-catalog-urls.js", {
-    stdio: "inherit",
-    env: process.env,
-  });
-
   await pool.end();
 }
 

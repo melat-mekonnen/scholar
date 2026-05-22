@@ -13,15 +13,10 @@ const { fetchAfricanUniversityScholarships } = require("./connectors/africanUniv
 const { fetchAfricanAggregatorScholarships } = require("./connectors/africanAggregatorConnector");
 const { fetchAfricanResearchScholarships } = require("./connectors/africanResearchConnector");
 const { fetchCuratedLeafScholarships } = require("./connectors/curatedLeafConnector");
-const { fetchMastersPortalScholarships } = require("./connectors/mastersPortalConnector");
-const { fetchUsAggregatorDiscoveryScholarships } = require("./connectors/usAggregatorDiscoveryConnector");
-const { CURATED_LEAF_SOURCE, US_AGGREGATOR_DISCOVERY_SOURCE } = require("./sourceNames");
+const { CURATED_LEAF_SOURCE } = require("./sourceNames");
 
 /** Hand-picked official leaf programme pages; no open-ended hub crawl. */
 const CURATED_LEAF_SOURCE_IDS = ["curated_leaf"];
-
-/** US aggregator discovery (official URL resolution, admin review). */
-const US_AGGREGATOR_DISCOVERY_SOURCE_IDS = ["us_aggregator_discovery"];
 
 /** Fast Africa-scale ingest (no DAAD / slow EU crawlers). */
 const AFRICA_SCALE_SOURCE_IDS = [
@@ -104,23 +99,11 @@ const SOURCES = {
     enabled: () => env.ingestFastwebEnabled,
     fetch: fetchFastwebScholarships,
   },
-  mastersportal: {
-    sourceName: "MASTERSPORTAL",
-    sourceType: SOURCE_TYPES.AGGREGATOR,
-    enabled: () => env.ingestMastersportalEnabled,
-    fetch: fetchMastersPortalScholarships,
-  },
   curated_leaf: {
     sourceName: CURATED_LEAF_SOURCE,
     sourceType: SOURCE_TYPES.GOVERNMENT,
     enabled: () => true,
     fetch: fetchCuratedLeafScholarships,
-  },
-  us_aggregator_discovery: {
-    sourceName: US_AGGREGATOR_DISCOVERY_SOURCE,
-    sourceType: SOURCE_TYPES.AGGREGATOR,
-    enabled: () => env.ingestUsAggregatorDiscoveryEnabled,
-    fetch: fetchUsAggregatorDiscoveryScholarships,
   },
 };
 
@@ -165,15 +148,6 @@ function parseRequestedSources(input) {
   ) {
     return CURATED_LEAF_SOURCE_IDS;
   }
-  if (
-    normalized === "us_aggregator_discovery" ||
-    normalized === "us-aggregator-discovery" ||
-    normalized === "us_aggregator" ||
-    normalized === "phase2" ||
-    normalized === "phase2_discovery"
-  ) {
-    return US_AGGREGATOR_DISCOVERY_SOURCE_IDS;
-  }
 
   const allKeys = listSources();
   const keys =
@@ -215,7 +189,6 @@ function parseRequestedSources(input) {
 module.exports = {
   AFRICA_SCALE_SOURCE_IDS,
   CURATED_LEAF_SOURCE_IDS,
-  US_AGGREGATOR_DISCOVERY_SOURCE_IDS,
   listSources,
   getSourceConfig,
   getSourceConfigBySourceName,

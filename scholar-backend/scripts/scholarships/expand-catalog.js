@@ -26,7 +26,7 @@ async function main() {
   }
 
   runScript("scholarships/sync-leaf-catalog.js");
-  runScript("purge-uk-funding-bursary-junk.js");
+  runScript("scholarships/crawl-uk-funding-pages.js", "--max-per-hub=4");
 
   const ukSources = ukFundingDiscoverySourceNames();
   const counts = await pool.query(

@@ -4,7 +4,7 @@
 require("dotenv").config();
 
 const { pool } = require("../../src/infra/db/neonClient");
-const { runScript } = require("../lib/run");
+const { runScript } = require("./lib/run");
 
 process.env.INGESTION_ENABLED = "true";
 process.env.INGEST_DAAD_ENABLED = "false";

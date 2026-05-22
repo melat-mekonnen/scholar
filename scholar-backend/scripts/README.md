@@ -26,8 +26,6 @@ Operational scripts grouped by responsibility. Run from `scholar-backend/` (or v
 | `scholarships/enrich-descriptions.js` | `scholarships:enrich-descriptions` | Fetch pages, extract facts, write sectioned descriptions |
 | `scholarships/verify-enriched-content.js` | `scholarships:verify-content` | Gate: ≥90% verified rows have sectioned descriptions |
 | `scholarships/crawl-uk-funding-pages.js` | `scholarships:crawl-uk-funding` | Discover bursary links from university hubs |
-| `scholarships/deduplicate-scholarships.js` | `scholarships:dedupe -- --dry-run` / `--apply` / `--restore` | Remove same-source re-import copies only (not shared apply URLs) |
-| `scholarships/import-mastersportal-seeds.js` | `scholarships:import-mastersportal` | Import MastersPortal seeds as `needs_review` by default (`--status=verified` optional) |
 | `scholarships/ingest-curated.js` | `ingest:curated-leaf` | Staging pipeline ingest for curated leaf pack |
 
 ## Study programmes

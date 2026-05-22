@@ -6,10 +6,10 @@ import { apiFetchJson } from "@/lib/api"
 import {
   mergeScholarshipDetail,
   normalizeScholarship,
+  getApplicationUrl,
   parseDescriptionSections,
   filterDescriptionSectionsForDisplay,
-  formatDescriptionBodyForDisplay,
-  formatScholarshipMetaLine,
+  fundingTypeLabel,
   isStudyProgramme,
   translateFundingTypeLabel,
   type ScholarshipPublic,
@@ -25,8 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { ScholarshipDates } from "@/components/scholarship-dates"
 
 type Props = {
@@ -81,8 +80,11 @@ export function ScholarshipDetailDialog({
   }, [open, summary, lang])
 
   const merged = detail ?? summary
-  const metaLine = merged ? formatScholarshipMetaLine(t, merged) : ""
-
+  const applyUrl = merged ? getApplicationUrl(merged) : undefined
+  const degreeLevelLabel =
+    merged && typeof merged.degreeLevel === "string"
+      ? merged.degreeLevel.replace("_", " ")
+      : "—"
   const sections = merged?.description
     ? filterDescriptionSectionsForDisplay(parseDescriptionSections(merged.description))
     : []
@@ -102,7 +104,7 @@ export function ScholarshipDetailDialog({
               {metaLine}
             </DialogDescription>
           )}
-          {merged && <ScholarshipDates scholarship={merged} className="pt-1" compact />}
+          {merged && <ScholarshipDates scholarship={merged} className="pt-2" compact />}
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -126,6 +128,38 @@ export function ScholarshipDetailDialog({
                     <Badge variant="outline" className="border-emerald-200 text-emerald-800">
                       {translateFundingTypeLabel(t, merged.fundingType)}
                     </Badge>
+                    {merged.fundingType && (
+                      <Badge variant="outline">{t(fundingTypeLabel(merged.fundingType))}</Badge>
+                    )}
+                    {merged.amount && <Badge variant="outline">{merged.amount}</Badge>}
+                  </div>
+
+                  {sections.length > 0 ? (
+                    <div className="space-y-4">
+                      {sections.map((section) => (
+                        <div key={section.heading} className="space-y-1">
+                          <p className="text-sm font-medium">{section.heading}</p>
+                          <p className="text-muted-foreground whitespace-pre-wrap break-words text-sm leading-relaxed">
+                            {section.body}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : merged.description ? (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {isProgramme ? t("About this programme") : t("About this scholarship")}
+                      </p>
+                      <p className="text-muted-foreground whitespace-pre-wrap break-words text-sm leading-relaxed">
+                        {merged.description}
+                      </p>
+                    </div>
+                  ) : (
+                    !loading && (
+                      <p className="text-muted-foreground text-sm">
+                        No extended description is available for this listing.
+                      </p>
+                    )
                   )}
                   {merged.amount && (
                     <Badge variant="outline" className="border-emerald-200 text-emerald-800">

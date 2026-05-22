@@ -14,6 +14,28 @@ const { sharedUniversityCourseProgrammes } = require("./sharedUniversityCourses"
 
 /** Programmes fetched from official pages (already leaf-level URLs). */
 const SCRAPE_PROGRAMME_DEFINITIONS = [
+  // —— United States ——
+  {
+    externalId: "fulbright-foreign-student",
+    url: "https://foreign.fulbrightonline.org/apply",
+    organizationName: "Fulbright Program",
+    country: "United States",
+    degreeLevel: "master",
+    fieldOfStudy: "multiple disciplines",
+    fundingType: "fully_funded",
+    titleHint: "Fulbright Foreign Student Program",
+  },
+  {
+    externalId: "fulbright-flta",
+    url: "https://foreign.fulbrightonline.org/about/types-of-awards/fulbright-foreign-language-teaching-assistant-flta-grants",
+    organizationName: "Fulbright Program",
+    country: "United States",
+    degreeLevel: "bachelor",
+    fieldOfStudy: "language teaching",
+    fundingType: "fully_funded",
+    titleHint: "Fulbright FLTA Program",
+  },
+
   // —— Germany (DAAD curated — no open-ended hub crawl) ——
   ...CURATED_DAAD_PROGRAMMES.filter((p) => p.externalId !== "daad-funding-database"),
 

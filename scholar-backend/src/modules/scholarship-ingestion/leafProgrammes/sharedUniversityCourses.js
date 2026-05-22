@@ -51,6 +51,7 @@ function sharedUniversityCourseProgrammes() {
     const fundingUrl = resolveSharedUniversityUrl(entry);
 
     for (const course of COURSE_TEMPLATES) {
+      const courseUrl = `${fundingUrl.replace(/\/+$/, "")}#course-${course.slug}`;
       definitions.push({
         externalId: `shared-course-${entry.slug}-${course.slug}`,
         title: `Commonwealth Shared Scholarship — ${course.title} (${entry.university.replace(/ \(.*\)/, "")})`,
@@ -61,13 +62,13 @@ function sharedUniversityCourseProgrammes() {
         fieldOfStudy: course.field,
         fundingType: "fully_funded",
         amount: "Fully funded tuition, stipend, and travel (Shared Scholarship)",
-        applicationUrl: fundingUrl,
-        sourceUrl: `${fundingUrl.replace(/\/+$/, "")}#shared-course-${course.slug}`,
+        applicationUrl: courseUrl,
+        sourceUrl: courseUrl,
         secondaryApplyUrl: CSC_CENTRAL,
         description: courseDescription({
           university: entry.university,
           course,
-          courseUrl: fundingUrl,
+          courseUrl,
         }),
         eligibleRegions: ["africa", "commonwealth", "developing"],
         isRolling: false,

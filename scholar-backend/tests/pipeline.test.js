@@ -4,7 +4,7 @@ const { mergeScholarshipRecords, pickPublishStatus } = require("../src/modules/s
 const { decidePublishStatus } = require("../src/modules/scholarship-ingestion/pipeline/decidePublishStatus");
 const { canCaptureRecord, buildCanonicalKey } = require("../src/modules/scholarship-ingestion/pipeline/captureRecord");
 const { resolveDuplicateAction } = require("../src/modules/scholarship-ingestion/detectDuplicates");
-const { CURATED_LEAF_SOURCE, US_AGGREGATOR_DISCOVERY_SOURCE } = require("../src/modules/scholarship-ingestion/sourceNames");
+const { CURATED_LEAF_SOURCE } = require("../src/modules/scholarship-ingestion/sourceNames");
 
 test("canCaptureRecord accepts minimal fetch row", () => {
   const result = canCaptureRecord({

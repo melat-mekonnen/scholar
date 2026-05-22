@@ -7,7 +7,6 @@ require("dotenv").config();
 const axios = require("axios");
 const { pool } = require("../../src/infra/db/neonClient");
 const { StudyProgrammeRepository } = require("../../src/repositories/StudyProgrammeRepository");
-const { maybeTranslateStudyProgramme } = require("../../src/services/scholarshipAmharicContent");
 const { extractScholarshipFacts } = require("../../src/modules/scholarship-ingestion/ai/extractScholarshipFacts");
 const { formatDescriptionFromFacts } = require("../../src/modules/scholarship-ingestion/ai/formatDescriptionSections");
 

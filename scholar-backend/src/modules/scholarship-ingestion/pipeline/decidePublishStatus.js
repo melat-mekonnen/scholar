@@ -6,7 +6,7 @@ const {
   isBareHomepageUrl,
 } = require("../descriptionQuality");
 const { classifyScholarshipRecord } = require("../scholarshipClassifier");
-const { isCuratedLeafSource, isUsAggregatorDiscoverySource } = require("../sourceNames");
+const { isCuratedLeafSource } = require("../sourceNames");
 
 /**
  * Decide catalog status at publish time. Returns null when row should stay staging-only.
