@@ -92,3 +92,38 @@ export function formatDocumentType(type: string) {
 export function defaultRequiresPro(type: string) {
   return type === "cover_letter_template" || type === "resume_template"
 }
+
+export type DocumentSort = "popular" | "newest" | "title"
+
+export function sortDocuments<T extends { title: string; downloadCount: number; createdAt: string }>(
+  docs: T[],
+  sort: DocumentSort,
+): T[] {
+  const copy = [...docs]
+  if (sort === "popular") {
+    return copy.sort((a, b) => b.downloadCount - a.downloadCount || a.title.localeCompare(b.title))
+  }
+  if (sort === "newest") {
+    return copy.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+  }
+  return copy.sort((a, b) => a.title.localeCompare(b.title))
+}
+
+export function documentTypeHint(type: string): string {
+  const key = type.toLowerCase()
+  if (key.includes("cv") || key.includes("resume")) {
+    return "Structure your experience for scholarship committees."
+  }
+  if (key.includes("cover")) {
+    return "Tailor your motivation letter for each application."
+  }
+  if (key.includes("recommendation") || key.includes("reference")) {
+    return "Guidance for referees and recommendation requests."
+  }
+  if (key.includes("checklist") || key.includes("guide")) {
+    return "Step-by-step help for application readiness."
+  }
+  return "Ready-to-use material for your applications."
+}

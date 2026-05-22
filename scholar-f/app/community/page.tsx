@@ -1,37 +1,30 @@
 "use client"
 
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-} from "lucide-react"
-
-import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import {
   deleteCommunityMessage,
   fetchCommunityChannels,
   fetchCommunityMessages,
+  hideCommunityMessage,
+  pinCommunityMessage,
   postCommunityMessage,
   reportCommunityMessage,
+  unpinCommunityMessage,
+  updateCommunityMessage,
   type CommunityChannel,
   type CommunityMessage,
 } from "@/lib/community"
+import { buildLinkShareMessage } from "@/lib/community-links"
 import { clearToken, getToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { CommunityChat } from "@/components/student-portal/community-chat"
+import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { Badge } from "@/components/ui/badge"
 
 type MeResponse = {
@@ -58,13 +51,37 @@ export default function CommunityPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [sending, setSending] = useState(false)
   const [draft, setDraft] = useState("")
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [replyTo, setReplyTo] = useState<CommunityMessage | null>(null)
+  const [editingMessage, setEditingMessage] = useState<CommunityMessage | null>(null)
   const streamRef = useRef<EventSource | null>(null)
+
+  function startEdit(message: CommunityMessage) {
+    setEditingMessage(message)
+    setReplyTo(null)
+    setPendingFiles([])
+    setDraft(message.body)
+  }
+
+  function cancelEdit() {
+    setEditingMessage(null)
+    setDraft("")
+  }
 
   const selectedChannel = useMemo(
     () => channels.find((c) => c.id === channelId) ?? null,
-    [channels, channelId]
+    [channels, channelId],
   )
+
+  const pinnedMessage = selectedChannel?.pinnedMessage ?? null
+  const isModerator =
+    me?.role === "admin" || me?.role === "manager" || me?.role === "owner"
+
+  function updateChannelPin(cid: string, pinned: CommunityMessage | null) {
+    setChannels((prev) =>
+      prev.map((c) => (c.id === cid ? { ...c, pinnedMessage: pinned } : c)),
+    )
+  }
 
   useEffect(() => {
     if (!getToken()) {
@@ -136,11 +153,20 @@ export default function CommunityPage() {
       setMessages(data.messages ?? [])
       setHasMore(data.pagination?.hasMore ?? false)
       setOldestCursor(data.pagination?.oldestCreatedAt ?? null)
+      if (data.channel?.id) {
+        updateChannelPin(data.channel.id, data.channel.pinnedMessage ?? null)
+      }
       setLoadingMessages(false)
       requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
     },
-    [router, toast]
+    [router, toast],
   )
+
+  useEffect(() => {
+    cancelEdit()
+    setReplyTo(null)
+    setPendingFiles([])
+  }, [channelId])
 
   useEffect(() => {
     if (channelId) {
@@ -162,7 +188,7 @@ export default function CommunityPage() {
     const token = getToken()
     if (!token) return
     const source = new EventSource(
-      `/api/community/channels/${encodeURIComponent(channelId)}/stream?token=${encodeURIComponent(token)}`
+      `/api/community/channels/${encodeURIComponent(channelId)}/stream?token=${encodeURIComponent(token)}`,
     )
     source.addEventListener("message_created", (evt) => {
       try {
@@ -172,6 +198,56 @@ export default function CommunityPage() {
           return [...prev, msg]
         })
         requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
+      } catch {
+        /* ignore */
+      }
+    })
+    source.addEventListener("message_deleted", (evt) => {
+      try {
+        const payload = JSON.parse((evt as MessageEvent).data) as { id: string }
+        setMessages((prev) => prev.filter((m) => m.id !== payload.id))
+        setChannels((prev) =>
+          prev.map((c) =>
+            c.pinnedMessage?.id === payload.id ? { ...c, pinnedMessage: null } : c,
+          ),
+        )
+      } catch {
+        /* ignore */
+      }
+    })
+    source.addEventListener("message_hidden", (evt) => {
+      try {
+        const payload = JSON.parse((evt as MessageEvent).data) as { id: string }
+        setMessages((prev) => prev.filter((m) => m.id !== payload.id))
+        setChannels((prev) =>
+          prev.map((c) =>
+            c.pinnedMessage?.id === payload.id ? { ...c, pinnedMessage: null } : c,
+          ),
+        )
+      } catch {
+        /* ignore */
+      }
+    })
+    source.addEventListener("pin_updated", (evt) => {
+      try {
+        const payload = JSON.parse((evt as MessageEvent).data) as {
+          channelId: string
+          pinnedMessage: CommunityMessage | null
+        }
+        updateChannelPin(payload.channelId, payload.pinnedMessage)
+      } catch {
+        /* ignore */
+      }
+    })
+    source.addEventListener("message_updated", (evt) => {
+      try {
+        const msg = JSON.parse((evt as MessageEvent).data) as CommunityMessage
+        setMessages((prev) => prev.map((m) => (m.id === msg.id ? msg : m)))
+        setChannels((prev) =>
+          prev.map((c) =>
+            c.pinnedMessage?.id === msg.id ? { ...c, pinnedMessage: msg } : c,
+          ),
+        )
       } catch {
         /* ignore */
       }
@@ -204,12 +280,87 @@ export default function CommunityPage() {
     setLoadingMore(false)
   }
 
-  async function sendMessage() {
-    const text = draft.trim()
-    if (!channelId || !text || sending) return
+  async function shareLink(url: string, note: string) {
+    if (!channelId || sending || editingMessage) return
+    const text = buildLinkShareMessage(url, note)
+    if (!text) {
+      toast({ title: "Invalid link", variant: "destructive" })
+      return
+    }
     setSending(true)
     const parentReply = replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
-    const { res, data, errorMessage } = await postCommunityMessage(channelId, text, parentReply)
+    const { res, data, errorMessage } = await postCommunityMessage(
+      channelId,
+      text,
+      parentReply,
+      [],
+    )
+    if (res.status === 401 || res.status === 403) {
+      clearToken()
+      router.replace("/signin")
+      setSending(false)
+      return
+    }
+    if (!res.ok || !data) {
+      setSending(false)
+      toast({
+        title: "Link not shared",
+        description: errorMessage ?? "Please try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    setMessages((prev) => [...prev, data])
+    setReplyTo(null)
+    setSending(false)
+    toast({ title: "Link shared" })
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
+  }
+
+  async function saveEdit() {
+    const text = draft.trim()
+    if (!editingMessage || sending || !text) return
+    setSending(true)
+    const { res, data, errorMessage } = await updateCommunityMessage(editingMessage.id, text)
+    if (res.status === 401 || res.status === 403) {
+      clearToken()
+      router.replace("/signin")
+      setSending(false)
+      return
+    }
+    if (!res.ok || !data) {
+      setSending(false)
+      toast({
+        title: "Edit not saved",
+        description: errorMessage ?? "Please try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    setMessages((prev) => prev.map((m) => (m.id === data.id ? data : m)))
+    setChannels((prev) =>
+      prev.map((c) => (c.pinnedMessage?.id === data.id ? { ...c, pinnedMessage: data } : c)),
+    )
+    cancelEdit()
+    setSending(false)
+    toast({ title: "Message updated" })
+  }
+
+  async function sendMessage() {
+    if (editingMessage) {
+      await saveEdit()
+      return
+    }
+    const text = draft.trim()
+    if (!channelId || sending || (!text && pendingFiles.length === 0)) return
+    setSending(true)
+    const parentReply = replyTo && !replyTo.parentMessageId ? replyTo.id : undefined
+    const { res, data, errorMessage } = await postCommunityMessage(
+      channelId,
+      text,
+      parentReply,
+      pendingFiles,
+    )
     if (res.status === 401 || res.status === 403) {
       clearToken()
       router.replace("/signin")
@@ -227,6 +378,7 @@ export default function CommunityPage() {
     }
     setMessages((prev) => [...prev, data])
     setDraft("")
+    setPendingFiles([])
     setReplyTo(null)
     setSending(false)
     requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
@@ -245,6 +397,67 @@ export default function CommunityPage() {
       return
     }
     setMessages((prev) => prev.filter((x) => x.id !== m.id))
+    if (pinnedMessage?.id === m.id && channelId) {
+      updateChannelPin(channelId, null)
+    }
+  }
+
+  async function hideMessage(m: CommunityMessage) {
+    const { res } = await hideCommunityMessage(m.id)
+    if (!res.ok) {
+      toast({ title: "Could not remove message", variant: "destructive" })
+      return
+    }
+    setMessages((prev) => prev.filter((x) => x.id !== m.id))
+    if (pinnedMessage?.id === m.id && channelId) {
+      updateChannelPin(channelId, null)
+    }
+    toast({ title: "Message removed", description: "Hidden from the channel for all members." })
+  }
+
+  async function pinMessage(m: CommunityMessage) {
+    if (!channelId) return
+    const { res, data } = await pinCommunityMessage(channelId, m.id)
+    if (!res.ok || !data) {
+      toast({ title: "Could not pin message", variant: "destructive" })
+      return
+    }
+    updateChannelPin(channelId, data.pinnedMessage)
+    toast({ title: "Message pinned", description: "Visible at the top of this channel." })
+  }
+
+  async function unpinMessage() {
+    if (!channelId) return
+    const { res, data } = await unpinCommunityMessage(channelId)
+    if (!res.ok || !data) {
+      toast({ title: "Could not unpin", variant: "destructive" })
+      return
+    }
+    updateChannelPin(channelId, null)
+    toast({ title: "Message unpinned" })
+  }
+
+  function copyMessage(text: string) {
+    void navigator.clipboard.writeText(text).then(
+      () => toast({ title: "Copied to clipboard" }),
+      () => toast({ title: "Could not copy", variant: "destructive" }),
+    )
+  }
+
+  function scrollToMessage(messageId: string) {
+    document.getElementById(`msg-${messageId}`)?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
+
+  function jumpToMessage(message: CommunityMessage) {
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === message.id)) return prev
+      return [...prev, message].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      )
+    })
+    requestAnimationFrame(() => {
+      window.setTimeout(() => scrollToMessage(message.id), 80)
+    })
   }
 
   async function reportMessage(m: CommunityMessage) {
@@ -265,66 +478,88 @@ export default function CommunityPage() {
   const canPost = me?.role === "student" || me?.role === "admin"
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
-      <StudentPortalInlineAside />
-
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <div>
-            <h1 className="text-lg font-semibold text-emerald-950">Community</h1>
-            <p className="text-xs text-slate-600">
-              Peer tips, experiences, and constructive feedback — stay kind and on-topic.
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-900">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-200 px-2.5 py-1.5 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Portal</span>
+          </Link>
+          <div className="min-w-0 border-l border-emerald-100 pl-3">
+            <h1 className="truncate text-lg font-semibold text-emerald-950">Community</h1>
+            <p className="truncate text-xs text-slate-600">
+              {loadingChannels
+                ? "Loading channels…"
+                : selectedChannel
+                  ? selectedChannel.name
+                  : `${channels.length} channel${channels.length === 1 ? "" : "s"} · live chat`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {me?.role ? (
-              <Badge className="border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100">
-                {me.role}
-              </Badge>
-            ) : null}
-            <ProfileAvatarLink />
-          </div>
-        </header>
-
-        <div className="relative flex min-h-0 flex-1 flex-col">
-          <div className="pointer-events-none absolute -left-20 top-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-16 top-32 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
-          <div className="relative shrink-0 border-b border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-4 shadow-sm shadow-emerald-900/5 md:px-6">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-base font-semibold tracking-tight text-slate-900">Community support</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Join a channel, share experiences, and help other students on their scholarship journey.
-              </p>
-            </div>
-          </div>
-
-          <CommunityChat
-            channels={channels}
-            channelId={channelId}
-            onChannelSelect={setChannelId}
-            selectedChannel={selectedChannel}
-            messages={messages}
-            meId={me?.id ?? null}
-            loadingChannels={loadingChannels}
-            loadingMessages={loadingMessages}
-            channelsError={channelsError}
-            hasMore={hasMore}
-            loadingMore={loadingMore}
-            onLoadOlder={() => void loadOlder()}
-            draft={draft}
-            onDraftChange={setDraft}
-            replyTo={replyTo}
-            onReplyToChange={setReplyTo}
-            sending={sending}
-            canPost={canPost}
-            onSend={() => void sendMessage()}
-            onDelete={(m) => void removeMessage(m)}
-            onReport={(m) => void reportMessage(m)}
-            bottomRef={bottomRef}
-          />
         </div>
-      </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <StudentLanguageToggle />
+          {me?.role ? (
+            <Badge className="hidden border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100 sm:inline-flex">
+              {me.role}
+            </Badge>
+          ) : null}
+          <ProfileAvatarLink />
+        </div>
+      </header>
+
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-3 md:p-4">
+        <div className="pointer-events-none absolute -left-24 top-0 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-20 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
+
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-emerald-100/80 bg-white shadow-lg shadow-emerald-900/5 ring-1 ring-emerald-50">
+          <div className="pointer-events-none h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          <CommunityChat
+                channels={channels}
+                channelId={channelId}
+                onChannelSelect={setChannelId}
+                selectedChannel={selectedChannel}
+                messages={messages}
+                meId={me?.id ?? null}
+                loadingChannels={loadingChannels}
+                loadingMessages={loadingMessages}
+                channelsError={channelsError}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                onLoadOlder={() => void loadOlder()}
+                onRetryChannels={() => void loadChannels()}
+                draft={draft}
+                onDraftChange={setDraft}
+                replyTo={replyTo}
+                onReplyToChange={(m) => {
+                  setReplyTo(m)
+                  if (m) cancelEdit()
+                }}
+                editingMessage={editingMessage}
+                onEdit={startEdit}
+                onCancelEdit={cancelEdit}
+                pendingFiles={pendingFiles}
+                onPendingFilesChange={setPendingFiles}
+                sending={sending}
+                canPost={canPost}
+                isModerator={isModerator}
+                pinnedMessage={pinnedMessage}
+                onSend={() => void sendMessage()}
+                onCopy={copyMessage}
+                onDelete={(m) => void removeMessage(m)}
+                onReport={(m) => void reportMessage(m)}
+                onPin={(m) => void pinMessage(m)}
+                onUnpin={() => void unpinMessage()}
+                onHide={(m) => void hideMessage(m)}
+                onScrollToMessage={scrollToMessage}
+                onJumpToMessage={jumpToMessage}
+                onShareLink={(url, note) => void shareLink(url, note)}
+                bottomRef={bottomRef}
+              />
+        </div>
+      </main>
     </div>
   )
 }

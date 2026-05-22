@@ -1,19 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import {
-  FileText,
-  FolderOpen,
-  LayoutDashboard,
-  Search,
-  Sparkles,
-  MessageSquare,
-  Users,
-  Bookmark,
-  UserCircle2,
-  Settings,
-} from "lucide-react"
+import { FolderOpen } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
 import {
@@ -23,10 +11,8 @@ import {
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
-import { useStudentI18n } from "@/lib/student-i18n"
 
 export default function DocumentsPage() {
-  const { t } = useStudentI18n()
   const [docs, setDocs] = useState<DocumentResource[]>([])
   const [q, setQ] = useState("")
   const [loading, setLoading] = useState(true)
@@ -43,7 +29,7 @@ export default function DocumentsPage() {
         { method: "GET", auth: false },
       )
       if (!res.ok || !data) {
-        setError(errorMessage || t("Failed to load documents"))
+        setError(errorMessage || "Failed to load documents")
         setLoading(false)
         return
       }
@@ -59,11 +45,16 @@ export default function DocumentsPage() {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <div>
-            <h1 className="text-lg font-semibold text-emerald-950">{t("Document Resources")}</h1>
-            <p className="text-xs text-slate-600">
-              {t("Templates and guides for your scholarship applications.")}
-            </p>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+              <FolderOpen className="h-4 w-4" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-emerald-950">Document Resources</h1>
+              <p className="text-xs text-slate-600">
+                Templates and guides — edit online, fuse your profile, and download.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <StudentLanguageToggle />
