@@ -20,7 +20,9 @@ function parseLang(query) {
 function shouldIncludeProgrammes(query, degreeLevels) {
   if (String(query?.include_programmes || "1") === "0") return false;
   if (!degreeLevels?.length) return true;
-  return degreeLevels.some((d) => d === "bachelor" || d === "high_school");
+  return degreeLevels.some((d) =>
+    ["bachelor", "high_school", "master", "phd"].includes(d),
+  );
 }
 
 const UUID_V4 =

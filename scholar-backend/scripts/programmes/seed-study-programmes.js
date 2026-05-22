@@ -1,13 +1,13 @@
 /**
- * Seed Warwick study programmes into study_programmes table (Phase 4).
+ * Seed Warwick study programmes into `study_programmes`.
  */
 require("dotenv").config();
 
-const { pool } = require("../src/infra/db/neonClient");
-const { StudyProgrammeRepository } = require("../src/repositories/StudyProgrammeRepository");
-const { warwickStudyProgrammeRecords } = require("../src/modules/scholarship-ingestion/leafProgrammes/warwickStudyProgrammes");
-const { extractScholarshipFacts } = require("../src/modules/scholarship-ingestion/ai/extractScholarshipFacts");
-const { formatDescriptionFromFacts } = require("../src/modules/scholarship-ingestion/ai/formatDescriptionSections");
+const { pool } = require("../../src/infra/db/neonClient");
+const { StudyProgrammeRepository } = require("../../src/repositories/StudyProgrammeRepository");
+const { warwickStudyProgrammeRecords } = require("../../src/modules/scholarship-ingestion/leafProgrammes/warwickStudyProgrammes");
+const { extractScholarshipFacts } = require("../../src/modules/scholarship-ingestion/ai/extractScholarshipFacts");
+const { formatDescriptionFromFacts } = require("../../src/modules/scholarship-ingestion/ai/formatDescriptionSections");
 
 async function main() {
   const repo = new StudyProgrammeRepository();

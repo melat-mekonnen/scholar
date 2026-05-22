@@ -106,7 +106,7 @@ services:
       db:
         condition: service_healthy
     restart: "no"
-    command: ["node", "scripts/docker-first-run.js"]
+    command: ["node", "scripts/setup/docker-first-run.js"]
 
   web:
     build:

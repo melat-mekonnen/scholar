@@ -1,6 +1,7 @@
 const { BookmarkRepository } = require("../repositories/BookmarkRepository");
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
 const { UserActivityRepository } = require("../repositories/UserActivityRepository");
+const { mapPublicScholarship } = require("../utils/mapPublicOpportunity");
 
 const bookmarkRepo = new BookmarkRepository();
 const scholarshipRepo = new ScholarshipRepository();
@@ -9,19 +10,14 @@ const activityRepo = new UserActivityRepository();
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function mapScholarshipRow(r) {
+function parseLang(query) {
+  const lang = String(query?.lang || "en").toLowerCase();
+  return lang === "am" ? "am" : "en";
+}
+
+function mapScholarshipRow(r, lang = "en") {
   return {
-    id: r.id,
-    title: r.title,
-    country: r.country,
-    degreeLevel: r.degree_level,
-    fieldOfStudy: r.field_of_study,
-    fundingType: r.funding_type,
-    deadline: r.deadline,
-    amount: r.amount,
-    description: r.description,
-    applicationUrl: r.application_url,
-    createdAt: r.created_at,
+    ...mapPublicScholarship(r, lang),
     bookmarkedAt: r.bookmarked_at,
   };
 }
@@ -88,14 +84,15 @@ async function listBookmarks(req, res, next) {
     const { page = "1", limit = "12" } = req.query;
     const parsedPage = Math.max(parseInt(page, 10) || 1, 1);
     const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 100);
+    const lang = parseLang(req.query);
 
     const { rows, total, page: p, limit: l } = await bookmarkRepo.listByUser(
       req.user.id,
       parsedPage,
-      parsedLimit
+      parsedLimit,
     );
 
-    const scholarships = rows.map(mapScholarshipRow);
+    const scholarships = rows.map((row) => mapScholarshipRow(row, lang));
 
     return res.json({
       results: scholarships,

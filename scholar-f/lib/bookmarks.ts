@@ -29,10 +29,11 @@ export async function removeBookmark(scholarshipId: string) {
 /**
  * GET /api/bookmarks — paginated saved scholarships for the current student.
  */
-export async function fetchBookmarksPage(page: number, limit: number) {
+export async function fetchBookmarksPage(page: number, limit: number, lang = "en") {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
+    lang,
   })
   return apiFetchJson<BookmarksListResponse>(`/api/bookmarks?${params.toString()}`, {
     method: "GET",

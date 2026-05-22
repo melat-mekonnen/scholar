@@ -9,9 +9,10 @@ const {
 } = require("./commonwealthNominators");
 const { buildLeafRecordsFromList } = require("./buildLeafProgrammeRecord");
 const { warwickSharedCourseProgrammes } = require("./warwickSharedCourses");
+const { sharedUniversityCourseProgrammes } = require("./sharedUniversityCourses");
 
 /** Programmes fetched from official pages (already leaf-level URLs). */
-const PHASE1_SCRAPE_PROGRAMMES = [
+const SCRAPE_PROGRAMME_DEFINITIONS = [
   // —— United States ——
   {
     externalId: "fulbright-foreign-student",
@@ -172,7 +173,7 @@ const PHASE1_SCRAPE_PROGRAMMES = [
   },
 ];
 
-const PHASE1_CURATED_DESCRIPTIONS = {
+const SCRAPE_PROGRAMME_DESCRIPTIONS = {
   "fulbright-foreign-student":
     "The Fulbright Foreign Student Program enables graduate students, young professionals, and artists from abroad to study and conduct research in the United States at participating universities.",
   "fulbright-flta":
@@ -225,6 +226,7 @@ function leafProgrammeDefinitions() {
   return [
     ...commonwealthSharedLeafProgrammes(),
     ...warwickSharedCourseProgrammes(),
+    ...sharedUniversityCourseProgrammes(),
     ...commonwealthDistanceLeafProgrammes(),
     ...commonwealthMastersNominatorLeafProgrammes(),
     ...commonwealthPhdNominatorLeafProgrammes(),
@@ -237,16 +239,16 @@ function buildLeafImportRecords() {
   return buildLeafRecordsFromList(leafProgrammeDefinitions());
 }
 
-function phase1ScrapeProgrammesWithDescriptions() {
-  return PHASE1_SCRAPE_PROGRAMMES.map((programme) => ({
+function scrapeProgrammesWithDescriptions() {
+  return SCRAPE_PROGRAMME_DEFINITIONS.map((programme) => ({
     ...programme,
-    curatedDescription: PHASE1_CURATED_DESCRIPTIONS[programme.externalId],
+    curatedDescription: SCRAPE_PROGRAMME_DESCRIPTIONS[programme.externalId],
   }));
 }
 
 function catalogSummary() {
   const leaf = leafProgrammeDefinitions();
-  const scrape = PHASE1_SCRAPE_PROGRAMMES;
+  const scrape = SCRAPE_PROGRAMME_DEFINITIONS;
   return {
     leafCount: leaf.length,
     scrapeCount: scrape.length,
@@ -254,6 +256,7 @@ function catalogSummary() {
     byFamily: {
       commonwealthShared: commonwealthSharedLeafProgrammes().length,
       warwickSharedCourses: warwickSharedCourseProgrammes().length,
+      sharedUniversityCourses: sharedUniversityCourseProgrammes().length,
       commonwealthDistance: commonwealthDistanceLeafProgrammes().length,
       commonwealthMastersNominators: commonwealthMastersNominatorLeafProgrammes().length,
       commonwealthPhdNominators: commonwealthPhdNominatorLeafProgrammes().length,
@@ -264,10 +267,10 @@ function catalogSummary() {
 }
 
 module.exports = {
-  PHASE1_SCRAPE_PROGRAMMES,
-  PHASE1_CURATED_DESCRIPTIONS,
+  SCRAPE_PROGRAMME_DEFINITIONS,
+  SCRAPE_PROGRAMME_DESCRIPTIONS,
   leafProgrammeDefinitions,
   buildLeafImportRecords,
-  phase1ScrapeProgrammesWithDescriptions,
+  scrapeProgrammesWithDescriptions,
   catalogSummary,
 };

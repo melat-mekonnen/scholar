@@ -27,6 +27,7 @@ export type ScholarshipPublic = {
   descriptionEn?: string
   descriptionAm?: string
   applicationUrl?: string
+  applicationStatus?: "open" | "closed" | "rolling" | "unknown"
   createdAt?: string
   updatedAt?: string
   /** Present when the student is logged in (from `is_bookmarked` / `isBookmarked`). */
@@ -62,6 +63,38 @@ export function formatScholarshipDeadlineLabel(s: {
   if (s.deadline) return s.deadline
   if (s.isRolling) return "Open / rolling"
   return null
+}
+
+export type ScholarshipDateLine = {
+  label: string
+  value: string
+  variant?: "start" | "deadline" | "rolling"
+}
+
+/** Structured date rows for card/detail components (not description text). */
+export function getScholarshipDateLines(s: {
+  deadline?: string
+  endDate?: string
+  startDate?: string
+  isRolling?: boolean
+}): ScholarshipDateLine[] {
+  const lines: ScholarshipDateLine[] = []
+  if (s.startDate) {
+    lines.push({ label: "Opens", value: s.startDate, variant: "start" })
+  }
+
+  const deadlineLabel = formatScholarshipDeadlineLabel(s)
+  if (deadlineLabel) {
+    if (s.isRolling && !s.deadline && !s.endDate) {
+      lines.push({ label: "Applications", value: deadlineLabel, variant: "rolling" })
+    } else if (s.isRolling) {
+      lines.push({ label: "Deadline", value: deadlineLabel, variant: "deadline" })
+    } else {
+      lines.push({ label: "Closes", value: deadlineLabel, variant: "deadline" })
+    }
+  }
+
+  return lines
 }
 
 export function hasScholarshipDateInfo(s: {
@@ -136,6 +169,18 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
     descriptionEn: str(r.descriptionEn) ?? str(r.description_en),
     descriptionAm: str(r.descriptionAm) ?? str(r.description_am),
     applicationUrl: url,
+    applicationStatus:
+      r.applicationStatus === "open" ||
+      r.applicationStatus === "closed" ||
+      r.applicationStatus === "rolling" ||
+      r.applicationStatus === "unknown"
+        ? r.applicationStatus
+        : r.application_status === "open" ||
+            r.application_status === "closed" ||
+            r.application_status === "rolling" ||
+            r.application_status === "unknown"
+          ? r.application_status
+          : undefined,
     createdAt: str(r.createdAt) ?? str(r.created_at),
     updatedAt: str(r.updatedAt) ?? str(r.updated_at),
     ...(isBookmarked !== undefined ? { isBookmarked } : {}),
@@ -168,8 +213,33 @@ export function parseDescriptionSections(description?: string): DescriptionSecti
   })
 }
 
+/** Hide date sections from prose — dates belong on cards, not in description body. */
+export function filterDescriptionSectionsForDisplay(
+  sections: DescriptionSection[],
+): DescriptionSection[] {
+  return sections.filter(
+    (section) => !/^important dates$/i.test(section.heading.trim()),
+  )
+}
+
 export function isStudyProgramme(s: Pick<ScholarshipPublic, "recordType" | "fundingType">): boolean {
   return s.recordType === "study_programme" || s.fundingType === "not_funded"
+}
+
+export function applicationStatusLabel(status?: string): string | null {
+  if (!status) return null
+  switch (status) {
+    case "open":
+      return "Applications open"
+    case "closed":
+      return "Applications closed"
+    case "rolling":
+      return "Rolling applications"
+    case "unknown":
+      return null
+    default:
+      return null
+  }
 }
 
 export function fundingTypeLabel(fundingType?: string): string {

@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   AFRICA_SCALE_SOURCE_IDS,
-  PHASE1_SOURCE_IDS,
+  CURATED_LEAF_SOURCE_IDS,
   listSources,
   getSourceConfig,
   getSourceConfigBySourceName,
@@ -45,11 +45,16 @@ test("parseRequestedSources africa alias excludes DAAD", () => {
   assert.ok(!keys.includes("daad"));
 });
 
-test("parseRequestedSources phase1 alias runs curated pack only", () => {
-  const keys = parseRequestedSources("phase1");
-  assert.deepEqual(keys, PHASE1_SOURCE_IDS);
-  assert.ok(keys.includes("phase1_curated"));
+test("parseRequestedSources curated_leaf alias runs curated pack only", () => {
+  const keys = parseRequestedSources("curated_leaf");
+  assert.deepEqual(keys, CURATED_LEAF_SOURCE_IDS);
+  assert.ok(keys.includes("curated_leaf"));
   assert.ok(!keys.includes("african_aggregators"));
+});
+
+test("parseRequestedSources legacy phase1 alias still resolves", () => {
+  const keys = parseRequestedSources("phase1");
+  assert.deepEqual(keys, CURATED_LEAF_SOURCE_IDS);
 });
 
 test("getSourceConfigBySourceName resolves registry entry", () => {

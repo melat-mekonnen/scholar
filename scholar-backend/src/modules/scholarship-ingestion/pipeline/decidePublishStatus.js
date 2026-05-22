@@ -6,6 +6,7 @@ const {
   isBareHomepageUrl,
 } = require("../descriptionQuality");
 const { classifyScholarshipRecord } = require("../scholarshipClassifier");
+const { isCuratedLeafSource } = require("../sourceNames");
 
 /**
  * Decide catalog status at publish time. Returns null when row should stay staging-only.
@@ -14,7 +15,7 @@ function decidePublishStatus({ record, gate, sourceName, forcePublishStatus }) {
   if (forcePublishStatus) return forcePublishStatus;
 
   const classification = classifyScholarshipRecord(record);
-  const isCurated = String(sourceName || "").toUpperCase() === "PHASE1_CURATED";
+  const isCurated = isCuratedLeafSource(sourceName);
 
   if (classification.reject && !isCurated) {
     return null;

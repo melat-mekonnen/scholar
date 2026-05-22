@@ -15,15 +15,15 @@ import { StudentPortalInlineAside } from "@/components/student-portal/student-po
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { apiFetchJson } from "@/lib/api"
 import {
-  formatScholarshipDeadlineLabel,
   fundingTypeLabel,
   isStudyProgramme,
   normalizeScholarship,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { getMyApplications } from "@/lib/applications"
-import { clearToken } from "@/lib/auth"
 import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
+import { ScholarshipDates } from "@/components/scholarship-dates"
+import { clearToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -638,19 +638,12 @@ export default function ScholarshipsPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">{s.title}</p>
                           <p className="mt-1 text-sm text-slate-500">
-                            {s.organizationName ? `${s.organizationName} 
- · ` : ""}
-                            {s.country} 
- · {s.degreeLevel.replace("_", " ")}
-                            {s.fieldOfStudy ? ` 
- · ${s.fieldOfStudy}` : ""}
+                            {s.organizationName ? `${s.organizationName} · ` : ""}
+                            {s.country} · {s.degreeLevel.replace("_", " ")}
+                            {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>
+                          <ScholarshipDates scholarship={s} className="mt-2" />
                         </div>
-                        {!s.startDate && !(s.endDate || s.deadline) && (
-                          <span className="shrink-0 text-xs text-slate-500">
-                            Dates not specified
-                          </span>
-                        )}
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked={s.isBookmarked ?? false}
@@ -676,16 +669,6 @@ export default function ScholarshipsPage() {
                           </Badge>
                         )}
                         {s.amount && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.amount}</Badge>}
-                        {s.startDate && <Badge variant="outline" className="border-emerald-200 text-emerald-800">Start: {s.startDate}</Badge>}
-                        {formatScholarshipDeadlineLabel(s) && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
-                            {s.isRolling && (s.deadline || s.endDate)
-                              ? `Deadline: ${formatScholarshipDeadlineLabel(s)}`
-                              : s.isRolling
-                                ? formatScholarshipDeadlineLabel(s)!
-                                : `End: ${formatScholarshipDeadlineLabel(s)}`}
-                          </Badge>
-                        )}
                       </div>
 
                       <div className="pt-2 flex gap-2">

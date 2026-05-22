@@ -24,6 +24,7 @@ import {
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { clearToken } from "@/lib/auth"
+import { useStudentI18n } from "@/lib/student-i18n"
 import { apiFetchJson } from "@/lib/api"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
+import { ScholarshipDates } from "@/components/scholarship-dates"
 import {
   Pagination,
   PaginationContent,
@@ -68,6 +70,7 @@ function formatDegreeLevel(value?: string | null) {
 export default function SavedScholarshipsPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t, lang } = useStudentI18n()
 
   const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -83,7 +86,7 @@ export default function SavedScholarshipsPage() {
   const loadBookmarks = useCallback(async () => {
     setLoading(true)
     setError(null)
-    const { res, data, errorMessage } = await fetchBookmarksPage(page, limit)
+    const { res, data, errorMessage } = await fetchBookmarksPage(page, limit, lang)
     if (res.status === 401) {
       clearToken()
       router.replace("/signin")
@@ -102,7 +105,7 @@ export default function SavedScholarshipsPage() {
     setResults(items)
     setTotal(data.total ?? items.length)
     setLoading(false)
-  }, [page, limit, router])
+  }, [page, limit, lang, router])
 
   useEffect(() => {
     void loadBookmarks()
@@ -232,12 +235,10 @@ export default function SavedScholarshipsPage() {
                       <p className="text-sm text-slate-500">
                         {s.country} · {formatDegreeLevel(s.degreeLevel)}
                       </p>
+                      <ScholarshipDates scholarship={s} className="mt-1" />
                       <div className="flex flex-wrap gap-2">
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
-                        )}
-                        {s.deadline && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">Deadline: {s.deadline}</Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 pt-1">

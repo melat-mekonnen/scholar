@@ -1,22 +1,23 @@
 /**
- * Direct upsert of all configured leaf + curated scrape records as verified PHASE1_CURATED.
+ * Upsert configured leaf + scrape programme records as verified curated leaves.
  */
 require("dotenv").config();
 
-const { pool } = require("../src/infra/db/neonClient");
-const { ScholarshipRepository } = require("../src/repositories/ScholarshipRepository");
+const { pool } = require("../../src/infra/db/neonClient");
+const { ScholarshipRepository } = require("../../src/repositories/ScholarshipRepository");
 const {
   buildLeafImportRecords,
-  phase1ScrapeProgrammesWithDescriptions,
-} = require("../src/modules/scholarship-ingestion/leafProgrammes/assembleLeafCatalog");
-const { buildLeafProgrammeRecord } = require("../src/modules/scholarship-ingestion/leafProgrammes/buildLeafProgrammeRecord");
-const { normalizeScholarshipRecord } = require("../src/modules/scholarship-ingestion/normalizeScholarship");
-const { isBareHomepageUrl } = require("../src/modules/scholarship-ingestion/descriptionQuality");
+  scrapeProgrammesWithDescriptions,
+} = require("../../src/modules/scholarship-ingestion/leafProgrammes/assembleLeafCatalog");
+const { buildLeafProgrammeRecord } = require("../../src/modules/scholarship-ingestion/leafProgrammes/buildLeafProgrammeRecord");
+const { normalizeScholarshipRecord } = require("../../src/modules/scholarship-ingestion/normalizeScholarship");
+const { isBareHomepageUrl } = require("../../src/modules/scholarship-ingestion/descriptionQuality");
+const { CURATED_LEAF_SOURCE } = require("../../src/modules/scholarship-ingestion/sourceNames");
 
-const SOURCE = "PHASE1_CURATED";
+const SOURCE = CURATED_LEAF_SOURCE;
 
 function scrapeProgrammeRecords() {
-  return phase1ScrapeProgrammesWithDescriptions()
+  return scrapeProgrammesWithDescriptions()
     .map((programme) => {
       const title = programme.titleHint || programme.externalId;
       const description =

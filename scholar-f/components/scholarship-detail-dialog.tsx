@@ -8,9 +8,8 @@ import {
   mergeScholarshipDetail,
   normalizeScholarship,
   getApplicationUrl,
-  formatScholarshipDeadlineLabel,
-  hasScholarshipDateInfo,
   parseDescriptionSections,
+  filterDescriptionSectionsForDisplay,
   fundingTypeLabel,
   isStudyProgramme,
   type ScholarshipPublic,
@@ -26,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScholarshipDates } from "@/components/scholarship-dates"
 
 type Props = {
   open: boolean
@@ -80,12 +80,13 @@ export function ScholarshipDetailDialog({
 
   const merged = detail ?? summary
   const applyUrl = merged ? getApplicationUrl(merged) : undefined
-  const deadlineLabel = merged ? formatScholarshipDeadlineLabel(merged) : null
   const degreeLevelLabel =
     merged && typeof merged.degreeLevel === "string"
       ? merged.degreeLevel.replace("_", " ")
       : "—"
-  const sections = merged?.description ? parseDescriptionSections(merged.description) : []
+  const sections = merged?.description
+    ? filterDescriptionSectionsForDisplay(parseDescriptionSections(merged.description))
+    : []
   const isProgramme = merged ? isStudyProgramme(merged) : false
 
   return (
@@ -101,6 +102,7 @@ export function ScholarshipDetailDialog({
               {merged.fieldOfStudy ? ` · ${merged.fieldOfStudy}` : ""}
             </p>
           )}
+          {merged && <ScholarshipDates scholarship={merged} className="pt-2" compact />}
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-hidden">
@@ -120,30 +122,6 @@ export function ScholarshipDetailDialog({
                       <Badge variant="outline">{t(fundingTypeLabel(merged.fundingType))}</Badge>
                     )}
                     {merged.amount && <Badge variant="outline">{merged.amount}</Badge>}
-                    {merged.startDate && (
-                      <Badge variant="outline">Start: {merged.startDate}</Badge>
-                    )}
-                    {deadlineLabel && (
-                      <Badge
-                        variant="outline"
-                        className={
-                          merged.isRolling && !merged.deadline && !merged.endDate
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                            : undefined
-                        }
-                      >
-                        {merged.isRolling && (merged.deadline || merged.endDate)
-                          ? `Deadline: ${deadlineLabel}`
-                          : merged.isRolling
-                            ? deadlineLabel
-                            : `End: ${deadlineLabel}`}
-                      </Badge>
-                    )}
-                    {!hasScholarshipDateInfo(merged) && (
-                      <span className="text-muted-foreground self-center text-xs">
-                        Dates not specified
-                      </span>
-                    )}
                   </div>
 
                   {sections.length > 0 ? (

@@ -1,4 +1,7 @@
 const { query } = require("../infra/db/neonClient");
+const { curatedLeafSourceNames } = require("../modules/scholarship-ingestion/sourceNames");
+
+const CURATED_LEAF_SOURCES = curatedLeafSourceNames();
 
 class ScholarshipRepository {
   async expirePastDeadline() {
@@ -770,22 +773,40 @@ class ScholarshipRepository {
     });
   }
 
-  async listForContentEnrichment({ limit = 50, onlyMissingAm = false } = {}) {
-    const params = [limit];
-    let extra = "";
+  async listForContentEnrichment({
+    limit = 50,
+    all = false,
+    onlyMissingAm = false,
+    onlyUnrefined = false,
+  } = {}) {
+    const params = [];
+    const where = [
+      `status IN ('verified', 'pending')`,
+      `COALESCE(record_type, 'scholarship') = 'scholarship'`,
+    ];
+
     if (onlyMissingAm) {
-      extra = "AND (description_am IS NULL OR title_am IS NULL)";
+      where.push(`(description_am IS NULL OR title_am IS NULL)`);
     }
+    if (onlyUnrefined) {
+      where.push(`(extracted_facts IS NULL OR description NOT LIKE '## Overview%')`);
+    }
+
+    let limitClause = "";
+    if (!all) {
+      params.push(limit);
+      limitClause = `LIMIT $${params.length}`;
+    }
+
     const result = await query(
       `SELECT id, title, organization_name, country, host_country, degree_level, field_of_study,
               funding_type, deadline, application_start_date, application_end_date, amount,
-              description, application_url, source_url, is_rolling, eligible_regions, record_type
+              description, application_url, source_url, is_rolling, eligible_regions, record_type,
+              extracted_facts, application_status
        FROM scholarships
-       WHERE status IN ('verified', 'pending')
-         AND COALESCE(record_type, 'scholarship') = 'scholarship'
-         ${extra}
+       WHERE ${where.join(" AND ")}
        ORDER BY updated_at DESC
-       LIMIT $1`,
+       ${limitClause}`,
       params,
     );
     return result.rows;
@@ -799,6 +820,10 @@ class ScholarshipRepository {
            description_am = COALESCE($4, description_am),
            extracted_facts = COALESCE($5, extracted_facts),
            application_status = COALESCE($6, application_status),
+           deadline = COALESCE($7, deadline),
+           application_start_date = COALESCE($8, application_start_date),
+           application_end_date = COALESCE($9, application_end_date),
+           is_rolling = COALESCE($10, is_rolling),
            updated_at = NOW()
        WHERE id = $1
        RETURNING id, title`,
@@ -809,6 +834,10 @@ class ScholarshipRepository {
         fields.descriptionAm || null,
         fields.extractedFacts ? JSON.stringify(fields.extractedFacts) : null,
         fields.applicationStatus || null,
+        fields.deadline || null,
+        fields.applicationStartDate || null,
+        fields.applicationEndDate || null,
+        fields.isRolling == null ? null : Boolean(fields.isRolling),
       ],
     );
     return result.rows[0] || null;
@@ -836,14 +865,14 @@ class ScholarshipRepository {
       `UPDATE scholarships
        SET status = 'verified',
            updated_at = NOW()
-       WHERE source_name = 'PHASE1_CURATED'
+       WHERE source_name = ANY($1::text[])
          AND status = 'needs_review'
          AND length(COALESCE(description, '')) >= 120
          AND application_url IS NOT NULL
          AND application_url !~* '^https?://[^/]+/?$'
          AND source_url !~* '^https?://[^/]+/?$'
        RETURNING id, title`,
-      [],
+      [CURATED_LEAF_SOURCES],
     );
     return result.rows;
   }
@@ -851,17 +880,17 @@ class ScholarshipRepository {
   async purgeStaleCuratedDuplicates() {
     const result = await query(
       `DELETE FROM scholarships stale
-       WHERE stale.source_name = 'PHASE1_CURATED'
+       WHERE stale.source_name = ANY($1::text[])
          AND stale.status = 'rejected'
          AND EXISTS (
            SELECT 1 FROM scholarships live
-           WHERE live.source_name = 'PHASE1_CURATED'
+           WHERE live.source_name = ANY($1::text[])
              AND live.status = 'verified'
              AND live.external_id = stale.external_id
              AND live.id <> stale.id
          )
        RETURNING stale.id, stale.title`,
-      [],
+      [CURATED_LEAF_SOURCES],
     );
     return result.rows;
   }
@@ -872,16 +901,27 @@ class ScholarshipRepository {
        SET status = 'verified',
            rejection_reason = NULL,
            updated_at = NOW()
-       WHERE source_name = 'PHASE1_CURATED'
+       WHERE source_name = ANY($1::text[])
          AND status IN ('rejected', 'pending', 'expired')
          AND length(COALESCE(description, '')) >= 120
          AND application_url IS NOT NULL
          AND application_url !~* '^https?://[^/]+/?$'
          AND source_url !~* '^https?://[^/]+/?$'
        RETURNING id, title`,
-      [],
+      [CURATED_LEAF_SOURCES],
     );
     return result.rows;
+  }
+
+  async normalizeLegacySourceNames() {
+    await query(
+      `UPDATE scholarships SET source_name = 'CURATED_LEAF' WHERE source_name = 'PHASE1_CURATED'`,
+      [],
+    );
+    await query(
+      `UPDATE scholarships SET source_name = 'UK_FUNDING_DISCOVERY' WHERE source_name = 'PHASE3_BURSARY'`,
+      [],
+    );
   }
 }
 

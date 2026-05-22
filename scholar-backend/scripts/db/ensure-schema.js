@@ -3,7 +3,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const { pool, query } = require("../src/infra/db/neonClient");
+const { pool, query } = require("../../src/infra/db/neonClient");
 
 async function runSqlFile(filePath) {
   const sql = fs.readFileSync(filePath, "utf8");
@@ -21,17 +21,17 @@ async function main() {
   if (!row.scholarships) {
     // eslint-disable-next-line no-console
     console.log("Applying db/schema.sql (first run)...");
-    await runSqlFile(path.join(__dirname, "../db/schema.sql"));
+    await runSqlFile(path.join(__dirname, "../../../db/schema.sql"));
   } else {
     // eslint-disable-next-line no-console
-    console.log("Base schema present — running phase migrations only.");
+    console.log("Base schema present — running content migrations only.");
   }
 
   // eslint-disable-next-line no-console
-  console.log("Running migrate-scholarship-phases.js...");
-  require("child_process").execSync("node scripts/migrate-scholarship-phases.js", {
+  console.log("Running content schema migration...");
+  require("child_process").execSync("node scripts/db/migrations/migrate-content-schema.js", {
     stdio: "inherit",
-    cwd: path.join(__dirname, ".."),
+    cwd: path.join(__dirname, "../.."),
   });
 
   // eslint-disable-next-line no-console

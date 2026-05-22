@@ -12,10 +12,10 @@ import { apiFetchJson } from "@/lib/api"
 import {
   getApplicationUrl,
   normalizeScholarship,
-  openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
+import { ScholarshipDates } from "@/components/scholarship-dates"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -226,9 +226,7 @@ export default function DashboardPage() {
 
                     <CardContent className="space-y-3">
                       <p className="text-sm text-slate-500">Country: {s.country}</p>
-                      {s.deadline && (
-                        <p className="text-sm text-slate-500">Deadline: {s.deadline}</p>
-                      )}
+                      <ScholarshipDates scholarship={s} />
 
                       <div className="flex gap-2 pt-3">
                         <Button
