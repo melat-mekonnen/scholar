@@ -1,6 +1,7 @@
 import { clearToken } from "@/lib/auth"
 import {
   confirmTrackedApplication,
+  getMyApplications,
   startTrackedApplication,
 } from "@/lib/applications"
 import {
@@ -33,7 +34,7 @@ export async function applyWithReturnConfirmation({
     onUnauthorized()
     return
   }
-  if (!tracked.res.ok && tracked.res.status !== 409) {
+  if (!tracked.res.ok) {
     toast({
       title: "Could not start tracking",
       description:
@@ -43,7 +44,19 @@ export async function applyWithReturnConfirmation({
     return
   }
 
-  const applicationId = tracked.data?.id
+  let applicationId = tracked.data?.id
+  const status = tracked.data?.status
+  const alreadySubmitted =
+    tracked.data?.alreadySubmitted === true ||
+    (status != null && status !== "pending")
+
+  if (!applicationId) {
+    const mine = await getMyApplications()
+    if (mine.res.ok && mine.data?.applications) {
+      const found = mine.data.applications.find((a) => a.scholarshipId === scholarship.id)
+      applicationId = found?.id
+    }
+  }
 
   const ok = await openScholarshipApplication(scholarship)
   if (!ok) {
@@ -72,6 +85,14 @@ export async function applyWithReturnConfirmation({
         toast({
           title: "No problem",
           description: "Your application stays pending in the tracker until you confirm.",
+        })
+        return
+      }
+
+      if (alreadySubmitted) {
+        toast({
+          title: "Already in My Applications",
+          description: "This scholarship is already saved in your application tracker.",
         })
         return
       }
