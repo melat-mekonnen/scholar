@@ -1,7 +1,21 @@
 const { query } = require("../infra/db/neonClient");
 const { curatedLeafSourceNames } = require("../modules/scholarship-ingestion/sourceNames");
+const { normalizeUrl } = require("../modules/scholarship-ingestion/urlNormalize");
+const { resolveFieldCategory } = require("../utils/fieldCategory");
+const { aggregateHostRegionFacets } = require("../utils/hostRegion");
 
 const CURATED_LEAF_SOURCES = curatedLeafSourceNames();
+const PUBLIC_SCHOLARSHIP_WHERE =
+  "status = 'verified' AND COALESCE(record_type, 'scholarship') = 'scholarship' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE)";
+
+function mapFacetRows(rows = []) {
+  return rows
+    .map((row) => ({
+      value: String(row?.value || "").trim(),
+      count: Number(row?.count || 0),
+    }))
+    .filter((facet) => facet.value.length > 0);
+}
 
 class ScholarshipRepository {
   async expirePastDeadline() {

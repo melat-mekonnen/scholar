@@ -28,7 +28,7 @@ import {
 import { getMyApplications } from "@/lib/applications"
 import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { ScholarshipDates } from "@/components/scholarship-dates"
-import { clearToken } from "@/lib/auth"
+import { clearToken, getToken } from "@/lib/auth"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
@@ -200,6 +200,60 @@ function sortOptionLabel(sort: SortOption): string {
       return "Recently added"
     default:
       return sort
+  }
+}
+
+function formatFacetLabel(label: string, count?: number): string {
+  return typeof count === "number" && count > 0 ? `${label} (${count})` : label
+}
+
+function degreeLevelLabel(level: string): string {
+  switch (level) {
+    case "high_school":
+      return "High school"
+    case "bachelor":
+      return "Bachelor"
+    case "master":
+      return "Master"
+    case "phd":
+      return "PhD"
+    default:
+      return level.replace(/_/g, " ")
+  }
+}
+
+function eligibleRegionLabel(value: string): string {
+  const normalized = value.trim().toLowerCase()
+  switch (normalized) {
+    case "africa":
+      return "Africa"
+    case "commonwealth":
+      return "Commonwealth"
+    case "developing":
+      return "Developing countries"
+    case "international":
+      return "International"
+    case "asia":
+      return "Asia"
+    default:
+      return value.replace(/_/g, " ")
+  }
+}
+
+function fieldCategoryLabel(value: string): string {
+  return value.replace(/_/g, " ")
+}
+
+function availabilityFilterLabel(value: Exclude<AvailabilityFilter, "">): string {
+  switch (value) {
+    case "open":
+      return "Applications open"
+    case "rolling":
+      return "Rolling applications"
+    case "closing_soon":
+      return "Closing soon"
+    default:
+      return value
   }
 }
 
@@ -1139,7 +1193,7 @@ export default function ScholarshipsPage() {
                           <p className="text-base font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">{s.title}</p>
                           <p className="mt-1 text-sm text-slate-500">
                             {s.organizationName ? `${s.organizationName} · ` : ""}
-                            {s.country} · {s.degreeLevel.replace("_", " ")}
+                            {t(s.country)} · {t(degreeLevelLabel(s.degreeLevel))}
                             {s.fieldOfStudy ? ` · ${s.fieldOfStudy}` : ""}
                           </p>
                           <ScholarshipDates scholarship={s} className="mt-2" />

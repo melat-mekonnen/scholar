@@ -20,7 +20,18 @@ export function formatFacetLabel(value: string, count: number): string {
 }
 
 export function degreeLevelLabel(level: string): string {
-  return level.replace(/_/g, " ")
+  switch (level) {
+    case "high_school":
+      return "High school"
+    case "bachelor":
+      return "Bachelor"
+    case "master":
+      return "Master"
+    case "phd":
+      return "PhD"
+    default:
+      return level.replace(/_/g, " ")
+  }
 }
 
 export function hostRegionLabel(region: string): string {
@@ -265,8 +276,51 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
 export function getApplicationUrl(s: ScholarshipPublic): string | undefined {
   const u = s.applicationUrl?.trim()
   if (!u) return undefined
-  if (/^https?:\/\//i.test(u)) return u
-  return `https://${u}`
+  const withScheme = /^https?:\/\//i.test(u) ? u : `https://${u}`
+  return rewriteKnownApplyUrl(withScheme)
+}
+
+const DAAD_STABLE_BASE =
+  "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database"
+
+const DAAD_DETAIL_BY_LEGACY_PATH: Array<[RegExp, string]> = [
+  [/\/in-region-scholarships\/?$/i, "10000486"],
+  [/\/(development-related-postgraduate-courses-epos|epos)\/?$/i, "50076777"],
+  [/\/research-grants\/?$/i, "57742121"],
+  [/\/study-scholarships\/?$/i, "50026200"],
+  [/\/study-stipends\/?$/i, "50035295"],
+  [/\/graduate-schools\/?$/i, "57135739"],
+  [/\/undergraduate-scholarships\/?$/i, "10000207"],
+]
+
+function rewriteKnownApplyUrl(url: string): string {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return url
+  }
+
+  const host = parsed.hostname.toLowerCase()
+  if (!host.endsWith("daad.de")) return url
+
+  // Keep already-stable DAAD detail links as-is.
+  if (
+    host === "www2.daad.de" &&
+    parsed.pathname.toLowerCase().includes("/stipendium/datenbank/") &&
+    parsed.searchParams.has("detail")
+  ) {
+    return parsed.toString()
+  }
+
+  const path = parsed.pathname.toLowerCase().replace(/\/+$/, "")
+  for (const [pattern, detailId] of DAAD_DETAIL_BY_LEGACY_PATH) {
+    if (pattern.test(path)) {
+      return `${DAAD_STABLE_BASE}/?detail=${detailId}`
+    }
+  }
+
+  return url
 }
 
 /** Parse ## Section markdown from refined descriptions. */
@@ -319,6 +373,9 @@ export function applicationStatusLabel(status?: string): string | null {
 export function fundingTypeLabel(fundingType?: string): string {
   if (!fundingType) return "—"
   if (fundingType === "not_funded") return "Fees apply"
+  if (fundingType === "fully_funded") return "Fully funded"
+  if (fundingType === "partially_funded") return "Partially funded"
+  if (fundingType === "self_funded") return "Self funded"
   return fundingType.replace(/_/g, " ")
 }
 
