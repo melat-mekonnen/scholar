@@ -38,18 +38,16 @@ async function create(req, res, next) {
 
     const existing = await repo.findByUserAndScholarship(userId, scholarshipId);
     if (existing) {
-      if (existing.status === "pending") {
-        return res.status(200).json({
-          id: existing.id,
-          userId: existing.user_id,
-          scholarshipId: existing.scholarship_id,
-          status: existing.status,
-          createdAt: existing.created_at,
-          updatedAt: existing.updated_at,
-          existing: true,
-        });
-      }
-      return res.status(409).json({ message: "Application already exists for this scholarship" });
+      return res.status(200).json({
+        id: existing.id,
+        userId: existing.user_id,
+        scholarshipId: existing.scholarship_id,
+        status: existing.status,
+        createdAt: existing.created_at,
+        updatedAt: existing.updated_at,
+        existing: true,
+        alreadySubmitted: existing.status !== "pending",
+      });
     }
 
     const created = await repo.create({
@@ -127,6 +125,18 @@ async function updateStatus(req, res, next) {
       const err = new Error("Application not found");
       err.statusCode = 404;
       throw err;
+    }
+
+    if (existing.status === status) {
+      return res.json({
+        id: existing.id,
+        userId: existing.user_id,
+        scholarshipId: existing.scholarship_id,
+        status: existing.status,
+        createdAt: existing.created_at,
+        updatedAt: existing.updated_at,
+        unchanged: true,
+      });
     }
 
     const updated = await repo.updateStatus(applicationId, userId, status);
