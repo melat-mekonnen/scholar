@@ -1,6 +1,6 @@
 /**
  * Inserts one local user per role (student, manager, owner, admin) for manual routing checks.
- * Same password for all — dev only. Re-run safe: upserts on email.
+ * Same password for all — dev only. Re-run safe: inserts only if missing.
  *
  * Usage: npm run seed:test-roles
  */
@@ -44,27 +44,34 @@ async function main() {
   const client = new Client({ connectionString: process.env.DATABASE_URL });
   await client.connect();
 
+  let insertedCount = 0;
+  let skippedCount = 0;
+
   try {
     for (const u of TEST_USERS) {
-      await client.query(
+      const result = await client.query(
         `INSERT INTO users (full_name, email, password_hash, auth_provider, role, is_active)
          VALUES ($1, $2, $3, 'local', $4, TRUE)
-         ON CONFLICT (email) DO UPDATE SET
-           full_name = EXCLUDED.full_name,
-           password_hash = EXCLUDED.password_hash,
-           role = EXCLUDED.role,
-           auth_provider = 'local',
-           is_active = TRUE,
-           updated_at = NOW()`,
+         ON CONFLICT (email) DO NOTHING`,
         [u.fullName, u.email.toLowerCase(), passwordHash, u.role]
       );
+
+      if (result.rowCount === 1) {
+        insertedCount += 1;
+      } else {
+        skippedCount += 1;
+      }
     }
   } finally {
     await client.end();
   }
 
   // eslint-disable-next-line no-console
-  console.log("Seeded 4 role test users (password for all):", PASSWORD);
+  console.log(
+    `Role test users seed complete (inserted: ${insertedCount}, existing: ${skippedCount}).`
+  );
+  // eslint-disable-next-line no-console
+  console.log("Password for inserted users:", PASSWORD);
   // eslint-disable-next-line no-console
   console.log("");
   for (const u of TEST_USERS) {

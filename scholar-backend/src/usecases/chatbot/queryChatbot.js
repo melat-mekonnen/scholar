@@ -43,17 +43,40 @@ function mapMlResponse(data) {
 
 async function queryScholarMl({ userId, message, topK = 5 }) {
   const mlUrl = `${env.scholarMlChatUrl.replace(/\/+$/, "")}/v1/chat`;
-  const { data } = await axios.post(
-    mlUrl,
-    {
-      message: String(message).trim(),
-      user_id: userId,
-      filters: {},
-      dry_run: false,
-    },
-    { timeout: 300000 }
-  );
-  return mapMlResponse(data);
+  const basePayload = {
+    message: String(message).trim(),
+    user_id: userId,
+    filters: {},
+  };
+
+  try {
+    const { data } = await axios.post(
+      mlUrl,
+      {
+        ...basePayload,
+        dry_run: false,
+      },
+      { timeout: 300000 }
+    );
+    return mapMlResponse(data);
+  } catch (error) {
+    // If LLM generation fails (e.g. Ollama unavailable/forbidden), gracefully
+    // fall back to retrieval-only response from Scholar-ML dry-run mode.
+    if (!axios.isAxiosError(error)) throw error;
+    const detail =
+      String(error.response?.data?.detail || error.response?.data?.message || error.message || "").toLowerCase();
+    if (!detail.includes("llm generation failed")) throw error;
+
+    const { data } = await axios.post(
+      mlUrl,
+      {
+        ...basePayload,
+        dry_run: true,
+      },
+      { timeout: 300000 }
+    );
+    return mapMlResponse(data);
+  }
 }
 
 async function queryLegacyAi({ userId, message, topK = 5 }) {
