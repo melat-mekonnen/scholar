@@ -2,6 +2,15 @@ import { apiFetchJson } from "@/lib/api"
 
 export type ApplicationStatus = "pending" | "submitted" | "accepted" | "rejected"
 
+/** POST /api/applications response (new or existing row). */
+export type ApplicationCreateResponse = {
+  id: string
+  scholarshipId: string
+  status: ApplicationStatus
+  existing?: boolean
+  alreadySubmitted?: boolean
+}
+
 export type StudentApplication = {
   id: string
   scholarshipId: string
@@ -22,12 +31,7 @@ export async function createApplication(
   scholarshipId: string,
   status: ApplicationStatus = "pending",
 ) {
-  return apiFetchJson<{
-    id: string
-    scholarshipId: string
-    status: ApplicationStatus
-    existing?: boolean
-  }>("/api/applications", {
+  return apiFetchJson<ApplicationCreateResponse>("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ scholarshipId, status }),
@@ -36,7 +40,11 @@ export async function createApplication(
 
 /** Start tracking an application (pending) before opening the official site. */
 export async function startTrackedApplication(scholarshipId: string) {
-  return createApplication(scholarshipId, "pending")
+  return apiFetchJson<ApplicationCreateResponse>("/api/applications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scholarshipId, status: "pending" }),
+  })
 }
 
 /** Mark a pending application as submitted after the student confirms they applied. */
