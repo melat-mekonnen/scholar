@@ -51,7 +51,7 @@ type PostingProfileEditorProps = {
   showSidebar?: boolean
 }
 
-const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 const fieldClass = "h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
 const textareaClass = "rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
 const iconClass = "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70"
@@ -221,7 +221,7 @@ export function PostingProfileEditor({
               University Representative
             </h2>
 
-            <nav className="flex flex-1 flex-col space-y-1 rounded-2xl border border-emerald-100/80 bg-white p-2">
+            <nav className="flex flex-1 flex-col space-y-1 rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-2">
               <Link href={basePath} className={inactiveNav}>
                 <span className={inactiveNavIcon}>
                   <LayoutDashboard className="h-4 w-4" />
@@ -292,7 +292,7 @@ export function PostingProfileEditor({
                 <IdCard className="h-6 w-6" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{pageTitle}</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{pageTitle}</h1>
                 <p className="mt-1 text-sm text-slate-600">{pageDescription}</p>
               </div>
             </div>

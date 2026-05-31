@@ -86,23 +86,24 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
 
   if (gate !== "ready") {
     return (
-      <div className="min-h-screen bg-slate-100 p-8">
-        <p className="text-sm text-slate-600">Loading…</p>
+      <div className="min-h-screen bg-slate-100 p-8 dark:bg-background dark:text-foreground transition-colors duration-200">
+        <p className="text-sm text-slate-600 dark:text-foreground/70">Loading…</p>
       </div>
     )
   }
 
-  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
-  const listWell = "rounded-xl border border-emerald-100/80 bg-emerald-50/30 p-3"
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
+  const listWell =
+    "rounded-xl border border-emerald-100/80 bg-emerald-50/30 p-3 dark:border-border dark:bg-muted/30"
   const statRow =
-    "flex items-center justify-between rounded-lg border border-emerald-100/60 bg-white px-3 py-2"
+    "flex items-center justify-between rounded-lg border border-emerald-100/60 bg-white px-3 py-2 dark:border-border dark:bg-card dark:text-foreground"
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <div className="flex">
         {showSidebar ? (
           <aside className={cn("hidden w-72 shrink-0 flex-col border-r md:flex md:min-h-screen", cfg.shellClassName)}>
-            <div className="border-b border-emerald-100/80 px-6 py-5">
+            <div className="border-b border-emerald-100/80 px-6 py-5 dark:border-border">
               <div className="mb-4 flex items-center gap-3">
                 <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
               </div>
@@ -112,7 +113,7 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Owner portal</p>
               ) : null}
               <div className="leading-tight">
-                <span className="block font-semibold text-slate-900">
+                <span className="block font-semibold text-slate-900 dark:text-foreground">
                   {workspace === "manager" ? "University Representative" : cfg.shellTitle}
                 </span>
                 <span className="text-xs text-slate-500">{cfg.shellSubtitle}</span>
@@ -200,7 +201,7 @@ export function ScholarshipOpsDashboard({ workspace, showSidebar = true }: Props
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <LayoutDashboard className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.dashboardHeading}</h1>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{cfg.dashboardHeading}</h1>
                 </div>
                 <p className="text-sm text-slate-600">{cfg.dashboardTagline}</p>
               </div>

@@ -44,7 +44,7 @@ const degreeOptions = [
 ]
 
 const profileCardClass =
-  "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+  "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 
 const interestOptions = [
   'STEM',

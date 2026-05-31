@@ -69,7 +69,7 @@ export function StudentPortalShell({
           {hero ? (
             <div className={studentPortalHeroCardClass}>
               <div className={studentPortalHeroAccentClass}>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{hero.title}</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{hero.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{hero.description}</p>
               </div>
             </div>

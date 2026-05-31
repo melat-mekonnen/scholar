@@ -188,7 +188,7 @@ export default function AiChatPage() {
   ]
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
         <div className="flex min-h-0 flex-1 flex-col p-6">
           <div className="mb-8 flex items-center gap-3">
@@ -233,9 +233,9 @@ export default function AiChatPage() {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           <div>
-            <h1 className="text-lg font-semibold text-emerald-950">{t("AI Chatbot")}</h1>
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">{t("AI Chatbot")}</h1>
             <p className="text-xs text-slate-600">
               Answers use your profile and verified scholarships, plus the AI reference dataset.
             </p>
@@ -250,7 +250,7 @@ export default function AiChatPage() {
           <div className="pointer-events-none absolute -left-20 top-16 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-40 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-5 py-4 shadow-sm shadow-emerald-900/5 sm:px-6">
+          <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-5 py-4 shadow-sm shadow-emerald-900/5 sm:px-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
@@ -269,7 +269,7 @@ export default function AiChatPage() {
             </div>
           </div>
 
-          <Card className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
             <CardContent className="flex min-h-0 flex-1 flex-col gap-0 p-0">
               <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 sm:px-5">

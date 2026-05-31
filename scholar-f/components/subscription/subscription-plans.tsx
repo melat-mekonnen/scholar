@@ -266,7 +266,7 @@ export function SubscriptionPlans({
           </CardContent>
         </Card>
       ) : (
-        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Manage Pro</CardTitle>
             <CardDescription>

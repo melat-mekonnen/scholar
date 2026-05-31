@@ -145,10 +145,10 @@ export default function PendingScholarshipsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-7 shadow-sm">
         <div className="flex flex-col gap-4 border-l-4 border-emerald-500 pl-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Pending scholarships</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Pending scholarships</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
               Review and moderate scholarships before they go live to students.
             </p>
@@ -169,7 +169,7 @@ export default function PendingScholarshipsPage() {
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
       ) : null}
 
-      <section className="rounded-2xl border border-emerald-100/80 bg-white/90 p-3 shadow-sm shadow-emerald-900/5">
+      <section className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200/90 p-3 shadow-sm shadow-emerald-900/5">
         <Card className="border-0 bg-transparent shadow-none">
           <CardHeader className="space-y-4 px-3 pb-2 pt-1 sm:px-4">
             <div className="flex flex-wrap items-center justify-between gap-2">

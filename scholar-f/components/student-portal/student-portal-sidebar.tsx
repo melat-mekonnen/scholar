@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { navLinkActive, navLinkInactive } from "@/lib/theme"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { getStudentSidebarLinks, isStudentSidebarActive } from "@/lib/student-portal-sidebar"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
@@ -35,7 +36,7 @@ export function StudentPortalSidebar({
   )
 
   return (
-    <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+    <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 transition-colors duration-200 ease-in-out dark:border-border dark:bg-card md:flex md:min-h-screen md:flex-col">
       <div className="flex min-h-0 flex-1 flex-col p-6">
         <div className="mb-8 flex items-center gap-3">
           <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
@@ -54,15 +55,15 @@ export function StudentPortalSidebar({
                 href={item.href}
                 className={
                   active
-                    ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
-                    : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
+                    ? `group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-semibold ${navLinkActive}`
+                    : `group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)] ${navLinkInactive}`
                 }
               >
                 <span
                   className={
                     active
-                      ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
-                      : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+                      ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100 dark:bg-muted dark:text-emerald-300 dark:ring-border"
+                      : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80 dark:bg-muted dark:text-foreground/70 dark:group-hover:bg-accent dark:group-hover:text-emerald-300"
                   }
                 >
                   <Icon className="h-4 w-4" />

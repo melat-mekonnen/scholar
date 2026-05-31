@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Bell,
   FileText,
@@ -18,6 +18,9 @@ import {
 
 import { apiFetchJson } from "@/lib/api"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { headerShellAlt, mainScroll, pageShell, sidebarShell } from "@/lib/theme"
+import { clearToken, getToken } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -63,15 +66,15 @@ function NavLinks({
             onClick={onNavigate}
             className={
               active
-                ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80"
-                : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)]"
+                ? "group flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200/80 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200 dark:ring-emerald-800/60"
+                : "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.25)] dark:text-foreground/80 dark:hover:bg-accent dark:hover:text-emerald-300"
             }
           >
             <span
               className={
                 active
-                  ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100"
-                  : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+                  ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 ring-1 ring-teal-100 dark:bg-muted dark:text-emerald-300 dark:ring-border"
+                  : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.3)] group-hover:ring-1 group-hover:ring-emerald-300/80 dark:bg-muted dark:text-foreground/70 dark:group-hover:bg-accent dark:group-hover:text-emerald-300"
               }
             >
               <Icon className="h-4 w-4" />
@@ -97,6 +100,7 @@ type MeResponse = { role?: string }
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
@@ -142,8 +146,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pageLabel = NAV.find((n) => isActive(pathname, n.href))?.label ?? "Admin"
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+    <div className={cn("flex min-h-screen", pageShell)}>
+      <aside className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-screen md:flex-col", sidebarShell)}>
         <div className="flex min-h-0 flex-1 flex-col p-6">
           <div className="mb-8 flex items-center gap-3">
             <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
@@ -157,7 +161,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white px-4 py-3 shadow-sm md:px-6">
+        <header className={cn("flex items-center justify-between gap-3 px-4 py-3 md:px-6", headerShellAlt)}>
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -174,7 +178,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <SheetHeader className="sr-only">
                   <SheetTitle>Admin menu</SheetTitle>
                 </SheetHeader>
-                <div className="flex h-full min-h-0 flex-col border-r border-emerald-100/90 bg-white">
+                <div className={cn("flex h-full min-h-0 flex-col border-r", sidebarShell)}>
                   <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
                     <div className="mb-8 flex items-center gap-3">
                       <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
@@ -186,22 +190,25 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 className="truncate text-lg font-semibold text-slate-900">{pageLabel}</h1>
+            <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-foreground">{pageLabel}</h1>
           </div>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="hidden border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50 sm:inline-flex"
-          >
-            <Link href="/admin/notifications">
-              <Bell className="mr-1 h-4 w-4" />
-              {unreadCount > 0 ? `${unreadCount} unread` : "Alerts"}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="hidden border-emerald-200 text-emerald-800 hover:bg-emerald-50 sm:inline-flex dark:border-border dark:text-emerald-300"
+            >
+              <Link href="/admin/notifications">
+                <Bell className="mr-1 h-4 w-4" />
+                {unreadCount > 0 ? `${unreadCount} unread` : "Alerts"}
+              </Link>
+            </Button>
+          </div>
         </header>
 
-        <div className="flex-1 overflow-auto bg-slate-100">{children}</div>
+        <div className={cn("flex-1 overflow-auto", mainScroll)}>{children}</div>
       </div>
     </div>
   )

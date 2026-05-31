@@ -2,14 +2,23 @@
 
 import type { ReactNode } from "react"
 
+import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { StudentI18nProvider } from "@/lib/student-i18n"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <StudentI18nProvider>
-      {children}
-      <Toaster />
-    </StudentI18nProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      storageKey="theme"
+      disableTransitionOnChange={false}
+    >
+      <StudentI18nProvider>
+        {children}
+        <Toaster />
+      </StudentI18nProvider>
+    </ThemeProvider>
   )
 }

@@ -106,16 +106,16 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
   }
 
   return (
-    <div className={showBackLink ? "min-h-screen bg-slate-100 text-slate-900" : "text-slate-900"}>
+    <div className={showBackLink ? "min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200" : "text-slate-900"}>
       <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-6 md:px-6 md:py-8">
-        <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+        <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-5 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                 <Bell className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{title}</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{title}</h1>
                 <p className="text-sm text-slate-600">{roleSubtitle(expectedRole)}</p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         ) : null}
 
-        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <CardHeader className="border-b border-emerald-100/80">
             <CardTitle className="text-lg text-slate-900">Notifications</CardTitle>
             <CardDescription className="text-slate-600">{unreadCount} unread</CardDescription>

@@ -125,13 +125,13 @@ export default function SavedScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold text-emerald-950">Saved Scholarships</h1>
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Saved Scholarships</h1>
             {me?.role ? (
               <Badge className="capitalize border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100">
                 {me.role}
@@ -151,7 +151,7 @@ export default function SavedScholarshipsPage() {
           <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
             <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Saved for later</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Saved for later</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 Scholarships you bookmarked. Remove the bookmark to take them off this list.
               </p>
@@ -175,7 +175,7 @@ export default function SavedScholarshipsPage() {
           {loading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
@@ -185,7 +185,7 @@ export default function SavedScholarshipsPage() {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <Empty className="rounded-2xl border border-emerald-100/80 bg-white/90">
+            <Empty className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200/90">
               <EmptyHeader>
                 <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700">
                   <Bookmark className="size-6" />
@@ -207,7 +207,7 @@ export default function SavedScholarshipsPage() {
                 {results.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />

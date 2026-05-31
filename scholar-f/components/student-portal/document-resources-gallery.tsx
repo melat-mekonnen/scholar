@@ -273,7 +273,7 @@ export function DocumentResourcesGallery({
             {filtered.map((doc) => (
               <div
                 key={doc.id}
-                className="flex flex-col rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-4 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="max-w-[140px] mx-auto w-full">
                   <DocumentTemplatePreview

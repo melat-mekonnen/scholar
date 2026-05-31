@@ -87,12 +87,12 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">My Applications</h1>
+        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
+          <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">My Applications</h1>
           <ProfileAvatarLink />
         </header>
 
@@ -104,7 +104,7 @@ export default function ApplicationsPage() {
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div className="border-l-4 border-emerald-500 pl-4">
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Application tracker</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Application tracker</h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
                   See every scholarship you have started or submitted, and update status as you hear back.
                 </p>
@@ -122,28 +122,28 @@ export default function ApplicationsPage() {
 
           {!loading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
                 <CardContent className="pt-6">
                   <p className="text-sm font-medium text-slate-500">Total</p>
                   <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.total}</p>
                 </CardContent>
               </Card>
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-teal-600 opacity-80" />
                 <CardContent className="pt-6">
                   <p className="text-sm font-medium text-slate-500">Submitted</p>
                   <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.submitted}</p>
                 </CardContent>
               </Card>
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-80" />
                 <CardContent className="pt-6">
                   <p className="text-sm font-medium text-slate-500">Accepted</p>
                   <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.accepted}</p>
                 </CardContent>
               </Card>
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-80" />
                 <CardContent className="pt-6">
                   <p className="text-sm font-medium text-slate-500">Pending</p>
@@ -163,7 +163,7 @@ export default function ApplicationsPage() {
           ) : null}
 
           {!loading && sorted.length === 0 ? (
-            <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+            <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
               <CardHeader>
                 <CardTitle className="text-base text-slate-900">No applications yet</CardTitle>
@@ -193,7 +193,7 @@ export default function ApplicationsPage() {
                 {sorted.map((a) => (
                   <Card
                     key={a.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />

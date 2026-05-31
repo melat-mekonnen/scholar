@@ -62,14 +62,14 @@ export default function AdminDocumentsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm ring-1 ring-emerald-400/30">
               <FileText className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Document management</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Document management</h1>
               <p className="mt-1 text-sm text-slate-600">
                 Search and moderate uploaded resources available to students.
               </p>
@@ -95,7 +95,7 @@ export default function AdminDocumentsPage() {
 
       <div className="grid gap-3">
         {rows.map((d) => (
-          <Card key={d.id} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card key={d.id} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
             <CardHeader className="border-b border-emerald-100/70 pb-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

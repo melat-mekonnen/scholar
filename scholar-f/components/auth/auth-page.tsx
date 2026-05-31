@@ -482,8 +482,8 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
   )
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 pb-0">
-      <Card className="w-full max-w-3xl overflow-hidden border-0 bg-white shadow-2xl">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 pb-0 dark:bg-background transition-colors duration-200">
+      <Card className="w-full max-w-3xl overflow-hidden border-0 bg-white shadow-2xl dark:bg-card dark:text-card-foreground dark:border-border transition-colors duration-200">
         <div
           className={`hidden w-[200%] transition-transform duration-700 ease-in-out md:flex ${
             isSignIn ? "translate-x-0" : "-translate-x-1/2"

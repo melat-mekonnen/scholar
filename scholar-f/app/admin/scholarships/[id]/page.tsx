@@ -120,10 +120,10 @@ export default function ScholarshipReviewPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-7 shadow-sm">
         <div className="flex flex-col gap-4 border-l-4 border-emerald-500 pl-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Scholarship review</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Scholarship review</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
               Carefully review scholarship details before approving or rejecting.
             </p>
@@ -144,11 +144,11 @@ export default function ScholarshipReviewPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           <section className="space-y-4 lg:col-span-2">
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
               <CardHeader className="space-y-1 border-b border-emerald-100/80 pb-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <CardTitle className="text-xl font-semibold text-slate-900">{scholarship.title}</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-slate-900 dark:text-foreground">{scholarship.title}</CardTitle>
                     <p className="mt-1 text-sm text-slate-600">
                       {scholarship.country} · {scholarship.degreeLevel.replace("_", " ")}
                     </p>
@@ -192,7 +192,7 @@ export default function ScholarshipReviewPage() {
             </Card>
 
             {scholarship.postedBy && (
-              <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+              <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
                 <CardHeader className="border-b border-emerald-100/80 py-3">
                   <CardTitle className="text-sm font-semibold text-slate-900">Posted by</CardTitle>
                 </CardHeader>
@@ -205,7 +205,7 @@ export default function ScholarshipReviewPage() {
           </section>
 
           <section className="space-y-4">
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
               <CardHeader className="border-b border-emerald-100/80 py-3">
                 <CardTitle className="text-sm font-semibold text-slate-900">Verification actions</CardTitle>
               </CardHeader>

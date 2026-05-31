@@ -58,7 +58,7 @@ type MeResponse = {
   role?: string
 }
 
-const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 const fieldClass = "h-10 rounded-xl border-emerald-100/80 bg-white focus-visible:ring-emerald-500/30"
 
 export default function OwnerUsersPage() {
@@ -240,7 +240,7 @@ export default function OwnerUsersPage() {
             <Users className="h-6 w-6" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Students & managers</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Students & managers</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
               Promote students to scholarship managers or return them to student. Admin and owner accounts are
               excluded from this list.
@@ -259,19 +259,19 @@ export default function OwnerUsersPage() {
           </>
         ) : (
           <>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total users</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{total}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Students (this page)</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{studentsOnPage}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Managers (this page)</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-700">{managersOnPage}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Active users (this page)</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{activeOnPage}</p>
             </div>

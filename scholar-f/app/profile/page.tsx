@@ -82,7 +82,7 @@ function ProfilePageInner() {
   if (!roleChecked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8">
-        <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">
+        <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-6 shadow-sm">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-32 w-full" />
@@ -93,18 +93,18 @@ function ProfilePageInner() {
 
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           {(role === "manager" || role === "owner") && intentStudent ? (
             <Button asChild variant="outline" className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
               <Link href={homeHref}>{backLabelForRole(role)}</Link>
             </Button>
           ) : (
             <div>
-              <h1 className="text-lg font-semibold text-emerald-950">{t("Profile")}</h1>
+              <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">{t("Profile")}</h1>
               <p className="text-xs text-slate-600">Your applicant details power AI matches and recommendations.</p>
             </div>
           )}
@@ -123,14 +123,14 @@ function ProfilePageInner() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
                   <UserCircle2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Student applicant profile</h2>
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Student applicant profile</h2>
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     GPA, degree, field of study, country, and interests used for smarter scholarship matching.
                   </p>
@@ -158,7 +158,7 @@ function ProfilePageInner() {
             </div>
 
             <aside className="space-y-6">
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                 <CardHeader>
                   <CardTitle className="text-base text-slate-900">Tips for Success</CardTitle>
@@ -195,7 +195,7 @@ function ProfilePageInner() {
                 </CardContent>
               </Card>
 
-              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+              <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-500 opacity-90" />
                 <CardHeader>
                   <CardTitle className="text-base text-slate-900">Frequently Asked</CardTitle>
@@ -226,7 +226,7 @@ export default function ProfilePage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-slate-100 p-8">
-          <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white p-6 shadow-sm">
+          <div className="w-full max-w-md space-y-3 rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-6 shadow-sm">
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-32 w-full" />

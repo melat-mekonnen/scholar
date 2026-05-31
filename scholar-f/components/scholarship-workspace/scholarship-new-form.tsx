@@ -106,7 +106,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <FilePlus2 className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">
                     {cfg.newScholarshipTitle}
                   </h1>
                 </div>
@@ -124,7 +124,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <FilePlus2 className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.newScholarshipTitle}</h1>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{cfg.newScholarshipTitle}</h1>
                 </div>
                 <p className="max-w-xl text-sm text-slate-600">
                   Publish a complete scholarship listing with clear eligibility and application details.
@@ -155,7 +155,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
         </header>
 
         <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
-          <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
             <CardHeader className="border-b border-emerald-100/80">
               <CardTitle className="text-lg text-slate-900">Scholarship details</CardTitle>
             </CardHeader>
@@ -341,7 +341,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="h-fit rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5 lg:sticky lg:top-6">
+          <Card className="h-fit rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5 lg:sticky lg:top-6">
             <CardHeader className="border-b border-emerald-100/80">
               <CardTitle className="text-base text-slate-900">Publishing tips</CardTitle>
             </CardHeader>

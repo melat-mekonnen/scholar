@@ -37,7 +37,7 @@ type ReportRow = {
   reporterName?: string
 }
 
-const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 const fieldClass = "h-10 rounded-xl border-emerald-100/80 bg-white focus-visible:ring-emerald-500/30"
 
 export default function OwnerCommunityModerationPage() {
@@ -138,7 +138,7 @@ export default function OwnerCommunityModerationPage() {
               <MessageSquareWarning className="h-6 w-6" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Owner community moderation</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Owner community moderation</h1>
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">

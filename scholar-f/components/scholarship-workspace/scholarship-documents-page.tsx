@@ -126,7 +126,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
       ? "Filtering documents by your owner account."
       : "Filtering documents by your manager account."
 
-  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 
   return (
     <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
@@ -139,7 +139,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <Files className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">
                     {cfg.documentPageHeading}
                   </h1>
                 </div>
@@ -157,7 +157,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <Files className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.documentPageHeading}</h1>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{cfg.documentPageHeading}</h1>
                 </div>
                 <p className="max-w-xl text-sm text-slate-600">
                   Upload and manage document resources linked to your scholarships.

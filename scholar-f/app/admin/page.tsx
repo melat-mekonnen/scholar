@@ -154,9 +154,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-7 shadow-sm">
         <div className="border-l-4 border-emerald-500 pl-4">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Admin Dashboard</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Admin Dashboard</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
             Manage scholarships, users, and platform operations for EthioScholar.
           </p>
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
       <section className="grid gap-4 md:grid-cols-4">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+            <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
               <CardContent className="space-y-2 pt-6">
                 <Skeleton className="h-4 w-28" />
                 <Skeleton className="h-8 w-16" />
@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
           ))
         ) : (
           <>
-            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Active Scholarships</p>
@@ -189,7 +189,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 opacity-90" />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Pending Approvals</p>
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Total Applications</p>
@@ -207,7 +207,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Total Users</p>
@@ -220,7 +220,7 @@ export default function AdminDashboardPage() {
       </section>
 
       {/* Scholarships needing approval — list shell aligned with student applications */}
-      <section className="rounded-2xl border border-emerald-100/80 bg-white/90 p-3 shadow-sm shadow-emerald-900/5">
+      <section className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200/90 p-3 shadow-sm shadow-emerald-900/5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-100/80 px-3 py-3 sm:px-4 sm:py-4">
           <h2 className="text-lg font-semibold text-slate-900">Needs approval / unverified</h2>
 

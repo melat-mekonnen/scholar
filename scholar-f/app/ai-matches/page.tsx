@@ -106,13 +106,13 @@ export default function AiMatchesPage() {
   }, [router])
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           <div>
-            <h1 className="text-lg font-semibold text-emerald-950">{t("AI Matches")}</h1>
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">{t("AI Matches")}</h1>
             <p className="text-xs text-slate-600">
               Ranked using the AI service. Complete your profile for better matches.
             </p>
@@ -127,10 +127,10 @@ export default function AiMatchesPage() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Personalized matches</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Personalized matches</h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
                   
                 </p>
@@ -160,7 +160,7 @@ export default function AiMatchesPage() {
           {loading ? (
             <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
@@ -170,7 +170,7 @@ export default function AiMatchesPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
               <CardContent className="space-y-4 p-6 text-center sm:text-left">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 sm:mx-0">
                   <Sparkles className="h-6 w-6" />
@@ -191,7 +191,7 @@ export default function AiMatchesPage() {
               {items.map((item, index) => (
                 <Card
                   key={`${item.scholarship.id}-${index}`}
-                  className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                  className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                   <CardHeader className="pb-2">

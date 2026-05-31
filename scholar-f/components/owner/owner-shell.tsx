@@ -23,6 +23,8 @@ import {
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
 import { getScholarshipWorkspaceConfig } from "@/lib/scholarship-workspace"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { headerShell, mainScroll, pageShell } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -105,13 +107,13 @@ type NotificationResponse = {
 }
 
 const inactiveNavRow =
-  "group flex w-full items-center justify-between gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50/90 hover:text-emerald-800 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.2)]"
+  "group flex w-full items-center justify-between gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition-[color,background-color,box-shadow] duration-200 hover:bg-emerald-50/90 hover:text-emerald-800 hover:shadow-[0_4px_16px_-4px_rgba(16,185,129,0.2)] dark:text-foreground/80 dark:hover:bg-accent dark:hover:text-emerald-300"
 const inactiveNavIcon =
-  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.28)] group-hover:ring-1 group-hover:ring-emerald-300/80"
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition-[color,background-color,box-shadow,ring-color] duration-200 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:shadow-[0_2px_10px_-2px_rgba(16,185,129,0.28)] group-hover:ring-1 group-hover:ring-emerald-300/80 dark:bg-muted dark:text-foreground/70 dark:group-hover:bg-accent dark:group-hover:text-emerald-300"
 const activeNavRow =
-  "group flex w-full items-center justify-between gap-1.5 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-2 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80"
+  "group flex w-full items-center justify-between gap-1.5 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-2 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200 dark:ring-emerald-800/60"
 const activeNavIcon =
-  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-teal-700 ring-1 ring-teal-100"
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-teal-700 ring-1 ring-teal-100 dark:bg-muted dark:text-emerald-300 dark:ring-border"
 
 function NavLinks({
   pathname,
@@ -215,7 +217,7 @@ function SidebarAlerts({
 
 function OwnerSidebarHeader({ compact }: { compact?: boolean }) {
   return (
-    <div className={cn("border-b border-emerald-100/80", compact ? "px-4 py-3" : "px-6 py-5")}>
+    <div className={cn("border-b border-emerald-100/80 dark:border-border", compact ? "px-4 py-3" : "px-6 py-5")}>
       <div className={cn("flex items-center gap-3", compact ? "mb-3" : "mb-4")}>
         <img
           src="/ethioscholar-logo.svg"
@@ -237,10 +239,10 @@ function OwnerSidebarHeader({ compact }: { compact?: boolean }) {
 
 function OwnerSidebarFooter({ onSignOut, compact }: { onSignOut: () => void; compact?: boolean }) {
   return (
-    <div className={cn("mt-auto border-t border-emerald-100/80", compact ? "p-3" : "p-6 pt-4")}>
+    <div className={cn("mt-auto border-t border-emerald-100/80 dark:border-border", compact ? "p-3" : "p-6 pt-4")}>
       <button
         type="button"
-        className="group flex w-full items-center justify-between rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-emerald-800 shadow-sm transition-colors hover:bg-emerald-50"
+        className="group flex w-full items-center justify-between rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-emerald-800 shadow-sm transition-colors hover:bg-emerald-50 dark:border-border dark:bg-card dark:text-emerald-300 dark:hover:bg-accent"
         onClick={onSignOut}
       >
         <span className="inline-flex items-center gap-2.5">
@@ -274,7 +276,7 @@ function OwnerSidebarPanel({
       <OwnerSidebarHeader compact={compact} />
       <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", compact ? "px-4 py-3" : "px-6 py-4")}>
         <SidebarAlerts pendingCount={pendingCount} unreadCount={unreadCount} compact={compact} />
-        <div className="rounded-2xl border border-emerald-100/80 bg-emerald-50/20 p-2 shadow-sm shadow-emerald-900/5">
+        <div className="rounded-2xl border border-emerald-100/80 bg-emerald-50/20 p-2 shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-background/40">
           <NavLinks
             pathname={pathname}
             unreadCount={unreadCount}
@@ -328,7 +330,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
   const pageLabel = FLAT_NAV.find((n) => navItemActive(pathname, n))?.label ?? "Owner"
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={cn("flex min-h-screen", pageShell)}>
       <aside
         className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-screen", cfg.shellClassName)}
       >
@@ -341,7 +343,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-5">
+        <header className={cn("sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 md:px-5", headerShell)}>
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -365,17 +367,18 @@ export function OwnerShell({ children }: { children: ReactNode }) {
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 className="truncate text-lg font-semibold">{pageLabel}</h1>
+            <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-foreground">{pageLabel}</h1>
             <span className="hidden shrink-0 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium capitalize text-emerald-800 sm:inline">
               owner
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="hidden border-emerald-200 text-emerald-800 hover:bg-emerald-50 sm:inline-flex"
+              className="hidden border-emerald-200 text-emerald-800 hover:bg-emerald-50 sm:inline-flex dark:border-border dark:text-emerald-300"
             >
               <Link href="/owner/notifications">
                 <Bell className="mr-1 h-4 w-4" />
@@ -385,7 +388,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto bg-slate-100">{children}</div>
+        <div className={cn("flex-1 overflow-auto", mainScroll)}>{children}</div>
       </div>
     </div>
   )

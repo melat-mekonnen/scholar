@@ -421,12 +421,12 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">Browse Scholarships</h1>
+        <header className={cn(inlineHeaderRow)}>
+          <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Browse Scholarships</h1>
           <div className="flex items-center gap-2">
             <StudentLanguageToggle />
             <ProfileAvatarLink />
@@ -440,14 +440,14 @@ export default function ScholarshipsPage() {
           <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
             <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Find your next scholarship</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Find your next scholarship</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 Search verified opportunities and filter by country, degree, field of study, and funding.
               </p>
             </div>
           </div>
 
-        <div className="rounded-2xl border border-emerald-100/80 bg-white p-3 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-50">
+        <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-3 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-50">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="relative w-full md:max-w-xl">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
@@ -516,7 +516,7 @@ export default function ScholarshipsPage() {
         <div className="grid gap-6 md:grid-cols-[300px_1fr]">
           {/* Desktop filters */}
           <aside className="hidden md:block">
-            <Card className="relative sticky top-6 overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className="relative sticky top-6 overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base text-slate-900"><span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-teal-700 ring-1 ring-emerald-100"><Filter className="h-4 w-4" /></span>Filters</CardTitle>
@@ -595,7 +595,7 @@ export default function ScholarshipsPage() {
             {loading ? (
               <div className="grid gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
                     <CardContent className="p-6 space-y-3">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
@@ -608,7 +608,7 @@ export default function ScholarshipsPage() {
                 ))}
               </div>
             ) : visibleResults.length === 0 ? (
-              <Empty className="rounded-2xl border border-emerald-100/80 bg-white/90">
+              <Empty className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200/90">
                 <EmptyHeader>
                   <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700">
                     <SearchIcon className="size-6" />
@@ -629,7 +629,7 @@ export default function ScholarshipsPage() {
                 {visibleResults.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
