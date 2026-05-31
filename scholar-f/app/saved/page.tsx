@@ -52,6 +52,17 @@ import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
+import {
+  emeraldCard,
+  headerShell,
+  heroBanner,
+  outlineControl,
+  pageShell,
+  summaryBar,
+  textMuted,
+  textPrimary,
+  textSubtle,
+} from "@/lib/theme"
 
 type MeResponse = {
   id: string
@@ -125,15 +136,15 @@ export default function SavedScholarshipsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
+    <div className={`flex min-h-screen ${pageShell}`}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
+        <header className={`flex shrink-0 items-center justify-between ${headerShell}`}>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Saved Scholarships</h1>
             {me?.role ? (
-              <Badge className="capitalize border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100">
+              <Badge className="capitalize border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/40 dark:text-emerald-200">
                 {me.role}
               </Badge>
             ) : null}
@@ -148,34 +159,38 @@ export default function SavedScholarshipsPage() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className={heroBanner}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Saved for later</h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
+              <h2 className={`text-2xl font-semibold tracking-tight ${textPrimary}`}>Saved for later</h2>
+              <p className={`mt-2 text-sm leading-relaxed ${textMuted}`}>
                 Scholarships you bookmarked. Remove the bookmark to take them off this list.
               </p>
             </div>
           </div>
 
           {!loading && results.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm ring-1 ring-emerald-50">
-              <p className="text-sm text-slate-600">
-                <span className="font-semibold text-emerald-700">{total.toLocaleString()}</span> saved scholarship
+            <div className={summaryBar}>
+              <p className={`text-sm ${textMuted}`}>
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400">{total.toLocaleString()}</span> saved scholarship
                 {total === 1 ? "" : "s"}
               </p>
-              <Button asChild variant="outline" size="sm" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50">
+              <Button asChild variant="outline" size="sm" className={`text-emerald-800 dark:text-emerald-300 ${outlineControl}`}>
                 <Link href="/scholarships">Browse more</Link>
               </Button>
             </div>
           ) : null}
 
-          {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>}
+          {error && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900/50 dark:bg-red-950/40">
+              {error}
+            </p>
+          )}
 
           {loading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
+                <Card key={i} className={emeraldCard}>
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
@@ -185,9 +200,9 @@ export default function SavedScholarshipsPage() {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <Empty className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200/90">
+            <Empty className={`${emeraldCard} border-emerald-100/80`}>
               <EmptyHeader>
-                <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700">
+                <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                   <Bookmark className="size-6" />
                 </EmptyMedia>
                 <EmptyTitle>No saved scholarships yet</EmptyTitle>
@@ -207,13 +222,13 @@ export default function SavedScholarshipsPage() {
                 {results.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className={`group relative overflow-hidden ${emeraldCard} transition-all hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-black/30`}
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base leading-snug text-slate-900 transition-colors group-hover:text-emerald-800">{s.title}</CardTitle>
+                        <CardTitle className={`text-base leading-snug ${textPrimary} transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300`}>{s.title}</CardTitle>
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked
@@ -229,22 +244,22 @@ export default function SavedScholarshipsPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3 pt-0">
-                      <p className="text-sm text-slate-500">
+                      <p className={`text-sm ${textSubtle}`}>
                         {s.country} · {formatDegreeLevel(s.degreeLevel)}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300">{s.bookmarkCount} saved</Badge>
                         )}
                         {s.deadline && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">Deadline: {s.deadline}</Badge>
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300">Deadline: {s.deadline}</Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 pt-1">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-md border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          className={`rounded-md text-emerald-800 dark:text-emerald-300 ${outlineControl}`}
                           onClick={() => setViewScholarship(s)}
                         >
                           View
@@ -266,7 +281,7 @@ export default function SavedScholarshipsPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="rounded-xl border border-emerald-100/80 bg-white px-3 py-3 shadow-sm ring-1 ring-emerald-100/60">
+                <div className={`${summaryBar} px-3 py-3`}>
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>

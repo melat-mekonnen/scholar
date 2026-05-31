@@ -33,6 +33,7 @@ import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-li
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside";
 import { CommunityChat } from "@/components/student-portal/community-chat";
 import { Badge } from "@/components/ui/badge";
+import { headerShell, heroBanner, pageShell, textMuted, textPrimary } from "@/lib/theme";
 
 type MeResponse = {
   id: string;
@@ -194,24 +195,118 @@ export default function CommunityPage() {
     };
   }, [channelId]);
 
+  const canPost = me?.role === "student" || me?.role === "admin";
+
+  const loadOlder = useCallback(async () => {
+    if (!channelId || !oldestCursor || loadingMore) return;
+    setLoadingMore(true);
+    const { res, data } = await fetchCommunityMessages(channelId, {
+      before: oldestCursor,
+      limit: 50,
+    });
+    if (res.status === 401 || res.status === 403) {
+      clearToken();
+      router.replace("/signin");
+      setLoadingMore(false);
+      return;
+    }
+    if (!res.ok || !data) {
+      setLoadingMore(false);
+      toast({ title: "Could not load earlier messages", variant: "destructive" });
+      return;
+    }
+    setMessages((prev) => [...(data.messages ?? []), ...prev]);
+    setHasMore(data.pagination?.hasMore ?? false);
+    setOldestCursor(data.pagination?.oldestCreatedAt ?? null);
+    setLoadingMore(false);
+  }, [channelId, oldestCursor, loadingMore, router, toast]);
+
+  async function sendMessage() {
+    const body = draft.trim();
+    if (!body || !channelId || sending || !canPost) return;
+    setSending(true);
+    const { res, data, errorMessage } = await postCommunityMessage(
+      channelId,
+      body,
+      replyTo?.id ?? null,
+    );
+    if (res.status === 401 || res.status === 403) {
+      clearToken();
+      router.replace("/signin");
+      setSending(false);
+      return;
+    }
+    if (!res.ok || !data) {
+      toast({
+        title: "Could not send message",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      });
+      setSending(false);
+      return;
+    }
+    setDraft("");
+    setReplyTo(null);
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === data.id)) return prev;
+      return [...prev, data];
+    });
+    requestAnimationFrame(() =>
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+    );
+    setSending(false);
+  }
+
+  async function removeMessage(m: CommunityMessage) {
+    const { res, errorMessage } = await deleteCommunityMessage(m.id);
+    if (!res.ok) {
+      toast({
+        title: "Could not delete message",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setMessages((prev) => prev.filter((x) => x.id !== m.id));
+    toast({ title: "Message deleted" });
+  }
+
+  async function reportMessage(m: CommunityMessage) {
+    const reason = window.prompt("Why are you reporting this message?")?.trim();
+    if (!reason) return;
+    const { res, errorMessage } = await reportCommunityMessage(m.id, reason);
+    if (!res.ok) {
+      toast({
+        title: "Could not submit report",
+        description: errorMessage || "Try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({
+      title: "Report submitted",
+      description: "Moderators will review this message.",
+    });
+  }
+
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
+    <div className={`flex min-h-screen ${pageShell}`}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
+        <header className={`flex shrink-0 items-center justify-between ${headerShell}`}>
           <div>
             <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">
               Community
             </h1>
-            <p className="text-xs text-slate-600">
+            <p className={`text-xs ${textMuted}`}>
               Peer tips, experiences, and constructive feedback — stay kind and
               on-topic.
             </p>
           </div>
           <div className="flex items-center gap-2">
             {me?.role ? (
-              <Badge className="border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100">
+              <Badge className="border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/40 dark:text-emerald-200">
                 {me.role}
               </Badge>
             ) : null}
@@ -222,13 +317,13 @@ export default function CommunityPage() {
         <div className="relative flex min-h-0 flex-1 flex-col">
           <div className="pointer-events-none absolute -left-20 top-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-16 top-32 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
-          <div className="relative shrink-0 border-b border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-4 shadow-sm shadow-emerald-900/5 md:px-6">
+          <div className={`relative shrink-0 px-4 py-4 md:px-6 ${heroBanner}`}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-base font-semibold tracking-tight text-slate-900">
+            <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
+              <h2 className={`text-base font-semibold tracking-tight ${textPrimary}`}>
                 Community support
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className={`mt-1 text-sm ${textMuted}`}>
                 Join a channel, share experiences, and help other students on
                 their scholarship journey.
               </p>

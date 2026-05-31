@@ -26,6 +26,8 @@ import { clearToken } from "@/lib/auth"
 import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { useStudentI18n } from "@/lib/student-i18n"
+import { heroBanner, inlineHeaderRow, summaryBar, textMuted, textPrimary } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -437,17 +439,17 @@ export default function ScholarshipsPage() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className={heroBanner}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Find your next scholarship</h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
+              <h2 className={`text-2xl font-semibold tracking-tight ${textPrimary}`}>Find your next scholarship</h2>
+              <p className={`mt-2 text-sm leading-relaxed ${textMuted}`}>
                 Search verified opportunities and filter by country, degree, field of study, and funding.
               </p>
             </div>
           </div>
 
-        <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-3 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-50">
+        <div className={`${summaryBar} p-3 shadow-sm shadow-emerald-900/5`}>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="relative w-full md:max-w-xl">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />

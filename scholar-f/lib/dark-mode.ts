@@ -15,5 +15,7 @@ export {
   textSubtle as portalTextSubtle,
   outlineControl as portalOutlineControl,
   inputSurface as portalInputSurface,
+  heroBanner,
+  summaryBar,
   settingsCardClass,
-} from "@/lib/theme"
+} from "./theme"

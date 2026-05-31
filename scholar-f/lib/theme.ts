@@ -49,6 +49,14 @@ export const inputSurface =
 export const settingsCardClass =
   `relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-card dark:text-card-foreground ${themeTransition}`
 
+/** Page hero / intro banner (emerald accent strip) */
+export const heroBanner =
+  `relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-6 py-7 shadow-sm shadow-emerald-900/5 dark:border-border dark:from-card dark:via-card dark:to-emerald-950/25 dark:shadow-none ${themeTransition}`
+
+/** Inline count / action bar below hero */
+export const summaryBar =
+  `flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm ring-1 ring-emerald-50 dark:border-border dark:bg-card dark:ring-border/50 ${themeTransition}`
+
 /** Table wrapper on admin pages */
 export const tableShell = "rounded-xl border border-border bg-card shadow-sm"
 
