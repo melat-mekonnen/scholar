@@ -695,7 +695,7 @@ export default function ScholarshipsPage() {
                           className="rounded-md border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
                           onClick={() => setViewScholarship(s)}
                         >
-                          View
+                          {t("View details")}
                         </Button>
                         <ScholarshipApplyButton
                           scholarship={s}

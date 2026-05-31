@@ -157,7 +157,7 @@ export function parseDescriptionSections(description?: string): DescriptionSecti
 
   const parts = text.split(/^##\s+/m).filter(Boolean)
   if (parts.length <= 1 && !text.startsWith("##")) {
-    return [{ heading: "About", body: text }]
+    return [{ heading: "Overview", body: text }]
   }
 
   return parts.map((block) => {
@@ -166,6 +166,103 @@ export function parseDescriptionSections(description?: string): DescriptionSecti
     const body = nl >= 0 ? block.slice(nl + 1).trim() : ""
     return { heading, body }
   })
+}
+
+function normalizeUrlForCompare(url: string): string {
+  try {
+    const u = new URL(url.trim())
+    return `${u.origin}${u.pathname}`.replace(/\/+$/, "").toLowerCase()
+  } catch {
+    return url.trim().replace(/\/+$/, "").toLowerCase()
+  }
+}
+
+/** Host label for apply links (e.g. warwick.ac.uk). */
+export function getApplicationUrlHost(url?: string): string | undefined {
+  const u = url?.trim()
+  if (!u) return undefined
+  try {
+    return new URL(/^https?:\/\//i.test(u) ? u : `https://${u}`).hostname.replace(/^www\./i, "")
+  } catch {
+    return undefined
+  }
+}
+
+/** Remove boilerplate URLs from description text when Apply already provides the link. */
+export function stripRedundantDescriptionUrls(text: string, applyUrl?: string): string {
+  let t = String(text || "").trim()
+  if (!t) return ""
+
+  const applyNorm = applyUrl ? normalizeUrlForCompare(applyUrl) : null
+
+  const trailingPatterns = [
+    /Official course page:\s*https?:\/\/\S+/gi,
+    /Course page:\s*https?:\/\/\S+/gi,
+    /Official scheme:[^\n]*https?:\/\/\S+/gi,
+    /Apply via the official page:\s*https?:\/\/\S+/gi,
+    /Use the official course page[^\n]*https?:\/\/\S+/gi,
+  ]
+  for (const pattern of trailingPatterns) {
+    t = t.replace(pattern, "").trim()
+  }
+
+  const lines = t
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return true
+      const bare = line.replace(/^[-*•]\s+/, "").trim()
+      if (!/^https?:\/\//i.test(bare)) return true
+      if (applyNorm && normalizeUrlForCompare(bare) === applyNorm) return false
+      return true
+    })
+
+  t = lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()
+  return t
+}
+
+function isOfficialLinksOnlySection(body: string, applyUrl?: string): boolean {
+  if (!applyUrl) return false
+  const applyNorm = normalizeUrlForCompare(applyUrl)
+  const lines = body
+    .split("\n")
+    .map((l) => l.replace(/^[-*•]\s+/, "").trim())
+    .filter(Boolean)
+  if (!lines.length) return true
+  return lines.every((line) => normalizeUrlForCompare(line) === applyNorm)
+}
+
+/** Sections ready for the detail UI (no duplicate apply URLs). */
+export function prepareDescriptionSections(
+  description?: string,
+  applyUrl?: string,
+): DescriptionSection[] {
+  const apply = applyUrl?.trim()
+    ? getApplicationUrl({ id: "", title: "", country: "", degreeLevel: "bachelor", applicationUrl: applyUrl })
+    : undefined
+
+  return parseDescriptionSections(description)
+    .map((section) => ({
+      heading: section.heading,
+      body: stripRedundantDescriptionUrls(section.body, apply),
+    }))
+    .filter((section) => {
+      if (!section.body.trim()) return false
+      if (section.heading.toLowerCase() === "official links" && isOfficialLinksOnlySection(section.body, apply)) {
+        return false
+      }
+      if (section.heading.toLowerCase() === "how to apply" && isOfficialLinksOnlySection(section.body, apply)) {
+        return false
+      }
+      return true
+    })
+}
+
+export function degreeLevelLabel(degreeLevel?: string): string {
+  if (!degreeLevel) return "—"
+  const normalized =
+    degreeLevel.trim().toLowerCase() === "masters" ? "master" : degreeLevel.trim().toLowerCase()
+  return normalized.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export function isStudyProgramme(s: Pick<ScholarshipPublic, "recordType" | "fundingType">): boolean {
