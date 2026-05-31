@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
+# Convert a scholarship dictionary into a single searchable text string
 def scholarship_to_text(row: Dict[str, Any]) -> str:
     return " | ".join(
         [
@@ -20,6 +21,7 @@ def scholarship_to_text(row: Dict[str, Any]) -> str:
     ).strip()
 
 
+# Embedding service that supports both SBERT and TF-IDF fallback
 class EmbeddingService:
     def __init__(
         self,
@@ -28,10 +30,17 @@ class EmbeddingService:
     ) -> None:
         self.model_name = model_name
         self._use_sentence_transformers = use_sentence_transformers
+
+        # Holds SBERT model if available
         self._sbert_model = None
+
+        # TF-IDF vectorizer fallback
         self._vectorizer: Optional[TfidfVectorizer] = None
+
+        # Current active embedding mode
         self._mode: str = "tfidf"
 
+    # Initialize SBERT model if enabled and available
     def _ensure_sbert(self) -> None:
         if not self._use_sentence_transformers:
             self._mode = "tfidf"
@@ -44,17 +53,22 @@ class EmbeddingService:
             self._sbert_model = SentenceTransformer(self.model_name)
             self._mode = "sbert"
         except Exception:
-            # Fallback to lightweight TF-IDF if sentence-transformers is not available.
+            # Fallback gracefully if dependency is missing or fails
             self._mode = "tfidf"
 
+    # Fit TF-IDF model on provided texts (no-op for SBERT)
     def fit(self, texts: List[str]) -> None:
         if not texts:
             self._vectorizer = None
             return
+
         self._ensure_sbert()
+
         if self._mode == "sbert":
-            # SentenceTransformers doesn't require fitting.
+            # SBERT does not require fitting
             return
+
+        # Build TF-IDF representation
         self._vectorizer = TfidfVectorizer(
             lowercase=True,
             stop_words=None,
@@ -65,24 +79,35 @@ class EmbeddingService:
         )
         self._vectorizer.fit(texts)
 
+    # Convert input texts into embeddings (SBERT or TF-IDF fallback)
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
         if not texts:
             return []
+
         self._ensure_sbert()
+
+        # Use SBERT embeddings if available
         if self._mode == "sbert" and self._sbert_model is not None:
-            vectors = self._sbert_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+            vectors = self._sbert_model.encode(
+                texts,
+                normalize_embeddings=True,
+                show_progress_bar=False,
+            )
             return vectors.tolist()
 
+        # Ensure TF-IDF is ready
         if self._vectorizer is None:
-            # If fit() wasn't called, fit on the fly (best effort).
             self.fit(texts)
 
         assert self._vectorizer is not None
+
+        # Transform texts into TF-IDF vectors
         mat = self._vectorizer.transform(texts)
         arr = mat.toarray().astype(np.float32)
-        # Normalize for cosine similarity via dot product.
+
+        # Normalize vectors for cosine similarity
         norms = np.linalg.norm(arr, axis=1, keepdims=True)
         norms = np.where(norms == 0, 1.0, norms)
         arr = arr / norms
-        return arr.tolist()
 
+        return arr.tolist()
