@@ -14,6 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
 import { cn } from "@/lib/utils"
+import { ScholarshipWorkspaceLayout } from "@/components/scholarship-workspace/scholarship-workspace-shell"
+import {
+  outlineEmeraldButton,
+  textMuted,
+  textPrimary,
+  workspaceCardShell,
+  workspacePageHeader,
+} from "@/lib/theme"
 
 type MeResponse = { id: string; role?: string }
 type DocumentRow = {
@@ -114,11 +122,9 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
 
   if (gate !== "ready") {
     return (
-      <main className={cfg.standaloneSurfaceClass}>
-        <div className="mx-auto max-w-4xl px-4 py-8">
-          <p className="text-sm text-slate-600">Loading…</p>
-        </div>
-      </main>
+      <ScholarshipWorkspaceLayout workspace={workspace}>
+        <p className={cn("text-sm", textMuted)}>Loading…</p>
+      </ScholarshipWorkspaceLayout>
     )
   }
 
@@ -127,12 +133,10 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
       ? "Filtering documents by your owner account."
       : "Filtering documents by your manager account."
 
-  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
-
   return (
-    <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
-      <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-8">
-        <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-6 shadow-sm shadow-emerald-900/5">
+    <ScholarshipWorkspaceLayout workspace={workspace}>
+      <div className="relative mx-auto max-w-5xl space-y-6">
+        <header className={workspacePageHeader}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             {isManager ? (
               <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -140,11 +144,11 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <Files className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">
                     {cfg.documentPageHeading}
                   </h1>
                 </div>
-                <p className="max-w-xl text-sm text-slate-600">
+                <p className={cn("max-w-xl text-sm", textMuted)}>
                   Upload PDFs, CV guides, and tips as general document resources for applicants.
                 </p>
                 <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
@@ -158,9 +162,9 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <Files className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.documentPageHeading}</h1>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{cfg.documentPageHeading}</h1>
                 </div>
-                <p className="max-w-xl text-sm text-slate-600">
+                <p className={cn("max-w-xl text-sm", textMuted)}>
                   Upload and manage general document resources (guides, templates, tips).
                 </p>
                 <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
@@ -173,14 +177,14 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
               <Button
                 asChild
                 variant="outline"
-                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                className={cn("rounded-xl", outlineEmeraldButton)}
               >
                 <Link href={cfg.profilePath}>{cfg.profileLinkLabel}</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                className={cn("rounded-xl", outlineEmeraldButton)}
               >
                 <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
               </Button>
@@ -188,7 +192,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
           </div>
         </header>
 
-        <Card className={cardShell}>
+        <Card className={workspaceCardShell}>
           <CardHeader className="border-b border-emerald-100/80">
             <CardTitle className="flex items-center gap-2 text-lg text-slate-900">
               <Upload className="h-5 w-5 text-emerald-600" />
@@ -236,7 +240,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
           </CardContent>
         </Card>
 
-        <Card className={cardShell}>
+        <Card className={workspaceCardShell}>
           <CardHeader className="border-b border-emerald-100/80">
             <CardTitle className="flex items-center gap-2 text-lg text-slate-900">
               <FolderOpen className="h-5 w-5 text-emerald-600" />
@@ -295,6 +299,6 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </ScholarshipWorkspaceLayout>
   )
 }

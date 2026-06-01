@@ -18,6 +18,17 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
+import {
+  emeraldCard,
+  inlineHeaderRow,
+  inputSurface,
+  outlineControl,
+  pageShell,
+  textMuted,
+  textPrimary,
+  textSubtle,
+} from "@/lib/theme"
+import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
 
 type EligibilityMatch = {
   profile_field: string
@@ -305,14 +316,14 @@ export default function AiChatPage() {
       : undefined
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={`flex min-h-screen ${pageShell}`}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className={cn(inlineHeaderRow)}>
           <div>
-            <h1 className="text-lg font-semibold text-emerald-950">{t("AI Chatbot")}</h1>
-            <p className="text-xs text-slate-600">
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200 dark:text-emerald-200">{t("AI Chatbot")}</h1>
+            <p className={`text-xs ${textMuted}`}>
               {quotaSubtitle ?? "Answers use your profile and verified scholarships, plus the AI reference dataset."}
             </p>
           </div>
@@ -326,20 +337,20 @@ export default function AiChatPage() {
           <div className="pointer-events-none absolute -left-20 top-16 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-40 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-5 py-4 shadow-sm shadow-emerald-900/5 sm:px-6">
+          <div className={`px-5 py-4 sm:px-6 ${emeraldCard}`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
                   <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900">Scholarship assistant</h2>
-                  <p className="mt-0.5 text-sm text-slate-600">
+                  <h2 className={`text-base font-semibold ${textPrimary}`}>Scholarship assistant</h2>
+                  <p className={`mt-0.5 text-sm ${textMuted}`}>
                     Ask about funding, countries, fields, eligibility, or deadlines in plain language.
                   </p>
                 </div>
               </div>
-              <Button asChild variant="outline" size="sm" className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50">
+              <Button asChild variant="outline" size="sm" className={`shrink-0 text-emerald-800 ${outlineControl}`}>
                 <Link href="/ai-matches">{t("AI Matches")}</Link>
               </Button>
             </div>
@@ -358,7 +369,7 @@ export default function AiChatPage() {
             </Card>
           ) : null}
 
-          <Card className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${studentPortalCardClass}`}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
             <CardContent className="flex min-h-0 flex-1 flex-col gap-0 p-0">
               <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 sm:px-5">
@@ -378,24 +389,24 @@ export default function AiChatPage() {
                           "max-w-[min(100%,42rem)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap shadow-sm",
                           msg.role === "user"
                             ? "bg-emerald-600 text-white shadow-emerald-900/10"
-                            : "border border-emerald-100/80 bg-emerald-50/60 text-slate-800",
+                            : "border border-emerald-100/80 bg-emerald-50/60 text-slate-800 dark:border-border dark:bg-muted/60 dark:text-foreground",
                         )}
                       >
                         {msg.content}
                       </div>
                       {msg.role === "user" ? (
-                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 ring-1 ring-slate-200/80">
+                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 ring-1 ring-slate-200/80 dark:bg-muted dark:text-foreground dark:ring-border">
                           <User className="h-4 w-4" />
                         </div>
                       ) : null}
                     </div>
                   ))}
                   {sending ? (
-                    <div className="flex items-center gap-2.5 text-sm text-slate-500">
+                    <div className={`flex items-center gap-2.5 text-sm ${textSubtle}`}>
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
                         <Bot className="h-4 w-4 animate-pulse" />
                       </div>
-                      <span className="rounded-2xl border border-emerald-100/80 bg-emerald-50/60 px-3.5 py-2 text-slate-600">
+                      <span className="rounded-2xl border border-emerald-100/80 bg-emerald-50/60 px-3.5 py-2 text-slate-600 dark:border-border dark:bg-muted/60 dark:text-foreground/80">
                         Thinking…
                       </span>
                     </div>
@@ -403,7 +414,7 @@ export default function AiChatPage() {
                 </div>
               </div>
 
-              <div className="shrink-0 border-t border-emerald-100/80 bg-slate-50/50 p-3 sm:p-4">
+              <div className="shrink-0 border-t border-emerald-100/80 bg-slate-50/50 p-3 sm:p-4 dark:border-border dark:bg-background/80">
                 {!sending && messages.length <= 1 ? (
                   <div className="mb-3 flex flex-wrap gap-2">
                     {QUICK_PROMPTS.map((prompt) => (
@@ -411,7 +422,7 @@ export default function AiChatPage() {
                         key={prompt}
                         type="button"
                         onClick={() => void sendMessage(prompt)}
-                        className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-50"
+                        className={`rounded-full px-3 py-1 text-xs font-medium text-emerald-800 transition-colors ${outlineControl}`}
                       >
                         {prompt}
                       </button>
@@ -424,7 +435,7 @@ export default function AiChatPage() {
                   onChange={(e) => setInput(e.target.value)}
                   rows={3}
                   disabled={sending || quotaExhausted}
-                  className="resize-none border-emerald-200/80 bg-white focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60"
+                  className={`resize-none focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60 ${inputSurface}`}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
@@ -433,7 +444,7 @@ export default function AiChatPage() {
                   }}
                 />
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <p className="hidden text-xs text-slate-500 sm:block">Enter to send · Shift+Enter for new line</p>
+                  <p className={`hidden text-xs sm:block ${textSubtle}`}>Enter to send · Shift+Enter for new line</p>
                   <Button
                     type="button"
                     className="ml-auto bg-emerald-600 text-white hover:bg-emerald-700"

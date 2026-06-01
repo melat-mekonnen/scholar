@@ -107,7 +107,7 @@ export default function AdminAuditLogsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export default function AdminAuditLogsPage() {
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Admin audit logs</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Admin audit logs</h1>
                 <p className="text-sm text-slate-500">
                   Track admin actions across scholarships and users.
                 </p>
@@ -143,21 +143,21 @@ export default function AdminAuditLogsPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Logs on this page</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{rows.length}</p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Admin-prefixed actions</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{currentPageAdminEvents}</p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">User-prefixed actions</p>
@@ -166,7 +166,7 @@ export default function AdminAuditLogsPage() {
         </Card>
       </section>
 
-      <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+      <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <CardTitle className="text-base">Recent activity</CardTitle>

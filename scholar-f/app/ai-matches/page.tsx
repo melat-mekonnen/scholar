@@ -27,6 +27,23 @@ import { useToast } from "@/hooks/use-toast"
 import { clearToken, getToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
+import {
+  accentEmerald,
+  elevatedCard,
+  emeraldCard,
+  emeraldFilterBadge,
+  headerShell,
+  heroBanner,
+  mainScroll,
+  outlineEmeraldButton,
+  pageShell,
+  summaryBar,
+  textMuted,
+  textPrimary,
+  textSubtle,
+} from "@/lib/theme"
+import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
@@ -106,61 +123,62 @@ export default function AiMatchesPage() {
   }, [router])
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={cn("flex min-h-screen", pageShell)}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className={cn("flex items-center justify-between px-4 py-3 md:px-6", headerShell)}>
           <div>
-            <h1 className="text-lg font-semibold text-emerald-950">{t("AI Matches")}</h1>
-            <p className="text-xs text-slate-600">
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-foreground">{t("AI Matches")}</h1>
+            <p className={cn("text-xs", textMuted)}>
               Ranked from whatever is in your profile now — add more details anytime for stronger matches.
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className="relative flex-1 space-y-6 p-6">
+        <main className={cn("relative flex-1 space-y-6 p-6", mainScroll)}>
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className={cn("px-6 py-7", heroBanner)}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Personalized matches</h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <h2 className={cn("text-2xl font-semibold tracking-tight", textPrimary)}>Personalized matches</h2>
+                <p className={cn("mt-2 text-sm leading-relaxed", textMuted)}>
                   
                 </p>
               </div>
-              <Button asChild variant="outline" className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50">
+              <Button asChild variant="outline" className={cn("shrink-0", outlineEmeraldButton)}>
                 <Link href="/profile">{t("Profile")}</Link>
               </Button>
             </div>
           </div>
 
           {!loading && items.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm ring-1 ring-emerald-50">
-              <p className="text-sm text-slate-600">
-                <span className="font-semibold text-emerald-700">{items.length}</span> recommendation
+            <div className={summaryBar}>
+              <p className={cn("text-sm", textMuted)}>
+                <span className={accentEmerald}>{items.length}</span> recommendation
                 {items.length === 1 ? "" : "s"}
               </p>
-              <Button asChild variant="outline" size="sm" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50">
+              <Button asChild variant="outline" size="sm" className={outlineEmeraldButton}>
                 <Link href="/scholarships">{t("Browse Scholarships")}</Link>
               </Button>
             </div>
           ) : null}
 
           {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900 dark:bg-red-950/40">{error}</p>
           ) : null}
 
           {loading ? (
             <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                <Card key={i} className={emeraldCard}>
                   <CardContent className="space-y-3 p-6">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
@@ -170,14 +188,14 @@ export default function AiMatchesPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+            <Card className={emeraldCard}>
               <CardContent className="space-y-4 p-6 text-center sm:text-left">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 sm:mx-0">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border sm:mx-0">
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">No matches yet</p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className={cn("font-semibold", textPrimary)}>No matches yet</p>
+                  <p className={cn("mt-1 text-sm", textMuted)}>
                     {error
                       ? "Check the message above, update your profile if needed, then refresh this page."
                       : "We use whatever you have saved so far. Add field, degree, country, GPA, or interests for stronger matches, then refresh."}
@@ -191,23 +209,20 @@ export default function AiMatchesPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {items.map((item, index) => (
-                <Card
-                  key={`${item.scholarship.id}-${index}`}
-                  className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                >
+                <Card key={`${item.scholarship.id}-${index}`} className={elevatedCard}>
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-3">
-                      <CardTitle className="line-clamp-2 text-base leading-snug text-slate-900 transition-colors group-hover:text-emerald-800">
+                      <CardTitle className={cn("line-clamp-2 text-base leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300", textPrimary)}>
                         {item.scholarship.title}
                       </CardTitle>
-                      <Badge className="shrink-0 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80 hover:bg-emerald-100">
+                      <Badge className="shrink-0 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-200 dark:ring-emerald-800/50 dark:hover:bg-emerald-950/70">
                         {Math.round(item.matchPercentage)}% match
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-0">
-                    <p className="text-sm text-slate-500">
+                    <p className={cn("text-sm", textSubtle)}>
                       {item.scholarship.country || "N/A"}
                       {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
                     </p>
@@ -217,7 +232,7 @@ export default function AiMatchesPage() {
                           <Badge
                             key={`${item.scholarship.id}-match-${label}`}
                             variant="outline"
-                            className="border-emerald-200 bg-emerald-50/50 text-xs font-medium text-emerald-800"
+                            className={cn(emeraldFilterBadge, "text-xs font-medium")}
                           >
                             {label}
                           </Badge>
@@ -228,7 +243,7 @@ export default function AiMatchesPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                        className={outlineEmeraldButton}
                         asChild
                       >
                         <Link href={`/scholarships?q=${encodeURIComponent(item.scholarship.title)}`}>{t("View")}</Link>

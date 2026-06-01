@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { heroBanner, textMuted, textPrimary } from "@/lib/theme"
 
 export type DocumentResource = {
   id: string
@@ -97,11 +98,11 @@ export function DocumentResourcesGallery({
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-3xl border border-emerald-100/80 bg-gradient-to-b from-emerald-50/80 via-white to-teal-50/50 px-6 py-10 text-center shadow-sm md:px-10 md:py-12">
+      <section className={`relative overflow-hidden px-6 py-10 text-center shadow-sm md:px-10 md:py-12 ${heroBanner}`}>
         <div className="pointer-events-none absolute -left-16 top-8 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-16 bottom-4 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
 
-        <h2 className="relative text-2xl font-bold tracking-tight text-slate-900 md:text-3xl lg:text-4xl">
+        <h2 className={`relative text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl ${textPrimary}`}>
           {countLabel ? (
             <>
               Choose from{" "}
@@ -114,21 +115,21 @@ export function DocumentResourcesGallery({
             "Document resources for your applications"
           )}
         </h2>
-        <p className="relative mx-auto mt-3 max-w-2xl text-sm text-slate-600 md:text-base">
+        <p className={`relative mx-auto mt-3 max-w-2xl text-sm md:text-base ${textMuted}`}>
           Free CV templates, recommendation guides, and scholarship application materials — curated to
           help your applications stand out.{" "}
-          <Link href="/scholarships" className="font-medium text-blue-700 underline-offset-2 hover:underline">
+          <Link href="/scholarships" className="font-medium text-blue-700 underline-offset-2 hover:underline dark:text-emerald-400">
             Browse scholarships
           </Link>
         </p>
 
         <div className="relative mx-auto mt-6 max-w-md">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-muted-foreground" />
           <Input
             placeholder="Search templates and guides..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 rounded-full border-emerald-100 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500"
+            className="h-11 rounded-full border-emerald-100 bg-white pl-9 shadow-sm focus-visible:ring-emerald-500 dark:border-border dark:bg-background"
           />
         </div>
 
@@ -141,7 +142,7 @@ export function DocumentResourcesGallery({
                 "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                 typeFilter === "all"
                   ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-card dark:text-muted-foreground dark:ring-border dark:hover:bg-accent"
               )}
             >
               All
@@ -155,7 +156,7 @@ export function DocumentResourcesGallery({
                   "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   typeFilter === t
                     ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
-                    : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                    : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-card dark:text-muted-foreground dark:ring-border dark:hover:bg-accent"
                 )}
               >
                 {formatTypeLabel(t)}
@@ -178,10 +179,10 @@ export function DocumentResourcesGallery({
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-emerald-200 bg-white px-6 py-14 text-center">
-          <FileText className="mx-auto h-10 w-10 text-blue-400" />
-          <p className="mt-3 font-medium text-slate-900">No documents match your search</p>
-          <p className="mt-1 text-sm text-slate-500">Try another keyword or clear filters.</p>
+        <div className="rounded-2xl border border-dashed border-emerald-200 bg-white px-6 py-14 text-center dark:border-border dark:bg-card">
+          <FileText className="mx-auto h-10 w-10 text-blue-400 dark:text-emerald-400" />
+          <p className={`mt-3 font-medium ${textPrimary}`}>No documents match your search</p>
+          <p className={`mt-1 text-sm ${textMuted}`}>Try another keyword or clear filters.</p>
         </div>
       ) : (
         <>
@@ -221,16 +222,16 @@ export function DocumentResourcesGallery({
                           </div>
                         </div>
                         <div className="mt-3 px-1 text-center">
-                          <p className="line-clamp-2 text-sm font-semibold text-slate-900">{doc.title}</p>
-                          <p className="mt-0.5 text-xs text-slate-500">{formatTypeLabel(doc.type)}</p>
+                          <p className={`line-clamp-2 text-sm font-semibold ${textPrimary}`}>{doc.title}</p>
+                          <p className={`mt-0.5 text-xs ${textMuted}`}>{formatTypeLabel(doc.type)}</p>
                         </div>
                       </Link>
                     </CarouselItem>
                   )
                 })}
               </CarouselContent>
-              <CarouselPrevious className="-left-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 md:-left-4" />
-              <CarouselNext className="-right-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 md:-right-4" />
+              <CarouselPrevious className="-left-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 dark:border-border dark:bg-card dark:hover:bg-accent md:-left-4" />
+              <CarouselNext className="-right-1 border-emerald-100 bg-white shadow-md hover:bg-emerald-50 dark:border-border dark:bg-card dark:hover:bg-accent md:-right-4" />
             </Carousel>
           </div>
 
@@ -246,7 +247,7 @@ export function DocumentResourcesGallery({
                     "h-2 rounded-full transition-all",
                     i === activeSnap
                       ? "w-6 bg-gradient-to-r from-emerald-600 to-teal-600"
-                      : "w-2 bg-slate-300 hover:bg-slate-400"
+                      : "w-2 bg-slate-300 hover:bg-slate-400 dark:bg-muted-foreground/40 dark:hover:bg-muted-foreground/60"
                   )}
                 />
               ))}
@@ -258,7 +259,7 @@ export function DocumentResourcesGallery({
               type="button"
               variant="outline"
               onClick={() => setShowAllGrid((v) => !v)}
-              className="rounded-full border-slate-300 bg-white px-6 shadow-sm hover:border-blue-200 hover:bg-emerald-50/50"
+              className="rounded-full border-slate-300 bg-white px-6 shadow-sm hover:border-blue-200 hover:bg-emerald-50/50 dark:border-border dark:bg-card dark:hover:border-emerald-800/50 dark:hover:bg-accent"
             >
               {showAllGrid ? "Hide full list" : "All document resources"}
             </Button>
@@ -267,13 +268,13 @@ export function DocumentResourcesGallery({
       )}
 
       {showAllGrid && !loading && filtered.length > 0 ? (
-        <section className="space-y-4 border-t border-emerald-100/70 pt-8">
-          <h3 className="text-lg font-semibold text-slate-900">All resources</h3>
+        <section className="space-y-4 border-t border-emerald-100/70 pt-8 dark:border-border">
+          <h3 className={`text-lg font-semibold ${textPrimary}`}>All resources</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((doc) => (
               <div
                 key={doc.id}
-                className="flex flex-col rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 p-4 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="max-w-[140px] mx-auto w-full">
                   <DocumentTemplatePreview
@@ -283,12 +284,12 @@ export function DocumentResourcesGallery({
                   />
                 </div>
                 <div className="mt-3 flex flex-1 flex-col">
-                  <p className="font-medium text-slate-900 line-clamp-2">{doc.title}</p>
+                  <p className={`font-medium line-clamp-2 ${textPrimary}`}>{doc.title}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-800">
+                    <Badge variant="secondary" className="bg-blue-50 text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
                       {formatTypeLabel(doc.type)}
                     </Badge>
-                    <span className="text-xs text-slate-500">{doc.downloadCount} downloads</span>
+                    <span className={`text-xs ${textMuted}`}>{doc.downloadCount} downloads</span>
                   </div>
                   <a
                     href={`${API_BASE_URL}/api/documents/${doc.id}/download`}

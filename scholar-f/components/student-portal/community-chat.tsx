@@ -32,6 +32,7 @@ import { CommunityMessageAttachments } from "@/components/student-portal/communi
 import { CommunityMessageBody } from "@/components/student-portal/community-message-body"
 import { CommunityShareLinkDialog } from "@/components/student-portal/community-share-link-dialog"
 import { cn } from "@/lib/utils"
+import { inputSurface, outlineEmeraldButton, textMuted, textPrimary, textSubtle } from "@/lib/theme"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -273,29 +274,29 @@ export function CommunityChat({
       {/* Channel sidebar */}
       <aside
         className={cn(
-          "flex w-full shrink-0 flex-col border-r border-emerald-100/80 bg-slate-50/80 md:w-[min(100%,360px)]",
+          "flex w-full shrink-0 flex-col border-r border-emerald-100/80 bg-slate-50/80 transition-colors duration-200 dark:border-border dark:bg-card md:w-[min(100%,360px)]",
           mobileShowChat && channelId ? "hidden md:flex" : "flex",
         )}
       >
-        <div className="border-b border-emerald-100/70 bg-white px-4 py-4">
+        <div className="border-b border-emerald-100/70 bg-white px-4 py-4 dark:border-border dark:bg-card">
           <div className="mb-3 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
               <Users className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Channels</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-sm font-semibold text-slate-900 dark:text-foreground">Channels</p>
+              <p className="text-xs text-slate-500 dark:text-muted-foreground">
                 {loadingChannels ? "Loading…" : `${channels.length} discussion topics`}
               </p>
             </div>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-muted-foreground" />
             <Input
               placeholder="Search channels…"
               value={channelSearch}
               onChange={(e) => setChannelSearch(e.target.value)}
-              className="h-10 rounded-xl border-emerald-100/90 bg-white pl-9 text-sm shadow-sm focus-visible:ring-emerald-500/30"
+              className="h-10 rounded-xl border-emerald-100/90 bg-white pl-9 text-sm shadow-sm focus-visible:ring-emerald-500/30 dark:border-border dark:bg-background"
             />
           </div>
         </div>
@@ -329,7 +330,7 @@ export function CommunityChat({
           {!loadingChannels &&
             !channelsError &&
             filteredChannels.length === 0 && (
-              <li className="px-3 py-8 text-center text-sm text-slate-500">No channels match your search.</li>
+              <li className="px-3 py-8 text-center text-sm text-slate-500 dark:text-muted-foreground">No channels match your search.</li>
             )}
 
           {!loadingChannels &&
@@ -347,8 +348,8 @@ export function CommunityChat({
                     className={cn(
                       "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-all",
                       active
-                        ? "bg-white shadow-md shadow-emerald-900/5 ring-1 ring-emerald-200/90"
-                        : "hover:bg-white/80 hover:shadow-sm",
+                        ? "bg-white shadow-md shadow-emerald-900/5 ring-1 ring-emerald-200/90 dark:bg-card dark:shadow-none dark:ring-border"
+                        : "hover:bg-white/80 hover:shadow-sm dark:hover:bg-accent",
                     )}
                   >
                     <div
@@ -364,7 +365,7 @@ export function CommunityChat({
                         <span
                           className={cn(
                             "truncate text-sm font-semibold",
-                            active ? "text-emerald-900" : "text-slate-900",
+                            active ? "text-emerald-900 dark:text-emerald-200" : "text-slate-900 dark:text-foreground",
                           )}
                         >
                           {c.name}
@@ -373,7 +374,7 @@ export function CommunityChat({
                           <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
                         ) : null}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">{preview}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">{preview}</p>
                     </div>
                   </button>
                 </li>
@@ -385,7 +386,7 @@ export function CommunityChat({
       {/* Conversation */}
       <section
         className={cn(
-          "flex min-w-0 flex-1 flex-col bg-gradient-to-b from-slate-50 via-white to-emerald-50/20",
+          "flex min-w-0 flex-1 flex-col bg-gradient-to-b from-slate-50 via-white to-emerald-50/20 dark:from-background dark:via-background dark:to-emerald-950/15",
           !mobileShowChat && !channelId ? "hidden md:flex" : "flex",
           !channelId && "md:flex",
         )}
@@ -399,8 +400,8 @@ export function CommunityChat({
               </div>
             </div>
             <div className="max-w-md space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900">Choose a channel to begin</h3>
-              <p className="text-sm leading-relaxed text-slate-600">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-foreground">Choose a channel to begin</h3>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-muted-foreground">
                 Connect with other applicants, share timelines, and get constructive feedback on your
                 scholarship journey.
               </p>
@@ -410,7 +411,7 @@ export function CommunityChat({
                 <Badge
                   key={rule}
                   variant="secondary"
-                  className="border-emerald-100 bg-white text-emerald-800 ring-1 ring-emerald-100"
+                  className="border-emerald-100 bg-white text-emerald-800 ring-1 ring-emerald-100 dark:border-border dark:bg-card dark:text-emerald-200 dark:ring-border"
                 >
                   {rule}
                 </Badge>
@@ -419,7 +420,7 @@ export function CommunityChat({
           </div>
         ) : (
           <>
-            <header className="flex shrink-0 items-center gap-3 border-b border-emerald-100/80 bg-white/95 px-3 py-3 backdrop-blur-sm md:px-5">
+            <header className="flex shrink-0 items-center gap-3 border-b border-emerald-100/80 bg-white/95 px-3 py-3 backdrop-blur-sm dark:border-border dark:bg-card/95 md:px-5">
               <Button
                 type="button"
                 variant="ghost"
@@ -442,15 +443,15 @@ export function CommunityChat({
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="truncate text-base font-semibold text-slate-900">{selectedChannel?.name}</h2>
+                  <h2 className="truncate text-base font-semibold text-slate-900 dark:text-foreground">{selectedChannel?.name}</h2>
                   <Badge
                     variant="secondary"
-                    className="shrink-0 border-emerald-100 bg-emerald-50 text-[10px] font-medium uppercase tracking-wide text-emerald-800"
+                    className="shrink-0 border-emerald-100 bg-emerald-50 text-[10px] font-medium uppercase tracking-wide text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                   >
                     Live
                   </Badge>
                 </div>
-                <p className="truncate text-xs text-slate-500">
+                <p className="truncate text-xs text-slate-500 dark:text-muted-foreground">
                   {selectedChannel?.description ?? "Peer discussion"}
                 </p>
               </div>
@@ -459,8 +460,8 @@ export function CommunityChat({
                 variant={messageSearchOpen ? "secondary" : "outline"}
                 size="icon"
                 className={cn(
-                  "h-10 w-10 shrink-0 rounded-xl border-emerald-100",
-                  messageSearchOpen && "bg-emerald-50 text-emerald-800",
+                  "h-10 w-10 shrink-0 rounded-xl border-emerald-100 dark:border-border",
+                  messageSearchOpen && "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200",
                 )}
                 onClick={toggleMessageSearch}
                 aria-label={messageSearchOpen ? "Close message search" : "Search messages"}
@@ -468,27 +469,27 @@ export function CommunityChat({
               >
                 <Search className="h-4 w-4" />
               </Button>
-              <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-emerald-100/80 bg-emerald-50/50 px-2.5 py-1.5 text-emerald-800 lg:flex">
+              <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-emerald-100/80 bg-emerald-50/50 px-2.5 py-1.5 text-emerald-800 dark:border-border dark:bg-emerald-950/40 dark:text-emerald-200 lg:flex">
                 <Shield className="h-3.5 w-3.5" />
                 <span className="text-[11px] font-medium">Moderated</span>
               </div>
             </header>
 
             {messageSearchOpen ? (
-              <div className="shrink-0 border-b border-emerald-100/80 bg-white px-3 py-3 md:px-5">
+              <div className="shrink-0 border-b border-emerald-100/80 bg-white px-3 py-3 dark:border-border dark:bg-card md:px-5">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-muted-foreground" />
                   <Input
                     ref={messageSearchInputRef}
                     placeholder={`Search in ${selectedChannel?.name ?? "this channel"}…`}
                     value={messageQuery}
                     onChange={(e) => setMessageQuery(e.target.value)}
-                    className="h-10 rounded-xl border-emerald-100/90 bg-slate-50/80 pl-9 pr-9 text-sm"
+                    className={cn("h-10 rounded-xl pl-9 pr-9 text-sm", inputSurface)}
                   />
                   {messageQuery ? (
                     <button
                       type="button"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-accent dark:hover:text-foreground"
                       onClick={() => {
                         setMessageQuery("")
                         setMessageSearchResults([])
@@ -499,9 +500,9 @@ export function CommunityChat({
                     </button>
                   ) : null}
                 </div>
-                <div className="mt-2 max-h-52 overflow-y-auto rounded-xl border border-emerald-100/80 bg-slate-50/50">
+                <div className="mt-2 max-h-52 overflow-y-auto rounded-xl border border-emerald-100/80 bg-slate-50/50 dark:border-border dark:bg-muted/40">
                   {messageQuery.trim().length < 2 ? (
-                    <p className="px-3 py-4 text-center text-xs text-slate-500">
+                    <p className={cn("px-3 py-4 text-center text-xs", textSubtle)}>
                       Type at least 2 characters to search messages, names, and file names.
                     </p>
                   ) : messageSearchLoading ? (
@@ -510,27 +511,27 @@ export function CommunityChat({
                       <Skeleton className="h-12 w-full rounded-lg" />
                     </div>
                   ) : messageSearchResults.length === 0 ? (
-                    <p className="px-3 py-4 text-center text-xs text-slate-500">
+                    <p className={cn("px-3 py-4 text-center text-xs", textSubtle)}>
                       No messages match &ldquo;{messageQuery.trim()}&rdquo;.
                     </p>
                   ) : (
-                    <ul className="divide-y divide-emerald-100/60 p-1">
+                    <ul className="divide-y divide-emerald-100/60 p-1 dark:divide-border">
                       {messageSearchResults.map((m) => (
                         <li key={m.id}>
                           <button
                             type="button"
                             onClick={() => selectSearchResult(m)}
-                            className="flex w-full flex-col gap-0.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white"
+                            className="flex w-full flex-col gap-0.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white dark:hover:bg-accent"
                           >
-                            <span className="text-xs font-semibold text-emerald-900">
+                            <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                               {m.authorFullName}
-                              <span className="ml-2 font-normal text-slate-400">
+                              <span className="ml-2 font-normal text-slate-400 dark:text-muted-foreground">
                                 {formatMessageTime(m.createdAt)}
                               </span>
                             </span>
-                            <span className="line-clamp-2 text-sm text-slate-700">{m.body}</span>
+                            <span className={cn("line-clamp-2 text-sm", textPrimary)}>{m.body}</span>
                             {(m.attachments?.length ?? 0) > 0 ? (
-                              <span className="text-[11px] text-slate-500">
+                              <span className={cn("text-[11px]", textSubtle)}>
                                 {m.attachments!.length} attachment
                                 {m.attachments!.length === 1 ? "" : "s"}
                               </span>
@@ -549,16 +550,16 @@ export function CommunityChat({
                 <button
                   type="button"
                   onClick={() => onScrollToMessage?.(pinnedMessage.id)}
-                  className="mb-4 flex w-full items-start gap-3 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50/90 to-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-amber-50"
+                  className="mb-4 flex w-full items-start gap-3 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50/90 to-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-amber-50 dark:border-amber-800/60 dark:from-amber-950/40 dark:to-card dark:hover:bg-amber-950/50"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
                     <Pin className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
                       Pinned · {pinnedMessage.authorFullName}
                     </p>
-                    <p className="mt-0.5 line-clamp-2 text-sm text-slate-700">{pinnedMessage.body}</p>
+                    <p className={cn("mt-0.5 line-clamp-2 text-sm", textPrimary)}>{pinnedMessage.body}</p>
                   </div>
                 </button>
               ) : null}
@@ -569,7 +570,7 @@ export function CommunityChat({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="rounded-full border-emerald-200/80 bg-white text-xs shadow-sm hover:bg-emerald-50"
+                    className={cn("rounded-full text-xs shadow-sm", outlineEmeraldButton)}
                     disabled={loadingMore || loadingMessages}
                     onClick={onLoadOlder}
                   >
@@ -600,7 +601,7 @@ export function CommunityChat({
                     <div key={m.id} id={`msg-${m.id}`}>
                       {showDate && (
                         <div className="my-5 flex justify-center">
-                          <span className="rounded-full bg-white px-4 py-1 text-[11px] font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/80">
+                          <span className="rounded-full bg-white px-4 py-1 text-[11px] font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/80 dark:bg-muted dark:text-muted-foreground dark:ring-border">
                             {formatDateSeparator(m.createdAt)}
                           </span>
                         </div>
@@ -613,8 +614,8 @@ export function CommunityChat({
                         )}
                       >
                         {!isOwn && (
-                          <Avatar className="mt-0.5 h-9 w-9 shrink-0 ring-2 ring-white shadow-sm">
-                            <AvatarFallback className="bg-gradient-to-br from-emerald-50 to-teal-50 text-[10px] font-semibold text-emerald-800">
+                          <Avatar className="mt-0.5 h-9 w-9 shrink-0 ring-2 ring-white shadow-sm dark:ring-border">
+                            <AvatarFallback className="bg-gradient-to-br from-emerald-50 to-teal-50 text-[10px] font-semibold text-emerald-800 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200">
                               {initials(m.authorFullName)}
                             </AvatarFallback>
                           </Avatar>
@@ -626,7 +627,7 @@ export function CommunityChat({
                           )}
                         >
                           {!isOwn && (
-                            <p className="mb-1 px-1 text-[11px] font-semibold text-emerald-900/90">
+                            <p className="mb-1 px-1 text-[11px] font-semibold text-emerald-900/90 dark:text-emerald-200">
                               {m.authorFullName}
                             </p>
                           )}
@@ -635,7 +636,7 @@ export function CommunityChat({
                               "relative rounded-2xl px-4 py-2.5 shadow-sm",
                               isOwn
                                 ? "rounded-br-md bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-emerald-900/10"
-                                : "rounded-bl-md border border-slate-200/80 bg-white text-slate-900",
+                                : "rounded-bl-md border border-slate-200/80 bg-white text-slate-900 dark:border-border dark:bg-muted dark:text-foreground",
                               isPinned && "ring-2 ring-amber-300/90 ring-offset-1",
                             )}
                           >
@@ -651,7 +652,7 @@ export function CommunityChat({
                                   "mb-2 rounded-lg border-l-[3px] px-2 py-1.5 text-[11px]",
                                   isOwn
                                     ? "border-emerald-200/80 bg-white/10"
-                                    : "border-emerald-500 bg-emerald-50/80 text-slate-700",
+                                    : "border-emerald-500 bg-emerald-50/80 text-slate-700 dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-muted-foreground",
                                 )}
                               >
                                 <span className="font-semibold">{parent.authorFullName}</span>
@@ -712,11 +713,11 @@ export function CommunityChat({
 
               {!loadingMessages && messages.length === 0 && (
                 <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
                     <MessageCircle className="h-7 w-7" />
                   </div>
-                  <p className="font-medium text-slate-800">Start the conversation</p>
-                  <p className="max-w-xs text-sm text-slate-500">
+                  <p className={cn("font-medium", textPrimary)}>Start the conversation</p>
+                  <p className={cn("max-w-xs text-sm", textSubtle)}>
                     Be the first to share a tip, question, or experience in this channel.
                   </p>
                 </div>
@@ -725,12 +726,12 @@ export function CommunityChat({
               <div ref={bottomRef} className="h-1" />
             </div>
 
-            <div className="shrink-0 border-t border-emerald-100/80 bg-white px-3 py-3 md:px-5 md:py-4">
+            <div className="shrink-0 border-t border-emerald-100/80 bg-white px-3 py-3 dark:border-border dark:bg-card md:px-5 md:py-4">
               {editingMessage ? (
-                <div className="mb-3 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/60 px-3 py-2.5">
+                <div className="mb-3 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/60 px-3 py-2.5 dark:border-blue-800/60 dark:bg-blue-950/30">
                   <div className="min-w-0 flex-1 border-l-[3px] border-blue-500 pl-2.5">
-                    <p className="text-xs font-semibold text-blue-900">Editing your message</p>
-                    <p className="truncate text-xs text-slate-600">
+                    <p className="text-xs font-semibold text-blue-900 dark:text-blue-200">Editing your message</p>
+                    <p className={cn("truncate text-xs", textMuted)}>
                       Changes sync for everyone in this channel
                     </p>
                   </div>
@@ -747,12 +748,12 @@ export function CommunityChat({
                 </div>
               ) : null}
               {replyTo && !editingMessage ? (
-                <div className="mb-3 flex items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3 py-2.5">
+                <div className="mb-3 flex items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3 py-2.5 dark:border-emerald-800/60 dark:bg-emerald-950/30">
                   <div className="min-w-0 flex-1 border-l-[3px] border-emerald-500 pl-2.5">
-                    <p className="text-xs font-semibold text-emerald-900">
+                    <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                       Replying to {replyTo.authorFullName}
                     </p>
-                    <p className="truncate text-xs text-slate-600">{replyTo.body}</p>
+                    <p className={cn("truncate text-xs", textMuted)}>{replyTo.body}</p>
                   </div>
                   <Button
                     type="button"
@@ -767,7 +768,7 @@ export function CommunityChat({
                 </div>
               ) : null}
               {!canPost && (
-                <p className="mb-2 text-center text-xs text-slate-500">
+                <p className={cn("mb-2 text-center text-xs", textSubtle)}>
                   Sign in as a student to post in this channel.
                 </p>
               )}
@@ -776,7 +777,7 @@ export function CommunityChat({
                   {pendingFiles.map((file, index) => (
                     <li
                       key={`${file.name}-${index}`}
-                      className="flex max-w-full items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-2.5 py-1.5 text-xs text-slate-700"
+                      className="flex max-w-full items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-2.5 py-1.5 text-xs text-slate-700 dark:border-border dark:bg-emerald-950/30 dark:text-muted-foreground"
                     >
                       <Paperclip className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
                       <span className="truncate">{file.name}</span>
@@ -814,7 +815,7 @@ export function CommunityChat({
                 onShare={onShareLink}
                 sending={sending}
               />
-              <div className="flex items-end gap-0 rounded-2xl border border-slate-200/90 bg-slate-50/80 py-1 pl-3 pr-1 shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-500/20">
+              <div className="flex items-end gap-0 rounded-2xl border border-slate-200/90 bg-slate-50/80 py-1 pl-3 pr-1 shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-500/20 dark:border-border dark:bg-muted/50 dark:focus-within:border-emerald-600">
                 <Textarea
                   placeholder={
                     !canPost
@@ -846,7 +847,7 @@ export function CommunityChat({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-emerald-300"
                         disabled={!canPost || sending}
                         onClick={() => setShareLinkOpen(true)}
                         aria-label="Share a link"
@@ -857,7 +858,7 @@ export function CommunityChat({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        className="h-9 w-9 shrink-0 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-emerald-300"
                         disabled={!canPost || sending || pendingFiles.length >= COMMUNITY_MAX_FILES}
                         onClick={() => fileInputRef.current?.click()}
                         aria-label="Attach files"
@@ -878,7 +879,7 @@ export function CommunityChat({
                   </Button>
                 </div>
               </div>
-              <p className="mt-2 text-center text-[10px] leading-relaxed text-slate-400">
+              <p className={cn("mt-2 text-center text-[10px] leading-relaxed", textSubtle)}>
                 <Shield className="mr-1 inline h-3 w-3" />
                 Share links, files (PDF, CV, images), or text · up to {COMMUNITY_MAX_FILES} files,{" "}
                 {COMMUNITY_MAX_FILE_MB} MB each

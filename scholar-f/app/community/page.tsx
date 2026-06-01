@@ -26,6 +26,9 @@ import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-li
 import { CommunityChat } from "@/components/student-portal/community-chat"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { emeraldCard, headerShell, mainScroll, pageShell } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 
 type MeResponse = {
   id: string
@@ -478,19 +481,19 @@ export default function CommunityPage() {
   const canPost = me?.role === "student" || me?.role === "admin"
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-900">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+    <div className={cn("flex h-screen flex-col overflow-hidden", pageShell)}>
+      <header className={cn("flex shrink-0 items-center justify-between gap-4 px-4 py-3 md:px-6", headerShell)}>
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/dashboard"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-200 px-2.5 py-1.5 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-50"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-200 px-2.5 py-1.5 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-50 dark:border-border dark:text-emerald-200 dark:hover:bg-accent"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Portal</span>
           </Link>
-          <div className="min-w-0 border-l border-emerald-100 pl-3">
-            <h1 className="truncate text-lg font-semibold text-emerald-950">Community</h1>
-            <p className="truncate text-xs text-slate-600">
+          <div className="min-w-0 border-l border-emerald-100 pl-3 dark:border-border">
+            <h1 className="truncate text-lg font-semibold text-emerald-950 dark:text-foreground">Community</h1>
+            <p className="truncate text-xs text-slate-600 dark:text-muted-foreground">
               {loadingChannels
                 ? "Loading channels…"
                 : selectedChannel
@@ -500,9 +503,10 @@ export default function CommunityPage() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <StudentLanguageToggle />
           {me?.role ? (
-            <Badge className="hidden border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100 sm:inline-flex">
+            <Badge className="hidden border-emerald-200 bg-emerald-50 capitalize text-emerald-800 ring-1 ring-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 dark:ring-emerald-800/50 sm:inline-flex">
               {me.role}
             </Badge>
           ) : null}
@@ -510,11 +514,11 @@ export default function CommunityPage() {
         </div>
       </header>
 
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-3 md:p-4">
+      <main className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden p-3 md:p-4", mainScroll)}>
         <div className="pointer-events-none absolute -left-24 top-0 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-20 top-20 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
 
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-emerald-100/80 bg-white shadow-lg shadow-emerald-900/5 ring-1 ring-emerald-50">
+        <div className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden", emeraldCard)}>
           <div className="pointer-events-none h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
           <CommunityChat
                 channels={channels}

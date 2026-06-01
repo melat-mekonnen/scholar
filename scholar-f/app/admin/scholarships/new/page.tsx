@@ -169,10 +169,10 @@ export default function AdminNewScholarshipPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-5 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="border-l-4 border-emerald-500 pl-4">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Create scholarship</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Create scholarship</h1>
             <p className="mt-1.5 max-w-xl text-sm text-slate-600">
               Accurate programs for EthioScholar students—each listing stays in pending until verified.
             </p>
@@ -194,7 +194,7 @@ export default function AdminNewScholarshipPage() {
         </div>
       </header>
 
-      <Card className="overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+      <Card className="overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
         <CardHeader className="border-b border-emerald-100/80 bg-gradient-to-r from-emerald-50/40 to-teal-50/30 px-6 py-4">
           <CardTitle className="text-lg font-semibold text-slate-900">Scholarship details</CardTitle>
           <CardDescription className="mt-1 max-w-2xl text-sm text-slate-600">

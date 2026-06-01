@@ -24,6 +24,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
 import { cn } from "@/lib/utils"
+import { ScholarshipWorkspaceLayout } from "@/components/scholarship-workspace/scholarship-workspace-shell"
+import { outlineEmeraldButton, textMuted, textPrimary, workspacePageHeader } from "@/lib/theme"
 
 type CreateScholarshipResponse = {
   id: string
@@ -87,18 +89,16 @@ export function ScholarshipNewForm({ workspace }: Props) {
 
   if (gate !== "ready") {
     return (
-      <main className={cfg.standaloneSurfaceClass}>
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          <p className="text-sm text-slate-600">Loading…</p>
-        </div>
-      </main>
+      <ScholarshipWorkspaceLayout workspace={workspace}>
+        <p className={cn("text-sm", textMuted)}>Loading…</p>
+      </ScholarshipWorkspaceLayout>
     )
   }
 
   return (
-    <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
-      <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-8">
-        <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-6 shadow-sm shadow-emerald-900/5">
+    <ScholarshipWorkspaceLayout workspace={workspace}>
+      <div className="relative mx-auto max-w-5xl space-y-6">
+        <header className={workspacePageHeader}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             {isManager ? (
               <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -106,14 +106,14 @@ export function ScholarshipNewForm({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <FilePlus2 className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">
+                  <h1 className={cn("min-w-0 text-2xl font-semibold tracking-tight", textPrimary)}>
                     {cfg.newScholarshipTitle}
                   </h1>
                 </div>
-                <p className="max-w-xl text-sm text-slate-600">
+                <p className={cn("max-w-xl text-sm", textMuted)}>
                   Add a clear title, deadline, and eligibility so students can find and trust your listing.
                 </p>
-                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
                   Review may apply before verification
                 </div>
@@ -124,12 +124,12 @@ export function ScholarshipNewForm({ workspace }: Props) {
                   <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                     <FilePlus2 className="h-6 w-6" />
                   </div>
-                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.newScholarshipTitle}</h1>
+                  <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{cfg.newScholarshipTitle}</h1>
                 </div>
                 <p className="max-w-xl text-sm text-slate-600">
                   Publish a complete scholarship listing with clear eligibility and application details.
                 </p>
-                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+                <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
                   Professional listing experience
                 </div>
@@ -139,14 +139,14 @@ export function ScholarshipNewForm({ workspace }: Props) {
               <Button
                 variant="outline"
                 asChild
-                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                className={cn("rounded-xl", outlineEmeraldButton)}
               >
                 <Link href={cfg.profilePath}>{cfg.profileLinkLabel}</Link>
               </Button>
               <Button
                 variant="outline"
                 asChild
-                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                className={cn("rounded-xl", outlineEmeraldButton)}
               >
                 <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
               </Button>
@@ -155,7 +155,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
         </header>
 
         <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
-          <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
             <CardHeader className="border-b border-emerald-100/80">
               <CardTitle className="text-lg text-slate-900">Scholarship details</CardTitle>
             </CardHeader>
@@ -341,7 +341,7 @@ export function ScholarshipNewForm({ workspace }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="h-fit rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5 lg:sticky lg:top-6">
+          <Card className="h-fit rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5 lg:sticky lg:top-6">
             <CardHeader className="border-b border-emerald-100/80">
               <CardTitle className="text-base text-slate-900">Publishing tips</CardTitle>
             </CardHeader>
@@ -364,6 +364,6 @@ export function ScholarshipNewForm({ workspace }: Props) {
           </Card>
         </div>
       </div>
-    </main>
+    </ScholarshipWorkspaceLayout>
   )
 }

@@ -3,12 +3,10 @@
 import Link from "next/link"
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useTheme } from "next-themes"
 import {
   Bell,
   FolderOpen,
   LayoutDashboard,
-  Moon,
   Palette,
   Search,
   Shield,
@@ -22,6 +20,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
 import { useStudentI18n } from "@/lib/student-i18n"
@@ -41,20 +40,19 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { ThemeSettings } from "@/components/theme-settings"
+import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  headerShell,
+  pageShell,
+  settingsCardClass,
+  textMuted,
+  textPrimary,
+} from "@/lib/theme"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { Skeleton } from "@/components/ui/skeleton"
-
-const settingsCardClass =
-  "relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
 
 type MeResponse = {
   id: string
@@ -66,9 +64,7 @@ type MeResponse = {
 function SettingsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { theme, setTheme } = useTheme()
   const { t } = useStudentI18n()
-  const [mounted, setMounted] = useState(false)
 
   const [me, setMe] = useState<MeResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -86,10 +82,6 @@ function SettingsPageContent() {
   }
 
   const chatQuota = subscription?.chat ?? null
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     async function load() {
@@ -148,23 +140,24 @@ function SettingsPageContent() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={cn("flex min-h-screen", pageShell)}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className={cn("flex items-center justify-between px-4 md:px-6", headerShell)}>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg font-semibold text-emerald-950">{t("Settings")}</h1>
+              <h1 className={cn("text-lg font-semibold text-emerald-950 dark:text-foreground")}>{t("Settings")}</h1>
               {me?.role ? (
                 <Badge className="capitalize bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80 hover:bg-emerald-100">
                   {me.role}
                 </Badge>
               ) : null}
             </div>
-            <p className="text-xs text-slate-600">Account, notifications, appearance, and security.</p>
+            <p className={cn("text-xs", textMuted)}>Account, notifications, appearance, and security.</p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
@@ -174,15 +167,15 @@ function SettingsPageContent() {
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="rounded-2xl border border-emerald-100/80 bg-white px-6 py-7 shadow-sm shadow-emerald-900/5">
+          <div className={cn(settingsCardClass, "px-6 py-7")}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
                   <SettingsIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Your preferences</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  <h2 className={cn("text-2xl font-semibold tracking-tight", textPrimary)}>Your preferences</h2>
+                  <p className={cn("mt-2 text-sm leading-relaxed", textMuted)}>
                     Manage your account, notifications, and how EthioScholar looks for you.
                   </p>
                 </div>
@@ -369,29 +362,7 @@ function SettingsPageContent() {
               <CardDescription>Light, dark, or follow your system.</CardDescription>
             </CardHeader>
             <CardContent>
-              {mounted ? (
-                <div className="flex flex-col gap-2 sm:max-w-xs">
-                  <Label htmlFor="theme-select" className="flex items-center gap-2">
-                    <Moon className="h-4 w-4 text-emerald-700" />
-                    Theme
-                  </Label>
-                  <Select value={theme ?? "system"} onValueChange={setTheme}>
-                    <SelectTrigger
-                      id="theme-select"
-                      className="w-full rounded-lg border-emerald-200/80 bg-white focus:ring-emerald-200/60"
-                    >
-                      <SelectValue placeholder="Theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">Loading theme…</p>
-              )}
+              <ThemeSettings />
             </CardContent>
           </Card>
 

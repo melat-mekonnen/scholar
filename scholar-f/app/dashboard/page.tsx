@@ -13,13 +13,15 @@ import {
   getApplicationUrl,
   normalizeScholarship,
   openScholarshipApplication,
-  formatScholarshipDeadlineLabel,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { clearToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { headerShell, inlineHeaderRow, pageShell, textMuted, textPrimary, textSubtle } from "@/lib/theme"
+import { cn } from "@/lib/utils"
+import { studentPortalCardClass, studentPortalHeroCardClass } from "@/components/student-portal/student-portal-ui"
 type DashboardStats = {
   activeApplications: number
   savedScholarships: number
@@ -125,23 +127,28 @@ export default function DashboardPage() {
   const activities = summary?.recentActivity ?? []
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={`flex min-h-screen ${pageShell}`}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
-          <h1 className="text-lg font-semibold text-emerald-950">Dashboard</h1>
-          <ProfileAvatarLink />
+        <header className={cn(inlineHeaderRow)}>
+          <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Dashboard</h1>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden text-emerald-800 sm:inline-flex dark:text-emerald-300">
+              <Link href="/settings#appearance">Theme</Link>
+            </Button>
+            <ProfileAvatarLink />
+          </div>
         </header>
 
         <main className="flex-1 space-y-8 p-6">
-          <div className="rounded-2xl border border-slate-200/90 bg-white px-6 py-7 shadow-sm">
-            <div className="border-l-4 border-emerald-500 pl-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <div className={studentPortalHeroCardClass}>
+            <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
+              <h2 className={`text-2xl font-semibold tracking-tight ${textPrimary}`}>
                 Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""}{" "}
                 👋
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <p className={`mt-2 text-sm leading-relaxed ${textMuted}`}>
                 Discover scholarships that match your profile.
               </p>
             </div>
@@ -150,7 +157,7 @@ export default function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-4">
             {loading
               ? Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                  <Card key={i} className={studentPortalCardClass}>
                     <CardContent className="pt-6">
                       <Skeleton className="h-4 w-28 mb-2" />
                       <Skeleton className="h-8 w-16" />
@@ -160,24 +167,24 @@ export default function DashboardPage() {
               : statCards.map((stat) => (
                   <Card
                     key={stat.title}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className={`group relative overflow-hidden ${studentPortalCardClass} transition-all hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20`}
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
                     <CardContent className="pt-6">
-                      <p className="text-sm font-medium text-slate-500">{stat.title}</p>
-                      <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
+                      <p className={`text-sm font-medium ${textSubtle}`}>{stat.title}</p>
+                      <p className={`mt-1 text-3xl font-semibold tracking-tight ${textPrimary}`}>{stat.value}</p>
                     </CardContent>
                   </Card>
                 ))}
           </div>
 
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-slate-900">Recommended Scholarships</h3>
+            <h3 className={`mb-4 text-xl font-semibold ${textPrimary}`}>Recommended Scholarships</h3>
 
             {loading && (
               <div className="grid md:grid-cols-3 gap-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                  <Card key={i} className={studentPortalCardClass}>
                     <CardHeader>
                       <Skeleton className="h-6 w-3/4" />
                     </CardHeader>
@@ -195,8 +202,8 @@ export default function DashboardPage() {
             )}
 
             {!loading && recommended.length === 0 && (
-              <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
-                <CardContent className="pt-6 text-sm text-slate-500">
+              <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200">
+                <CardContent className={`pt-6 text-sm ${textSubtle}`}>
                   No verified scholarships are available to show yet. Once listings are published, upcoming
                   deadlines will appear here. You can also{" "}
                   <Link href="/scholarships" className="text-emerald-600 underline underline-offset-2">
@@ -213,13 +220,10 @@ export default function DashboardPage() {
 
             {!loading && recommended.length > 0 && (
               <div className="grid md:grid-cols-3 gap-4">
-                {recommended.map((row) => {
-                  const s = toScholarshipCard(row)
-                  const deadlineLabel = formatScholarshipDeadlineLabel(s)
-                  return (
+                {recommended.map((s) => (
                   <Card
                     key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardHeader className="pb-3">
@@ -229,9 +233,9 @@ export default function DashboardPage() {
                     </CardHeader>
 
                     <CardContent className="space-y-3">
-                      <p className="text-sm text-slate-500">Country: {s.country}</p>
-                      {deadlineLabel && (
-                        <p className="text-sm text-slate-500">{deadlineLabel}</p>
+                      <p className={`text-sm ${textSubtle}`}>Country: {s.country}</p>
+                      {s.deadline && (
+                        <p className={`text-sm ${textSubtle}`}>Deadline: {s.deadline}</p>
                       )}
 
                       <div className="flex gap-2 pt-3">
@@ -245,7 +249,7 @@ export default function DashboardPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-md border-slate-300 bg-white hover:bg-slate-50"
+                          className="rounded-md border-slate-300 bg-white hover:bg-slate-50 dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-accent"
                           disabled={!getApplicationUrl(s)}
                           onClick={() =>
                             void applyWithReturnConfirmation({
@@ -260,16 +264,15 @@ export default function DashboardPage() {
                       </div>
                     </CardContent>
                   </Card>
-                  )
-                })}
+                ))}
               </div>
             )}
           </div>
 
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-slate-900">Recent Activity</h3>
+            <h3 className={`mb-4 text-xl font-semibold ${textPrimary}`}>Recent Activity</h3>
 
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+            <Card className={studentPortalCardClass}>
               <CardContent className="pt-6 space-y-3">
                 {loading && (
                   <>
@@ -279,14 +282,14 @@ export default function DashboardPage() {
                   </>
                 )}
                 {!loading && activities.length === 0 && (
-                  <p className="text-sm text-slate-500">
+                  <p className={`text-sm ${textSubtle}`}>
                     No activity yet. Save a scholarship, start an application, or update an application status
                     to see updates here.
                   </p>
                 )}
                 {!loading &&
                   activities.map((activity, index) => (
-                    <p key={index} className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    <p key={index} className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-muted/50 dark:text-foreground/80">
                       {activity}
                     </p>
                   ))}

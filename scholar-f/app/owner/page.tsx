@@ -89,7 +89,7 @@ export default function OwnerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <div className="relative mx-auto max-w-6xl px-4 py-8">
         <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
@@ -100,7 +100,7 @@ export default function OwnerDashboardPage() {
               <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                 <Building2 className="h-6 w-6" />
               </div>
-              <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">Owner dashboard</h1>
+              <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Owner dashboard</h1>
             </div>
             <p className="max-w-2xl text-sm text-slate-600">
               Posting profile and user roles live here; open <strong className="font-semibold text-emerald-800">Scholarship operations</strong> for
@@ -114,7 +114,7 @@ export default function OwnerDashboardPage() {
 
         {data && !loading && (
           <div className="space-y-4">
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
               <CardHeader className="border-b border-emerald-100/70">
                 <CardTitle className="text-lg text-slate-900">Overview</CardTitle>
                 <CardDescription className="text-slate-600">
@@ -133,7 +133,7 @@ export default function OwnerDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
               <CardHeader className="border-b border-emerald-100/70">
                 <CardTitle className="text-lg text-slate-900">Needs approval ({pending.length})</CardTitle>
                 <CardDescription className="text-slate-600">Pending scholarship submissions.</CardDescription>

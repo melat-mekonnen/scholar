@@ -223,7 +223,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+      <header className="rounded-2xl border border-slate-200/90 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-6 py-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function AdminUsersPage() {
                 <UsersIcon className="h-5 w-5" />
               </span>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">User Management</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">User Management</h1>
                 <p className="text-sm text-slate-500">
                   Manage platform users, roles, and activation status.
                 </p>
@@ -278,21 +278,21 @@ export default function AdminUsersPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Active users (page)</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{activeCount}</p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-400 to-slate-600 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Inactive users (page)</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{inactiveCount}</p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Managers + Owners</p>
@@ -301,7 +301,7 @@ export default function AdminUsersPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 opacity-90" />
           <CardContent className="pt-6">
             <p className="text-xs font-medium text-slate-500">Admins (page)</p>
@@ -314,7 +314,7 @@ export default function AdminUsersPage() {
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
 
-        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
           <CardHeader>
             <CardTitle className="text-base">Users</CardTitle>
           </CardHeader>
@@ -452,7 +452,7 @@ export default function AdminUsersPage() {
         </Card>
 
         {editingUser && (
-          <Card className="mt-6 rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+          <Card className="mt-6 rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5">
             <CardHeader>
               <CardTitle className="text-base">Edit User</CardTitle>
             </CardHeader>

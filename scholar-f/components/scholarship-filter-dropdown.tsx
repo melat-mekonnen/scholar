@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { filterSectionLabel, inputSurface } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 
 export const FILTER_ANY = "all"
 
@@ -36,13 +38,18 @@ export function ScholarshipFilterDropdown({
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">{label}</p>
+      <p className={filterSectionLabel}>{label}</p>
       <Select
         value={selectValue}
         onValueChange={(next) => onChange(next === FILTER_ANY ? "" : next)}
         disabled={disabled}
       >
-        <SelectTrigger className="h-10 w-full rounded-lg border-emerald-200 bg-white text-left shadow-sm focus:ring-emerald-500">
+        <SelectTrigger
+          className={cn(
+            "h-10 w-full rounded-lg text-left shadow-sm focus:ring-emerald-500",
+            inputSurface,
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="max-h-[min(280px,50vh)]">

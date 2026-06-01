@@ -29,7 +29,7 @@ export function StudentPortalHeroSection({
     <div className={cn(studentPortalHeroCardClass, className)}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className={cn(studentPortalHeroAccentClass, end ? "min-w-0 flex-1" : undefined)}>
-          <Heading className="text-2xl font-semibold tracking-tight text-slate-900">{title}</Heading>
+          <Heading className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{title}</Heading>
           {description ? (
             <div className="mt-2 text-sm leading-relaxed text-slate-600">{description}</div>
           ) : null}

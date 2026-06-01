@@ -10,6 +10,16 @@ import { clearToken } from "@/lib/auth"
 import { useScholarshipWorkspaceGate } from "@/hooks/use-scholarship-workspace-gate"
 import { getScholarshipWorkspaceConfig, type ScholarshipWorkspace } from "@/lib/scholarship-workspace"
 import { cn } from "@/lib/utils"
+import { ScholarshipWorkspaceLayout } from "@/components/scholarship-workspace/scholarship-workspace-shell"
+import {
+  inputSurface,
+  outlineEmeraldButton,
+  textMuted,
+  textPrimary,
+  textSubtle,
+  workspaceCardShell,
+  workspacePageHeader,
+} from "@/lib/theme"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -230,34 +240,29 @@ export function ScholarshipManagePage({ workspace }: Props) {
 
   if (gate !== "ready") {
     return (
-      <main className={cfg.standaloneSurfaceClass}>
-        <div className="mx-auto max-w-6xl px-4 py-8">
-          <p className="text-sm text-slate-600">Loading…</p>
-        </div>
-      </main>
+      <ScholarshipWorkspaceLayout workspace={workspace}>
+        <p className={cn("text-sm", textMuted)}>Loading…</p>
+      </ScholarshipWorkspaceLayout>
     )
   }
 
-  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
-
-  return (
-    <main className={cn(cfg.standaloneSurfaceClass, "text-slate-900")}>
-      <div className="relative mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <header className="rounded-2xl border border-emerald-100/80 border-l-4 border-l-emerald-500 bg-white px-6 py-6 shadow-sm shadow-emerald-900/5">
+  const content = (
+    <div className="relative mx-auto max-w-6xl space-y-6">
+        <header className={workspacePageHeader}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">
                 <div className="shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                   <ListChecks className="h-6 w-6" />
                 </div>
-                <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">Manage scholarships</h1>
+                <h1 className={cn("min-w-0 text-2xl font-semibold tracking-tight", textPrimary)}>Manage scholarships</h1>
               </div>
-              <p className="max-w-xl text-sm text-slate-600">
+              <p className={cn("max-w-xl text-sm", textMuted)}>
                 {workspace === "owner"
                   ? "Review and manage all scholarships across managers."
                   : "Edit listings you publish. Substantive changes return the listing to pending review."}
               </p>
-              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 {isManager ? "Search, filter, and keep deadlines accurate" : "Organized workflow for scholarship lifecycle"}
               </div>
@@ -266,7 +271,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
               <Button
                 variant="outline"
                 asChild
-                className="rounded-xl border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+                className={cn("rounded-xl", outlineEmeraldButton)}
               >
                 <Link href={cfg.basePath}>{cfg.opsBackLabel}</Link>
               </Button>
@@ -288,13 +293,13 @@ export function ScholarshipManagePage({ workspace }: Props) {
         ) : null}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className={cardShell}>
+          <Card className={workspaceCardShell}>
             <CardContent className="pt-5">
-              <p className="text-xs text-slate-500">Total in view</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{summary.total}</p>
+              <p className={cn("text-xs", textSubtle)}>Total in view</p>
+              <p className={cn("mt-1 text-3xl font-semibold tracking-tight", textPrimary)}>{summary.total}</p>
             </CardContent>
           </Card>
-          <Card className={cardShell}>
+          <Card className={workspaceCardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Pending</p>
               <p className="mt-1 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-3xl font-semibold tracking-tight text-transparent">
@@ -302,13 +307,13 @@ export function ScholarshipManagePage({ workspace }: Props) {
               </p>
             </CardContent>
           </Card>
-          <Card className={cardShell}>
+          <Card className={workspaceCardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Verified</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">{summary.verified}</p>
             </CardContent>
           </Card>
-          <Card className={cardShell}>
+          <Card className={workspaceCardShell}>
             <CardContent className="pt-5">
               <p className="text-xs text-slate-500">Rejected</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-rose-600">{summary.rejected}</p>
@@ -316,10 +321,10 @@ export function ScholarshipManagePage({ workspace }: Props) {
           </Card>
         </section>
 
-        <Card className={cardShell}>
-          <CardHeader className="space-y-4 border-b border-emerald-100/80 pb-6">
+        <Card className={workspaceCardShell}>
+          <CardHeader className="space-y-4 border-b border-emerald-100/80 pb-6 dark:border-border">
             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base text-slate-900">Scholarship list</CardTitle>
+              <CardTitle className={cn("text-base", textPrimary)}>Scholarship list</CardTitle>
             </div>
             <div className="flex flex-wrap gap-2">
               <div className="relative">
@@ -328,13 +333,16 @@ export function ScholarshipManagePage({ workspace }: Props) {
                   placeholder="Search title..."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  className="h-10 w-64 rounded-xl border-emerald-100/90 pl-9 shadow-sm focus-visible:ring-emerald-500"
+                  className={cn("h-10 w-64 rounded-xl pl-9 shadow-sm focus-visible:ring-emerald-500", inputSurface)}
                 />
               </div>
               <div className="relative">
                 <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-600/70" />
                 <select
-                  className="h-10 rounded-xl border border-emerald-100/90 bg-white pl-9 pr-8 text-sm text-slate-700 shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                  className={cn(
+                    "h-10 rounded-xl border pl-9 pr-8 text-sm shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+                    inputSurface,
+                  )}
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -349,21 +357,21 @@ export function ScholarshipManagePage({ workspace }: Props) {
             </div>
           </CardHeader>
           <CardContent className="pt-2">
-            <Table className="overflow-hidden rounded-xl border border-emerald-100/80">
-              <TableHeader className="bg-emerald-50/50 [&_tr]:border-emerald-100/80">
-                <TableRow className="border-emerald-100/80 hover:bg-transparent">
-                  <TableHead className="text-emerald-900/90">Title</TableHead>
-                  <TableHead className="text-emerald-900/90">Organization</TableHead>
-                  <TableHead className="text-emerald-900/90">Status</TableHead>
-                  <TableHead className="text-emerald-900/90">Deadline</TableHead>
-                  <TableHead className="text-emerald-900/90">Rejection</TableHead>
-                  <TableHead className="text-right text-emerald-900/90">Actions</TableHead>
+            <Table className="overflow-hidden rounded-xl border border-emerald-100/80 dark:border-border">
+              <TableHeader className="bg-emerald-50/50 dark:bg-muted/40 [&_tr]:border-emerald-100/80 dark:[&_tr]:border-border">
+                <TableRow className="border-emerald-100/80 hover:bg-transparent dark:border-border">
+                  <TableHead className="text-emerald-900/90 dark:text-emerald-200">Title</TableHead>
+                  <TableHead className="text-emerald-900/90 dark:text-emerald-200">Organization</TableHead>
+                  <TableHead className="text-emerald-900/90 dark:text-emerald-200">Status</TableHead>
+                  <TableHead className="text-emerald-900/90 dark:text-emerald-200">Deadline</TableHead>
+                  <TableHead className="text-emerald-900/90 dark:text-emerald-200">Rejection</TableHead>
+                  <TableHead className="text-right text-emerald-900/90 dark:text-emerald-200">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-sm text-slate-600">
+                    <TableCell colSpan={6} className={cn("text-sm", textMuted)}>
                       Loading…
                     </TableCell>
                   </TableRow>
@@ -371,9 +379,9 @@ export function ScholarshipManagePage({ workspace }: Props) {
                   visible.map((s) => (
                     <TableRow
                       key={s.id}
-                      className="border-emerald-100/60 hover:bg-emerald-50/40"
+                      className="border-emerald-100/60 hover:bg-emerald-50/40 dark:border-border dark:hover:bg-muted/40"
                     >
-                      <TableCell className="font-medium text-slate-900">{s.title}</TableCell>
+                      <TableCell className={cn("font-medium", textPrimary)}>{s.title}</TableCell>
                       <TableCell>{s.organizationName || "-"}</TableCell>
                       <TableCell>{statusBadge(s.status)}</TableCell>
                       <TableCell>{s.deadline || "-"}</TableCell>
@@ -384,7 +392,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                          className={outlineEmeraldButton}
                           onClick={() => void openEdit(s.id)}
                         >
                           Edit
@@ -397,7 +405,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-sm text-slate-600">
+                    <TableCell colSpan={6} className={cn("text-sm", textMuted)}>
                       No scholarships found.
                     </TableCell>
                   </TableRow>
@@ -408,9 +416,9 @@ export function ScholarshipManagePage({ workspace }: Props) {
         </Card>
 
         {editing ? (
-          <Card className={cardShell}>
+          <Card className={workspaceCardShell}>
             <CardHeader className="border-b border-emerald-100/80">
-              <CardTitle className="text-base text-slate-900">Edit scholarship</CardTitle>
+              <CardTitle className={cn("text-base", textPrimary)}>Edit scholarship</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 pt-2">
               <div className="grid gap-3 md:grid-cols-2">
@@ -478,7 +486,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
-                  className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  className={outlineEmeraldButton}
                   onClick={() => setEditing(null)}
                 >
                   Cancel
@@ -495,6 +503,7 @@ export function ScholarshipManagePage({ workspace }: Props) {
           </Card>
         ) : null}
       </div>
-    </main>
   )
+
+  return <ScholarshipWorkspaceLayout workspace={workspace}>{content}</ScholarshipWorkspaceLayout>
 }

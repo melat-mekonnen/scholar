@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -16,7 +17,7 @@ import {
 } from "lucide-react"
 export default function HomePage() {
   return (
-    <main id="top" className="min-h-screen bg-slate-50 text-slate-900">
+    <main id="top" className="min-h-screen bg-slate-50 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
 
       {/* HERO — photo-forward + emerald tint; white nav */}
       <section className="relative overflow-hidden bg-slate-900">
@@ -32,12 +33,13 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -right-6 top-32 h-32 w-32 rotate-45 rounded-xl border border-white/10 bg-white/[0.03]" />
         <div className="pointer-events-none absolute -left-16 bottom-20 h-40 w-40 rounded-full border border-white/8 bg-white/[0.02]" />
 
-        <div className="relative z-10 w-full bg-white/95 shadow-md backdrop-blur">
+        <div className="relative z-10 w-full border-b border-transparent bg-white/95 shadow-md backdrop-blur dark:border-border dark:bg-card/95">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-2 md:px-8">
             <Link href="/" aria-label="EthioScholar Home" className="flex items-center">
               <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-11 w-auto" />
             </Link>
             <div className="flex items-center gap-2 sm:gap-3">
+              <ThemeToggle />
               <a
                 href="#about"
                 className="rounded-md px-2 py-1 text-sm font-semibold text-slate-700 hover:text-slate-900"
@@ -103,7 +105,7 @@ export default function HomePage() {
 
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+            <p className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground md:text-3xl">
               Why choose us?
             </p>
           </div>
@@ -123,7 +125,7 @@ export default function HomePage() {
             <div className="pointer-events-none absolute left-[45%] top-10 h-6 w-6 rounded-full bg-white/90 ring-2 ring-emerald-200/70" />
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-border dark:bg-card dark:text-foreground">
                 <CardContent className="p-6 text-center sm:p-7">
                   <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
                     <ShieldCheck className="h-6 w-6" />
@@ -135,7 +137,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-border dark:bg-card dark:text-foreground">
                 <CardContent className="p-6 text-center sm:p-7">
                   <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
                     <Brain className="h-6 w-6" />
@@ -147,7 +149,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-teal-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className="relative h-full overflow-hidden rounded-3xl border-teal-100/90 bg-white/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-border dark:bg-card dark:text-foreground">
                 <CardContent className="p-6 text-center sm:p-7">
                   <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-600/10 text-teal-700 ring-1 ring-teal-100">
                     <ClipboardList className="h-6 w-6" />
@@ -159,7 +161,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Card className="relative h-full overflow-hidden rounded-3xl border-emerald-100/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-border dark:bg-card dark:text-foreground">
                 <CardContent className="p-6 text-center sm:p-7">
                   <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-100">
                     <Bookmark className="h-6 w-6" />
@@ -176,13 +178,13 @@ export default function HomePage() {
       </section>
 
       {/* ABOUT — modern split layout */}
-      <section id="about" className="relative overflow-hidden bg-white pt-12 pb-14 md:pt-14 md:pb-20">
+      <section id="about" className="relative overflow-hidden bg-white pt-12 pb-14 md:pt-14 md:pb-20 dark:bg-background transition-colors duration-200">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white via-slate-50/40 to-white" />
 
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="order-1 lg:-mt-2">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground md:text-3xl">
                 About us
               </h2>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600">
@@ -248,7 +250,7 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-6xl px-6">
 
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+            <p className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground md:text-3xl">
               How it works
             </p>
             <p className="mx-auto mt-2 max-w-2xl text-base text-black">
@@ -278,7 +280,7 @@ export default function HomePage() {
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-emerald-600/10 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
                   <UserPlus className="h-9 w-9" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-slate-900">Create Account</h3>
+                <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-foreground">Create Account</h3>
                 <p className="mx-auto mt-3 max-w-xs text-sm text-slate-600">
                   Create your profile and add the details that matter for matching.
                 </p>
@@ -288,7 +290,7 @@ export default function HomePage() {
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-emerald-600/10 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
                   <Search className="h-9 w-9" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-slate-900">Enter Information</h3>
+                <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-foreground">Enter Information</h3>
                 <p className="mx-auto mt-3 max-w-xs text-sm text-slate-600">
                   Discover scholarships with clear eligibility and deadlines.
                 </p>
@@ -298,7 +300,7 @@ export default function HomePage() {
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-teal-600/10 text-teal-700 shadow-sm ring-1 ring-teal-100">
                   <Send className="h-9 w-9" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-slate-900">Apply & Track</h3>
+                <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-foreground">Apply & Track</h3>
                 <p className="mx-auto mt-3 max-w-xs text-sm text-slate-600">
                   Apply with confidence and track your progress in one dashboard.
                 </p>

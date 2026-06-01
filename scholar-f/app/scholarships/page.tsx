@@ -27,6 +27,29 @@ import { clearToken } from "@/lib/auth"
 import { ScholarshipApplyButton } from "@/components/scholarship-apply-button"
 import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { useStudentI18n } from "@/lib/student-i18n"
+import {
+  accentEmerald,
+  elevatedCard,
+  emeraldCard,
+  emeraldFilterBadge,
+  filterSectionLabel,
+  heroBanner,
+  inactiveChipButton,
+  inlineHeaderRow,
+  inputSurface,
+  mainScroll,
+  outlineEmeraldButton,
+  outlineControl,
+  pageShell,
+  slateFilterBadge,
+  summaryBar,
+  tealFilterBadge,
+  textMuted,
+  textPrimary,
+  textSubtle,
+} from "@/lib/theme"
+import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { ScholarshipBookmarkButton } from "@/components/scholarship-bookmark-button"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -387,10 +410,10 @@ export default function ScholarshipsPage() {
         />
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Deadline</p>
+          <p className={filterSectionLabel}>Deadline</p>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <p className="text-xs text-slate-500">From</p>
+              <p className={cn("text-xs", textSubtle)}>From</p>
               <Input
                 type="date"
                 value={deadlineFrom}
@@ -398,11 +421,11 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineFrom(e.target.value)
                 }}
-                className="h-10 rounded-lg border-emerald-200 bg-white focus-visible:ring-emerald-500"
+                className={cn("h-10 rounded-lg focus-visible:ring-emerald-500", inputSurface)}
               />
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-slate-500">To</p>
+              <p className={cn("text-xs", textSubtle)}>To</p>
               <Input
                 type="date"
                 value={deadlineTo}
@@ -410,14 +433,14 @@ export default function ScholarshipsPage() {
                   setPage(1)
                   setDeadlineTo(e.target.value)
                 }}
-                className="h-10 rounded-lg border-emerald-200 bg-white focus-visible:ring-emerald-500"
+                className={cn("h-10 rounded-lg focus-visible:ring-emerald-500", inputSurface)}
               />
             </div>
           </div>
         </div>
 
         <div className="pt-2">
-          <Button variant="outline" className="h-10 w-full rounded-lg border-emerald-200 text-emerald-800 hover:bg-emerald-50" onClick={clearAll}>
+          <Button variant="outline" className={cn("h-10 w-full rounded-lg", outlineEmeraldButton)} onClick={clearAll}>
             Clear filters
           </Button>
         </div>
@@ -426,38 +449,39 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <div className="flex h-dvh max-h-dvh overflow-hidden bg-slate-100 text-slate-900">
+    <div className={cn("flex h-dvh max-h-dvh overflow-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 sm:px-6">
-          <h1 className="min-w-0 truncate text-base font-semibold text-emerald-950 sm:text-lg">
+        <header className={cn("flex shrink-0 items-center justify-between gap-3 sm:px-6", inlineHeaderRow)}>
+          <h1 className="min-w-0 truncate text-base font-semibold text-emerald-950 dark:text-foreground sm:text-lg">
             Browse Scholarships
           </h1>
           <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-4 sm:p-6">
+        <main className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden p-4 sm:p-6", mainScroll)}>
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
           <div className="relative shrink-0 space-y-4 sm:space-y-5">
-          <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-5 shadow-sm shadow-emerald-900/5 sm:px-6 sm:py-7">
+          <div className={cn("relative overflow-hidden px-4 py-5 sm:px-6 sm:py-7", heroBanner)}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <div className="border-l-4 border-emerald-500 pl-3 sm:pl-4">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+            <div className="border-l-4 border-emerald-500 pl-3 dark:border-emerald-400 sm:pl-4">
+              <h2 className={cn("text-xl font-semibold tracking-tight sm:text-2xl", textPrimary)}>
                 Find your next scholarship
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <p className={cn("mt-2 text-sm leading-relaxed", textMuted)}>
                 Search verified opportunities and filter by country, degree, field of study, and funding.
               </p>
             </div>
           </div>
 
-        <div className="rounded-2xl border border-emerald-100/80 bg-white p-3 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-50 sm:p-4">
+        <div className={cn("p-3 sm:p-4", summaryBar)}>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative w-full min-w-0 lg:max-w-xl">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
@@ -468,7 +492,7 @@ export default function ScholarshipsPage() {
                 setQInput(e.target.value)
               }}
               placeholder="Search scholarships…"
-              className="h-11 rounded-xl border-emerald-200 bg-white pl-9 text-base shadow-sm focus-visible:ring-emerald-500 sm:text-sm"
+              className={cn("h-11 rounded-xl pl-9 text-base shadow-sm focus-visible:ring-emerald-500 sm:text-sm", inputSurface)}
             />
             </div>
 
@@ -481,7 +505,7 @@ export default function ScholarshipsPage() {
                     setSort(v as SortOption)
                   }}
                 >
-                  <SelectTrigger className="h-11 w-56 rounded-xl border-emerald-200 focus:ring-emerald-500 bg-white shadow-sm">
+                  <SelectTrigger className={cn("h-11 w-56 rounded-xl focus:ring-emerald-500 shadow-sm", inputSurface)}>
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -498,7 +522,7 @@ export default function ScholarshipsPage() {
                 <SheetTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-11 flex-1 rounded-xl border-emerald-200 bg-white shadow-sm hover:bg-emerald-50 sm:flex-none lg:hidden"
+                    className={cn("h-11 flex-1 rounded-xl shadow-sm sm:flex-none lg:hidden", outlineControl)}
                   >
                     <Filter className="mr-2 h-4 w-4" />
                     Filters
@@ -506,10 +530,10 @@ export default function ScholarshipsPage() {
                 </SheetTrigger>
                 <SheetContent
                   side="right"
-                  className="flex w-full max-w-sm flex-col gap-0 border-l border-emerald-100 p-0 sm:max-w-md"
+                  className="flex w-full max-w-sm flex-col gap-0 border-l border-emerald-100 bg-background p-0 dark:border-border sm:max-w-md"
                 >
-                  <SheetHeader className="shrink-0 border-b border-emerald-100 bg-emerald-50/50 px-4 py-4 text-left">
-                    <SheetTitle className="text-emerald-950">Filters</SheetTitle>
+                  <SheetHeader className="shrink-0 border-b border-emerald-100 bg-emerald-50/50 px-4 py-4 text-left dark:border-border dark:bg-card">
+                    <SheetTitle className="text-emerald-950 dark:text-foreground">Filters</SheetTitle>
                   </SheetHeader>
                   <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-8">
                     <FilterPanel compact />
@@ -520,7 +544,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant="outline"
                 onClick={clearAll}
-                className="hidden h-11 rounded-xl border-emerald-200 bg-white text-emerald-800 shadow-sm hover:bg-emerald-50 lg:inline-flex"
+                className={cn("hidden h-11 rounded-xl shadow-sm lg:inline-flex", outlineEmeraldButton)}
               >
                 <X className="h-4 w-4 mr-2" />
                 Reset
@@ -536,11 +560,11 @@ export default function ScholarshipsPage() {
         >
           {/* Desktop filters — independent scroll */}
           <aside className="hidden min-h-0 min-w-0 lg:flex lg:flex-col">
-            <Card className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
+            <Card className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden shadow-emerald-900/5 dark:shadow-none", emeraldCard)}>
               <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <CardHeader className="shrink-0 pb-3">
-                <CardTitle className="flex items-center gap-2 text-base text-slate-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
+                <CardTitle className={cn("flex items-center gap-2 text-base", textPrimary)}>
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
                     <Filter className="h-4 w-4" />
                   </span>
                   Filters
@@ -558,21 +582,21 @@ export default function ScholarshipsPage() {
             className="min-h-0 min-w-0 space-y-4 overflow-y-auto overscroll-y-contain lg:pr-1 [-webkit-overflow-scrolling:touch]"
           >
             {error && (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900 dark:bg-red-950/40">
                 {error}
               </p>
             )}
-            <div className="flex flex-col gap-3 rounded-xl border border-emerald-100/80 bg-white px-3 py-3 shadow-sm ring-1 ring-emerald-100/60 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-              <p className="text-sm text-slate-600">
+            <div className={cn("flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4", summaryBar)}>
+              <p className={cn("text-sm", textMuted)}>
                 {loading ? (
                   "Loading..."
                 ) : applicationFilter === "all" ? (
                   <>
-                    <span className="font-semibold text-emerald-700">{total.toLocaleString()}</span> results
+                    <span className={accentEmerald}>{total.toLocaleString()}</span> results
                   </>
                 ) : (
                   <>
-                    <span className="font-semibold text-emerald-700">{visibleResults.length.toLocaleString()}</span>{" "}
+                    <span className={accentEmerald}>{visibleResults.length.toLocaleString()}</span>{" "}
                     shown on this page
                   </>
                 )}
@@ -585,7 +609,7 @@ export default function ScholarshipsPage() {
                     setSort(v as SortOption)
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full rounded-xl border-emerald-200 bg-white shadow-sm focus:ring-emerald-500 sm:w-48">
+                  <SelectTrigger className={cn("h-10 w-full rounded-xl shadow-sm focus:ring-emerald-500 sm:w-48", inputSurface)}>
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -603,12 +627,12 @@ export default function ScholarshipsPage() {
                 {region && activeRegionLabel && (
                   <Badge
                     variant="outline"
-                    className="gap-1 border-emerald-200 bg-emerald-50/80 text-emerald-900"
+                    className={emeraldFilterBadge}
                   >
                     {activeRegionLabel}
                     <button
                       type="button"
-                      className="rounded-full p-0.5 hover:bg-emerald-100"
+                      className="rounded-full p-0.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
                       aria-label="Remove region filter"
                       onClick={() => {
                         setPage(1)
@@ -622,12 +646,12 @@ export default function ScholarshipsPage() {
                 {degreeLevel && activeDegreeLabel && (
                   <Badge
                     variant="outline"
-                    className="gap-1 border-slate-200 bg-slate-50 text-slate-800"
+                    className={slateFilterBadge}
                   >
                     {activeDegreeLabel}
                     <button
                       type="button"
-                      className="rounded-full p-0.5 hover:bg-slate-100"
+                      className="rounded-full p-0.5 hover:bg-slate-100 dark:hover:bg-muted"
                       aria-label="Remove degree level filter"
                       onClick={() => {
                         setPage(1)
@@ -641,12 +665,12 @@ export default function ScholarshipsPage() {
                 {fieldCategory && activeFieldLabel && (
                   <Badge
                     variant="outline"
-                    className="gap-1 border-teal-200 bg-teal-50/80 text-teal-900"
+                    className={tealFilterBadge}
                   >
                     {activeFieldLabel}
                     <button
                       type="button"
-                      className="rounded-full p-0.5 hover:bg-teal-100"
+                      className="rounded-full p-0.5 hover:bg-teal-100 dark:hover:bg-teal-900/50"
                       aria-label="Remove field of study filter"
                       onClick={() => {
                         setPage(1)
@@ -660,12 +684,12 @@ export default function ScholarshipsPage() {
                 {fundingType && activeFundingLabel && (
                   <Badge
                     variant="outline"
-                    className="gap-1 border-emerald-200 bg-emerald-50/80 text-emerald-900"
+                    className={emeraldFilterBadge}
                   >
                     {activeFundingLabel}
                     <button
                       type="button"
-                      className="rounded-full p-0.5 hover:bg-emerald-100"
+                      className="rounded-full p-0.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
                       aria-label="Remove funding type filter"
                       onClick={() => {
                         setPage(1)
@@ -683,7 +707,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "all" ? "default" : "outline"}
                 size="sm"
-                className={`shrink-0 ${applicationFilter === "all" ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-800"}`}
+                className={`shrink-0 ${applicationFilter === "all" ? "bg-emerald-600 text-white hover:bg-emerald-700" : inactiveChipButton}`}
                 onClick={() => setApplicationFilter("all")}
               >
                 All
@@ -691,7 +715,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "applied" ? "default" : "outline"}
                 size="sm"
-                className={`shrink-0 ${applicationFilter === "applied" ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border-slate-300 bg-white hover:bg-slate-50"}`}
+                className={`shrink-0 ${applicationFilter === "applied" ? "bg-emerald-600 text-white hover:bg-emerald-700" : inactiveChipButton}`}
                 onClick={() => setApplicationFilter("applied")}
               >
                 Applied
@@ -699,7 +723,7 @@ export default function ScholarshipsPage() {
               <Button
                 variant={applicationFilter === "not_applied" ? "default" : "outline"}
                 size="sm"
-                className={`shrink-0 ${applicationFilter === "not_applied" ? "bg-teal-600 text-white hover:bg-teal-700" : "border-slate-300 bg-white hover:bg-slate-50"}`}
+                className={`shrink-0 ${applicationFilter === "not_applied" ? "bg-teal-600 text-white hover:bg-teal-700" : inactiveChipButton}`}
                 onClick={() => setApplicationFilter("not_applied")}
               >
                 Not Applied
@@ -709,7 +733,7 @@ export default function ScholarshipsPage() {
             {loading ? (
               <div className="grid gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+                  <Card key={i} className={emeraldCard}>
                     <CardContent className="p-6 space-y-3">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
@@ -722,9 +746,9 @@ export default function ScholarshipsPage() {
                 ))}
               </div>
             ) : visibleResults.length === 0 ? (
-              <Empty className="rounded-2xl border border-emerald-100/80 bg-white/90">
+              <Empty className={cn(emeraldCard, "bg-white/90 dark:bg-card")}>
                 <EmptyHeader>
-                  <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700">
+                  <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                     <SearchIcon className="size-6" />
                   </EmptyMedia>
                   <EmptyTitle>No results</EmptyTitle>
@@ -733,7 +757,7 @@ export default function ScholarshipsPage() {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button variant="outline" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50" onClick={clearAll}>
+                  <Button variant="outline" className={outlineEmeraldButton} onClick={clearAll}>
                     Clear search & filters
                   </Button>
                 </EmptyContent>
@@ -741,19 +765,16 @@ export default function ScholarshipsPage() {
             ) : (
               <div className="grid gap-4">
                 {visibleResults.map((s) => (
-                  <Card
-                    key={s.id}
-                    className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                  >
+                  <Card key={s.id} className={elevatedCard}>
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
                     <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
                     <CardContent className="space-y-3 p-4 sm:p-6">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0 flex-1">
-                          <p className="text-base font-semibold leading-snug text-slate-900 transition-colors group-hover:text-emerald-800">
+                          <p className={cn("text-base font-semibold leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300", textPrimary)}>
                             {s.title}
                           </p>
-                          <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                          <p className={cn("mt-1 text-sm leading-relaxed", textSubtle)}>
                             {[
                               s.organizationName,
                               s.country,
@@ -764,9 +785,9 @@ export default function ScholarshipsPage() {
                               .join(" · ")}
                           </p>
                           {formatScholarshipDateRange(s) ? (
-                            <p className="mt-1 text-xs text-slate-600">{formatScholarshipDateRange(s)}</p>
+                            <p className={cn("mt-1 text-xs", textMuted)}>{formatScholarshipDateRange(s)}</p>
                           ) : (
-                            <p className="mt-1 text-xs text-slate-500">Dates not specified</p>
+                            <p className={cn("mt-1 text-xs", textSubtle)}>Dates not specified</p>
                           )}
                         </div>
                         <div className="flex shrink-0 items-center justify-end sm:justify-start">
@@ -781,23 +802,23 @@ export default function ScholarshipsPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-300 dark:hover:bg-emerald-950/70">
                           {isStudyProgramme(s) ? t("Study programme") : t("Verified")}
                         </Badge>
                         {appliedScholarshipIds.has(s.id) && (
                           <Badge className="bg-teal-600 text-white">Applied</Badge>
                         )}
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
+                          <Badge variant="outline" className={emeraldFilterBadge}>{s.bookmarkCount} saved</Badge>
                         )}
                         {s.fundingType && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                          <Badge variant="outline" className={emeraldFilterBadge}>
                             {t(fundingTypeLabel(s.fundingType))}
                           </Badge>
                         )}
-                        {s.amount && <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.amount}</Badge>}
+                        {s.amount && <Badge variant="outline" className={emeraldFilterBadge}>{s.amount}</Badge>}
                         {formatScholarshipDateRange(s) && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                          <Badge variant="outline" className={emeraldFilterBadge}>
                             {formatScholarshipDateRange(s)}
                           </Badge>
                         )}
@@ -807,7 +828,7 @@ export default function ScholarshipsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-10 w-full rounded-md border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50 sm:w-auto"
+                          className={cn("h-10 w-full rounded-md sm:w-auto", outlineEmeraldButton)}
                           onClick={() => setViewScholarship(s)}
                         >
                           {t("View details")}
@@ -827,7 +848,7 @@ export default function ScholarshipsPage() {
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="rounded-xl border border-emerald-100/80 bg-white px-2 py-3 shadow-sm ring-1 ring-emerald-100/60 sm:px-3">
+              <div className={cn("rounded-xl px-2 py-3 sm:px-3", summaryBar)}>
                 <Pagination className="mx-0 w-full justify-start overflow-x-auto overscroll-x-contain">
                   <PaginationContent className="flex-nowrap gap-0.5 sm:flex-wrap">
                     <PaginationItem>
@@ -848,8 +869,8 @@ export default function ScholarshipsPage() {
                             isActive={p === page}
                             className={
                               p === page
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                                : "hover:bg-emerald-50 hover:text-emerald-700"
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 dark:hover:bg-emerald-950/70"
+                                : "hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-accent dark:hover:text-emerald-200"
                             }
                             onClick={(e) => {
                               e.preventDefault()

@@ -50,14 +50,14 @@ export function StudentPortalShell({
         <header className={studentPortalHeaderClass}>
           <div className="min-w-0 flex-1 pr-4">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+              <h1 className="text-lg font-semibold text-slate-900 dark:text-foreground">{title}</h1>
               {role ? (
-                <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700">
+                <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700 dark:bg-muted dark:text-muted-foreground">
                   {role}
                 </Badge>
               ) : null}
             </div>
-            {subtitle ? <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p> : null}
+            {subtitle ? <p className="mt-0.5 text-sm text-slate-500 dark:text-muted-foreground">{subtitle}</p> : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {headerEnd}
@@ -69,8 +69,8 @@ export function StudentPortalShell({
           {hero ? (
             <div className={studentPortalHeroCardClass}>
               <div className={studentPortalHeroAccentClass}>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{hero.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{hero.description}</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">{hero.title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-muted-foreground">{hero.description}</p>
               </div>
             </div>
           ) : null}

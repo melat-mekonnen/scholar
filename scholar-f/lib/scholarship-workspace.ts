@@ -17,7 +17,8 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
       documentPageHeading: "Document resources",
       newScholarshipTitle: "Create scholarship",
       /** Same shell as manager — platform-wide emerald / teal portal */
-      shellClassName: "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5",
+      shellClassName:
+        "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-card transition-colors duration-200",
       navActiveClass:
         "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-900 ring-1 ring-emerald-200/80 font-medium",
       navInactiveClass:
@@ -29,7 +30,8 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
       newScholarshipPath: "/owner/scholarships/new",
       manageScholarshipsPath: "/owner/scholarships/manage",
       ownerHomePath: "/owner",
-      standaloneSurfaceClass: "min-h-screen bg-slate-100",
+      standaloneSurfaceClass:
+        "min-h-screen bg-slate-100 dark:bg-background dark:text-foreground transition-colors duration-200",
     }
   }
 
@@ -45,7 +47,8 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
     documentPageHeading: "Manager document resources",
     newScholarshipTitle: "Create scholarship",
       /** Manager shell — aligned with student / admin portal emerald theme */
-      shellClassName: "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5",
+      shellClassName:
+        "border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-card transition-colors duration-200",
       navActiveClass:
         "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-900 ring-1 ring-emerald-200/80 font-medium",
       navInactiveClass:
@@ -57,6 +60,7 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
     newScholarshipPath: "/manager/scholarships/new",
     manageScholarshipsPath: "/manager/scholarships",
     ownerHomePath: "/owner",
-    standaloneSurfaceClass: "min-h-screen bg-slate-100",
+    standaloneSurfaceClass:
+      "min-h-screen bg-slate-100 dark:bg-background dark:text-foreground transition-colors duration-200",
   }
 }

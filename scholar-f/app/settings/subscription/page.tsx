@@ -63,7 +63,7 @@ export default function SubscriptionPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500">
+        <div className="flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-background dark:text-muted-foreground">
           Loading subscription…
         </div>
       }

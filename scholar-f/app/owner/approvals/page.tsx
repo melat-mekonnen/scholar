@@ -122,7 +122,7 @@ export default function OwnerApprovalsPage() {
     )
   }, [pending, query])
 
-  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+  const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 
   return (
     <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-8">
@@ -141,7 +141,7 @@ export default function OwnerApprovalsPage() {
               <ClipboardList className="h-6 w-6" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Pending approvals</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Pending approvals</h1>
               <p className="mt-1 max-w-xl text-sm text-slate-600">
                 Review manager-submitted and imported scholarships before they go live for students.
               </p>
@@ -180,15 +180,15 @@ export default function OwnerApprovalsPage() {
           </>
         ) : (
           <>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">In queue</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{pending.length}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Showing</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{visible.length}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100/80 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 px-4 py-3 shadow-sm shadow-emerald-900/5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</p>
               <p className="mt-1 flex items-center gap-2 text-sm font-medium text-emerald-800">
                 <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />

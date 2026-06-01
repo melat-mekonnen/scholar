@@ -16,7 +16,7 @@ type TrustedImportResponse = {
   errors?: Array<{ sourceName: string; message: string }>
 }
 
-const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5"
+const cardShell = "rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 shadow-emerald-900/5"
 
 export default function OwnerTrustedImportPage() {
   const router = useRouter()
@@ -62,7 +62,7 @@ export default function OwnerTrustedImportPage() {
             <Download className="h-6 w-6" />
           </div>
           <div className="min-w-0 space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Trusted import</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-foreground">Trusted import</h1>
             <p className="text-sm text-slate-600">
               Pull scholarship listings from configured trusted feeds (e.g. Fastweb). Imports typically land in your
               approval queue.

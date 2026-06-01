@@ -52,14 +52,14 @@ export default function DocumentsPage() {
   }, [q])
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
       <StudentPortalInlineAside />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6">
+        <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           <div>
-            <h1 className="text-lg font-semibold text-emerald-950">Document Resources</h1>
-            <p className="text-xs text-slate-600">Templates and guides for your scholarship applications.</p>
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Document Resources</h1>
+            <p className="text-xs text-slate-600 dark:text-muted-foreground">Templates and guides for your scholarship applications.</p>
           </div>
           <div className="flex items-center gap-2">
             <StudentLanguageToggle />

@@ -46,9 +46,9 @@ export function StudentPortalTopHeader({ title, role, end }: StudentPortalTopHea
   return (
     <header className={studentPortalHeaderClass}>
       <div className="flex min-w-0 items-center gap-3">
-        <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+        <h1 className="text-lg font-semibold text-slate-900 dark:text-foreground">{title}</h1>
         {role ? (
-          <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700">
+          <Badge variant="secondary" className="capitalize bg-slate-100 text-slate-700 dark:bg-muted dark:text-foreground">
             {role}
           </Badge>
         ) : null}

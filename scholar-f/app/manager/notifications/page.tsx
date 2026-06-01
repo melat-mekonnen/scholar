@@ -1,7 +1,16 @@
 import { NotificationsPage } from "@/components/notifications/notifications-page"
+import { ScholarshipWorkspaceShell } from "@/components/scholarship-workspace/scholarship-workspace-shell"
 
 export default function ManagerNotificationsPage() {
   return (
-    <NotificationsPage expectedRole="manager" title="Manager notifications" backHref="/manager" />
+    <ScholarshipWorkspaceShell workspace="manager">
+      <NotificationsPage
+        expectedRole="manager"
+        title="Manager notifications"
+        backHref="/manager"
+        showBackLink={false}
+        embeddedInWorkspaceShell
+      />
+    </ScholarshipWorkspaceShell>
   )
 }

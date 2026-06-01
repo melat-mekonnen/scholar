@@ -9,6 +9,8 @@ import { apiFetchJson } from "@/lib/api"
 import { clearToken } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import { outlineEmeraldButton, textMuted, textPrimary, workspaceCardShell, workspacePageHeader } from "@/lib/theme"
 
 type NotificationItem = {
   id: string
@@ -29,6 +31,8 @@ type Props = {
   backHref: string
   /** When false, omit the back link (e.g. owner layout already provides navigation). */
   showBackLink?: boolean
+  /** When true, render only inner content (parent provides workspace shell). */
+  embeddedInWorkspaceShell?: boolean
 }
 
 function typeLabel(type: string) {
@@ -38,10 +42,12 @@ function typeLabel(type: string) {
 }
 
 function typeTone(type: string, isRead: boolean) {
-  if (isRead) return "border-slate-200 bg-slate-50 text-slate-600"
-  if (type === "scholarship_verified") return "border-emerald-200 bg-emerald-50 text-emerald-800"
-  if (type === "scholarship_rejected") return "border-rose-200 bg-rose-50 text-rose-700"
-  return "border-teal-200 bg-teal-50 text-teal-800"
+  if (isRead) return "border-slate-200 bg-slate-50 text-slate-600 dark:border-border dark:bg-muted dark:text-muted-foreground"
+  if (type === "scholarship_verified")
+    return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+  if (type === "scholarship_rejected")
+    return "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200"
+  return "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-200"
 }
 
 function roleSubtitle(role: Props["expectedRole"]) {
@@ -55,7 +61,13 @@ function scholarshipReviewHref(role: Props["expectedRole"], scholarshipId: strin
   return "/manager/scholarships"
 }
 
-export function NotificationsPage({ expectedRole, title, backHref, showBackLink = true }: Props) {
+export function NotificationsPage({
+  expectedRole,
+  title,
+  backHref,
+  showBackLink = true,
+  embeddedInWorkspaceShell = false,
+}: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState(false)
@@ -105,23 +117,22 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
     }
   }
 
-  return (
-    <div className={showBackLink ? "min-h-screen bg-slate-100 text-slate-900" : "text-slate-900"}>
-      <div className="relative mx-auto max-w-5xl space-y-6 px-4 py-6 md:px-6 md:py-8">
-        <header className="rounded-2xl border border-slate-200/90 bg-white px-6 py-5 shadow-sm">
+  const inner = (
+      <div className={cn("relative space-y-6", embeddedInWorkspaceShell ? "mx-auto max-w-5xl" : "mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-8")}>
+        <header className={workspacePageHeader}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-sm ring-1 ring-emerald-400/30">
                 <Bell className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{title}</h1>
-                <p className="text-sm text-slate-600">{roleSubtitle(expectedRole)}</p>
+                <h1 className={cn("text-2xl font-semibold tracking-tight", textPrimary)}>{title}</h1>
+                <p className={cn("text-sm", textMuted)}>{roleSubtitle(expectedRole)}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {showBackLink ? (
-                <Button variant="outline" asChild className="rounded-xl border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50">
+                <Button variant="outline" asChild className={cn("rounded-xl", outlineEmeraldButton)}>
                   <Link href={backHref}>
                     <ChevronLeft className="mr-1 h-4 w-4" />
                     Back
@@ -139,14 +150,14 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full border border-emerald-100 bg-emerald-50/80 px-2.5 py-1 font-medium text-emerald-900">
+            <span className="rounded-full border border-emerald-100 bg-emerald-50/80 px-2.5 py-1 font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
               Total: {items.length}
             </span>
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-800">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
               Unread: {unreadCount}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/80 px-2.5 py-1 font-medium text-teal-900">
-              <Activity className="h-3.5 w-3.5 text-teal-700" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/80 px-2.5 py-1 font-medium text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-200">
+              <Activity className="h-3.5 w-3.5 text-teal-700 dark:text-teal-300" />
               Activity stream
             </span>
           </div>
@@ -156,10 +167,10 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive">{error}</p>
         ) : null}
 
-        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5">
-          <CardHeader className="border-b border-emerald-100/80">
-            <CardTitle className="text-lg text-slate-900">Notifications</CardTitle>
-            <CardDescription className="text-slate-600">{unreadCount} unread</CardDescription>
+        <Card className={workspaceCardShell}>
+          <CardHeader className="border-b border-emerald-100/80 dark:border-border">
+            <CardTitle className={cn("text-lg", textPrimary)}>Notifications</CardTitle>
+            <CardDescription className={textMuted}>{unreadCount} unread</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 pt-4">
             {loading ? (
@@ -168,7 +179,7 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
               items.map((n) => (
                 <div
                   key={n.id}
-                  className="rounded-xl border border-emerald-100/90 bg-white p-3 shadow-sm transition-colors hover:bg-emerald-50/40"
+                  className="rounded-xl border border-emerald-100/90 bg-white p-3 shadow-sm transition-colors hover:bg-emerald-50/40 dark:border-border dark:bg-card dark:hover:bg-muted/40"
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span
@@ -178,7 +189,7 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
                     </span>
                     <span className="text-xs text-slate-500">{new Date(n.createdAt).toLocaleString()}</span>
                   </div>
-                  <p className="text-sm text-slate-700">{n.message}</p>
+                  <p className={cn("text-sm", textPrimary)}>{n.message}</p>
                   {n.scholarshipId ? (
                     <div className="mt-2">
                       <Link
@@ -192,13 +203,22 @@ export function NotificationsPage({ expectedRole, title, backHref, showBackLink 
                 </div>
               ))
             ) : (
-              <p className="rounded-xl border border-emerald-100/90 bg-emerald-50/40 px-4 py-3 text-center text-sm text-slate-600">
+              <p className={cn("rounded-xl border border-emerald-100/90 bg-emerald-50/40 px-4 py-3 text-center text-sm dark:border-border dark:bg-muted/30", textMuted)}>
                 No notifications yet.
               </p>
             )}
           </CardContent>
         </Card>
       </div>
+  )
+
+  if (embeddedInWorkspaceShell) {
+    return inner
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
+      {inner}
     </div>
   )
 }
