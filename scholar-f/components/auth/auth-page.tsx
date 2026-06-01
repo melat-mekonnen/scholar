@@ -7,6 +7,8 @@ import { Eye, EyeOff, Twitter, Linkedin, Facebook, Instagram } from "lucide-reac
 import { apiFetchJson, API_BASE_URL } from "@/lib/api"
 import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { setToken } from "@/lib/auth"
+import { checkPassword, formatPasswordErrors } from "@/lib/password-policy"
+import { PasswordStrengthHint } from "@/components/auth/password-strength-hint"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -83,8 +85,11 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
 
     if (!signUpData.password) {
       newErrors.password = "Password is required"
-    } else if (signUpData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
+    } else {
+      const passwordCheck = checkPassword(signUpData.password)
+      if (passwordCheck.errors.length > 0) {
+        newErrors.password = formatPasswordErrors(passwordCheck.errors)
+      }
     }
 
     if (!signUpData.confirmPassword) {
@@ -363,6 +368,7 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
                 </button>
               </div>
               {signUpErrors.password && <FieldError>{signUpErrors.password}</FieldError>}
+              <PasswordStrengthHint password={signUpData.password} />
             </Field>
 
             <Field>

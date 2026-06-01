@@ -9,6 +9,7 @@ const { handleGoogleCallback } = require("../usecases/auth/googleAuth");
 const { getGoogleAuthUrl } = require("../infra/google/googleOAuthClient");
 const { sendPasswordResetEmail } = require("../infra/email/mailer");
 const { env } = require("../config/env");
+const { validatePassword } = require("../utils/passwordPolicy");
 
 const userRepo = new UserRepository();
 
@@ -159,11 +160,7 @@ async function passwordReset(req, res, next) {
     if (!token) {
       throw Object.assign(new Error("Reset token is required"), { statusCode: 400 });
     }
-    if (!newPassword || newPassword.length < 8) {
-      throw Object.assign(new Error("Password must be at least 8 characters"), {
-        statusCode: 400,
-      });
-    }
+    validatePassword(newPassword);
 
     const tokenHash = hashResetToken(token);
     const record = await userRepo.findValidPasswordResetToken(tokenHash);

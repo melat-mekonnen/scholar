@@ -80,7 +80,7 @@
     "verify:role-routing": "node scripts/verify-role-routing.js",
     "verify:milestone2": "node scripts/verify-milestone2-api.js",
     "verify:milestone4": "node scripts/verify-milestone4-api.js",
-    "test": "node --test tests/profileCompleteness.test.js tests/scholarshipSearchValidation.test.js tests/scholarshipCrudRules.test.js tests/trustedScholarshipSources.test.js tests/subscriptionQuota.test.js tests/subscriptionActivatePro.test.js tests/qualityGate.test.js tests/detectDuplicates.test.js tests/descriptionQuality.test.js tests/scholarshipClassifier.test.js tests/sourceRegistry.test.js tests/africaEligibility.test.js tests/sourceHealth.test.js tests/pipeline.test.js tests/leafCatalog.test.js tests/aiDescription.test.js tests/resolveApplicationDates.test.js tests/educationusaFinancialAidParser.test.js tests/integration/mainApi.integration.test.js",
+    "test": "node --test tests/passwordPolicy.test.js tests/profileCompleteness.test.js tests/scholarshipSearchValidation.test.js tests/scholarshipCrudRules.test.js tests/trustedScholarshipSources.test.js tests/subscriptionQuota.test.js tests/subscriptionActivatePro.test.js tests/qualityGate.test.js tests/detectDuplicates.test.js tests/descriptionQuality.test.js tests/scholarshipClassifier.test.js tests/sourceRegistry.test.js tests/africaEligibility.test.js tests/sourceHealth.test.js tests/pipeline.test.js tests/leafCatalog.test.js tests/aiDescription.test.js tests/resolveApplicationDates.test.js tests/educationusaFinancialAidParser.test.js tests/integration/mainApi.integration.test.js",
     "test:integration": "node --test tests/integration/mainApi.integration.test.js"
   },
   "keywords": [

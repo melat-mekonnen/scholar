@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { UserRepository } = require("../../repositories/UserRepository");
+const { validatePassword } = require("../../utils/passwordPolicy");
 
 const userRepo = new UserRepository();
 
@@ -10,12 +11,7 @@ function validateSignupInput({ fullName, email, password }) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw Object.assign(new Error("Valid email is required"), { statusCode: 400 });
   }
-  if (!password || password.length < 8) {
-    throw Object.assign(
-      new Error("Password must be at least 8 characters"),
-      { statusCode: 400 }
-    );
-  }
+  validatePassword(password);
 }
 
 async function signupUser({ fullName, email, password }) {

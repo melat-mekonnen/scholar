@@ -5,6 +5,8 @@ import { Suspense, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { apiFetchJson } from "@/lib/api"
+import { checkPassword, formatPasswordErrors } from "@/lib/password-policy"
+import { PasswordStrengthHint } from "@/components/auth/password-strength-hint"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,6 +25,13 @@ function ResetPasswordForm() {
     e.preventDefault()
     setError(null)
     setMessage(null)
+
+    const passwordCheck = checkPassword(newPassword)
+    if (passwordCheck.errors.length > 0) {
+      setError(formatPasswordErrors(passwordCheck.errors))
+      return
+    }
+
     setIsLoading(true)
     try {
       const { res, data, errorMessage } = await apiFetchJson<{ message: string }>(
@@ -66,8 +75,7 @@ function ResetPasswordForm() {
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="New password (min 8 characters)"
-                minLength={8}
+                placeholder="New password"
                 required
                 className="pr-16"
               />
@@ -84,6 +92,7 @@ function ResetPasswordForm() {
                 )}
               </button>
             </div>
+            <PasswordStrengthHint password={newPassword} />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Resetting..." : "Reset password"}
             </Button>
