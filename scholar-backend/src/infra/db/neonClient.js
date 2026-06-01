@@ -3,11 +3,28 @@ const { env } = require("../../config/env");
 
 const localDbPattern = /(localhost|127\.0\.0\.1)/i;
 const disableSslPattern = /sslmode=disable/i;
+
+function stripSslModeFromUrl(databaseUrl) {
+  try {
+    const normalized = databaseUrl.replace(/^postgres:\/\//i, "postgresql://");
+    const parsed = new URL(normalized);
+    parsed.searchParams.delete("sslmode");
+    let out = parsed.toString();
+    return out.replace(/^postgresql:\/\//i, "postgres://");
+  } catch {
+    return databaseUrl;
+  }
+}
+
 const shouldUseSsl =
   !localDbPattern.test(env.databaseUrl) && !disableSslPattern.test(env.databaseUrl);
 
+const connectionString = shouldUseSsl
+  ? stripSslModeFromUrl(env.databaseUrl)
+  : env.databaseUrl;
+
 const pool = new Pool({
-  connectionString: env.databaseUrl,
+  connectionString,
   ...(shouldUseSsl
     ? {
         ssl: {
@@ -30,4 +47,3 @@ module.exports = {
   pool,
   query,
 };
-

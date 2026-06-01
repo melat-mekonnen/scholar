@@ -1,6 +1,6 @@
-const fs = require("fs");
 const path = require("path");
 const { randomUUID } = require("crypto");
+const { uploadsSubdir } = require("./uploadsPath");
 
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -27,9 +27,7 @@ const MAX_FILES_PER_MESSAGE = 4;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 function ensureCommunityUploadsDir() {
-  const dir = path.resolve(process.cwd(), "uploads", "community");
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  return uploadsSubdir("community");
 }
 
 function classifyAttachment(mimeType, originalName) {

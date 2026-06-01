@@ -1,6 +1,11 @@
+const path = require("path");
 const dotenv = require("dotenv");
 
-dotenv.config();
+// Repo root first (e.g. Supabase), then scholar-backend/.env for local overrides.
+const repoRootEnv = path.join(__dirname, "../../../.env");
+const backendEnv = path.join(__dirname, "../../.env");
+dotenv.config({ path: repoRootEnv });
+dotenv.config({ path: backendEnv });
 
 function required(name) {
   const value = process.env[name];

@@ -9,6 +9,7 @@ const {
   fuseTemplateContent,
   readTextFile,
 } = require("../usecases/documents/fuseDocumentWithProfile");
+const { uploadsSubdir } = require("../utils/uploadsPath");
 
 const repo = new DocumentRepository();
 const userRepo = new UserRepository();
@@ -68,9 +69,7 @@ const ALLOWED_MIME_TYPES = new Set([
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".doc", ".docx", ".txt"]);
 
 function ensureUploadsDir() {
-  const dir = path.resolve(process.cwd(), "uploads", "documents");
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  return uploadsSubdir("documents");
 }
 
 function sanitizeFileName(name) {
