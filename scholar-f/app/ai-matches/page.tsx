@@ -29,12 +29,7 @@ import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
-import {
-  formatScholarshipDeadlineLabel,
-  getApplicationUrl,
-  openScholarshipApplication,
-  type ScholarshipPublic,
-} from "@/lib/scholarship"
+import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
 
 type RecommendationItem = {
   scholarship: ScholarshipPublic
@@ -49,6 +44,17 @@ type RecommendationsResponse = {
   source?: string
   studentText?: string
   results?: RecommendationItem[]
+}
+
+function formatDate(date?: string) {
+  if (!date) return ""
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 }
 
 export default function AiMatchesPage() {
@@ -108,7 +114,7 @@ export default function AiMatchesPage() {
           <div>
             <h1 className="text-lg font-semibold text-emerald-950">{t("AI Matches")}</h1>
             <p className="text-xs text-slate-600">
-              Ranked using the AI service. Complete your profile for better matches.
+              Ranked from whatever is in your profile now — add more details anytime for stronger matches.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -172,11 +178,13 @@ export default function AiMatchesPage() {
                 <div>
                   <p className="font-semibold text-slate-900">No matches yet</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Fill out your profile (field, degree, country, interests) and try again.
+                    {error
+                      ? "Check the message above, update your profile if needed, then refresh this page."
+                      : "We use whatever you have saved so far. Add field, degree, country, GPA, or interests for stronger matches, then refresh."}
                   </p>
                 </div>
                 <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
-                  <Link href="/profile">Complete profile</Link>
+                  <Link href="/profile">Edit profile</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -201,9 +209,7 @@ export default function AiMatchesPage() {
                   <CardContent className="space-y-3 pt-0">
                     <p className="text-sm text-slate-500">
                       {item.scholarship.country || "N/A"}
-                      {formatScholarshipDeadlineLabel(item.scholarship)
-                        ? ` · ${formatScholarshipDeadlineLabel(item.scholarship)}`
-                        : ""}
+                      {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
                     </p>
                     {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">

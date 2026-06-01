@@ -27,12 +27,22 @@ async function main() {
     console.log("Base schema present — running phase migrations only.");
   }
 
-  // eslint-disable-next-line no-console
-  console.log("Running migrate-scholarship-phases.js...");
-  require("child_process").execSync("node scripts/migrate-scholarship-phases.js", {
-    stdio: "inherit",
-    cwd: path.join(__dirname, ".."),
-  });
+  const migrations = [
+    "migrate-scholarship-phases.js",
+    "migrate-community-tables.js",
+    "migrate-community-reports-and-moderation.js",
+    "migrate-community-pinned-message.js",
+    "migrate-community-attachments.js",
+    "migrate-community-message-edited.js",
+  ];
+  for (const script of migrations) {
+    // eslint-disable-next-line no-console
+    console.log(`Running ${script}...`);
+    require("child_process").execSync(`node scripts/${script}`, {
+      stdio: "inherit",
+      cwd: path.join(__dirname, ".."),
+    });
+  }
 
   // eslint-disable-next-line no-console
   console.log("Database ready.");
