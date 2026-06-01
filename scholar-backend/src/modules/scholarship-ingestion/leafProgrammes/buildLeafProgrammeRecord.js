@@ -4,8 +4,22 @@
 function normalizeWebsiteUrl(raw) {
   const value = String(raw || "").trim();
   if (!value) return null;
-  if (/^https?:\/\//i.test(value)) return value.replace(/\/+$/, "") + "/";
-  return `https://${value.replace(/^\/+/, "").replace(/\/+$/, "")}/`;
+  const href = /^https?:\/\//i.test(value) ? value : `https://${value.replace(/^\/+/, "")}`;
+  try {
+    const parsed = new URL(href);
+    const fragment = parsed.hash;
+    parsed.hash = "";
+    let out = parsed.href;
+    if (out.endsWith("/")) out = out.slice(0, -1);
+    if (fragment && /^#nominator-/i.test(fragment)) {
+      out += fragment.toLowerCase();
+    } else if (fragment) {
+      out += fragment;
+    }
+    return out;
+  } catch {
+    return null;
+  }
 }
 
 function buildLeafProgrammeRecord(programme) {
@@ -30,7 +44,7 @@ function buildLeafProgrammeRecord(programme) {
     applicationStartDate: programme.applicationStartDate || null,
     applicationEndDate: programme.applicationEndDate || null,
     description,
-    descriptionFromSite: true,
+    descriptionFromSite: programme.descriptionFromSite === true,
     applicationUrl,
     sourceUrl,
     isRolling: Boolean(programme.isRolling),
@@ -44,7 +58,7 @@ function buildLeafRecordsFromList(programmes) {
   for (const programme of programmes) {
     const record = buildLeafProgrammeRecord(programme);
     if (!record) continue;
-    const key = record.sourceUrl || record.applicationUrl;
+    const key = record.externalId || record.sourceUrl || record.applicationUrl;
     if (seen.has(key)) continue;
     seen.add(key);
     records.push(record);

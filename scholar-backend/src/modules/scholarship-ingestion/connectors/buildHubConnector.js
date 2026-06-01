@@ -102,6 +102,7 @@ async function fetchFromHubSources(sources, sourceType, fetchOptions = DEFAULT_F
 module.exports = {
   fetchFromHubSource,
   fetchFromHubSources,
+  discoverLinksForSource,
   programmeFromHub,
   DEFAULT_FETCH,
 };

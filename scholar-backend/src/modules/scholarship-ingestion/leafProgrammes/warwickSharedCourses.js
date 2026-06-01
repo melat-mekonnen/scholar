@@ -1,5 +1,5 @@
 /**
- * Warwick Commonwealth Shared — course-level leaf records (Phase 3).
+ * Warwick Commonwealth Shared — course-level leaf records.
  */
 const { buildLeafRecordsFromList } = require("./buildLeafProgrammeRecord");
 

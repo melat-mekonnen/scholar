@@ -114,7 +114,7 @@ export default function AiMatchesPage() {
           <div>
             <h1 className="text-lg font-semibold text-emerald-950">{t("AI Matches")}</h1>
             <p className="text-xs text-slate-600">
-              Ranked using the AI service. Complete your profile for better matches.
+              Ranked from whatever is in your profile now — add more details anytime for stronger matches.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -178,11 +178,13 @@ export default function AiMatchesPage() {
                 <div>
                   <p className="font-semibold text-slate-900">No matches yet</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Fill out your profile (field, degree, country, interests) and try again.
+                    {error
+                      ? "Check the message above, update your profile if needed, then refresh this page."
+                      : "We use whatever you have saved so far. Add field, degree, country, GPA, or interests for stronger matches, then refresh."}
                   </p>
                 </div>
                 <Button asChild className="bg-emerald-600 text-white hover:bg-emerald-700">
-                  <Link href="/profile">Complete profile</Link>
+                  <Link href="/profile">Edit profile</Link>
                 </Button>
               </CardContent>
             </Card>

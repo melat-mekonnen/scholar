@@ -42,7 +42,6 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
   const [form, setForm] = useState({
     title: "",
     type: "",
-    scholarshipId: "",
     file: null as File | null,
   })
 
@@ -84,9 +83,6 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
       body.append("title", form.title)
       body.append("type", form.type)
       body.append("file", form.file)
-      if (form.scholarshipId.trim()) {
-        body.append("scholarshipId", form.scholarshipId.trim())
-      }
 
       const res = await apiFetch("/api/documents", {
         method: "POST",
@@ -100,11 +96,16 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
       }
       if (!res.ok) {
         const txt = await res.text()
-        setFormError(txt || "Upload failed")
+        try {
+          const parsed = JSON.parse(txt) as { message?: string }
+          setFormError(parsed.message || txt || "Upload failed")
+        } catch {
+          setFormError(txt || "Upload failed")
+        }
         return
       }
 
-      setForm({ title: "", type: "", scholarshipId: "", file: null })
+      setForm({ title: "", type: "", file: null })
       await loadMeAndDocs()
     } finally {
       setLoading(false)
@@ -144,7 +145,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   </h1>
                 </div>
                 <p className="max-w-xl text-sm text-slate-600">
-                  Upload PDFs or guides and tie them to a scholarship ID so applicants can use your resources.
+                  Upload PDFs, CV guides, and tips as general document resources for applicants.
                 </p>
                 <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -160,7 +161,7 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-slate-900">{cfg.documentPageHeading}</h1>
                 </div>
                 <p className="max-w-xl text-sm text-slate-600">
-                  Upload and manage document resources linked to your scholarships.
+                  Upload and manage general document resources (guides, templates, tips).
                 </p>
                 <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -214,13 +215,6 @@ export function ScholarshipDocumentsPage({ workspace }: Props) {
                   value={form.type}
                   onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
                   className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500"
-                  required
-                />
-                <Input
-                  placeholder="Scholarship ID (required for upload)"
-                  value={form.scholarshipId}
-                  onChange={(e) => setForm((p) => ({ ...p, scholarshipId: e.target.value }))}
-                  className="h-11 rounded-xl border-emerald-100/90 shadow-sm focus-visible:ring-emerald-500 md:col-span-2"
                   required
                 />
                 <Input

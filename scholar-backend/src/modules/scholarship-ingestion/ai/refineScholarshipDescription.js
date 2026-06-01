@@ -8,7 +8,6 @@ Output markdown with these exact section headings:
 ## Overview
 ## Eligibility
 ## Funding
-## Important dates
 ## How to apply
 ## Official links
 Keep each section concise (2–5 sentences or bullet list). Use bullet lists where helpful.`;

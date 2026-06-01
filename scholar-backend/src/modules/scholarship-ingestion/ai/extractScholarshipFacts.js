@@ -15,6 +15,14 @@ function inferApplicationStatus(record) {
   return "unknown";
 }
 
+function descriptionExcerpt(description) {
+  const text = String(description || "").trim();
+  if (!text.startsWith("##")) return text.slice(0, 1200);
+  const overviewMatch = text.match(/^## Overview\s*\n+([\s\S]*?)(?=\n## |$)/m);
+  if (overviewMatch?.[1]) return overviewMatch[1].trim().slice(0, 1200);
+  return text.slice(0, 1200);
+}
+
 function extractScholarshipFacts(record) {
   const description = String(record.description || "").trim();
   const links = pickUrls(description);
@@ -51,7 +59,7 @@ function extractScholarshipFacts(record) {
     applicationStatus: inferApplicationStatus(record),
     eligibleRegions: Array.isArray(record.eligibleRegions) ? record.eligibleRegions : [],
     officialLinks: officialLinks.length ? officialLinks : links.slice(0, 5),
-    rawExcerpt: description.slice(0, 1200),
+    rawExcerpt: descriptionExcerpt(description),
     extractedAt: new Date().toISOString(),
   };
 }

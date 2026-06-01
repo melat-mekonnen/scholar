@@ -11,6 +11,10 @@ const BOILERPLATE_PATTERNS = [
   /Erasmus\+ helps organise student and doctoral candidate exchanges\.\s*There's no ce/i,
   /Chevening Scholarships\s+Are you eligible for a scholarship\? Learn more/i,
   /Are you eligible for a scholarship\? Learn more about Chevening/i,
+  /FDRE Ministry of Education is a Governmental Organization/i,
+  /governmental institution headquartered in Arada Sub City/i,
+  /Teachers' and Educational Leaders' Development Executive/i,
+  /EdTech\) week|የኤድቴክ \(EdTech\)/i,
 ];
 
 const JUNK_LINE_PATTERNS = [
@@ -69,11 +73,29 @@ function hasConcatenatedProgrammeListings(text) {
   return capsProgrammeLines.length >= 3;
 }
 
+function hasRepeatedParagraphs(text) {
+  const paragraphs = String(text || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line.length >= 40);
+  if (paragraphs.length < 2) return false;
+  const seen = new Map();
+  let duplicates = 0;
+  for (const paragraph of paragraphs) {
+    const key = paragraph.toLowerCase();
+    seen.set(key, (seen.get(key) || 0) + 1);
+    if (seen.get(key) > 1) duplicates += 1;
+  }
+  return duplicates >= 2;
+}
+
 function isPollutedDescription(text) {
   const hay = String(text || "").trim();
   if (!hay) return true;
   if (isGenericBoilerplate(hay)) return true;
   if (hasConcatenatedProgrammeListings(hay)) return true;
+  if (hasRepeatedParagraphs(hay)) return true;
+  if (/^Key points:\s*\n/i.test(hay) && !/\bscholarship\b/i.test(hay)) return true;
   return false;
 }
 
@@ -92,6 +114,19 @@ function isBareHomepageUrl(url) {
     const u = new URL(url);
     const path = u.pathname.replace(/\/+$/, "");
     return path === "" || path === "/";
+  } catch {
+    return true;
+  }
+}
+
+/** Language landing or announcement hubs — not a single programme page. */
+function isNonProgrammeHubUrl(url) {
+  if (isBareHomepageUrl(url)) return true;
+  try {
+    const pathname = new URL(url).pathname.replace(/\/+$/, "") || "/";
+    if (/^\/(en|am|fr|ar|home)$/i.test(pathname)) return true;
+    if (/\/announcement/i.test(pathname) && !/scholarship/i.test(pathname)) return true;
+    return false;
   } catch {
     return true;
   }
@@ -187,6 +222,7 @@ module.exports = {
   isPollutedDescription,
   isLowQualityTitle,
   isBareHomepageUrl,
+  isNonProgrammeHubUrl,
   isListingHubUrl,
   hasConcatenatedProgrammeListings,
   shouldAcceptEnrichedDescription,

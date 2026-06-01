@@ -12,6 +12,7 @@ const { mergeScholarshipRecords } = require("./pipeline/mergeRecords");
 const { canCaptureRecord, buildCanonicalKey } = require("./pipeline/captureRecord");
 const { decidePublishStatus } = require("./pipeline/decidePublishStatus");
 const { publishFromStaging } = require("./pipeline/publishFromStaging");
+const { maybeTranslateScholarship } = require("../../services/scholarshipAmharicContent");
 
 const scholarshipRepo = new ScholarshipRepository();
 const ingestionRepo = new ScholarshipIngestionRepository();
@@ -39,11 +40,8 @@ async function findExistingImport(normalized, { fuzzy = false } = {}) {
     sourceUrl: normalized.sourceUrl,
     externalId: normalized.externalId,
     normalizedSourceUrl: normalized.normalizedSourceUrl,
+    sourceName: normalized.sourceName,
   });
-
-  if (!existing && normalized.applicationUrl) {
-    existing = await scholarshipRepo.findByApplicationUrl(normalized.applicationUrl);
-  }
 
   if (fuzzy && !existing && normalized.country) {
     const { titleSimilarity } = require("./urlNormalize");
@@ -156,14 +154,22 @@ async function publishDirectRecord({
   const existing = await findExistingImport(enriched, { fuzzy: dedupMode() === "strict" });
   const dup = resolveDuplicateAction(enriched, existing, { mode: dedupMode() });
 
+  let scholarshipId = existing?.id || null;
+
   if (dup.action === "update" && existing?.id) {
     const merged = mergeScholarshipRecords(existing, enriched);
-    await scholarshipRepo.updateImportedScholarship(existing.id, merged);
+    const updated = await scholarshipRepo.updateImportedScholarship(existing.id, merged);
+    scholarshipId = updated?.id || existing.id;
   } else {
-    await scholarshipRepo.upsertImportedScholarship(enriched);
+    const inserted = await scholarshipRepo.upsertImportedScholarship(enriched);
+    scholarshipId = inserted?.id || scholarshipId;
   }
 
-  return { outcome: "published", duplicateAction: dup.action };
+  if (scholarshipId) {
+    maybeTranslateScholarship(scholarshipId);
+  }
+
+  return { outcome: "published", duplicateAction: dup.action, scholarshipId };
 }
 
 async function processSourceRecords({ sourceKey, config, forcePublishStatus }) {

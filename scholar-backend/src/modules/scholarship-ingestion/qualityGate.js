@@ -4,6 +4,7 @@ const {
   isLowQualityTitle,
   isListingHubUrl,
   isBareHomepageUrl,
+  isNonProgrammeHubUrl,
 } = require("./descriptionQuality");
 const { classifyScholarshipRecord } = require("./scholarshipClassifier");
 const { parseEligibleRegions, isOpenToAfricanStudents, africaSourceBoostScore } = require("./africaEligibility");
@@ -83,10 +84,10 @@ function assessQualityGate(record, options = {}) {
   if (record.sourceUrl && isListingHubUrl(record.sourceUrl)) {
     reasons.push("source is a listing hub, not a programme page");
   }
-  if (record.applicationUrl && isBareHomepageUrl(record.applicationUrl)) {
+  if (record.applicationUrl && (isBareHomepageUrl(record.applicationUrl) || isNonProgrammeHubUrl(record.applicationUrl))) {
     reasons.push("application URL is a bare homepage, not a programme page");
   }
-  if (record.sourceUrl && isBareHomepageUrl(record.sourceUrl)) {
+  if (record.sourceUrl && (isBareHomepageUrl(record.sourceUrl) || isNonProgrammeHubUrl(record.sourceUrl))) {
     reasons.push("source URL is a bare homepage, not a programme page");
   }
 

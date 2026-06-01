@@ -120,17 +120,11 @@ async function upload(req, res, next) {
       throw err;
     }
 
-    if (role === "manager" || role === "owner") {
-      if (!scholarshipId) {
-        fs.unlink(file.path, () => {});
-        const err = new Error("Managers and owners must provide scholarshipId for document upload");
-        err.statusCode = 400;
-        throw err;
-      }
+    if ((role === "manager" || role === "owner") && scholarshipId) {
       const owns = await repo.isScholarshipOwnedByManager(scholarshipId, userId);
       if (!owns) {
         fs.unlink(file.path, () => {});
-        const err = new Error("You can only upload documents for your own scholarships");
+        const err = new Error("You can only link documents to scholarships you posted");
         err.statusCode = 403;
         throw err;
       }

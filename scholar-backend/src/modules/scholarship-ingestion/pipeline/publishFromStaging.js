@@ -6,22 +6,18 @@ const { resolveDuplicateAction } = require("../detectDuplicates");
 const { mergeScholarshipRecords } = require("./mergeRecords");
 const { decidePublishStatus } = require("./decidePublishStatus");
 const { normalizeUrl } = require("../urlNormalize");
+const { maybeTranslateScholarship } = require("../../../services/scholarshipAmharicContent");
 
 const scholarshipRepo = new ScholarshipRepository();
 const stagingRepo = new ScholarshipStagingRepository();
 
 async function findExistingForPublish(normalized) {
-  let existing = await scholarshipRepo.findImportDuplicate({
+  return scholarshipRepo.findImportDuplicate({
     sourceUrl: normalized.sourceUrl,
     externalId: normalized.externalId,
     normalizedSourceUrl: normalized.normalizedSourceUrl,
+    sourceName: normalized.sourceName,
   });
-
-  if (!existing && normalized.applicationUrl) {
-    existing = await scholarshipRepo.findByApplicationUrl(normalized.applicationUrl);
-  }
-
-  return existing;
 }
 
 async function publishStagedRow(stagingRow, { forcePublishStatus, ingestionSourceType, ingestionSourcePriority }) {
@@ -83,6 +79,10 @@ async function publishStagedRow(stagingRow, { forcePublishStatus, ingestionSourc
     scholarshipId,
     pipelineStatus: publishStatus === "verified" ? "published" : "ready",
   });
+
+  if (scholarshipId) {
+    maybeTranslateScholarship(scholarshipId);
+  }
 
   return {
     outcome: publishStatus === "verified" ? "published_verified" : "published_review",

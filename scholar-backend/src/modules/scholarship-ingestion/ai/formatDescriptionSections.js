@@ -2,7 +2,6 @@ const SECTION_HEADERS = [
   "Overview",
   "Eligibility",
   "Funding",
-  "Important dates",
   "How to apply",
   "Official links",
 ];
@@ -13,18 +12,22 @@ function section(title, body) {
   return `## ${title}\n\n${text}`;
 }
 
-function formatDates(facts) {
-  const parts = [];
-  if (facts.applicationStartDate) parts.push(`Application opens: ${facts.applicationStartDate}`);
-  if (facts.applicationEndDate) parts.push(`Application closes: ${facts.applicationEndDate}`);
-  if (facts.deadline) parts.push(`Deadline: ${facts.deadline}`);
-  if (facts.isRolling || facts.applicationStatus === "rolling") {
-    parts.push("Rolling intake — check the official page for current deadlines.");
+function stripOverviewHeading(text) {
+  return String(text || "")
+    .replace(/^## Overview\s*\n+/i, "")
+    .trim();
+}
+
+function overviewText(facts) {
+  if (facts.pageExcerpt && facts.pageExcerpt.length >= 80) {
+    const excerpt = stripOverviewHeading(facts.pageExcerpt).slice(0, 900);
+    if (excerpt.length >= 40) return excerpt;
   }
-  if (facts.applicationStatus === "closed") {
-    parts.push("Applications for the current cycle are closed.");
-  }
-  return parts.join("\n");
+  const raw = stripOverviewHeading(facts.rawExcerpt);
+  if (raw.length >= 40) return raw.slice(0, 900);
+  return (
+    `${facts.title || "This programme"} is offered by ${facts.organization || "the funding body"}.`
+  ).slice(0, 900);
 }
 
 function formatFunding(facts) {
@@ -70,15 +73,11 @@ function formatOfficialLinks(facts) {
  * Build sectioned markdown description from extracted facts (no AI).
  */
 function formatDescriptionFromFacts(facts) {
-  const overview =
-    facts.rawExcerpt ||
-    `${facts.title || "This programme"} is offered by ${facts.organization || "the funding body"}.`;
-
+  const overview = overviewText(facts);
   const sections = [
-    section("Overview", overview.slice(0, 900)),
+    section("Overview", overview),
     section("Eligibility", formatEligibility(facts)),
     section("Funding", formatFunding(facts)),
-    section("Important dates", formatDates(facts)),
     section("How to apply", formatHowToApply(facts)),
     section("Official links", formatOfficialLinks(facts)),
   ].filter(Boolean);

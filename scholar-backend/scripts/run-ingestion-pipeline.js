@@ -1,10 +1,9 @@
 /**
  * Full ingestion pipeline: capture → stage → publish.
- * Phase 1 curated floor + optional Africa-scale sources.
  *
  * Usage:
  *   node scripts/run-ingestion-pipeline.js
- *   node scripts/run-ingestion-pipeline.js --source=phase1
+ *   node scripts/run-ingestion-pipeline.js --source=curated_leaf
  *   node scripts/run-ingestion-pipeline.js --source=africa
  */
 require("dotenv").config();
@@ -25,7 +24,7 @@ function parseArg(name, fallback) {
 }
 
 async function main() {
-  const source = parseArg("source", "phase1,africa");
+  const source = parseArg("source", "curated_leaf,africa");
 
   const result = await runScholarshipIngestion({ source });
   // eslint-disable-next-line no-console

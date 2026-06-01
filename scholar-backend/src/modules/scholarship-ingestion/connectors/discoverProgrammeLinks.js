@@ -72,10 +72,10 @@ function isProgrammeLikeUrl(url, options = {}) {
   );
 }
 
-async function fetchHubHtml(hubUrl, timeout = 30000) {
+async function fetchHubHtml(hubUrl, timeout = 30000, headers = REQUEST_HEADERS) {
   const response = await axios.get(hubUrl, {
     timeout,
-    headers: REQUEST_HEADERS,
+    headers: { ...REQUEST_HEADERS, ...headers },
     maxRedirects: 5,
   });
   return String(response.data || "");

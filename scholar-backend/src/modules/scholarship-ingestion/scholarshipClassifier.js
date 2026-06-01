@@ -5,6 +5,8 @@ const {
   isPollutedDescription,
   isLowQualityTitle,
   isListingHubUrl,
+  isBareHomepageUrl,
+  isNonProgrammeHubUrl,
 } = require("./descriptionQuality");
 const { isHubTitle } = require("./govTrustedDomains");
 
@@ -24,6 +26,8 @@ const NON_SCHOLARSHIP_TITLE_PATTERNS = [
   /^apply$/i,
   /^scholars?$/i,
   /^studying abroad$/i,
+  /^ethiopia foreign study programmes?$/i,
+  /^foreign study programmes?$/i,
   /^department of higher education and training$/i,
   /^internationalscholarships\./i,
   /toto|casino|slot|bandar|togel|betting|macau/i,
@@ -96,6 +100,9 @@ function classifyScholarshipRecord(record) {
 
   for (const url of [applicationUrl, record.sourceUrl]) {
     if (!url) continue;
+    if (isNonProgrammeHubUrl(url)) {
+      return { reject: true, reason: "ministry or language hub URL", category: "listing" };
+    }
     if (isListingHubUrl(url)) {
       return { reject: true, reason: "listing hub URL", category: "listing" };
     }

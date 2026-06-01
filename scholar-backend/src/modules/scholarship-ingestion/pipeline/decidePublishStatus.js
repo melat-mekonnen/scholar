@@ -1,4 +1,4 @@
-const { isHubTitle } = require("../govTrustedDomains");
+const { isHubTitle, isAggregatorUrl } = require("../govTrustedDomains");
 const {
   isLowQualityTitle,
   isListingHubUrl,
@@ -6,6 +6,7 @@ const {
   isBareHomepageUrl,
 } = require("../descriptionQuality");
 const { classifyScholarshipRecord } = require("../scholarshipClassifier");
+const { isCuratedLeafSource } = require("../sourceNames");
 
 /**
  * Decide catalog status at publish time. Returns null when row should stay staging-only.
@@ -14,7 +15,7 @@ function decidePublishStatus({ record, gate, sourceName, forcePublishStatus }) {
   if (forcePublishStatus) return forcePublishStatus;
 
   const classification = classifyScholarshipRecord(record);
-  const isCurated = String(sourceName || "").toUpperCase() === "PHASE1_CURATED";
+  const isCurated = isCuratedLeafSource(sourceName);
 
   if (classification.reject && !isCurated) {
     return null;
@@ -39,6 +40,21 @@ function decidePublishStatus({ record, gate, sourceName, forcePublishStatus }) {
       (record.description || "").length >= 120;
     if (hasLeafUrl) return "verified";
     return gate.publishStatus === "verified" ? "verified" : "needs_review";
+  }
+
+  if (isUsAggregatorDiscoverySource(sourceName)) {
+    const hasMinimumProgrammeText =
+      (record.description || "").length >= 100 &&
+      record.applicationUrl &&
+      record.country &&
+      record.title &&
+      record.title.length >= 8 &&
+      !isAggregatorUrl(record.sourceUrl || record.applicationUrl);
+
+    if (hasMinimumProgrammeText) {
+      return "needs_review";
+    }
+    return null;
   }
 
   if (gate.pass || gate.publishStatus === "verified") {

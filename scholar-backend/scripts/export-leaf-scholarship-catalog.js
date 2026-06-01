@@ -7,9 +7,9 @@ const fs = require("fs");
 const path = require("path");
 const {
   leafProgrammeDefinitions,
-  phase1ScrapeProgrammesWithDescriptions,
+  scrapeProgrammesWithDescriptions,
   catalogSummary,
-  PHASE1_CURATED_DESCRIPTIONS,
+  SCRAPE_PROGRAMME_DESCRIPTIONS,
 } = require("../src/modules/scholarship-ingestion/leafProgrammes/assembleLeafCatalog");
 const { buildLeafRecordsFromList } = require("../src/modules/scholarship-ingestion/leafProgrammes/buildLeafProgrammeRecord");
 
@@ -37,14 +37,14 @@ function leafExportRows() {
 }
 
 function scrapeExportRows() {
-  return phase1ScrapeProgrammesWithDescriptions().map((programme) => ({
+  return scrapeProgrammesWithDescriptions().map((programme) => ({
     family: "scrape",
     title: programme.titleHint || programme.externalId,
     organization: programme.organizationName,
     country: programme.country,
     applyUrl: programme.applicationUrl || programme.url,
     sourceUrl: programme.url,
-    description: PHASE1_CURATED_DESCRIPTIONS[programme.externalId] || "",
+    description: programme.curatedDescription || SCRAPE_PROGRAMME_DESCRIPTIONS[programme.externalId] || "",
     startDate: programme.applicationStartDate || null,
     endDate: programme.applicationEndDate || null,
     deadline: programme.deadline || null,

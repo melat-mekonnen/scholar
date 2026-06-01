@@ -1,6 +1,6 @@
 const { ScholarshipRepository } = require("../repositories/ScholarshipRepository");
 const { StudyProgrammeRepository } = require("../repositories/StudyProgrammeRepository");
-const { mapPublicScholarship } = require("../utils/mapPublicOpportunity");
+const { mapPublicScholarship, comparePublicOpportunities } = require("../utils/mapPublicOpportunity");
 const { getBookmarkUserId } = require("../middleware/requireStudent");
 const {
   initialStatusForCreator,
@@ -8,6 +8,15 @@ const {
   assertCanMutateScholarship,
   parseDeadline,
 } = require("../usecases/scholarships/scholarshipCrudRules");
+const { maybeTranslateScholarship } = require("../services/scholarshipAmharicContent");
+const { validateSearchInputs } = require("../usecases/scholarships/searchValidation");
+const { parseShuffleSeed } = require("../utils/shuffleSeed");
+const { ALLOWED_FIELD_CATEGORIES } = require("../utils/fieldCategory");
+const {
+  ALLOWED_HOST_REGIONS,
+  hostCountriesForRegions,
+  hostCountryToRegion,
+} = require("../utils/hostRegion");
 
 const repo = new ScholarshipRepository();
 const programmeRepo = new StudyProgrammeRepository();
@@ -20,7 +29,9 @@ function parseLang(query) {
 function shouldIncludeProgrammes(query, degreeLevels) {
   if (String(query?.include_programmes || "1") === "0") return false;
   if (!degreeLevels?.length) return true;
-  return degreeLevels.some((d) => d === "bachelor" || d === "high_school");
+  return degreeLevels.some((d) =>
+    ["bachelor", "high_school", "master", "phd"].includes(d),
+  );
 }
 
 const UUID_V4 =
@@ -116,6 +127,8 @@ async function create(req, res, next) {
       status: initialStatusForCreator(req.user.role),
     });
 
+    await maybeTranslateScholarship(created.id, { awaitResult: true });
+
     return res.status(201).json({
       id: created.id,
       title: created.title,
@@ -153,9 +166,12 @@ async function getFilters(req, res, next) {
   try {
     const filters = await repo.getPublicFilters();
     return res.json({
-      countries: filters.countries || [],
+      hostCountries: filters.hostCountries || [],
+      hostRegions: filters.hostRegions || [],
+      eligibleRegions: filters.eligibleRegions || [],
       degreeLevels: filters.degreeLevels || [],
-      fieldsOfStudy: filters.fieldsOfStudy || [],
+      fieldCategories: filters.fieldCategories || filters.fieldsOfStudy || [],
+      fieldsOfStudy: filters.fieldCategories || filters.fieldsOfStudy || [],
       fundingTypes: filters.fundingTypes || [],
     });
   } catch (err) {
@@ -169,6 +185,64 @@ function normalizeMulti(value) {
   return [value];
 }
 
+function parseApplicationFilter(value) {
+  const normalized = String(value || "all").toLowerCase();
+  if (normalized === "applied" || normalized === "not_applied") return normalized;
+  return "all";
+}
+
+function parseAvailability(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "open" || normalized === "rolling" || normalized === "closing_soon") {
+    return normalized;
+  }
+  return undefined;
+}
+
+function resolveHostRegions(query) {
+  return normalizeMulti(query.host_region)
+    .map((value) => String(value).toLowerCase())
+    .filter((value) => ALLOWED_HOST_REGIONS.includes(value));
+}
+
+function resolveHostCountries(query) {
+  const hostRegions = resolveHostRegions(query);
+  if (hostRegions.length) {
+    return hostCountriesForRegions(hostRegions);
+  }
+
+  const legacyCountries = [
+    ...normalizeMulti(query.host_country),
+    ...normalizeMulti(query.country),
+  ];
+  if (legacyCountries.length) {
+    const fromLegacyRegions = new Set();
+    for (const country of legacyCountries) {
+      const region = hostCountryToRegion(country);
+      if (region) {
+        for (const mapped of hostCountriesForRegions([region])) {
+          fromLegacyRegions.add(mapped);
+        }
+      } else {
+        fromLegacyRegions.add(country);
+      }
+    }
+    return [...fromLegacyRegions];
+  }
+
+  return [];
+}
+
+function resolveFieldCategories(query) {
+  const categories = normalizeMulti(query.field_category);
+  if (categories.length) return categories;
+  return normalizeMulti(query.field_of_study).filter((value) =>
+    ALLOWED_FIELD_CATEGORIES.has(String(value).toLowerCase()),
+  );
+}
+
+const MERGED_SEARCH_FETCH_CAP = 500;
+
 async function search(req, res, next) {
   try {
     await repo.expirePastDeadline();
@@ -180,62 +254,121 @@ async function search(req, res, next) {
       page,
       limit,
       status,
+      application_filter: applicationFilterRaw,
+      availability: availabilityRaw,
+      shuffle_seed: shuffleSeedRaw,
     } = req.query;
 
     const lang = parseLang(req.query);
-    const countries = normalizeMulti(req.query.country);
+    const hostRegions = resolveHostRegions(req.query);
+    const hostCountries = resolveHostCountries(req.query);
+    const fieldCategories = resolveFieldCategories(req.query).map((value) => String(value).toLowerCase());
+    const eligibleRegions = normalizeMulti(req.query.eligible_region).map((r) => String(r).toLowerCase());
     const degreeLevels = normalizeMulti(req.query.degree_level);
     const fieldsOfStudy = normalizeMulti(req.query.field_of_study);
     const fundingTypes = normalizeMulti(req.query.funding_type);
+    const applicationFilter = parseApplicationFilter(applicationFilterRaw);
+    const availability = parseAvailability(availabilityRaw);
+    const shuffleSeed = parseShuffleSeed(shuffleSeedRaw);
 
     const parsedPage = page ? Math.max(parseInt(page, 10), 1) : 1;
     const parsedLimit = limit ? Math.min(Math.max(parseInt(limit, 10), 1), 100) : 20;
 
     const bookmarkUserId = getBookmarkUserId(req);
-
+    const applicationUserId = bookmarkUserId;
     const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
-    const includeProgrammes = shouldIncludeProgrammes(req.query, degreeLevels);
 
-    const scholarshipResult = await repo.searchPublic({
-      q,
-      countries,
+    validateSearchInputs({
+      sort,
       degreeLevels,
-      fieldsOfStudy,
+      fundingTypes,
+      eligibleRegions,
+      hostRegions,
+      fieldCategories,
+      availability,
+      deadlineFrom,
+      deadlineTo,
+      status,
+      applicationFilter,
+      isPrivileged,
+    });
+
+    if (applicationFilter !== "all" && !applicationUserId) {
+      const err = new Error("Sign in to filter by application status");
+      err.statusCode = 401;
+      throw err;
+    }
+
+    const includeProgrammes =
+      shouldIncludeProgrammes(req.query, degreeLevels) &&
+      applicationFilter !== "applied" &&
+      !availability &&
+      !eligibleRegions.length;
+
+    const searchArgs = {
+      q,
+      hostCountries,
+      eligibleRegions,
+      availability,
+      degreeLevels,
+      fieldCategories,
+      fieldsOfStudy: fieldCategories.length ? undefined : fieldsOfStudy,
       fundingTypes,
       deadlineFrom,
       deadlineTo,
       sort,
-      page: parsedPage,
-      limit: includeProgrammes ? Math.ceil(parsedLimit / 2) : parsedLimit,
       status: isPrivileged ? status : undefined,
       bookmarkUserId,
-    });
+      applicationFilter,
+      applicationUserId,
+      shuffleSeed,
+    };
 
-    let programmeResults = [];
-    let programmeTotal = 0;
-    if (includeProgrammes) {
-      const programmeSearch = await programmeRepo.searchPublic({
-        q,
-        countries,
-        degreeLevels,
-        fieldsOfStudy,
-        fundingTypes: fundingTypes.length ? fundingTypes : undefined,
+    if (!includeProgrammes) {
+      const scholarshipResult = await repo.searchPublic({
+        ...searchArgs,
         page: parsedPage,
-        limit: Math.floor(parsedLimit / 2) || parsedLimit,
+        limit: parsedLimit,
+      });
+
+      return res.json({
+        results: scholarshipResult.results.map((r) => mapPublicScholarship(r, lang)),
+        total: scholarshipResult.total,
+        page: parsedPage,
+        limit: parsedLimit,
         lang,
       });
-      programmeResults = programmeSearch.results;
-      programmeTotal = programmeSearch.total;
     }
 
+    const fetchLimit = Math.min(parsedPage * parsedLimit, MERGED_SEARCH_FETCH_CAP);
+    const scholarshipResult = await repo.searchPublic({
+      ...searchArgs,
+      page: 1,
+      limit: fetchLimit,
+    });
+    const programmeSearch = await programmeRepo.searchPublic({
+      q,
+      hostCountries,
+      degreeLevels,
+      fieldCategories,
+      fundingTypes: fundingTypes.length ? fundingTypes : undefined,
+      availability,
+      sort,
+      page: 1,
+      limit: fetchLimit,
+      lang,
+      shuffleSeed,
+    });
+
     const scholarshipRows = scholarshipResult.results.map((r) => mapPublicScholarship(r, lang));
-    const merged = [...scholarshipRows, ...programmeResults]
-      .sort((a, b) => String(a.title).localeCompare(String(b.title)))
-      .slice(0, parsedLimit);
+    const merged = [...scholarshipRows, ...programmeSearch.results].sort((a, b) =>
+      comparePublicOpportunities(a, b, sort, q, shuffleSeed || "browse-default"),
+    );
+    const offset = (parsedPage - 1) * parsedLimit;
 
     return res.json({
-      results: merged,
-      total: scholarshipResult.total + programmeTotal,
+      results: merged.slice(offset, offset + parsedLimit),
+      total: scholarshipResult.total + programmeSearch.total,
       page: parsedPage,
       limit: parsedLimit,
       lang,

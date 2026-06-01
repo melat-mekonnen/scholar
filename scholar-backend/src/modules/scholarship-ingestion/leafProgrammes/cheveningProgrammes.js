@@ -6,13 +6,14 @@ const CHEVENING_CYCLE = {
   applicationStatus: "closed",
 };
 
-function cheveningCountryDescription(countryLabel) {
+function cheveningCountryDescription(countryLabel, countryPageUrl) {
   return [
     `Chevening Scholarship for citizens of ${countryLabel} (${CHEVENING_CYCLE.academicYear}).`,
     "Fully funded UK government award for a one-year master's degree at a UK university, including tuition, living costs, travel, and visa support for emerging leaders.",
     `Applications for ${CHEVENING_CYCLE.academicYear} Chevening Scholarships are currently ${CHEVENING_CYCLE.applicationStatus}.`,
-    "When open, apply through the official Chevening online application system.",
-    `Apply portal: ${CHEVENING_APPLY}`,
+    "When open, apply through the official Chevening online application system linked from the country programme page.",
+    `Official country programme page: ${countryPageUrl}`,
+    `Central apply portal (when open): ${CHEVENING_APPLY}`,
     `Application timeline: ${CHEVENING_TIMELINE}`,
   ].join(" ");
 }
@@ -100,13 +101,13 @@ function cheveningCountryLeafProgrammes() {
       degreeLevel: "master",
       fieldOfStudy: "multiple disciplines",
       fundingType: "fully_funded",
-      applicationUrl: CHEVENING_APPLY,
+      applicationUrl: url,
       url,
       sourceUrl: url,
       applicationStartDate: null,
       applicationEndDate: null,
       deadline: null,
-      description: cheveningCountryDescription(entry.label),
+      description: cheveningCountryDescription(entry.label, url),
       eligibleRegions: ["africa"],
     };
   });

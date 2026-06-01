@@ -2,6 +2,7 @@ const { AdminScholarshipRepository } = require("../../repositories/AdminScholars
 const { ScholarshipIngestionRepository } = require("../../repositories/ScholarshipIngestionRepository");
 const { runScholarshipIngestion } = require("../../modules/scholarship-ingestion/runScholarshipIngestion");
 const { listSourceMetadata } = require("../../modules/scholarship-ingestion/sourceRegistry");
+const { maybeTranslateScholarship } = require("../../services/scholarshipAmharicContent");
 
 const repo = new AdminScholarshipRepository();
 const ingestionRepo = new ScholarshipIngestionRepository();
@@ -33,6 +34,7 @@ async function verifyScholarship(id) {
     err.statusCode = 404;
     throw err;
   }
+  await maybeTranslateScholarship(id, { awaitResult: true });
   return updated;
 }
 

@@ -6,46 +6,153 @@ export type StudentLang = "en" | "am"
 
 const STORAGE_KEY = "student_lang"
 
+/** English UI strings mapped to Amharic (via Google Translate, with scholarship-context fixes). */
 const AMHARIC: Record<string, string> = {
   "Scholarship Portal": "የስኮላርሺፕ ፖርታል",
   Dashboard: "ዳሽቦርድ",
-  "Browse Scholarships": "ስኮላርሺፖችን ይመልከቱ",
+  "Browse Scholarships": "ስኮላርሺፖችን ያስሱ",
   "My Applications": "የእኔ ማመልከቻዎች",
   Community: "ማህበረሰብ",
   "Saved Scholarships": "የተቀመጡ ስኮላርሺፖች",
+  "Active Applications": "ንቁ ማመልከቻዎች",
+  "Recommended Matches": "የተመከሩ ግጥሚያዎች",
+  "Upcoming Deadlines": "ቀጣይ ቀነ-ገደቦች",
+  "Recommended Scholarships": "የተመከሩ ስኮላርሺፖች",
+  "Discover scholarships that match your profile.": "ከመገለጫዎ ጋር የሚዛመዱ ስኮላርሺፖችን ያግኙ።",
   Profile: "መገለጫ",
   Settings: "ቅንብሮች",
-  Billing: "ክፍያ",
+  Billing: "የሂሳብ አከፋፈል",
   Documents: "ሰነዶች",
   "Welcome back": "እንኳን ደህና መጡ",
   "Loading...": "በመጫን ላይ...",
-  Loading: "በመጫን ላይ...",
-  "Browse scholarships": "ስኮላርሺፖችን ይመልከቱ",
+  Loading: "በመጫን ላይ",
+  "Browse scholarships": "ስኮላርሺፖችን ያስሱ",
   Saved: "ተቀምጧል",
   "Back to Dashboard": "ወደ ዳሽቦርድ ተመለስ",
-  "No results": "ውጤት አልተገኘም",
+  "No results": "ምንም ውጤት የለም",
   Filters: "ማጣሪያዎች",
   Country: "ሀገር",
-  "Degree level": "የትምህርት ደረጃ",
-  "Field of study": "የትምህርት መስክ",
-  "Funding type": "የድጋፍ አይነት",
-  Deadline: "መጨረሻ ቀን",
-  "Clear filters": "ማጣሪያዎችን አጥፋ",
-  "Reset": "እንደነበረ መልስ",
+  "Degree level": "የዲግሪ ደረጃ",
+  "Field of study": "የጥናት መስክ",
+  "Funding type": "የገንዘብ ድጋፍ ዓይነት",
+  Deadline: "ቀነ-ገደብ",
+  "Clear filters": "ማጣሪያዎችን አጽዳ",
+  Reset: "ዳግም አስጀምር",
   View: "ይመልከቱ",
   Apply: "ያመልክቱ",
-  "Mark all read": "ሁሉንም እንደተነበበ አድርግ",
-  "AI Matches": "AI ማዕከለኛ ውጤቶች",
-  "AI Chatbot": "AI ደብረ ተዋናይ",
+  "Mark all read": "ሁሉንም እንደተነበቡ ምልክት ያድርጉ",
+  "AI Matches": "AI ግጥሚያዎች",
+  "AI Chatbot": "AI ውይይት ረዳት",
   "Student Portal": "የተማሪ ፖርታል",
-  "Document Resources": "ሰነድ ሀብቶች",
+  "Document Resources": "የሰነድ መርጃዎች",
   Verified: "የተረጋገጠ",
-  "Study programme": "የትምህርት ፕሮግራም",
+  "Study programme": "የጥናት ፕሮግራም",
   "Fees apply": "ክፍያ ይጠይቃል",
   "About this scholarship": "ስለዚህ ስኮላርሺፕ",
   "About this programme": "ስለዚህ ፕሮግራም",
+  "Dates not specified": "ቀኖች አልተገለጹም",
+  Opens: "ይከፈታል",
+  Closes: "ይዘጋል",
+  Applications: "ማመልከቻዎች",
+  Status: "ሁኔታ",
+  "Applications open": "ማመልከቻዎች ክፍት ናቸው",
+  "Applications closed": "ማመልከቻዎች ተዘጉ",
+  "Rolling applications": "ቀጣይ / ተራ ማመልከቻ",
   "Apply on official site": "በኦፊሴላዊ ጣቢያ ያመልክቱ",
   "View details": "ዝርዝር ይመልከቱ",
+  Search: "ፈልግ",
+  Sort: "ደርድር",
+  Availability: "ተገኝነት",
+  "Host region": "የአስተናጋጅ ክልል",
+  Eligible: "ብቁ",
+  "Eligible regions": "ብቁ ክልሎች",
+  "Active filters": "ንቁ ማጣሪያዎች",
+  All: "ሁሉም",
+  Submitted: "ተልኳል",
+  Pending: "በመጠባበቅ ላይ",
+  "Not submitted": "አልተላከም",
+  From: "ከ",
+  To: "እስከ",
+  Previous: "ቀዳሚ",
+  Next: "ቀጣይ",
+  saved: "ተቀምጧል",
+  "Failed to load scholarships": "ስኮላርሺፖችን መጫን አልተሳካም",
+  "No options match your search.": "ከፍለጋዎ ጋር የሚዛመዱ አማራጮች አልተገኙም።",
+  "Find your next scholarship": "ቀጣዩን ስኮላርሺፕዎን ያግኙ",
+  "Search by keyword (e.g. engineering, Germany, fully funded)": "በቁልፍ ቃል ይፈልጉ (ለምሳሌ ኢንጂነሪንግ፣ ጀርመን፣ ሙሉ ፈንድ)",
+  "Search verified opportunities and filter by host region, eligibility, degree, field, and funding.": "የተረጋገጡ እድሎችን ይፈልጉ እና በአስተናጋጅ ክልል፣ ብቁነት፣ ዲግሪ፣ መስክ እና ፈንድ ያጣሩ።",
+  "Sign in required": "መግባት ያስፈልጋል",
+  "Sign in to filter scholarships by application status.": "ስኮላርሺፖችን በማመልከቻ ሁኔታ ለማጣራት ይግቡ።",
+  "Host regions will appear when the backend returns filter options.": "የአስተናጋጅ ክልሎች ከbackend የማጣሪያ አማራጮች ሲመለሱ ይታያሉ።",
+  "Eligible regions will appear when the backend returns filter options.": "ብቁ ክልሎች ከbackend የማጣሪያ አማራጮች ሲመለሱ ይታያሉ።",
+  "Fields will appear when the backend returns filter options.": "መስኮች ከbackend የማጣሪያ አማራጮች ሲመለሱ ይታያሉ።",
+  "Funding types will appear when the backend returns filter options.": "የፈንድ አይነቶች ከbackend የማጣሪያ አማራጮች ሲመለሱ ይታያሉ።",
+  "Clear all": "ሁሉንም አጽዳ",
+  "Clear search & filters": "ፍለጋን እና ማጣሪያዎችን አጽዳ",
+  "Try adjusting your filters or searching with different keywords.": "ማጣሪያዎትን ያስተካክሉ ወይም በተለያዩ ቁልፍ ቃላት ይፈልጉ።",
+  "Apply (link unavailable)": "ያመልክቱ (ሊንኩ አልተገኘም)",
+  "Closing soon": "በቅርብ ጊዜ ይዘጋል",
+  "United Kingdom": "ዩናይትድ ኪንግደም",
+  "North America": "ሰሜን አሜሪካ",
+  Europe: "አውሮፓ",
+  Africa: "አፍሪካ",
+  "Asia-Pacific": "እስያ-ፓሲፊክ",
+  "Global / multi-country": "ዓለምአቀፍ / ብዙ ሀገራት",
+  Commonwealth: "ኮሞንዌልዝ",
+  "Developing countries": "በልማት ላይ ያሉ ሀገራት",
+  International: "ዓለምአቀፍ",
+  Asia: "እስያ",
+  Master: "ማስተር",
+  Bachelor: "ባችለር",
+  "High school": "ሁለተኛ ደረጃ",
+  PhD: "ፒኤችዲ",
+  "Open / rolling": "ክፍት / ቀጣይ",
+  "Fully funded": "ሙሉ ፈንድ",
+  "Partially funded": "ከፊል ፈንድ",
+  "Self funded": "ራስ ወጪ ፈንድ",
+  master: "ማስተር",
+  bachelor: "ባችለር",
+  phd: "ፒኤችዲ",
+  "open / rolling": "ክፍት / ቀጣይ",
+  "fully funded": "ሙሉ ፈንድ",
+  "partially funded": "ከፊል ፈንድ",
+  "self funded": "ራስ ወጪ ፈንድ",
+  general: "አጠቃላይ",
+  "international development": "ዓለምአቀፍ ልማት",
+  "public health": "የህዝብ ጤና",
+  business: "ቢዝነስ",
+  "data science": "ዳታ ሳይንስ",
+  research: "ምርምር",
+  "professional development": "ሙያዊ ልማት",
+  engineering: "ኢንጂነሪንግ",
+  education: "ትምህርት",
+  law: "ህግ",
+  "International development": "ዓለምአቀፍ ልማት",
+  "Public health": "የህዝብ ጤና",
+  "Data science": "ዳታ ሳይንስ",
+  "Professional development": "ሙያዊ ልማት",
+  "Open now": "አሁን ክፍት",
+  Rolling: "ቀጣይ",
+  Close: "ዝጋ",
+  Scholarship: "ስኮላርሺፕ",
+  "Loading full details…": "ሙሉ ዝርዝሮች በመጫን ላይ…",
+  Start: "መጀመሪያ",
+  End: "መጨረሻ",
+  "No extended description is available for this listing.": "ለዚህ ዝርዝር ተጨማሪ መግለጫ አልተገኘም።",
+  "Featured mix": "ዋና ተመራጭ ቅይጥ",
+  "Deadline (soonest)": "ቀነ-ገደብ (በጣም ቅርብ)",
+  "Deadline (latest)": "ቀነ-ገደብ (በጣም ሩቅ)",
+  "Funding amount": "የፈንድ መጠን",
+  "Recently added": "በቅርብ የተጨመረ",
+}
+
+export function translateLabel(lang: StudentLang, text: string): string {
+  if (lang !== "am") return text
+  const exact = AMHARIC[text]
+  if (exact) return exact
+  const trimmed = text.trim()
+  const normalized = trimmed.toLowerCase()
+  return AMHARIC[trimmed] ?? AMHARIC[normalized] ?? text
 }
 
 type StudentI18nContextValue = {
@@ -66,6 +173,12 @@ export function StudentI18nProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang
+    }
+  }, [lang])
+
   function setLang(next: StudentLang) {
     setLangState(next)
     if (typeof window !== "undefined") {
@@ -77,7 +190,7 @@ export function StudentI18nProvider({ children }: { children: ReactNode }) {
     () => ({
       lang,
       setLang,
-      t: (text: string) => (lang === "am" ? AMHARIC[text] ?? text : text),
+      t: (text: string) => translateLabel(lang, text),
     }),
     [lang],
   )
@@ -92,4 +205,3 @@ export function useStudentI18n() {
   }
   return ctx
 }
-

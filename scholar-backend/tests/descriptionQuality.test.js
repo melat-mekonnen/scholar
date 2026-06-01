@@ -37,6 +37,22 @@ MINISTRY OF FINANCE AND COMMERCE (MOFCOM) SCHOLARSHIP –
   assert.equal(isPollutedDescription(text), true);
 });
 
+test("isPollutedDescription detects repeated ministry homepage paragraphs", () => {
+  const line =
+    "FDRE Ministry of Education is a Governmental Organization Headquartered in Arada sub-city, Addis Ababa, Ethiopia.";
+  const text = [line, line, line, "Some unrelated news about EdTech week."].join("\n\n");
+  assert.equal(isPollutedDescription(text), true);
+});
+
+test("isNonProgrammeHubUrl rejects language landing pages", () => {
+  const { isNonProgrammeHubUrl } = require("../src/modules/scholarship-ingestion/descriptionQuality");
+  assert.equal(isNonProgrammeHubUrl("https://www.moe.gov.et/en"), true);
+  assert.equal(
+    isNonProgrammeHubUrl("https://education.gov.ng/federal-government-scholarship-awards/"),
+    false,
+  );
+});
+
 test("isLowQualityTitle rejects archive listing titles", () => {
   assert.equal(
     isLowQualityTitle("Scholarships Archive - Page 2 of 2 - Commonwealth Scholarship Commission"),

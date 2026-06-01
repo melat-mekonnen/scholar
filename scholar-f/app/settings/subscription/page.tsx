@@ -23,7 +23,7 @@ function SubscriptionPageContent() {
 
   useEffect(() => {
     async function load() {
-      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
+      const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET", auth: true })
       if (res.status === 401) {
         clearToken()
         router.replace("/signin")

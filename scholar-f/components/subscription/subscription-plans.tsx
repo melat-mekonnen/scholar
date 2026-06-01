@@ -84,7 +84,9 @@ export function SubscriptionPlans({
   onCancelPro,
 }: SubscriptionPlansProps) {
   const chat = subscription?.chat
-  const isPro = Boolean(subscription?.proActive || chat?.unlimited)
+  const paidPro = Boolean(subscription?.proActive)
+  const unlimitedChat = Boolean(chat?.unlimited)
+  const isPro = paidPro || unlimitedChat
   const used = chat?.used ?? 0
   const limit = chat?.limit ?? FREE_DAILY_LIMIT
   const remaining = chat?.remaining ?? Math.max(0, limit - used)
@@ -219,8 +221,8 @@ export function SubscriptionPlans({
         </Card>
       </div>
 
-      {/* Payment methods */}
-      {!isPro ? (
+      {/* Payment methods — only hide for paid Pro; staff with quota bypass still see checkout */}
+      {!paidPro ? (
         <Card className={studentPortalCardClass}>
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Choose payment method</CardTitle>
@@ -265,7 +267,7 @@ export function SubscriptionPlans({
             </div>
           </CardContent>
         </Card>
-      ) : (
+      ) : paidPro ? (
         <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="text-base text-slate-900">Manage Pro</CardTitle>
@@ -320,7 +322,24 @@ export function SubscriptionPlans({
             </AlertDialog>
           </CardContent>
         </Card>
-      )}
+      ) : unlimitedChat ? (
+        <Card className="rounded-2xl border-emerald-100/80 bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base text-slate-900">Unlimited AI Chat</CardTitle>
+            <CardDescription>
+              Your account role includes unlimited AI chat without a separate Pro subscription.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/ai-chat" className="gap-2">
+                <Zap className="h-4 w-4" />
+                Open AI Chat
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="rounded-2xl border-slate-200 bg-slate-50/80 shadow-sm">
         <CardContent className="flex gap-4 py-5">

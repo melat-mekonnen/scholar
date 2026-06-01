@@ -12,10 +12,11 @@ const { fetchAfricanMinistryScholarships } = require("./connectors/africanMinist
 const { fetchAfricanUniversityScholarships } = require("./connectors/africanUniversityConnector");
 const { fetchAfricanAggregatorScholarships } = require("./connectors/africanAggregatorConnector");
 const { fetchAfricanResearchScholarships } = require("./connectors/africanResearchConnector");
-const { fetchPhase1CuratedScholarships } = require("./connectors/phase1CuratedConnector");
+const { fetchCuratedLeafScholarships } = require("./connectors/curatedLeafConnector");
+const { CURATED_LEAF_SOURCE } = require("./sourceNames");
 
-/** Hand-picked official programme pages (~30); no hub crawl. */
-const PHASE1_SOURCE_IDS = ["phase1_curated"];
+/** Hand-picked official leaf programme pages; no open-ended hub crawl. */
+const CURATED_LEAF_SOURCE_IDS = ["curated_leaf"];
 
 /** Fast Africa-scale ingest (no DAAD / slow EU crawlers). */
 const AFRICA_SCALE_SOURCE_IDS = [
@@ -98,11 +99,11 @@ const SOURCES = {
     enabled: () => env.ingestFastwebEnabled,
     fetch: fetchFastwebScholarships,
   },
-  phase1_curated: {
-    sourceName: "PHASE1_CURATED",
+  curated_leaf: {
+    sourceName: CURATED_LEAF_SOURCE,
     sourceType: SOURCE_TYPES.GOVERNMENT,
     enabled: () => true,
-    fetch: fetchPhase1CuratedScholarships,
+    fetch: fetchCuratedLeafScholarships,
   },
 };
 
@@ -139,8 +140,13 @@ function parseRequestedSources(input) {
   if (normalized === "africa" || normalized === "africa_scale") {
     return parseRequestedSources(AFRICA_SCALE_SOURCE_IDS.join(","));
   }
-  if (normalized === "phase1" || normalized === "phase1_curated") {
-    return PHASE1_SOURCE_IDS;
+  if (
+    normalized === "curated_leaf" ||
+    normalized === "curated-leaf" ||
+    normalized === "phase1" ||
+    normalized === "phase1_curated"
+  ) {
+    return CURATED_LEAF_SOURCE_IDS;
   }
 
   const allKeys = listSources();
@@ -182,7 +188,7 @@ function parseRequestedSources(input) {
 
 module.exports = {
   AFRICA_SCALE_SOURCE_IDS,
-  PHASE1_SOURCE_IDS,
+  CURATED_LEAF_SOURCE_IDS,
   listSources,
   getSourceConfig,
   getSourceConfigBySourceName,

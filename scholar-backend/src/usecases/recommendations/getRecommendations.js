@@ -13,8 +13,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 /** Blend: TF-IDF (scholar-ai) vs structured profile rules */
 const HYBRID_AI_WEIGHT = 0.4;
 const HYBRID_RULE_WEIGHT = 0.6;
-const MIN_HYBRID_PERCENT = 45;
-const MIN_WEIGHTED_ONLY_PERCENT = 50;
+const MIN_HYBRID_PERCENT = 35;
+const MIN_WEIGHTED_ONLY_PERCENT = 38;
+const MIN_RELAXED_PERCENT = 18;
 
 /** Final score boosts — field & interests first; country only when core alignment exists */
 const BOOST_FIELD_EXACT = 16;
@@ -344,16 +345,84 @@ function toResultRow(scholarship, rule, ai, profile) {
   };
 }
 
-function passesResultFilters(row, minPercent) {
+function profileHasRecommendationSignals(profile) {
+  if (!profile) return false;
+  const interests = Array.isArray(profile.interests) ? profile.interests : [];
+  return Boolean(
+    (profile.field_of_study && String(profile.field_of_study).trim()) ||
+      (profile.preferred_country && String(profile.preferred_country).trim()) ||
+      (profile.degree_level && String(profile.degree_level).trim()) ||
+      profile.gpa != null ||
+      interests.some((i) => String(i || "").trim()),
+  );
+}
+
+function countProfileSignals(student) {
+  let n = 0;
+  if (student.field) n += 1;
+  if (student.country) n += 1;
+  if (student.degree_level) n += 1;
+  if (student.gpa > 0) n += 1;
+  if (student.interests.length > 0) n += 1;
+  return n;
+}
+
+function minPercentForProfile(signalCount, hybrid) {
+  if (signalCount <= 2) return hybrid ? 24 : 28;
+  if (signalCount === 3) return hybrid ? 30 : 32;
+  return hybrid ? MIN_HYBRID_PERCENT : MIN_WEIGHTED_ONLY_PERCENT;
+}
+
+function passesResultFilters(row, minPercent, student) {
   const coreAligned =
     row.fieldMatch ||
     row.fieldRelated ||
     (Array.isArray(row.matchedInterests) && row.matchedInterests.length > 0);
 
-  // Country-only matches are excluded (must align on major field and/or interests)
-  if (row.countryMatch && !coreAligned) return false;
+  const hasField = Boolean(student.field);
+  const hasInterests = student.interests.length > 0;
+  const hasDegree = Boolean(student.degree_level);
+  const hasCountry = Boolean(student.country);
 
-  return row.degreeMatch && coreAligned && row.matchPercentage >= minPercent;
+  // Full profiles: country alone is not enough — need field and/or interests
+  if (row.countryMatch && !coreAligned) {
+    const countryOnlyProfile =
+      hasCountry && !hasField && !hasInterests && !hasDegree;
+    if (!countryOnlyProfile) return false;
+    return row.countryMatch && row.matchPercentage >= minPercent;
+  }
+
+  // Degree-only profile (no field/interests yet)
+  if (!coreAligned && hasDegree && row.degreeMatch) {
+    return row.matchPercentage >= minPercent;
+  }
+
+  // Allow interest/field matches even when scholarship degree differs from profile
+  if (hasDegree && !row.degreeMatch && !coreAligned) return false;
+
+  return coreAligned && row.matchPercentage >= minPercent;
+}
+
+function rankRelaxedFallback(student, profile, rows, aiById, effectiveTopN) {
+  return rows
+    .map((scholarship) => {
+      const rule = calculateMatch(student, scholarship);
+      const ai = aiById?.get(String(scholarship.id)) || null;
+      return toResultRow(scholarship, rule, ai, profile);
+    })
+    .filter((row) => {
+      const coreAligned =
+        row.fieldMatch ||
+        row.fieldRelated ||
+        (Array.isArray(row.matchedInterests) && row.matchedInterests.length > 0);
+      if (row.countryMatch && !coreAligned && !row.degreeMatch) return false;
+      return (
+        row.matchPercentage >= MIN_RELAXED_PERCENT &&
+        (coreAligned || row.degreeMatch || row.fieldRelated)
+      );
+    })
+    .sort(compareByPriority)
+    .slice(0, effectiveTopN);
 }
 
 async function fetchAiScores(userId, studentText, rows, topN) {
@@ -381,23 +450,25 @@ async function fetchAiScores(userId, studentText, rows, topN) {
 }
 
 function rankWeightedOnly(student, profile, rows, effectiveTopN) {
+  const minPercent = minPercentForProfile(countProfileSignals(student), false);
   return rows
     .map((scholarship) =>
       toResultRow(scholarship, calculateMatch(student, scholarship), null, profile),
     )
-    .filter((row) => passesResultFilters(row, MIN_WEIGHTED_ONLY_PERCENT))
+    .filter((row) => passesResultFilters(row, minPercent, student))
     .sort(compareByPriority)
     .slice(0, effectiveTopN);
 }
 
 function rankHybrid(student, profile, rows, aiById, effectiveTopN) {
+  const minPercent = minPercentForProfile(countProfileSignals(student), true);
   return rows
     .map((scholarship) => {
       const rule = calculateMatch(student, scholarship);
       const ai = aiById.get(String(scholarship.id)) || null;
       return toResultRow(scholarship, rule, ai, profile);
     })
-    .filter((row) => passesResultFilters(row, MIN_HYBRID_PERCENT))
+    .filter((row) => passesResultFilters(row, minPercent, student))
     .sort(compareByPriority)
     .slice(0, effectiveTopN);
 }
@@ -411,20 +482,16 @@ async function getRecommendations({ userId, topN = 10 }) {
 
   const profile = await profileRepo.findByUserId(userId);
 
-  if (
-    !profile ||
-    !profile.gpa ||
-    !profile.field_of_study ||
-    !profile.preferred_country ||
-    !profile.degree_level
-  ) {
-    const err = new Error("Complete your profile to get recommendations");
+  if (!profileHasRecommendationSignals(profile)) {
+    const err = new Error(
+      "Add at least one profile detail (field, degree, country, GPA, or interests) to get recommendations",
+    );
     err.statusCode = 400;
     throw err;
   }
 
   const student = {
-    gpa: Number(profile.gpa),
+    gpa: profile.gpa != null ? Number(profile.gpa) : 0,
     field: normalize(profile.field_of_study),
     country: normalize(profile.preferred_country),
     interests: Array.isArray(profile.interests)
@@ -454,9 +521,10 @@ async function getRecommendations({ userId, topN = 10 }) {
 
   let source = "weighted";
   let ranked = [];
+  let aiById = null;
 
   try {
-    const aiById = await fetchAiScores(userId, studentText, rows, effectiveTopN);
+    aiById = await fetchAiScores(userId, studentText, rows, effectiveTopN);
     ranked = rankHybrid(student, profile, rows, aiById, effectiveTopN);
     if (ranked.length > 0) {
       source = "hybrid";
@@ -467,6 +535,11 @@ async function getRecommendations({ userId, topN = 10 }) {
   } catch {
     ranked = rankWeightedOnly(student, profile, rows, effectiveTopN);
     source = "weighted";
+  }
+
+  if (ranked.length === 0) {
+    ranked = rankRelaxedFallback(student, profile, rows, aiById, effectiveTopN);
+    if (ranked.length > 0) source = "relaxed";
   }
 
   const response = {

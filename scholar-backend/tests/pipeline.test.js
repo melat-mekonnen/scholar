@@ -4,6 +4,7 @@ const { mergeScholarshipRecords, pickPublishStatus } = require("../src/modules/s
 const { decidePublishStatus } = require("../src/modules/scholarship-ingestion/pipeline/decidePublishStatus");
 const { canCaptureRecord, buildCanonicalKey } = require("../src/modules/scholarship-ingestion/pipeline/captureRecord");
 const { resolveDuplicateAction } = require("../src/modules/scholarship-ingestion/detectDuplicates");
+const { CURATED_LEAF_SOURCE } = require("../src/modules/scholarship-ingestion/sourceNames");
 
 test("canCaptureRecord accepts minimal fetch row", () => {
   const result = canCaptureRecord({
@@ -46,7 +47,7 @@ test("decidePublishStatus quarantines hub titles for scrapers", () => {
   assert.equal(status, null);
 });
 
-test("decidePublishStatus allows phase1 curated through", () => {
+test("decidePublishStatus allows curated leaf sources through", () => {
   const status = decidePublishStatus({
     record: {
       title: "Commonwealth Master's Scholarships",
@@ -56,7 +57,7 @@ test("decidePublishStatus allows phase1 curated through", () => {
       sourceUrl: "https://cscuk.fcdo.gov.uk/scholarships/",
     },
     gate: { pass: true, publishStatus: "verified", reasons: [] },
-    sourceName: "PHASE1_CURATED",
+    sourceName: CURATED_LEAF_SOURCE,
   });
   assert.equal(status, "verified");
 });
@@ -72,6 +73,23 @@ test("decidePublishStatus sends thin scraper rows to needs_review", () => {
     },
     gate: { pass: false, publishStatus: "pending", reasons: ["aggregator requires manual or explicit auto-verify"] },
     sourceName: "AFRICAN_MINISTRIES",
+  });
+  assert.equal(status, "needs_review");
+});
+
+test("decidePublishStatus never auto-verifies US aggregator discovery rows", () => {
+  const status = decidePublishStatus({
+    record: {
+      title: "Fulbright Foreign Student Program",
+      description:
+        "The Fulbright Foreign Student Program offers fully funded scholarships for international graduate students. " +
+        "Covers tuition, stipend, and travel. Check eligibility and apply before the deadline.",
+      applicationUrl: "https://foreign.fulbrightonline.org/about/foreign-student-program",
+      country: "United States",
+      sourceUrl: "https://foreign.fulbrightonline.org/about/foreign-student-program",
+    },
+    gate: { pass: true, publishStatus: "verified", reasons: [] },
+    sourceName: US_AGGREGATOR_DISCOVERY_SOURCE,
   });
   assert.equal(status, "needs_review");
 });
