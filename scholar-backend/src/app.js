@@ -26,6 +26,7 @@ const notificationsRoutes = require("./routes/notifications.routes");
 const notificationPreferencesRoutes = require("./routes/notification-preferences.routes");
 const ownerCommunityRoutes = require("./routes/owner.community.routes");
 const { errorHandler } = require("./middleware/errorHandler");
+const { query } = require("./infra/db/neonClient");
 
 const app = express();
 
@@ -36,7 +37,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(morgan("dev"));
+app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
 
 // Chapa callback (JSON) — mount before Stripe raw parser (path prefix overlap).
 app.use("/api/billing/webhooks/chapa", express.json(), billingChapaWebhookRoutes);
@@ -51,8 +52,18 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+app.get("/health", async (req, res) => {
+  const deep = req.query.deep === "1" || req.query.deep === "true";
+  if (!deep) {
+    res.json({ status: "ok" });
+    return;
+  }
+  try {
+    await query("SELECT 1 AS ok");
+    res.json({ status: "ok", database: "ok" });
+  } catch {
+    res.status(503).json({ status: "degraded", database: "error" });
+  }
 });
 
 app.use("/auth", authRoutes);
