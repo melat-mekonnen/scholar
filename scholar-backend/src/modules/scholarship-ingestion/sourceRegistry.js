@@ -144,13 +144,26 @@ function parseRequestedSources(input) {
   }
 
   const allKeys = listSources();
-  const keys =
+  const rawKeys =
     !input || input === "all"
       ? allKeys
       : String(input)
           .split(",")
           .map((s) => s.trim().toLowerCase())
           .filter(Boolean);
+
+  const expandedKeys = [];
+  for (const key of rawKeys) {
+    if (key === "africa" || key === "africa_scale") {
+      expandedKeys.push(...AFRICA_SCALE_SOURCE_IDS);
+    } else if (key === "phase1" || key === "phase1_curated") {
+      expandedKeys.push(...PHASE1_SOURCE_IDS);
+    } else {
+      expandedKeys.push(key);
+    }
+  }
+
+  const keys = [...new Set(expandedKeys)];
 
   const validKeys = keys.filter((key) => Boolean(SOURCES[key]));
 

@@ -13,6 +13,7 @@ import {
   getApplicationUrl,
   normalizeScholarship,
   openScholarshipApplication,
+  formatScholarshipDeadlineLabel,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
@@ -212,7 +213,10 @@ export default function DashboardPage() {
 
             {!loading && recommended.length > 0 && (
               <div className="grid md:grid-cols-3 gap-4">
-                {recommended.map((s) => (
+                {recommended.map((row) => {
+                  const s = toScholarshipCard(row)
+                  const deadlineLabel = formatScholarshipDeadlineLabel(s)
+                  return (
                   <Card
                     key={s.id}
                     className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
@@ -226,8 +230,8 @@ export default function DashboardPage() {
 
                     <CardContent className="space-y-3">
                       <p className="text-sm text-slate-500">Country: {s.country}</p>
-                      {s.deadline && (
-                        <p className="text-sm text-slate-500">Deadline: {s.deadline}</p>
+                      {deadlineLabel && (
+                        <p className="text-sm text-slate-500">{deadlineLabel}</p>
                       )}
 
                       <div className="flex gap-2 pt-3">
@@ -256,7 +260,8 @@ export default function DashboardPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

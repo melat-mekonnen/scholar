@@ -9,6 +9,7 @@ const { pool } = require("../src/infra/db/neonClient");
 const { StudyProgrammeRepository } = require("../src/repositories/StudyProgrammeRepository");
 const { extractScholarshipFacts } = require("../src/modules/scholarship-ingestion/ai/extractScholarshipFacts");
 const { formatDescriptionFromFacts } = require("../src/modules/scholarship-ingestion/ai/formatDescriptionSections");
+const { isStudyProgrammeHubUrl } = require("../src/utils/studyProgrammeHubGuard");
 
 const HEADERS = {
   "User-Agent": "ScholarPlatformBot/1.0 (+https://localhost; public course discovery)",
@@ -47,6 +48,7 @@ async function discoverLinks(hubUrl, pattern, max) {
       continue;
     }
     if (!pattern.test(abs)) continue;
+    if (isStudyProgrammeHubUrl(abs)) continue;
     const key = abs.replace(/\/+$/, "");
     if (seen.has(key)) continue;
     seen.add(key);
@@ -73,6 +75,7 @@ async function main() {
   );
 
   for (const url of ugLinks) {
+    if (isStudyProgrammeHubUrl(url)) continue;
     const slug = url.split("/").filter(Boolean).pop();
     const title = slug.startsWith("bsc") || slug.startsWith("ba") ? slugToTitle(slug.replace(/^(bsc|ba)-?/, "")) : slugToTitle(slug);
     const fullTitle = slug.toUpperCase().startsWith("BSC") ? `BSc ${title}` : slug.toUpperCase().startsWith("BA") ? `BA ${title}` : title;
@@ -101,6 +104,7 @@ async function main() {
   }
 
   for (const url of pgLinks) {
+    if (isStudyProgrammeHubUrl(url)) continue;
     const slug = url.split("/").filter(Boolean).pop();
     const title = slugToTitle(slug);
     const record = {

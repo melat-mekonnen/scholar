@@ -9,6 +9,20 @@ const {
 } = require("./commonwealthNominators");
 const { buildLeafRecordsFromList } = require("./buildLeafProgrammeRecord");
 const { warwickSharedCourseProgrammes } = require("./warwickSharedCourses");
+const {
+  GLOBAL_OFFICIAL_SCRAPE_PROGRAMMES,
+  GLOBAL_OFFICIAL_DESCRIPTIONS,
+} = require("./globalOfficialProgrammes");
+const {
+  ASIAN_OFFICIAL_SCRAPE_PROGRAMMES,
+  ASIAN_OFFICIAL_DESCRIPTIONS,
+} = require("./asianOfficialProgrammes");
+const { highSchoolInternationalLeafProgrammes,
+  HIGH_SCHOOL_SCRAPE_PROGRAMMES,
+  HIGH_SCHOOL_CURATED_DESCRIPTIONS,
+} = require("./highSchoolInternationalProgrammes");
+const { educanadaEthiopiaLeafProgrammes } = require("./educanadaEthiopiaProgrammes");
+const { melbourneUndergraduateLeafProgrammes } = require("./melbourneUndergraduateScholarships");
 
 /** Programmes fetched from official pages (already leaf-level URLs). */
 const PHASE1_SCRAPE_PROGRAMMES = [
@@ -69,7 +83,7 @@ const PHASE1_SCRAPE_PROGRAMMES = [
   },
   {
     externalId: "erasmus-mundus-catalogue",
-    url: "https://www.eacea.ec.europa.eu/scholarships/emjmd-catalogue_en",
+    url: "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
     organizationName: "Erasmus+",
     country: "European Union",
     degreeLevel: "master",
@@ -98,7 +112,7 @@ const PHASE1_SCRAPE_PROGRAMMES = [
   },
   {
     externalId: "mandelarhodes",
-    url: "https://www.mandelarhodes.org/apply/",
+    url: "https://www.mandelarhodes.org/scholarship/apply/",
     organizationName: "Mandela Rhodes Foundation",
     country: "South Africa",
     degreeLevel: "master",
@@ -170,6 +184,15 @@ const PHASE1_SCRAPE_PROGRAMMES = [
     fundingType: "fully_funded",
     titleHint: "Ethiopia Foreign Study Programmes",
   },
+
+  // —— Global official programmes (outside US/UK Commonwealth hubs) ——
+  ...GLOBAL_OFFICIAL_SCRAPE_PROGRAMMES,
+
+  // —— Asia-Pacific official programmes ——
+  ...ASIAN_OFFICIAL_SCRAPE_PROGRAMMES,
+
+  // —— International high school (exchange & secondary scholarships) ——
+  ...HIGH_SCHOOL_SCRAPE_PROGRAMMES,
 ];
 
 const PHASE1_CURATED_DESCRIPTIONS = {
@@ -219,6 +242,9 @@ const PHASE1_CURATED_DESCRIPTIONS = {
     "The Government of Ghana scholarship for tertiary education supports eligible Ghanaian students pursuing approved programmes at accredited institutions according to Ministry of Education guidelines.",
   "et-moe-foreign-study":
     "Ethiopia's Ministry of Education foreign study programmes coordinate government-sponsored opportunities for Ethiopian students to pursue higher education abroad in priority disciplines.",
+  ...GLOBAL_OFFICIAL_DESCRIPTIONS,
+  ...ASIAN_OFFICIAL_DESCRIPTIONS,
+  ...HIGH_SCHOOL_CURATED_DESCRIPTIONS,
 };
 
 function leafProgrammeDefinitions() {
@@ -230,6 +256,9 @@ function leafProgrammeDefinitions() {
     ...commonwealthPhdNominatorLeafProgrammes(),
     ...commonwealthProfessionalFellowshipLeafProgramme(),
     ...cheveningLeafProgrammes(),
+    ...highSchoolInternationalLeafProgrammes(),
+    ...educanadaEthiopiaLeafProgrammes(),
+    ...melbourneUndergraduateLeafProgrammes(),
   ];
 }
 
@@ -259,6 +288,9 @@ function catalogSummary() {
       commonwealthPhdNominators: commonwealthPhdNominatorLeafProgrammes().length,
       chevening: cheveningLeafProgrammes().length,
       scrapeProgrammes: scrape.length,
+      globalOfficial: GLOBAL_OFFICIAL_SCRAPE_PROGRAMMES.length,
+      asianOfficial: ASIAN_OFFICIAL_SCRAPE_PROGRAMMES.length,
+      highSchoolInternational: highSchoolInternationalLeafProgrammes().length,
     },
   };
 }

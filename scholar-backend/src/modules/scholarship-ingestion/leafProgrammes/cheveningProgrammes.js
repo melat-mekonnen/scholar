@@ -4,6 +4,8 @@ const CHEVENING_TIMELINE = "https://www.chevening.org/scholarships/application-t
 const CHEVENING_CYCLE = {
   academicYear: "2026-2027",
   applicationStatus: "closed",
+  applicationStartDate: "2025-08-05",
+  applicationEndDate: "2025-11-04",
 };
 
 function cheveningCountryDescription(countryLabel) {
@@ -103,9 +105,9 @@ function cheveningCountryLeafProgrammes() {
       applicationUrl: CHEVENING_APPLY,
       url,
       sourceUrl: url,
-      applicationStartDate: null,
-      applicationEndDate: null,
-      deadline: null,
+      applicationStartDate: CHEVENING_CYCLE.applicationStartDate,
+      applicationEndDate: CHEVENING_CYCLE.applicationEndDate,
+      deadline: CHEVENING_CYCLE.applicationEndDate,
       description: cheveningCountryDescription(entry.label),
       eligibleRegions: ["africa"],
     };
@@ -125,9 +127,9 @@ function cheveningFellowshipLeafProgrammes() {
     applicationUrl: entry.url,
     url: entry.url,
     sourceUrl: entry.url,
-    applicationStartDate: null,
-    applicationEndDate: null,
-    deadline: null,
+    applicationStartDate: CHEVENING_CYCLE.applicationStartDate,
+    applicationEndDate: CHEVENING_CYCLE.applicationEndDate,
+    deadline: CHEVENING_CYCLE.applicationEndDate,
     description: cheveningFellowshipDescription(entry),
     eligibleRegions: entry.eligibleRegions,
   }));

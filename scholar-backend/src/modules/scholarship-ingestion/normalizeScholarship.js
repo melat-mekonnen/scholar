@@ -1,4 +1,5 @@
 const { normalizeDegreeLevel } = require("./degreeLevel");
+const { resolveApplicationDates } = require("../../utils/resolveApplicationDates");
 
 function decodeHtmlEntities(value) {
   return String(value || "")
@@ -12,7 +13,8 @@ function decodeHtmlEntities(value) {
 
 function normalizeScholarshipRecord(raw) {
   const degreeLevel = normalizeDegreeLevel(raw.degreeLevel);
-  return {
+  const recordType = raw.recordType === "study_programme" ? "study_programme" : "scholarship";
+  const base = {
     title: decodeHtmlEntities(String(raw.title || "").trim()),
     organizationName: raw.organizationName ? String(raw.organizationName).trim() : null,
     country: String(raw.country || "").trim(),
@@ -25,6 +27,7 @@ function normalizeScholarshipRecord(raw) {
     applicationUrl: raw.applicationUrl ? String(raw.applicationUrl).trim() : null,
     applicationStartDate: raw.applicationStartDate || null,
     applicationEndDate: raw.applicationEndDate || null,
+    programmeStartDate: raw.programmeStartDate || raw.startDate || null,
     sourceName: raw.sourceName ? String(raw.sourceName).trim() : "DAAD",
     sourceUrl: raw.sourceUrl ? String(raw.sourceUrl).trim() : null,
     externalId: raw.externalId ? String(raw.externalId).trim() : null,
@@ -33,6 +36,15 @@ function normalizeScholarshipRecord(raw) {
     eligibleRegions: Array.isArray(raw.eligibleRegions) ? raw.eligibleRegions : [],
     hostCountry: raw.hostCountry ? String(raw.hostCountry).trim() : null,
     descriptionFromSite: raw.descriptionFromSite !== false,
+    recordType,
+  };
+  const dates = resolveApplicationDates(base);
+  return {
+    ...base,
+    applicationStartDate: dates.applicationStartDate,
+    applicationEndDate: dates.applicationEndDate,
+    deadline: dates.deadline,
+    isRolling: dates.isRolling,
   };
 }
 

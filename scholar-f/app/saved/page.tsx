@@ -22,7 +22,9 @@ import {
   normalizeScholarship,
   openScholarshipApplication,
   type ScholarshipPublic,
+  formatScholarshipDeadlineLabel,
 } from "@/lib/scholarship"
+import { formatScholarshipDateDisplay } from "@/lib/scholarship-dates"
 import { clearToken } from "@/lib/auth"
 import { apiFetchJson } from "@/lib/api"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
@@ -236,8 +238,15 @@ export default function SavedScholarshipsPage() {
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">{s.bookmarkCount} saved</Badge>
                         )}
-                        {s.deadline && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">Deadline: {s.deadline}</Badge>
+                        {formatScholarshipDeadlineLabel(s) && (
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                            {formatScholarshipDeadlineLabel(s)}
+                          </Badge>
+                        )}
+                        {formatScholarshipDateDisplay(s.startDate) && (
+                          <Badge variant="outline" className="border-emerald-200 text-emerald-800">
+                            Opens {formatScholarshipDateDisplay(s.startDate)}
+                          </Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 pt-1">

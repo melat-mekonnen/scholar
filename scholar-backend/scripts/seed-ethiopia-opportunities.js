@@ -59,21 +59,6 @@ const opportunities = [
       "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
     status: "verified",
   },
-  {
-    title:
-      "International Community School of Addis Ababa Scholarship (High School)",
-    organization_name: "International Community School of Addis Ababa",
-    country: "Ethiopia",
-    degree_level: "high_school",
-    field_of_study: "general-secondary",
-    funding_type: "fully_funded",
-    deadline: "2026-04-15",
-    amount: "Full 4-year high school scholarship",
-    description:
-      "Merit and need-based high school scholarship, typically for Grade 9 entry. Usually includes a competitive selection exam and commonly runs with March-April application timing. Focused on top students from Addis Ababa schools.",
-    application_url: "https://www.icsaddis.org",
-    status: "verified",
-  },
 ];
 
 async function upsertOpportunity(item) {

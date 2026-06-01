@@ -13,8 +13,20 @@ function resolveLangContent(row, lang = "en") {
   };
 }
 
+const { resolveApplicationDates } = require("./resolveApplicationDates");
+
 function mapPublicScholarship(row, lang = "en") {
   const localized = resolveLangContent(row, lang);
+  const resolvedDates = resolveApplicationDates({
+    title: row.title,
+    description: row.description,
+    recordType: row.record_type || "scholarship",
+    degreeLevel: row.degree_level,
+    applicationStartDate: row.application_start_date,
+    applicationEndDate: row.application_end_date,
+    deadline: row.deadline,
+    isRolling: row.is_rolling,
+  });
   return {
     id: row.id,
     recordType: row.record_type || "scholarship",
@@ -27,17 +39,17 @@ function mapPublicScholarship(row, lang = "en") {
     degreeLevel: row.degree_level,
     fieldOfStudy: row.field_of_study,
     fundingType: row.funding_type,
-    deadline: row.deadline,
-    startDate: row.application_start_date,
-    endDate: row.application_end_date,
+    deadline: resolvedDates.deadline,
+    startDate: resolvedDates.applicationStartDate,
+    endDate: resolvedDates.applicationEndDate,
     amount: row.amount,
     description: localized.description,
     descriptionEn: localized.descriptionEn,
     descriptionAm: localized.descriptionAm,
     applicationUrl: row.application_url,
     applicationStatus: row.application_status,
-    isRolling: Boolean(row.is_rolling),
-    is_rolling: Boolean(row.is_rolling),
+    isRolling: resolvedDates.isRolling,
+    is_rolling: resolvedDates.isRolling,
     bookmark_count: row.bookmark_count,
     bookmarkCount: row.bookmark_count,
     is_bookmarked: Boolean(row.is_bookmarked),

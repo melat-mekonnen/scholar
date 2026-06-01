@@ -1,5 +1,10 @@
 const { query } = require("../infra/db/neonClient");
+const { resolveApplicationDates } = require("../utils/resolveApplicationDates");
 const { normalizeUrl } = require("../modules/scholarship-ingestion/urlNormalize");
+const {
+  isValidStudyProgrammeListing,
+  studyProgrammeNotHubSql,
+} = require("../utils/studyProgrammeHubGuard");
 
 class StudyProgrammeRepository {
   async upsertProgramme({
@@ -26,6 +31,9 @@ class StudyProgrammeRepository {
     isRolling = false,
     qualityScore = null,
   }) {
+    if (!isValidStudyProgrammeListing({ title, sourceUrl, applicationUrl })) {
+      return null;
+    }
     const normalizedSourceUrl = normalizeUrl(sourceUrl || applicationUrl);
     const result = await query(
       `INSERT INTO study_programmes (
@@ -111,7 +119,7 @@ class StudyProgrammeRepository {
     limit = 20,
     lang = "en",
   }) {
-    const where = [`p.status = 'verified'`];
+    const where = [`p.status = 'verified'`, studyProgrammeNotHubSql("p")];
     const params = [];
 
     if (q) {
@@ -170,6 +178,17 @@ class StudyProgrammeRepository {
 
   mapPublicRow(row, lang = "en") {
     const useAm = lang === "am";
+    const resolvedDates = resolveApplicationDates({
+      title: row.title,
+      description: row.description,
+      recordType: "study_programme",
+      degreeLevel: row.degree_level,
+      applicationStartDate: row.application_start_date,
+      applicationEndDate: row.application_end_date,
+      deadline: row.deadline,
+      programmeStartDate: row.programme_start_date,
+      isRolling: row.is_rolling,
+    });
     return {
       id: row.id,
       recordType: "study_programme",
@@ -182,23 +201,25 @@ class StudyProgrammeRepository {
       degreeLevel: row.degree_level,
       fieldOfStudy: row.field_of_study,
       fundingType: row.funding_type,
-      deadline: row.deadline,
-      startDate: row.application_start_date,
-      endDate: row.application_end_date,
+      deadline: resolvedDates.deadline,
+      startDate: resolvedDates.applicationStartDate,
+      endDate: resolvedDates.applicationEndDate,
       programmeStartDate: row.programme_start_date,
       amount: row.amount,
       description: useAm && row.description_am ? row.description_am : row.description,
       descriptionEn: row.description,
       descriptionAm: row.description_am,
       applicationUrl: row.application_url,
-      isRolling: Boolean(row.is_rolling),
+      isRolling: resolvedDates.isRolling,
     };
   }
 
   async findPublicById(id, { lang = "en" } = {}) {
-    const result = await query(`SELECT * FROM study_programmes WHERE id = $1 AND status = 'verified'`, [
-      id,
-    ]);
+    const result = await query(
+      `SELECT * FROM study_programmes p
+       WHERE p.id = $1 AND p.status = 'verified' AND ${studyProgrammeNotHubSql("p")}`,
+      [id],
+    );
     const row = result.rows[0];
     if (!row) return null;
     return this.mapPublicRow(row, lang);

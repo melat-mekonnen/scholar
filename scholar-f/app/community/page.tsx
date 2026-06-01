@@ -177,7 +177,73 @@ export default function CommunityPage() {
       }
     })
     streamRef.current = source
-  
+    return () => {
+      source.close()
+      streamRef.current = null
+    }
+  }, [channelId])
+
+  const canPost = Boolean(me?.id && draft.trim().length > 0)
+
+  const loadOlder = useCallback(async () => {
+    if (!channelId || !oldestCursor || loadingMore) return
+    setLoadingMore(true)
+    const { res, data } = await fetchCommunityMessages(channelId, {
+      before: oldestCursor,
+      limit: 50,
+    })
+    if (!res.ok || !data) {
+      setLoadingMore(false)
+      toast({ title: "Could not load older messages", variant: "destructive" })
+      return
+    }
+    setMessages((prev) => [...(data.messages ?? []), ...prev])
+    setHasMore(data.pagination?.hasMore ?? false)
+    setOldestCursor(data.pagination?.oldestCreatedAt ?? null)
+    setLoadingMore(false)
+  }, [channelId, oldestCursor, loadingMore, toast])
+
+  const sendMessage = useCallback(async () => {
+    const body = draft.trim()
+    if (!channelId || !body || sending) return
+    setSending(true)
+    const { res, data } = await postCommunityMessage(channelId, body, replyTo?.id ?? null)
+    if (!res.ok || !data) {
+      setSending(false)
+      toast({ title: "Could not send message", variant: "destructive" })
+      return
+    }
+    setDraft("")
+    setReplyTo(null)
+    setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data]))
+    setSending(false)
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
+  }, [channelId, draft, sending, replyTo, toast])
+
+  const removeMessage = useCallback(
+    async (message: CommunityMessage) => {
+      const { res } = await deleteCommunityMessage(message.id)
+      if (!res.ok) {
+        toast({ title: "Could not delete message", variant: "destructive" })
+        return
+      }
+      setMessages((prev) => prev.filter((m) => m.id !== message.id))
+    },
+    [toast],
+  )
+
+  const reportMessage = useCallback(
+    async (message: CommunityMessage) => {
+      const { res } = await reportCommunityMessage(message.id, "Reported from community chat")
+      if (!res.ok) {
+        toast({ title: "Could not report message", variant: "destructive" })
+        return
+      }
+      toast({ title: "Report submitted", description: "Thanks for helping keep the community safe." })
+    },
+    [toast],
+  )
+
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
       <StudentPortalInlineAside />

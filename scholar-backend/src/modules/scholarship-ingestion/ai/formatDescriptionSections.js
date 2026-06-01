@@ -1,3 +1,7 @@
+const {
+  formatDateHumanReadable,
+} = require("../../utils/resolveApplicationDates");
+
 const SECTION_HEADERS = [
   "Overview",
   "Eligibility",
@@ -15,10 +19,11 @@ function section(title, body) {
 
 function formatDates(facts) {
   const parts = [];
-  if (facts.applicationStartDate) parts.push(`Application opens: ${facts.applicationStartDate}`);
-  if (facts.applicationEndDate) parts.push(`Application closes: ${facts.applicationEndDate}`);
-  if (facts.deadline) parts.push(`Deadline: ${facts.deadline}`);
-  if (facts.isRolling || facts.applicationStatus === "rolling") {
+  const open = formatDateHumanReadable(facts.applicationStartDate);
+  const close = formatDateHumanReadable(facts.applicationEndDate || facts.deadline);
+  if (open) parts.push(`Applications open: ${open}`);
+  if (close) parts.push(`Applications close: ${close}`);
+  if ((facts.isRolling || facts.applicationStatus === "rolling") && !close) {
     parts.push("Rolling intake — check the official page for current deadlines.");
   }
   if (facts.applicationStatus === "closed") {

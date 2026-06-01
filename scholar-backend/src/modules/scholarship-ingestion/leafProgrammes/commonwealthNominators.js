@@ -31,19 +31,6 @@ function mastersNominatorDescription({ country, agency, url }) {
   ].join(" ");
 }
 
-function phdNominatorDescription({ country, agency, url }) {
-  return [
-    `Commonwealth PhD Scholarship route for ${country} (${CSC_CYCLE.academicYear}).`,
-    "PhD Scholarships support doctoral study at UK universities for candidates from eligible least developed and vulnerable Commonwealth countries.",
-    "Candidates must be nominated through their national nominating agency and apply via CSC Central when open.",
-    `National nominating route for ${country}: ${agency}.`,
-    `Nominator information: ${url}`,
-    `CSC application system: ${CSC_CENTRAL}`,
-    `Scheme overview: ${CSC_PHD_SCHEME}`,
-    `Applications for ${CSC_CYCLE.academicYear} are currently ${CSC_CYCLE.applicationStatus}.`,
-  ].join(" ");
-}
-
 /** African Commonwealth countries with known national nominating agency pages in Scholar. */
 const COMMONWEALTH_MASTERS_NOMINATORS = [
   {
@@ -129,25 +116,47 @@ function commonwealthMastersNominatorLeafProgrammes() {
   }));
 }
 
+function consolidatedPhdNominatorDescription() {
+  const lines = [
+    `Commonwealth PhD Scholarships (${CSC_CYCLE.academicYear}) for least developed and vulnerable Commonwealth countries.`,
+    "PhD Scholarships support doctoral study at UK universities. The CSC does not accept direct applications: candidates must be nominated through their national nominating agency and also complete the CSC Central application when the portal is open.",
+    `Scheme overview: ${CSC_PHD_SCHEME}`,
+    `Apply via CSC Central when open: ${CSC_CENTRAL}`,
+    `Applications for ${CSC_CYCLE.academicYear} are currently ${CSC_CYCLE.applicationStatus}. Study would begin ${CSC_CYCLE.studyStart}.`,
+    "",
+    "National nominating agencies (Africa):",
+  ];
+
+  for (const entry of COMMONWEALTH_MASTERS_NOMINATORS) {
+    lines.push(`• ${entry.country}: ${entry.agency} — ${entry.url}`);
+  }
+
+  return lines.join("\n");
+}
+
+const COMMONWEALTH_PHD_CONSOLIDATED_EXTERNAL_ID = "commonwealth-phd-ldc-vulnerable-states";
+
 function commonwealthPhdNominatorLeafProgrammes() {
-  return COMMONWEALTH_MASTERS_NOMINATORS.map((entry) => ({
-    externalId: `commonwealth-phd-${entry.slug}`,
-    title: `Commonwealth PhD Scholarship — ${entry.country} (via national nominator)`,
-    organizationName: entry.agency,
-    country: entry.country,
-    hostCountry: "United Kingdom",
-    degreeLevel: "phd",
-    fieldOfStudy: "doctoral research",
-    fundingType: "fully_funded",
-    url: nominatorApplicationUrl(entry, CSC_PHD_SCHEME),
-    applicationUrl: nominatorApplicationUrl(entry, CSC_PHD_SCHEME),
-    sourceUrl: `${CSC_PHD_SCHEME}#nominator-${entry.slug}`,
-    applicationStartDate: null,
-    applicationEndDate: null,
-    deadline: null,
-    description: phdNominatorDescription(entry),
-    eligibleRegions: ["africa", "commonwealth"],
-  }));
+  return [
+    {
+      externalId: COMMONWEALTH_PHD_CONSOLIDATED_EXTERNAL_ID,
+      title: "Commonwealth PhD Scholarships (LDC & vulnerable states)",
+      organizationName: "Commonwealth Scholarship Commission",
+      country: "United Kingdom",
+      hostCountry: "United Kingdom",
+      degreeLevel: "phd",
+      fieldOfStudy: "doctoral research",
+      fundingType: "fully_funded",
+      url: CSC_PHD_SCHEME,
+      applicationUrl: CSC_PHD_SCHEME,
+      sourceUrl: CSC_PHD_SCHEME,
+      applicationStartDate: null,
+      applicationEndDate: null,
+      deadline: null,
+      description: consolidatedPhdNominatorDescription(),
+      eligibleRegions: ["africa", "commonwealth"],
+    },
+  ];
 }
 
 function commonwealthProfessionalFellowshipLeafProgramme() {
@@ -184,4 +193,6 @@ module.exports = {
   commonwealthPhdNominatorLeafProgrammes,
   commonwealthProfessionalFellowshipLeafProgramme,
   COMMONWEALTH_MASTERS_NOMINATORS,
+  COMMONWEALTH_PHD_CONSOLIDATED_EXTERNAL_ID,
+  CSC_PHD_SCHEME,
 };

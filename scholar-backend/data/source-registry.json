@@ -1,0 +1,346 @@
+{
+  "$comment": "Tiered crawler source registry. tier1=official/government, tier2=african, tier3=university. Each entry: a hub/listing page the crawler discovers programme leaf links from. crawlPriority drives ingest order. Used to feed buildHubConnector-style discovery; leaf programmes still pass the qualityGate verifier before publish.",
+  "generatedFor": "10k+ verified-scholarship scaling plan",
+  "tier1_official": [
+    {
+      "key": "daad_database",
+      "organizationName": "DAAD — Germany",
+      "country": "Germany",
+      "hubUrl": "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/",
+      "curated": [
+        "https://www.daad.de/en/study-and-research-in-germany/scholarships/daad-scholarships/"
+      ],
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 1
+    },
+    {
+      "key": "daad_ethiopia",
+      "organizationName": "DAAD — Ethiopia",
+      "country": "Germany",
+      "hubUrl": "https://www.daad-ethiopia.org/en/find-scholarships/",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 1
+    },
+    {
+      "key": "educationusa",
+      "organizationName": "EducationUSA — U.S. Department of State",
+      "country": "United States",
+      "hubUrl": "https://educationusa.state.gov/find-financial-aid",
+      "curated": [
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=All&field_us_state_territory_tid=All&field_country_target_id=",
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=15&field_us_state_territory_tid=All&field_country_target_id=",
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=16&field_us_state_territory_tid=All&field_country_target_id=",
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=17&field_us_state_territory_tid=All&field_country_target_id=",
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=18&field_us_state_territory_tid=All&field_country_target_id=",
+        "https://educationusa.state.gov/find-financial-aid?field_scholarship_degree_levels_tid=19&field_us_state_territory_tid=All&field_country_target_id="
+      ],
+      "pathMustInclude": "/scholarships/",
+      "crawlPriority": 1
+    },
+    {
+      "key": "fulbright_foreign",
+      "organizationName": "Fulbright Foreign Student Program",
+      "country": "United States",
+      "hubUrl": "https://foreign.fulbrightonline.org/",
+      "curated": ["https://foreign.fulbrightonline.org/about/types-of-awards"],
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "erasmus_mundus_catalogue",
+      "organizationName": "Erasmus Mundus — European Commission",
+      "country": "European Union",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "turkiye_burslari",
+      "organizationName": "Türkiye Scholarships",
+      "country": "Turkey",
+      "hubUrl": "https://turkiyeburslari.gov.tr/en/page/prospective-students/scholarship-programs",
+      "curated": ["https://tbbs.turkiyeburslari.gov.tr/"],
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "csc_china",
+      "organizationName": "China Scholarship Council",
+      "country": "China",
+      "hubUrl": "https://www.campuschina.org/scholarships/index.html",
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "study_in_korea",
+      "organizationName": "NIIED — Study in Korea (GKS)",
+      "country": "South Korea",
+      "hubUrl": "https://www.studyinkorea.go.kr/en/sub/gks/allnew_invite.do",
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "mext_japan",
+      "organizationName": "MEXT — Study in Japan",
+      "country": "Japan",
+      "hubUrl": "https://www.studyinjapan.go.jp/en/planning/scholarship/",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 1
+    },
+    {
+      "key": "stipendium_hungaricum",
+      "organizationName": "Tempus Public Foundation — Hungary",
+      "country": "Hungary",
+      "hubUrl": "https://stipendiumhungaricum.hu/",
+      "curated": ["https://stipendiumhungaricum.hu/apply/"],
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "study_in_italy",
+      "organizationName": "Italian Ministry of Foreign Affairs",
+      "country": "Italy",
+      "hubUrl": "https://studyinitaly.esteri.it/en/call-for-application",
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    },
+    {
+      "key": "singa_singapore",
+      "organizationName": "A*STAR — Singapore (SINGA)",
+      "country": "Singapore",
+      "hubUrl": "https://www.a-star.edu.sg/Scholarships/for-graduate-studies/singapore-international-graduate-award-singa",
+      "pathMustInclude": null,
+      "crawlPriority": 1
+    }
+  ],
+  "tier2_african": [
+    {
+      "key": "mastercard_foundation",
+      "organizationName": "Mastercard Foundation Scholars Program",
+      "country": "Pan-African",
+      "hubUrl": "https://mastercardfdn.org/all/scholars/",
+      "curated": ["https://mastercardfoundation.org/scholars/"],
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "african_union_education",
+      "organizationName": "African Union — Education",
+      "country": "Pan-African",
+      "hubUrl": "https://au.int/en/education",
+      "curated": ["https://auscholarships.africa-union.org/"],
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 2
+    },
+    {
+      "key": "rsif_paset",
+      "organizationName": "Regional Scholarship and Innovation Fund (RSIF/PASET)",
+      "country": "Pan-African",
+      "hubUrl": "https://www.rsif-paset.org/apply/",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "afdb",
+      "organizationName": "African Development Bank",
+      "country": "Pan-African",
+      "hubUrl": "https://www.afdb.org/en/topics-and-sectors/initiatives-partnerships",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 2
+    },
+    {
+      "key": "amci_morocco",
+      "organizationName": "AMCI — Morocco",
+      "country": "Morocco",
+      "hubUrl": "https://www.amci.ma/en/bourses",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "study_in_egypt",
+      "organizationName": "Study in Egypt — Ministry of Higher Education",
+      "country": "Egypt",
+      "hubUrl": "https://studyinegypt.gov.eg/",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 2
+    },
+    {
+      "key": "alu_rwanda",
+      "organizationName": "African Leadership University",
+      "country": "Rwanda",
+      "hubUrl": "https://www.alueducation.com/admissions/financial-aid-and-scholarships/",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "university_of_rwanda",
+      "organizationName": "University of Rwanda",
+      "country": "Rwanda",
+      "hubUrl": "https://www.ur.ac.rw/?Scholarships",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 2
+    },
+    {
+      "key": "uct_south_africa",
+      "organizationName": "University of Cape Town",
+      "country": "South Africa",
+      "hubUrl": "https://www.uct.ac.za/students/fees-funding/postgraduate-funding",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "up_south_africa",
+      "organizationName": "University of Pretoria",
+      "country": "South Africa",
+      "hubUrl": "https://www.up.ac.za/postgraduate-bursaries-and-scholarships",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    },
+    {
+      "key": "stellenbosch",
+      "organizationName": "Stellenbosch University",
+      "country": "South Africa",
+      "hubUrl": "https://www.sun.ac.za/english/Bursaries-Loans",
+      "pathMustInclude": null,
+      "crawlPriority": 2
+    }
+  ],
+  "tier3_university": [
+    {
+      "key": "harvard_finaid",
+      "organizationName": "Harvard University",
+      "country": "United States",
+      "hubUrl": "https://college.harvard.edu/financial-aid",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "mit_finaid",
+      "organizationName": "Massachusetts Institute of Technology",
+      "country": "United States",
+      "hubUrl": "https://sfs.mit.edu/undergraduate-students/types-of-aid/scholarships-and-grants/",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "yale_finaid",
+      "organizationName": "Yale University",
+      "country": "United States",
+      "hubUrl": "https://finaid.yale.edu/",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "stanford_knight_hennessy",
+      "organizationName": "Stanford University — Knight-Hennessy",
+      "country": "United States",
+      "hubUrl": "https://knight-hennessy.stanford.edu/admission",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "snu_korea",
+      "organizationName": "Seoul National University",
+      "country": "South Korea",
+      "hubUrl": "https://en.snu.ac.kr/admission/scholarships",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "kaist_korea",
+      "organizationName": "KAIST",
+      "country": "South Korea",
+      "hubUrl": "https://admission.kaist.ac.kr/intl-undergraduate/",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "korea_university",
+      "organizationName": "Korea University",
+      "country": "South Korea",
+      "hubUrl": "https://gsis.korea.ac.kr/admissions/scholarship",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "tsinghua",
+      "organizationName": "Tsinghua University",
+      "country": "China",
+      "hubUrl": "https://www.tsinghua.edu.cn/en/Admissions/International_Students/Scholarships.htm",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "peking",
+      "organizationName": "Peking University",
+      "country": "China",
+      "hubUrl": "https://isd.pku.edu.cn/Scholarship/Chinese_Government_Scholarship.htm",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "ustc",
+      "organizationName": "University of Science and Technology of China",
+      "country": "China",
+      "hubUrl": "https://ic.ustc.edu.cn/en/list/zt6gm2",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "u_tokyo",
+      "organizationName": "University of Tokyo",
+      "country": "Japan",
+      "hubUrl": "https://www.u-tokyo.ac.jp/en/prospective-students/scholarships.html",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "keio",
+      "organizationName": "Keio University",
+      "country": "Japan",
+      "hubUrl": "https://www.keio.ac.jp/en/admissions/scholarships/",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "nus",
+      "organizationName": "National University of Singapore",
+      "country": "Singapore",
+      "hubUrl": "https://nus.edu.sg/oam/scholarships/scholarships-(international-students)",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "ntu",
+      "organizationName": "Nanyang Technological University",
+      "country": "Singapore",
+      "hubUrl": "https://www.ntu.edu.sg/admissions/undergraduate/scholarships",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    },
+    {
+      "key": "bologna",
+      "organizationName": "University of Bologna",
+      "country": "Italy",
+      "hubUrl": "https://www.unibo.it/en/study/grants-and-international-mobility/scholarships-and-grants",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "leiden",
+      "organizationName": "Leiden University",
+      "country": "Netherlands",
+      "hubUrl": "https://www.universiteitleiden.nl/en/scholarships",
+      "pathMustInclude": null,
+      "crawlPriority": 3
+    },
+    {
+      "key": "eth_zurich",
+      "organizationName": "ETH Zurich",
+      "country": "Switzerland",
+      "hubUrl": "https://ethz.ch/en/studies/financial/scholarships.html",
+      "pathMustInclude": "scholarship",
+      "crawlPriority": 3
+    }
+  ]
+}

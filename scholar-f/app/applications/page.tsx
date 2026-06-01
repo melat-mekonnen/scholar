@@ -25,6 +25,10 @@ import { StudentPortalInlineAside } from "@/components/student-portal/student-po
 
 // API + auth helpers
 import { getMyApplications, updateApplicationStatus, type ApplicationStatus, type StudentApplication } from "@/lib/applications"
+import {
+  formatScholarshipDateDisplay,
+  formatScholarshipDeadlineLabel,
+} from "@/lib/scholarship-dates"
 import { clearToken } from "@/lib/auth"
 
 // UI components (shadcn/ui)
@@ -269,17 +273,17 @@ export default function ApplicationsPage() {
                           </Badge>
                         ) : null}
 
-                        {a.scholarship.startDate ? (
+                        {formatScholarshipDateDisplay(a.scholarship.startDate) && (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">
-                            Start: {String(a.scholarship.startDate)}
+                            Opens {formatScholarshipDateDisplay(a.scholarship.startDate)}
                           </Badge>
-                        ) : null}
+                        )}
 
-                        {a.scholarship.endDate || a.scholarship.deadline ? (
+                        {formatScholarshipDeadlineLabel(a.scholarship) && (
                           <Badge variant="outline" className="border-emerald-200 text-emerald-800">
-                            End: {String(a.scholarship.endDate || a.scholarship.deadline)}
+                            {formatScholarshipDeadlineLabel(a.scholarship)}
                           </Badge>
-                        ) : null}
+                        )}
 
                         <Badge variant="outline" className="border-emerald-100 bg-emerald-50/50 text-slate-600">
                           Updated: {new Date(a.updatedAt).toLocaleDateString()}

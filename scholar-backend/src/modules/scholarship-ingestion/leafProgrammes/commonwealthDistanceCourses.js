@@ -6,6 +6,8 @@ const CSC_DISTANCE_COURSES =
 const DISTANCE_CYCLE = {
   academicYear: "2026/27",
   applicationStatus: "closed",
+  applicationStartDate: "2025-11-13",
+  applicationEndDate: "2026-03-27",
 };
 
 function distanceDescription({ course, university, theme }) {
@@ -377,9 +379,9 @@ function commonwealthDistanceLeafProgrammes() {
     degreeLevel: "master",
     fieldOfStudy: entry.theme,
     fundingType: "fully_funded",
-    applicationStartDate: null,
-    applicationEndDate: null,
-    deadline: null,
+    applicationStartDate: DISTANCE_CYCLE.applicationStartDate,
+    applicationEndDate: DISTANCE_CYCLE.applicationEndDate,
+    deadline: DISTANCE_CYCLE.applicationEndDate,
     url: entry.url,
     applicationUrl: entry.url,
     sourceUrl: entry.url,

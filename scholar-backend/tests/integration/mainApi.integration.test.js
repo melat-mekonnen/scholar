@@ -62,6 +62,27 @@ describe("Main API integration (live DB + .env)", { skip: !envOk }, () => {
     assert.equal(res.body?.status, "ok");
   });
 
+  test("public scholarship filters and search work without authentication", async () => {
+    const filters = await request.get("/api/scholarships/filters");
+    assert.equal(filters.status, 200);
+    assert.ok(Array.isArray(filters.body?.countries));
+
+    const search = await request.get(
+      "/api/scholarships/search?sort=deadline_asc&page=1&limit=5&status=verified",
+    );
+    assert.equal(search.status, 200);
+    assert.ok(Array.isArray(search.body?.results));
+    assert.ok(typeof search.body?.total === "number");
+
+    const deadlines = search.body.results
+      .map((r) => r.deadline)
+      .filter(Boolean)
+      .map((d) => new Date(d).getTime());
+    for (let i = 1; i < deadlines.length; i++) {
+      assert.ok(deadlines[i] >= deadlines[i - 1], "results should be ordered by deadline asc");
+    }
+  });
+
   test("scholarship filters + search (student token — /api user router enforces auth first)", async () => {
     const token = await login(USERS.student);
     const h = authHeader(token);

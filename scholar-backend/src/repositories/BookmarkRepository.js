@@ -1,4 +1,5 @@
 const { query } = require("../infra/db/neonClient");
+const { publicOpenScholarshipSql } = require("../utils/publicScholarshipVisibility");
 
 class BookmarkRepository {
   async create(userId, scholarshipId) {
@@ -22,11 +23,12 @@ class BookmarkRepository {
 
   async listByUser(userId, page, limit) {
     const offset = (page - 1) * limit;
+    const open = publicOpenScholarshipSql("s");
     const countResult = await query(
       `SELECT COUNT(*)::int AS total
        FROM bookmarks b
        INNER JOIN scholarships s ON s.id = b.scholarship_id
-       WHERE b.user_id = $1 AND s.status = 'verified'`,
+       WHERE b.user_id = $1 AND s.status = 'verified' AND ${open}`,
       [userId]
     );
     const total = Number(countResult.rows[0]?.total || 0);
@@ -46,7 +48,7 @@ class BookmarkRepository {
               b.created_at AS bookmarked_at
        FROM bookmarks b
        INNER JOIN scholarships s ON s.id = b.scholarship_id
-       WHERE b.user_id = $1 AND s.status = 'verified'
+       WHERE b.user_id = $1 AND s.status = 'verified' AND ${open}
        ORDER BY b.created_at DESC
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset]

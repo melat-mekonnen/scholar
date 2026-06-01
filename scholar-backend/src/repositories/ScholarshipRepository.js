@@ -1,4 +1,5 @@
 const { query } = require("../infra/db/neonClient");
+const { publicOpenScholarshipSql } = require("../utils/publicScholarshipVisibility");
 
 class ScholarshipRepository {
   async expirePastDeadline() {
@@ -180,7 +181,7 @@ class ScholarshipRepository {
        FROM scholarships
        WHERE is_recommended_default = TRUE
          AND status = 'verified'
-         AND (deadline IS NULL OR deadline >= CURRENT_DATE)
+         AND ${publicOpenScholarshipSql("")}
        ORDER BY deadline ASC NULLS LAST
        LIMIT $1`,
       [limit]
@@ -194,7 +195,7 @@ class ScholarshipRepository {
       `SELECT id, title, country, deadline, application_url
        FROM scholarships
        WHERE status = 'verified'
-         AND (deadline IS NULL OR deadline >= CURRENT_DATE)
+         AND ${publicOpenScholarshipSql("")}
        ORDER BY deadline ASC NULLS LAST
        LIMIT $1`,
       [limit]
@@ -203,42 +204,47 @@ class ScholarshipRepository {
   }
 
   async getPublicFilters() {
+    const open = publicOpenScholarshipSql("s");
     const countriesResult = await query(
-      `SELECT DISTINCT country
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND country IS NOT NULL
-       ORDER BY country ASC`,
+      `SELECT s.country, COUNT(*)::int AS count
+       FROM scholarships s
+       WHERE s.status = 'verified' AND ${open} AND s.country IS NOT NULL
+       GROUP BY s.country
+       ORDER BY count DESC, s.country ASC`,
       []
     );
 
     const degreeLevelsResult = await query(
       `SELECT DISTINCT degree_level
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND degree_level IS NOT NULL
+       FROM scholarships s
+       WHERE s.status = 'verified' AND ${open} AND s.degree_level IS NOT NULL
        ORDER BY degree_level ASC`,
       []
     );
 
     const fieldsResult = await query(
-      `SELECT DISTINCT field_of_study
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND field_of_study IS NOT NULL
-       ORDER BY field_of_study ASC`,
+      `SELECT s.field_of_study, COUNT(*)::int AS count
+       FROM scholarships s
+       WHERE s.status = 'verified' AND ${open} AND s.field_of_study IS NOT NULL
+       GROUP BY s.field_of_study
+       ORDER BY count DESC, s.field_of_study ASC`,
       []
     );
 
     const fundingTypesResult = await query(
       `SELECT DISTINCT funding_type
-       FROM scholarships
-       WHERE status = 'verified' AND (deadline IS NULL OR deadline >= CURRENT_DATE OR is_rolling = TRUE) AND funding_type IS NOT NULL
+       FROM scholarships s
+       WHERE s.status = 'verified' AND ${open} AND s.funding_type IS NOT NULL
        ORDER BY funding_type ASC`,
       []
     );
 
     return {
+      countryCounts: countriesResult.rows,
+      fieldCounts: fieldsResult.rows,
       countries: countriesResult.rows.map((r) => r.country),
-      degreeLevels: degreeLevelsResult.rows.map((r) => r.degree_level),
       fieldsOfStudy: fieldsResult.rows.map((r) => r.field_of_study),
+      degreeLevels: degreeLevelsResult.rows.map((r) => r.degree_level),
       fundingTypes: fundingTypesResult.rows.map((r) => r.funding_type),
     };
   }
@@ -264,7 +270,7 @@ class ScholarshipRepository {
     params.push(effectiveStatus);
     where.push(`s.status = $${params.length}`);
     where.push(`COALESCE(s.record_type, 'scholarship') = 'scholarship'`);
-    where.push(`(s.deadline IS NULL OR s.deadline >= CURRENT_DATE OR s.is_rolling = TRUE)`);
+    where.push(publicOpenScholarshipSql("s"));
 
     if (q) {
       params.push(`%${q.toLowerCase()}%`);
@@ -431,7 +437,7 @@ class ScholarshipRepository {
        LEFT JOIN users u ON s.posted_by_user_id = u.id
        WHERE s.id = $1
          AND s.status = 'verified'
-         AND (s.deadline IS NULL OR s.deadline >= CURRENT_DATE OR s.is_rolling = TRUE)
+         AND ${publicOpenScholarshipSql("s")}
        LIMIT 1`,
       params
     );

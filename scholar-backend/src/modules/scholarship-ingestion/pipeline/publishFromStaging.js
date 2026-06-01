@@ -67,15 +67,23 @@ async function publishStagedRow(stagingRow, { forcePublishStatus, ingestionSourc
 
   if (dup.action === "update" && existing?.id) {
     const merged = mergeScholarshipRecords(existing, record);
-    const updated = await scholarshipRepo.updateImportedScholarship(existing.id, merged);
-    scholarshipId = updated?.id || existing.id;
+    const upserted = await scholarshipRepo.upsertImportedScholarship({
+      ...merged,
+      sourceUrl: existing.source_url || merged.sourceUrl,
+      publishStatus: record.publishStatus,
+    });
+    scholarshipId = upserted?.id || existing.id;
   } else if (dup.action === "insert" || !existing) {
     const inserted = await scholarshipRepo.upsertImportedScholarship(record);
     scholarshipId = inserted?.id || scholarshipId;
   } else {
     const merged = mergeScholarshipRecords(existing, record);
-    const updated = await scholarshipRepo.updateImportedScholarship(existing.id, merged);
-    scholarshipId = updated?.id || existing.id;
+    const upserted = await scholarshipRepo.upsertImportedScholarship({
+      ...merged,
+      sourceUrl: existing.source_url || merged.sourceUrl,
+      publishStatus: record.publishStatus,
+    });
+    scholarshipId = upserted?.id || existing.id;
   }
 
   await stagingRepo.markPublished({

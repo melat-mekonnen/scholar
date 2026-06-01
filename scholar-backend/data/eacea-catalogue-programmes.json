@@ -1,0 +1,1879 @@
+{
+  "fetchedAt": "2026-06-01T10:26:34.356Z",
+  "erasmus": [
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Multilingualism and Cultural Diversity",
+      "acronym": "MultiDiverse",
+      "applicationUrl": "https://www.multidiverse.eu/applications",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241136",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Law and Gender, Intersectionality and Diversity",
+      "acronym": "LAWGID",
+      "applicationUrl": "https://lawgid.ius.bg.ac.rs/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240350",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Contemporary Challenges in the World of Work",
+      "acronym": "WOCC",
+      "applicationUrl": "https://www.master-wocc.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241106",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "InterCultural Leadership in Digital Era International Master",
+      "acronym": "CLIDE",
+      "applicationUrl": "https://clide.umk.pl/pliki/CLIDE%20IRK%20system.pdf",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241178",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Sustainable Transportation and Electric Power Systems",
+      "acronym": "EMJM STEPS",
+      "applicationUrl": "https://www.emjmdstepsrock.eu/application-form",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241082",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Politics and Society: Václav Havel Joint Master Degree",
+      "acronym": "EPS",
+      "applicationUrl": "https://epsmaster.eu/application-procedure/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241064",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Insects as Solutions for a Sustainable Future",
+      "acronym": "ISSF",
+      "applicationUrl": "https://issf-master.eu/how-to-apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239077",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Renewable Energy and Sustainable COnstruction, RESCO",
+      "acronym": "RESCO",
+      "applicationUrl": "https://resco-master.eu/applications-open/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238875",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Degree in Sports Ethics and Integrity",
+      "acronym": "MAiSI",
+      "applicationUrl": "https://onderwijsaanbod.kuleuven.be/opleidingen/e/SC_54023324/toelatingsvoorwaarden?ids=admission2026",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238589",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Masters in Journalism, Media and Globalisation (Mundus Journalism)",
+      "acronym": "EMMA",
+      "applicationUrl": "https://mundusjournalism.com/admissions/application-process",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101234513",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Masters in Earthen Architecture and Construction",
+      "acronym": "TERRA",
+      "applicationUrl": "https://msc-terra.org/applications/#academic-year",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241190",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Transfers-Fluids-Materials Aeronautical Sustainable Applications",
+      "acronym": "TFMASA",
+      "applicationUrl": "https://tfmasa.com/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240181",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Programme on the Engineering of Data-intensive Intelligent Software Systems",
+      "acronym": "EDISS",
+      "applicationUrl": "https://www.master-ediss.eu/application-round-for-self-funded-applications/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238940",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Radiation and its Effects on MicroElectronics and Photonics Technologies",
+      "acronym": "RADMEP",
+      "applicationUrl": "https://master-radmep.org/application-procedure/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238766",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Bio and Pharmaceutical Materials Science",
+      "acronym": "BIOPHAM",
+      "applicationUrl": "https://www.master-biopham.eu/how-to-apply/apply-now",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241095",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Data Engineering and Artificial Intelligence",
+      "acronym": "DEAI",
+      "applicationUrl": "https://deai.ulb.be/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241133",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Renewable Energy in the Marine environment",
+      "acronym": "REM Plus Plus",
+      "applicationUrl": "https://master-remplus2.eu/applications-and-selection-criteria/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239651",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainable Catalysis",
+      "acronym": "SuCat",
+      "applicationUrl": "https://www.master-sucat.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238854",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Law of Security, Peace and Sustainable Development",
+      "acronym": "ILSPSD",
+      "applicationUrl": "https://master-international-law-erasmusmundus.eu/step-by-step-application-guide/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238242",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Transnational Migrations",
+      "acronym": "MITRA",
+      "applicationUrl": "https://www.master-mitra.eu/en/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241222",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Engineering for Environmental Sustainability and International Cooperation",
+      "acronym": "EESIC",
+      "applicationUrl": "https://eesic.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240871",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint master in Applied security and defense - Networks for Unified Strategies",
+      "acronym": "JANUS",
+      "applicationUrl": "https://master-janus-security-defense.eu/how-to-apply-janus/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241310",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Large Scale Accelerators and Lasers",
+      "acronym": "LASCALA",
+      "applicationUrl": "https://www.master-lascala.eu/apply/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241086",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "NOHA Erasmus Mundus Joint Master in International Humanitarian Action (NOHA)",
+      "acronym": "NOHA",
+      "applicationUrl": "https://www.nohanet.org/data/erasmus/Guest%20Scholar%20Application%20Form.pdf",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240600",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Teaching, designing, managing, foreign Language learning for a Multicultural and inclusive Environment",
+      "acronym": "TELME",
+      "applicationUrl": "https://telme.hypotheses.org/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239299",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Data Science of Human Multimodal Communication: European and International Joint Masters Degree",
+      "acronym": "MULTICOM",
+      "applicationUrl": "https://multicom-em.eu/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101238231",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Theatre in Social, Participatory Art, Community and Educational contexts",
+      "acronym": "Theatre SPACEs",
+      "applicationUrl": "https://www.theatre-spaces.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241068",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint European Master Degree in Nuclear Physics",
+      "acronym": "NucPhys",
+      "applicationUrl": "https://www.emm-nucphys.eu/en/application-admission/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239847",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "DocNomadsPlus, Joint Master in Documentary Filmmaking",
+      "acronym": "DocNomadsPlus",
+      "applicationUrl": "https://docnomadsplus.eu/application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239524",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Programme in Neuroscience",
+      "acronym": "Neurasmus",
+      "applicationUrl": "https://www.neurasmus.u-bordeaux.fr/fees-and-scholarships/applying-as-self-funded-candidate/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239924",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Geo-Information Science and Earth Observation for Environmental Modelling and Management",
+      "acronym": "GEM",
+      "applicationUrl": "https://www.gem-msc.eu/apply-to-gem/admission-and-eligibility/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240661",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Interdisciplinary Mathematics",
+      "acronym": "InterMaths",
+      "applicationUrl": "https://www.intermaths.eu/erasmus-mundus/apply#consortium-scholarships",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101240735",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Security, Intelligence and Strategic Studies",
+      "acronym": "IMSISS",
+      "applicationUrl": "https://www.securityintelligence-erasmusmundus.eu/scholarship-application-results-now-released/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241097",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Choreomundus – Erasmus Mundus Master in Dance and Movement as Practical Knowledge and Heritage",
+      "acronym": "CHOREOMUNDUS",
+      "applicationUrl": "https://choreomundus.org/for-applicants/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101241246",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master&#039;s in Clinical Linguistics 25",
+      "acronym": "EMCL-25",
+      "applicationUrl": "https://www.emcl.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239448",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Science in European Forestry",
+      "acronym": "MSc EF",
+      "applicationUrl": "https://www.europeanforestry.eu",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101239159",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Excellence in Analytical Chemistry",
+      "acronym": "EACH",
+      "applicationUrl": "https://www.analyticalchemistry.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101235187",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Animal Biodiversity and Genomics",
+      "acronym": "EMABG",
+      "applicationUrl": "https://www.emabg.eu/application/selection-appeal/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101179080",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "RESOUND - Joint Master of Arts in Sound Design for Media Arts",
+      "acronym": "RESOUND",
+      "applicationUrl": "https://resound-ma.eu/application/#english-proficiency",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180273",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EMJM ENVIRONMENTAL CONTAMINATION AND TOXICOLOGY + ONE HEALTH",
+      "acronym": "ECTPLUS ONE HEALTH",
+      "applicationUrl": "https://www.ectplus.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180052",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Quaternary and Prehistory",
+      "acronym": "IMQP",
+      "applicationUrl": "https://quaternaryprehistory.eu/computer-science-and-technology",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101177274",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Europubhealth+│European Master in Public Health",
+      "acronym": "EPH Plus",
+      "applicationUrl": "https://www.europubhealth.org/applications/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180119",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Linguistic Data Science",
+      "acronym": "EMLDS",
+      "applicationUrl": "https://emlds.fcsh.unl.pt/for-applicants/application-submission/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180353",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Education, Migration, and Diversity",
+      "acronym": "EDU_MIG",
+      "applicationUrl": "https://master.edumig.tchooz.app/self-funded-study-place-edu_mig",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180007",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master International en Sciences de l&#039;Education Inclusive",
+      "acronym": "MISEI",
+      "applicationUrl": "https://master-misei.com/application-master-misei/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180418",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master Course in Mechatronics",
+      "acronym": "EU4M",
+      "applicationUrl": "https://www.eu4m.eu",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180050",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Mathematical Modelling, Simulation and Data Science for Industrial and Societal Challenges",
+      "acronym": "MATHS-DISC",
+      "applicationUrl": "https://www.mathsdisc.eu/admission/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180080",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master degree on the biology of Ageing",
+      "acronym": "IMAgein",
+      "applicationUrl": "https://life.univ-cotedazur.eu/graduate-school-lifes-actions/call-for-doctoral-applications",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180342",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Leading International Vaccinology Education for Innovation",
+      "acronym": "LIVE_Innov",
+      "applicationUrl": "https://masterlive-vaccinology.eu/apply-now/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101172104",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Greening Energy Market and Finance",
+      "acronym": "GrEnFIn",
+      "applicationUrl": "https://site.unibo.it/grenfin-emjm/en/application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101179940",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Global Markets, Local Creativities",
+      "acronym": "GLOCAL",
+      "applicationUrl": "https://globallocal-erasmusmundus.eu/2026-2028-applications-now-open/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101177425",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master in European Environmental Economics and Policy",
+      "acronym": "M3EP",
+      "applicationUrl": "https://4euplus.eu/4EU-981.html",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180000",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Health and Wellbeing across the Lifespan",
+      "acronym": "HYGIEIA",
+      "applicationUrl": "https://www.hygieiamaster.eu/admission/application-timings",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180030",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus - Master of Science in Imaging and Light in Extended Reality",
+      "acronym": "IMLEX",
+      "applicationUrl": "https://imlex.org/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101179938",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Economic POlicies for the Global bifurcation - Joint Master",
+      "acronym": "EPOG-JM",
+      "applicationUrl": "https://www.epog.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101179922",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Intelligent Photonics for Security Reliability Sustainability and Safety",
+      "acronym": "iPSRS",
+      "applicationUrl": "https://master-photonics4security.eu/visa-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180354",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Coordinated Humanitarian Response, Health and Displacement",
+      "acronym": "HumanResponse",
+      "applicationUrl": "https://humanresponse.eu/applications1/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180512",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Health Economics and Management",
+      "acronym": "Eu-HEM",
+      "applicationUrl": "https://eu-hem.eu/programme/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/586520-EPP-1-2017-1-NL-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "MASTER IN INTELLECTUAL PROPERTY AND DATA LAW",
+      "acronym": "MIPDaL",
+      "applicationUrl": "https://mipdal.eu/admission?open=application-documents",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180094",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Response_Able Futures; A European Joint Masters in Design and Care",
+      "acronym": "ResponseAbleFutures",
+      "applicationUrl": "https://www.response-able-futures.eu/application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180493",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EUropean master on COntrol of Renewable Energy systems",
+      "acronym": "EU-CORE",
+      "applicationUrl": "https://master-eu-core.ec-nantes.fr/admission/students/how-to-apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180476",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Cutting-Edge Technologies for Sustainable Agriculture",
+      "acronym": "SUSTAGRI",
+      "applicationUrl": "https://sustagri-em.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180446",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master&#039;s programme in Surface, Electro, Radiation, and Photo-chemistry",
+      "acronym": "SERP",
+      "applicationUrl": "https://www.master-serp.eu/apply/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180445",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Theoretical Chemistry and Computational Modeling",
+      "acronym": "TCCM",
+      "applicationUrl": "https://www.emtccm.org/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180348",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Social Psychology of Transformation: Understanding and Mastering Social Change",
+      "acronym": "SPOT",
+      "applicationUrl": "https://spot-psychology.eu/spot/applications/selection-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180302",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Research and Innovation in Higher Education",
+      "acronym": "MARIHE",
+      "applicationUrl": "https://www.marihe.eu/how-to-apply/application-process-and-timetable/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180266",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Electric vehicle PropulsIon &amp; COntrol Plus",
+      "acronym": "E-PiCo Plus",
+      "applicationUrl": "https://master-epico.ec-nantes.fr/english-version/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180198",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master&#039;s in Advanced Research in Criminology",
+      "acronym": "IMARC",
+      "applicationUrl": "https://www.eur.nl/en/esl/apply-imarc",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180177",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Decentralised Smart Energy Systems 2.0",
+      "acronym": "DENSYS 2.0",
+      "applicationUrl": "https://densys.univ-lorraine.fr/application/#admission",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180112",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Innovative Medicine",
+      "acronym": "IMIM",
+      "applicationUrl": "https://www.innovativemedicine.eu/application-and-admission-1",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180032",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Mechanics of Sustainable Materials and Structures",
+      "acronym": "MS2",
+      "applicationUrl": "https://www.ms2master.com/how-to-apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101178091",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Global Change Ecology and Biodiversity Management",
+      "acronym": "GLOBE",
+      "applicationUrl": "https://globe-master.eu/apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101180104",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Previous",
+      "acronym": "",
+      "applicationUrl": "https://frame.nust.na/",
+      "sourceUrl": "https://frame.nust.na/",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EMerald Master in Georesources Engineering",
+      "acronym": "EMerald",
+      "applicationUrl": "https://www.em-georesources.eu/apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127887",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "FilmMemory - Joint Master of Arts in European Film Heritage, History and Cultures",
+      "acronym": "FilmMemory",
+      "applicationUrl": "https://www.filmmemory.eu/application/call-for-applicants",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127690",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "MSc in Smart Cities and Communities",
+      "acronym": "SMACCs",
+      "applicationUrl": "https://www.smaccs.eu/practical/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128215",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master For Industry in Microwave Electronics and Photonics",
+      "acronym": "EMIMEP",
+      "applicationUrl": "https://www.erasmus-mundus.emimep.eu/admission-applications/https-www-erasmus-mundus-emimep-eu-admission-applications-erasmus-mundus-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128187",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Multiphase Systems for Sustainable Engineering",
+      "acronym": "MULTIPHASE",
+      "applicationUrl": "https://www.multiphase-master.eu/apply-multiphase/general-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128275",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Safe and Reliable Nuclear Applications",
+      "acronym": "SARENA",
+      "applicationUrl": "https://sarena.imt-atlantique.fr/index.php?lang=en",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128167",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Education Policies for Global Development",
+      "acronym": "GLOBED",
+      "applicationUrl": "https://globed.eu/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128259",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Communications Engineering and Data Science",
+      "acronym": "CoDaS",
+      "applicationUrl": "https://www.unite-codas-master.eu/programme.html#careers",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128281",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Masters Program in Public Policy",
+      "acronym": "MUNDUS MAPP",
+      "applicationUrl": "https://www.mundusmapp.org/important-update-for-applicants-to-the-iss-tracks-applicable-to-the-current-application-cycle-2026-2028-edition/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128240",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "PlantHealth - European Master Degree in PLANT HEALTH IN SUSTAINABLE CROPPING SYSTEMS",
+      "acronym": "PLANTHEALTH3",
+      "applicationUrl": "https://www.planthealth.upv.es/web/apply/application-procedure/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128273",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Physiology and Medicine of Humans in Space and Extreme Environment",
+      "acronym": "SpaceMed",
+      "applicationUrl": "https://space-med.eu/apply-to-spacemed/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127568",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Programme in Imaging",
+      "acronym": "IMAGING",
+      "applicationUrl": "https://www.emjm-imaging.eu/application-and-admission/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128227",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Masters in Risk Assessment and Management of Civil Infrastructures",
+      "acronym": "NORISK",
+      "applicationUrl": "https://msc-norisk.org/applications#participation-costs",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128171",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Interdisciplinarity in Materials for Energy Storage and Conversion",
+      "acronym": "i-MESC",
+      "applicationUrl": "https://i-mesc.eu/application/admission-criteria",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128159",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master in &#039;Global Studies&#039;",
+      "acronym": "EMGS",
+      "applicationUrl": "https://globalstudies-masters.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127959",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master of Science in Skin Health and Care",
+      "acronym": "EMOTION",
+      "applicationUrl": "https://www.emotion-master.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128127",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Image Processing and Computer Vision ai",
+      "acronym": "IPCVai",
+      "applicationUrl": "https://ipcv.eu/application-and-selection/apply-now/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127924",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master Erasmus Mundus in Lexicography",
+      "acronym": "EMJM-EMLex",
+      "applicationUrl": "https://www.emlex.eu.usc.gal/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101126545",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Groundwater and Global Change - Impacts and Adaptation",
+      "acronym": "GroundwatCh",
+      "applicationUrl": "https://www.groundwatermaster.eu/admission-and-application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127390",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Children’s Literature, Media and Cultural Entrepreneurship",
+      "acronym": "CLMCE",
+      "applicationUrl": "https://www.clmce-erasmusmundus.eu/postgraduate/erasmusmundus/clmce/howtoapply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101126726",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Redesigning the Post-Industrial City",
+      "acronym": "RePIC",
+      "applicationUrl": "https://repic-application.ruhr-uni-bochum.de/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128126",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "RE_PLAY: EUROPEAN JOINT MASTERS IN GAMES",
+      "acronym": "RE_PLAY",
+      "applicationUrl": "https://www.replaymasters.eu/admissions-and-requirements#application-req",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128161",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint Master&#039;s in Nanomaterials for Green and Digital Transitions",
+      "acronym": "GREENANO",
+      "applicationUrl": "https://www.greenanomaster.eu/application-and-selection",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127545",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Degree on Public Health in Disaster",
+      "acronym": "EMPHID",
+      "applicationUrl": "https://masterpublichealthdisasters.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128198",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Advanced Design of Sustainable Ships and Offshore Structures",
+      "acronym": "EMSHIP",
+      "applicationUrl": "https://www.emship.eu/how-to-apply/#application-procedure%E2%80%8B",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128183",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EUROPHOTONICS",
+      "acronym": "EUROPHOTONICS",
+      "applicationUrl": "https://www.europhotonics.org/wordpress/intake-2026-2028-application-campaign-is-closed/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128124",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainable Information Technologies for Societies Joint Masters",
+      "acronym": "SITeS-JM",
+      "applicationUrl": "https://aissprogram.eu/articles/how-to-build-a-strong-portfolio-for-the-aiss-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127953",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainable Forest and Nature Management",
+      "acronym": "SUFONAMA",
+      "applicationUrl": "https://sufonama-em.eu/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127220",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Soils and Global Change",
+      "acronym": "IMSOGLO",
+      "applicationUrl": "https://imsoglo.eu/admission-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101126802",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Flood Risk Management",
+      "acronym": "FLOODRisk",
+      "applicationUrl": "https://www.floodriskmaster.org/apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101127982",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Sustainable Systems Engineering",
+      "acronym": "EMSSE",
+      "applicationUrl": "https://www.emsse.eu",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128119",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master on Embedded Intelligence Nanosystems Engineering – from Nanoscale Technologies to Ubiquitous Smart Sensors",
+      "acronym": "EMINENT",
+      "applicationUrl": "https://eminent-master.eu/apply-now/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128051",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Copernicus Master in Digital Earth",
+      "acronym": "CDE",
+      "applicationUrl": "https://master-cde.eu/erasmus-mundus-joint-master-of-science-application-period-march-to-may/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128006",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master on Wine Tourism Transitions and Innovations",
+      "acronym": "WINTOUR",
+      "applicationUrl": "https://www.wintour-master.eu/en/apply/emjmd-scholarships/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101128149",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Manufacturing 4.0 by intElligent and susTAinable technologies - META 4.0",
+      "acronym": "META 4.0",
+      "applicationUrl": "https://www.master-meta4-0.eu/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082643",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Human Diseases Models Morphological Phenotyping",
+      "acronym": "MorphoPHEN",
+      "applicationUrl": "https://morphophen.eu/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082155",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master in Biomedical Engineering",
+      "acronym": "EMMBIOME",
+      "applicationUrl": "https://www.emmbiome.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082688",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Euro-Asian Joint Master Programme in Medical Technology and Healthcare Business",
+      "acronym": "EMMaH",
+      "applicationUrl": "https://master-emmah.eu/application-and-admission/admission-and-selection",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081786",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Hydrogen Systems and Enabling Technologies",
+      "acronym": "HySET",
+      "applicationUrl": "https://hysetmaster.polito.it/tips-to-prepare-a-successful-application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082651",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Science (MSc) in Global Environment and Development",
+      "acronym": "MERGED",
+      "applicationUrl": "https://merged.info/application-webinar-online-on-20th-february/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082117",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master In Artificial Intelligence",
+      "acronym": "EMAI",
+      "applicationUrl": "https://emai-master.eu",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082433",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EMJM AQUACULTURE, ENVIRONMENT AND SOCIETY – STAR",
+      "acronym": "EMJM ACES-STAR",
+      "applicationUrl": "https://www.emm-aces.org/apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101080968",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Advanced Methods in Particle Physics",
+      "acronym": "IMAPP",
+      "applicationUrl": "https://imapp.eu/new-application-timeline-has-been-announced/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081341",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master in Materials Science powEred by Large-Scale Facilities",
+      "acronym": "MaMaSELF",
+      "applicationUrl": "https://application.mamaself.eu/",
+      "sourceUrl": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/projects-details/43353764/101082454/ERASMUS2027",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Architectural and Urban Contemporary Heritage",
+      "acronym": "ARURCOHE",
+      "applicationUrl": "https://www.arurcohe.com/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081182",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Masters degree in Environmental Sciences, Policy and Management",
+      "acronym": "MESPOM",
+      "applicationUrl": "https://mespom.eu/application-deadlines-and-admissions-calendar",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082211",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master in Membrane Engineering for Sustainable Development",
+      "acronym": "MESD",
+      "applicationUrl": "https://mesd.edu.umontpellier.fr/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081874",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint Master Programme in Resilience in Educational Contexts",
+      "acronym": "FLOURISH",
+      "applicationUrl": "https://flourishproject.mt/applications/apply-online/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082428",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master on “Climate Change and Diversity: Sustainable Territorial Development”",
+      "acronym": "CCD-STeDe",
+      "applicationUrl": "https://ccd-stede.eu/the-third-call-for-applications-for-the-academic-year-2026-2027-is-now-open/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082398",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "ERASMUS MUNDUS JOINT MASTER in ARCHAEOLOGICAl MATERIALS SCIENCE",
+      "acronym": "ARCHMAT",
+      "applicationUrl": "https://www.erasmusmundus-archmat.eu/candidatures/applicationForm",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082567",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Applied Cybersecurity",
+      "acronym": "CyberMACS",
+      "applicationUrl": "https://cybermacs.eu/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082683",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Law and Economics",
+      "acronym": "EMLE",
+      "applicationUrl": "https://emle.org/online-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082393",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Functional Advanced Materials Engineering with Artificial Intelligence for Sustainability",
+      "acronym": "FAMEAIS",
+      "applicationUrl": "https://www.fame-master.eu/admissions/apply-to-be-visiting-scholar/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082749",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Global MINDS European Master in the Psychology of Global Mobility, Inclusion and Diversity in Society",
+      "acronym": "Global-MINDS",
+      "applicationUrl": "https://global-minds.eu/visa-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082707",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Public Sector Innovation and eGovernance",
+      "acronym": "PIONEER",
+      "applicationUrl": "https://pioneer-master.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082574",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Technology and Management for Circular Economy",
+      "acronym": "IMATEC",
+      "applicationUrl": "https://www.imatec-mundus.eu/admissions/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082436",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint Master&#039;s Degree Programme in Service Design Strategies and Innovations",
+      "acronym": "SDSI",
+      "applicationUrl": "https://www.sdsi.ma/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082388",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Education in Museums and Heritage",
+      "acronym": "EDUMaH",
+      "applicationUrl": "https://www.gla.ac.uk/postgraduate/erasmusmundus/edumah/howtoapply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082003",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Brain and Data Science",
+      "acronym": "NeuroData",
+      "applicationUrl": "https://www.neurodata-master.org/application-requirments",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081356",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Religious Diversity in a Globalised World",
+      "acronym": "ReD Global",
+      "applicationUrl": "https://www.red-global.eu/admission/application-instructions/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101082417",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Science in Fire Safety Engineering",
+      "acronym": "IMFSE",
+      "applicationUrl": "https://imfse.be/application-overview",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081748",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Planetary Geosciences",
+      "acronym": "GeoPlaNet",
+      "applicationUrl": "https://geoplanet-impg.eu/en/apply",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081552",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Managing Art and Cultural Heritage in Global Markets",
+      "acronym": "MAGMa",
+      "applicationUrl": "https://www.magma-erasmusmundus.eu/postgraduate/erasmusmundus/magma/apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101081731",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Governance &amp; Administration of Leisure and Sports International Master",
+      "acronym": "GOALS",
+      "applicationUrl": "https://www.master-goals.eu/participation-cost-scholarship/how-to-apply.html",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050239",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Coastal Hazards – Risks, Climate Change Impacts and Adaptation",
+      "acronym": "COASTHazar",
+      "applicationUrl": "https://www.coasthazar.eu/application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050331",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Science in Coastal and Marine Engineering and Management",
+      "acronym": "CoMEM+",
+      "applicationUrl": "https://www.ntnu.edu/studies/application",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050462",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Cartography - Mapping for a sustainable world",
+      "acronym": "CARTO",
+      "applicationUrl": "https://cartographymaster.eu/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050459",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Sustainable Mineral and Metal Processing Engineering",
+      "acronym": "PROMISE",
+      "applicationUrl": "https://www.master-promise.eu/apply-online/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050446",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Techniques, Patrimoine, Territoires de l&#039;Industrie : Histoire, Valorisation, Didactique",
+      "acronym": "TPTI",
+      "applicationUrl": "https://www.tpti.eu/en/apply/participation-fees.html",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050444",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Law, Data and Artificial Intelligence",
+      "acronym": "EMILDAI",
+      "applicationUrl": "https://emildai.eu/admissions/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050369",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Islands and Sustainability",
+      "acronym": "ISLANDS",
+      "applicationUrl": "https://islandsmaster.eu/application-form/financial-information/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050349",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Quantum Technologies and Engineering Erasmus Mundus Master",
+      "acronym": "QuanTEEM",
+      "applicationUrl": "https://www.quanteem.eu",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050730",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainable Biomass and Bioproducts Engineering",
+      "acronym": "Sus2BioEng",
+      "applicationUrl": "https://emjm-sbbe.eu/application-2026-2027/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050789",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainability in Agriculture, Food Production and Food Technology in the Danube Region - Danube AgriFood Master",
+      "acronym": "DAFM",
+      "applicationUrl": "https://www.agrifoodmaster.eu/selection-of-applications.html",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050466",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "EU-CONEXUS Joint Master Programme in Marine Biotechnology",
+      "acronym": "JMPMB",
+      "applicationUrl": "https://apply.eu-conexus.eu/courses/course/11-msc-joint-master-programe-marine-biotechnology",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050597",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "ChEMoinformaticsplus - Artificial Intelligence in Chemistry",
+      "acronym": "ChEMoinformaticsplus",
+      "applicationUrl": "https://masterchemoinfo.u-strasbg.fr/en/application/application-form-closed",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050809",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Transnational German Studies Erasmus Mundus Joint Master",
+      "acronym": "TNGS EMJM",
+      "applicationUrl": "https://transnationalgermanstudies.eu/en/application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050810",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "QUAntum Research Master-level Education Network",
+      "acronym": "QUARMEN",
+      "applicationUrl": "https://master-quarmen.eu/apply/application-procedure",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050997",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master Degree in Sustainable Design, Construction and Management of the Built Environment",
+      "acronym": "MBUILD",
+      "applicationUrl": "https://www.mbuild.eu/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101051004",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master in Astrophysics and Space Science",
+      "acronym": "MASS",
+      "applicationUrl": "https://www.master-mass.eu/application-submission/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101050044",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master Program in Advanced Materials Innovative Recycling AMIR EM",
+      "acronym": "AMIR-EM",
+      "applicationUrl": "https://www.amir-em-master.com/admission/application-guidelines/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049867",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Migration and Intercultural Relations",
+      "acronym": "EMMIR",
+      "applicationUrl": "https://www.emmir.org/applications",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049855",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master in Sustainable Drug Discovery",
+      "acronym": "S-DISCO",
+      "applicationUrl": "https://sustainabledrugdiscovery.eu/how-to-apply/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049847",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Science in Geospatial Technologies",
+      "acronym": "GeoTech",
+      "applicationUrl": "https://mastergeotech.info/how-to-apply/on-line-application/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049796",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master in Cybersecurity",
+      "acronym": "CYBERUS",
+      "applicationUrl": "https://cyberus.univ-ubs.fr/faq/when-will-i-be-informed-of-the-result-of-my-application-for-a-scholarship-",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049712",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Dynamics of Renewables-based Power Systems",
+      "acronym": "DREAM",
+      "applicationUrl": "https://master-dream.ec-nantes.fr/en/admission/application-requirements",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049647",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master Impact Entrepreneurship",
+      "acronym": "EMMIE",
+      "applicationUrl": "https://airtable.com/appb1276SxKcMGDna/pageVgmUv3ShIJMg5/form",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049277",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Masters in Environmental Technology and Engineering – Consolidation phase",
+      "acronym": "IMETE-C",
+      "applicationUrl": "https://www.imete.eu/applications-and-scholarships",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101049150",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Advanced Structural Analysis and Design using Composite Materials",
+      "acronym": "FRP++",
+      "applicationUrl": "https://msc-frp.org/applications/#intro",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101048961",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "CYBER: Joint Master in CYberspace, Behavior and E-theRapy",
+      "acronym": "CYBER",
+      "applicationUrl": "https://www.cyber-t.eu/application-process/",
+      "sourceUrl": "https://erasmus-plus.ec.europa.eu/projects/search/details/101048710",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Degree in Economics of Globalisation and European Integration",
+      "acronym": "EGEI",
+      "applicationUrl": "https://www.master-egei.eu/faq-application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619643-EPP-1-2020-1-IT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus MSc in Chemical Innovation and Regulation",
+      "acronym": "ChIR",
+      "applicationUrl": "https://www.emmcchir.org/admissions/apply",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619824-EPP-1-2020-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Embedded Computing Systems",
+      "acronym": "EMECS",
+      "applicationUrl": "https://www.emecs.eu",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619721-EPP-1-2020-1-DE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master in Work, Organizational and Personnel Psychology",
+      "acronym": "WOP-P",
+      "applicationUrl": "https://www.erasmuswop.org/apply-now",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619817-EPP-1-2020-1-ES-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Science in Health Mangement in Aquaculture",
+      "acronym": "AquaH",
+      "applicationUrl": "https://aquah.eu/admission-application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619841-EPP-1-2020-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Science in Marine Biological Resources",
+      "acronym": "IMBRSea",
+      "applicationUrl": "https://www.imbrsea.eu/application-faqs",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619636-EPP-1-2020-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Science in Rural Development",
+      "acronym": "IMRD",
+      "applicationUrl": "https://www.imrd.ugent.be/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610590-EPP-1-2019-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Kino Eyes - The European Fiction Master",
+      "acronym": "KEM",
+      "applicationUrl": "https://www.kinoeyes.eu/application-requirements",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619799-EPP-1-2020-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Intelligent Field Robotic Systems",
+      "acronym": "IFROS",
+      "applicationUrl": "https://ifrosmaster.org/application",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619789-EPP-1-2020-1-ES-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master in Applied Ecohydrology",
+      "acronym": "MAEH",
+      "applicationUrl": "https://maeh-mundus.eu/2026/01/15/applications-for-the-academic-year-2025-26-now-open-for-self-funded-candidates/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619807-EPP-1-2020-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Infectious Diseases and One Health",
+      "acronym": "IDOH+",
+      "applicationUrl": "https://infectious-diseases-one-health.eu/how-to-apply-1/application-documents/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610556-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Joint Masters in Management and Engineering of Environment and Energy +",
+      "acronym": "ME3+",
+      "applicationUrl": "https://www.imt-atlantique.fr/en/study/masters/emjmd/me3plus/apply",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619657-EPP-1-2020-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Mediterranean Forestry and Natural Resources Management",
+      "acronym": "MEDfOR",
+      "applicationUrl": "https://www.medfor.eu/content/how-apply",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619801-EPP-1-2020-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European MSc in Marine EnviRonment 2030",
+      "acronym": "MER2030",
+      "applicationUrl": "https://merconsortium.eu/application-enrolment/application-process/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619798-EPP-1-2020-1-ES-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Marine and maritime Intelligent Robotics",
+      "acronym": "MIR",
+      "applicationUrl": "https://www.master-mir.eu/application-procedure/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610558-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master’s Degree in Women’s and Gender Studies",
+      "acronym": "GEMMA",
+      "applicationUrl": "https://gemmaerasmusmundus.eu/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610564-EPP-1-2019-1-ES-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master of Science in Nuclear Fusion and Engineering Physics",
+      "acronym": "FUSION",
+      "applicationUrl": "https://www.em-master-fusion.org/application",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610557-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master of Science in Sustainable Food Systems Engineering, Technology and Business",
+      "acronym": "FOOD4S",
+      "applicationUrl": "https://iiw.kuleuven.be/english/food4s/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619864-EPP-1-2020-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Degree in Food Innovation &amp; Product Design",
+      "acronym": "FIPDes",
+      "applicationUrl": "https://www.fipdes.eu/?Application-procedure-159",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610546-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master of Urban Climate and Sustainability1.5",
+      "acronym": "MUrCS15",
+      "applicationUrl": "https://murcs.eu/how-to-apply/application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619644-EPP-1-2020-1-UK-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Nanomedicine for Drug Delivery",
+      "acronym": "NANOMED",
+      "applicationUrl": "https://master-nanomed.eu/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619764-EPP-1-2020-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Euroculture: Society, Politics and Culture in a Global Context",
+      "acronym": "EURCULT",
+      "applicationUrl": "https://www.euroculturemaster.eu/application-procedure",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619660-EPP-1-2020-1-NL-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Joint Master in Social Work with Children and Youth",
+      "acronym": "ESWOCHY",
+      "applicationUrl": "https://eswochy.eu/application-step-by-step/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619857-EPP-1-2020-1-LT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Models and Methods of Quantitative Economics",
+      "acronym": "QEM2018",
+      "applicationUrl": "https://master-economics-qem.eu/application-practical-information",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/599253-EPP-1-2018-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Master Program in Plant Breeding",
+      "acronym": "emPLANT",
+      "applicationUrl": "https://emplant-master.eu/apply-now",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619859-EPP-1-2020-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Re:Anima - European Joint Masters in Animation",
+      "acronym": "ReaAnim",
+      "applicationUrl": "https://www.reanima.eu/application/application-requirements",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610566-EPP-1-2019-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Educating software engineers with a sustainability mindset to improve the well-being of people through software solutions",
+      "acronym": "SE4GD",
+      "applicationUrl": "https://se4gd.lutsoftware.com/application-process/admissions-requirements/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619839-EPP-1-2020-1-FI-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Sustainable Ship and Shipping 4.0",
+      "acronym": "SEAS4.0",
+      "applicationUrl": "https://www.master-seas40.unina.it/application-and-admission/important-dates/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619828-EPP-1-2020-1-IT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Master&#039;s programme in Security and Cloud Computing",
+      "acronym": "SECCLO",
+      "applicationUrl": "https://www.secclo.eu/admission/application-documents/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619612-EPP-1-2020-1-FI-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "International Master of Science in Sustainable and Innovative Natural Resource Management",
+      "acronym": "SINReM",
+      "applicationUrl": "https://sinrem.eu/admission-application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619842-EPP-1-2020-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint International Master in Smart Systems Integrated Solutions",
+      "acronym": "SSIs",
+      "applicationUrl": "https://ssi-master.eu/application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619869-EPP-1-2020-1-NO-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Advanced Solid Mechanics",
+      "acronym": "STRAINS",
+      "applicationUrl": "https://master-strains.eu/how-to-apply/apply-now",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619582-EPP-1-2020-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Transition, Innovation and Sustainability Environments",
+      "acronym": "TISE",
+      "applicationUrl": "https://www.tise-master.eu/for-applicants/application-process/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619813-EPP-1-2020-1-AT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Human Rights Policy and Practice",
+      "acronym": "EMHRPP",
+      "applicationUrl": "https://www.emhrpp.com/how-to-apply",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610544-EPP-1-2019-1-SE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Erasmus Mundus Joint Master Degree in Tropical Biodiversity and Ecosystems",
+      "acronym": "TROPIMUNDO",
+      "applicationUrl": "https://tropimundo.eu/#application",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610581-EPP-1-2019-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "WAVES ACOUSTICS VIBRATIONS ENGINEERING SOUND",
+      "acronym": "WAVES",
+      "applicationUrl": "https://master-waves.eu/waves-applications-menu/visiting-about",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610485-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "World Textile Engineering Advanced Master",
+      "acronym": "WE-TEAM",
+      "applicationUrl": "https://we-team.education/the-procedure-in-5-steps/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619662-EPP-1-2020-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Joint European Master Programme in Advanced Materials Science and Engineering",
+      "acronym": "AMASE",
+      "applicationUrl": "https://www.eusmat.net/international-studies/master/amase/application/fees-and-scholarships/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619784-EPP-1-2020-1-DE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Chemical Nano-Engineering",
+      "acronym": "CNE",
+      "applicationUrl": "https://master-cne.eu/index.php/application-information/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619542-EPP-1-2020-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Cultures Littéraires Européennes - CLE",
+      "acronym": "CLE",
+      "applicationUrl": "https://cle.unibo.it/pages/23/application",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/599186-EPP-1-2018-1-IT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Central and East European, Russian and Eurasian Studies",
+      "acronym": "CEERES",
+      "applicationUrl": "https://erasmusmundus-ceeres.eu/2025-applications-extended/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/619589-EPP-1-2020-1-UK-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "European Master in Building Information Modelling",
+      "acronym": "BIM A+",
+      "applicationUrl": "https://bimaplus.org/application/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/599172-EPP-1-2018-1-PT-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Big Data Management and Analytics",
+      "acronym": "BDMA",
+      "applicationUrl": "https://bdma.ulb.ac.be/application-for-self-funded-student-2024-2026/",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610519-EPP-1-2019-1-BE-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    },
+    {
+      "catalogue": "erasmus_mundus",
+      "title": "Advanced Spectroscopy in Chemistry Master&#039;s Course",
+      "acronym": "ASC",
+      "applicationUrl": "https://master-asc.eu/application-process",
+      "sourceUrl": "https://ec.europa.eu/programmes/erasmus-plus/projects/eplus-project-details/#project/610540-EPP-1-2019-1-FR-EPPKA1-JMD-MOB",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en"
+    }
+  ],
+  "intra": [
+    {
+      "catalogue": "intra_africa",
+      "title": "Research and Academic Mobility for Drug Discovery in Africa (RAMDDA)",
+      "acronym": "RAMDDA",
+      "applicationUrl": "https://apply.ramdda.org/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility for Strengthening Innovations in Energy and Transport Through Integration of Information Technology and Social Aspects to Foster Climate Change Mitigation",
+      "acronym": "MOTION",
+      "applicationUrl": "https://motion.mu.ac.ke/2026/04/28/call-for-phd-and-msc-scholarship-applications-for-2026-2027-admissions/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Multidisciplinary Mobility for a Climate Resilient Africa",
+      "acronym": "MMoCRA",
+      "applicationUrl": "https://www.mmocra.com/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Integrating Mobility, Digital Tools, and Climate Education to Address Terrestrial Plant Diversity And Conservation in a Changing Climate",
+      "acronym": "IMPACT-ED",
+      "applicationUrl": "https://impact-ed.eu/apply-now/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Empowering Africa through Academic Mobility for Climate Change Mitigation, Adaptation, and Sustainable Development",
+      "acronym": "AAM-CSD",
+      "applicationUrl": "https://aam-csd.amu.edu.et/%f0%9f%8c%8d-call-for-applications-for-aam-csd-project-scholarships-under-intra-africa-academic-mobility-schemendici-2024-mobaf-%f0%9f%8c%8d/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Capacity Building for Engineering Education Practice and Research",
+      "acronym": "CB4EE",
+      "applicationUrl": "https://intra-africa-cb4ee.co.za/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Network for Zero-defect and Zero-waste Digital Manufacturing (DM) for Electric Vehicles’ Components (NeDMEV)",
+      "acronym": "NeDMEV",
+      "applicationUrl": "https://www.jkuat.ac.ke/project/nedmev/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "COllaborative Graduate Training to Enhance Climate Smart Agriculture and Biodiversity ConsErvATion in East and Central Africa",
+      "acronym": "COCREATE-Africa",
+      "applicationUrl": "https://www.co-createafrica.org/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Building Capacity for Climate-Resilient Food Systems in Africa",
+      "acronym": "CaReFoAfrica",
+      "applicationUrl": "https://www.carefoafrica.org/bursary-application-form/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility for high skilled scientists and entrepreneurs on orphan crops in higher education for accelerated climate change solutions in Africa",
+      "acronym": "ORPHAN",
+      "applicationUrl": "https://www.orphancrops.ci/call-for-application-2026.html",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Climate Research and Education to Advancing Green Development in Africa",
+      "acronym": "CREATE-GreenAfrica",
+      "applicationUrl": "https://create-greenafrica.udsm.ac.tz/component/content/article/selection-results-for-2025-2026-scholarship-applications?catid=10&Itemid=228",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Capacity Building of African Young Scientists in Precision Agriculture Through Cross-Regional Academic Mobility for Enhanced Climate-Smart Agri-Food System",
+      "acronym": "PATH",
+      "applicationUrl": "https://path-intraafrica.org/call-for-scholarship-application-for-credit-seeking-msc-in-the-framework-of-the-intra-africapath-project/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Towards Enhancing Sustainable and Innovative Environmental Change Solutions",
+      "acronym": "TESIECS",
+      "applicationUrl": "https://tesiecs.uj.ac.za/expression-of-interest/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility 4 Agricultural International Networks Supporting Thematic Resilience and Enhancing Adaptation and Mitigation (MAIN)STREAM",
+      "acronym": "MAINSTREAM",
+      "applicationUrl": "https://mainstreamafrica.org/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Promoting inclusive Homegrown clean energy solutions for climate change adaptation and mitigation in Africa",
+      "acronym": "HCE Solutions",
+      "applicationUrl": "https://hce.futminna.edu.ng/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility for Plant Genomics Scholars to Accelerate Climate-Smart Adaptation Options and Food Security in Africa II",
+      "acronym": "GENES II",
+      "applicationUrl": "https://genes-intra-africa.org/applynow.php",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Africa Sustainable Infrastructure Mobility",
+      "acronym": "ASIM",
+      "applicationUrl": "https://asim.uj.ac.za/index.php/credit-mobility-application-form/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Réseau de formation de scientifiques africains dans le domaine de l’ingénierie pour un développement industriel durable en Afrique",
+      "acronym": "RésIng",
+      "applicationUrl": "https://resing.inphb.ci/pdf/appels%20a%20candidatures/2024/CALL%20FOR%20MASTER%20APPLICATIONS%202024.pdf",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Pan-African Planetary and Space Science Network",
+      "acronym": "PAPSSN",
+      "applicationUrl": "https://scholarship.papssnmobility.org/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility for Research and African Integration through Health Sciences",
+      "acronym": "BRAINS",
+      "applicationUrl": "https://brains.strathmore.edu/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Electrochemical Science and Innovative Materials for Sustainable Africa Development",
+      "acronym": "ESIMSAD",
+      "applicationUrl": "https://esimsad.org/index.php/online-applications/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Partnering for Health Professional Training in African Universities",
+      "acronym": "P4PHTII",
+      "applicationUrl": "https://phpt.mu.ac.ke/index.php/staff-mobility-application/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility to Train Agribusiness and Food Systems Scientists for African Agriculture",
+      "acronym": "TAFSA",
+      "applicationUrl": "https://www.tafsa.org/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Mobility in Innovative Green Technologies for Climate Change Mitigation and Sustainable Bioeconomy",
+      "acronym": "INTERACT-Africa",
+      "applicationUrl": "https://interactafrica.mu.ac.ke/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Partnership to Strengthen Graduate Training and Research Capacity for developing climate smart agrifood systems in Central and East Africa",
+      "acronym": "CSAS",
+      "applicationUrl": "https://c-sas.org/application_form.html",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Green, REsilient and ENtrepreneurial Science, Technology, Engineering and Mathematics for Africa",
+      "acronym": "GREEN-STEM",
+      "applicationUrl": "https://green-stem.uonbi.ac.ke/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    },
+    {
+      "catalogue": "intra_africa",
+      "title": "Grow Green Africa (Gr2A): Building Climate Change Resilience through Smart Green Technologies",
+      "acronym": "Gr2A",
+      "applicationUrl": "https://gr2a.org/intra-africa-mobility-application-cohort-3/",
+      "sourceUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en",
+      "hubUrl": "https://www.eacea.ec.europa.eu/scholarships/intra-africa-scholarships-0_en"
+    }
+  ]
+}

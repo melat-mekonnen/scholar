@@ -86,7 +86,7 @@ function warwickStudyProgrammeRecords() {
     applicationUrl: entry.url,
     sourceUrl: entry.url,
     description: programmeDescription(entry),
-    isRolling: true,
+    isRolling: false,
   }));
 }
 

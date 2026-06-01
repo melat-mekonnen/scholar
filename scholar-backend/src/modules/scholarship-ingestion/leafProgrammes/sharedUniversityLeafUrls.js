@@ -2,10 +2,12 @@ const { isBareHomepageUrl } = require("../descriptionQuality");
 
 const CSC_SHARED_SCHEME =
   "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-shared-scholarships/";
+const CSC_APPLY = "https://cscuk.fcdo.gov.uk/apply/";
 
 /** Leaf funding pages for Shared Scholarship university placements (not homepages). */
 const SHARED_SCHOLARSHIP_LEAF_URLS = {
-  bournemouth: "https://www.bournemouth.ac.uk/study/fees-funding/scholarships",
+  bournemouth: CSC_APPLY,
+  durham: CSC_APPLY,
   brunel:
     "https://www.brunel.ac.uk/study/admissions/funding/scholarships-bursaries/postgraduate-scholarships",
   "harper-adams": "https://www.harper-adams.ac.uk/postgraduate/fees-and-funding/scholarships/",
@@ -42,5 +44,7 @@ function resolveSharedUniversityUrl(entry) {
 
 module.exports = {
   SHARED_SCHOLARSHIP_LEAF_URLS,
+  CSC_APPLY,
+  CSC_SHARED_SCHEME,
   resolveSharedUniversityUrl,
 };

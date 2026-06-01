@@ -1,6 +1,10 @@
 const COMMONWEALTH_SHARED_CONTACTS =
   "https://cscuk.fcdo.gov.uk/commonwealth-shared-scholarships-university-contact-details/";
-const { resolveSharedUniversityUrl } = require("./sharedUniversityLeafUrls");
+const {
+  resolveSharedUniversityUrl,
+  CSC_APPLY,
+  CSC_SHARED_SCHEME,
+} = require("./sharedUniversityLeafUrls");
 const COMMONWEALTH_SHARED_SCHEME =
   "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-shared-scholarships/";
 const CSC_CENTRAL = "https://cscuk.fcdo.gov.uk/apply/";
@@ -9,6 +13,8 @@ const SHARED_CYCLE = {
   academicYear: "2026/27",
   studyStart: "September/October 2026",
   applicationStatus: "closed",
+  applicationStartDate: "2025-11-13",
+  applicationEndDate: "2025-12-09",
 };
 
 function sharedDescription({ university, slots, email, notes }) {
@@ -349,6 +355,9 @@ const COMMONWEALTH_SHARED_UNIVERSITIES = [
 function commonwealthSharedLeafProgrammes() {
   return COMMONWEALTH_SHARED_UNIVERSITIES.map((entry) => {
     const website = resolveSharedUniversityUrl(entry);
+    const applyUrl = CSC_APPLY;
+    const sourceUrl =
+      website === CSC_APPLY || website === CSC_SHARED_SCHEME ? CSC_SHARED_SCHEME : website;
     return {
       externalId: `commonwealth-shared-${entry.slug}`,
       title: `Commonwealth Shared Scholarship — ${entry.university} (${entry.slots} awards)`,
@@ -359,12 +368,12 @@ function commonwealthSharedLeafProgrammes() {
       fieldOfStudy: "approved master's courses at participating UK universities",
       fundingType: "fully_funded",
       amount: `${entry.slots} fully funded Shared Scholarship award${entry.slots === 1 ? "" : "s"}`,
-      applicationStartDate: null,
-      applicationEndDate: null,
-      deadline: null,
-      url: website,
-      applicationUrl: website,
-      sourceUrl: website,
+      applicationStartDate: SHARED_CYCLE.applicationStartDate,
+      applicationEndDate: SHARED_CYCLE.applicationEndDate,
+      deadline: SHARED_CYCLE.applicationEndDate,
+      url: applyUrl,
+      applicationUrl: applyUrl,
+      sourceUrl,
       secondaryApplyUrl: CSC_CENTRAL,
       description: sharedDescription(entry),
       eligibleRegions: ["africa", "commonwealth", "developing"],

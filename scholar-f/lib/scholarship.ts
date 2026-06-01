@@ -1,4 +1,10 @@
 import { apiFetchJson } from "@/lib/api"
+import {
+  formatScholarshipDeadlineLabel as formatDeadlineLabelFriendly,
+  normalizeScholarshipDateField,
+  humanizeIsoDatesInText,
+  formatScholarshipDateRange,
+} from "@/lib/scholarship-dates"
 
 export type DegreeLevel = "high_school" | "bachelor" | "master" | "phd"
 
@@ -57,12 +63,11 @@ export function formatScholarshipDeadlineLabel(s: {
   endDate?: string
   isRolling?: boolean
 }): string | null {
-  if (s.isRolling && !s.deadline && !s.endDate) return "Open / rolling"
-  if (s.endDate) return s.endDate
-  if (s.deadline) return s.deadline
-  if (s.isRolling) return "Open / rolling"
-  return null
+  return formatDeadlineLabelFriendly(s)
 }
+
+/** Combined open–close label for cards. */
+export { formatScholarshipDateRange } from "@/lib/scholarship-dates"
 
 export function hasScholarshipDateInfo(s: {
   deadline?: string
@@ -119,17 +124,19 @@ export function normalizeScholarship(raw: unknown): ScholarshipPublic {
     degreeLevel: dl,
     fieldOfStudy: str(r.fieldOfStudy) ?? str(r.field_of_study),
     fundingType: str(r.fundingType) ?? str(r.funding_type),
-    deadline: str(r.deadline),
-    startDate:
+    deadline: normalizeScholarshipDateField(str(r.deadline)),
+    startDate: normalizeScholarshipDateField(
       str(r.startDate) ??
-      str(r.start_date) ??
-      str(r.applicationStartDate) ??
-      str(r.application_start_date),
-    endDate:
+        str(r.start_date) ??
+        str(r.applicationStartDate) ??
+        str(r.application_start_date),
+    ),
+    endDate: normalizeScholarshipDateField(
       str(r.endDate) ??
-      str(r.end_date) ??
-      str(r.applicationEndDate) ??
-      str(r.application_end_date),
+        str(r.end_date) ??
+        str(r.applicationEndDate) ??
+        str(r.application_end_date),
+    ),
     isRolling: bool(r.isRolling) ?? bool(r.is_rolling),
     amount: str(r.amount),
     description: str(r.description),
@@ -188,6 +195,16 @@ export function getApplicationUrlHost(url?: string): string | undefined {
   }
 }
 
+function trimUrlToken(url: string): string {
+  return url.replace(/[.,;:!?)]+$/g, "")
+}
+
+function urlInTextMatchesApply(fragment: string, applyNorm: string): boolean {
+  const match = fragment.match(/https?:\/\/\S+/i)
+  if (!match) return false
+  return normalizeUrlForCompare(trimUrlToken(match[0])) === applyNorm
+}
+
 /** Remove boilerplate URLs from description text when Apply already provides the link. */
 export function stripRedundantDescriptionUrls(text: string, applyUrl?: string): string {
   let t = String(text || "").trim()
@@ -195,44 +212,159 @@ export function stripRedundantDescriptionUrls(text: string, applyUrl?: string): 
 
   const applyNorm = applyUrl ? normalizeUrlForCompare(applyUrl) : null
 
-  const trailingPatterns = [
+  const inlinePatterns = [
     /Official course page:\s*https?:\/\/\S+/gi,
     /Course page:\s*https?:\/\/\S+/gi,
     /Official scheme:[^\n]*https?:\/\/\S+/gi,
     /Apply via the official page:\s*https?:\/\/\S+/gi,
-    /Use the official course page[^\n]*https?:\/\/\S+/gi,
+    /Use the official course page to review entry requirements, fees, and how to apply for admission\.?/gi,
+    /International students may also explore separate scholarship listings linked to Warwick\.?/gi,
+    /\(not a funded scholarship listing\)/gi,
   ]
-  for (const pattern of trailingPatterns) {
+  for (const pattern of inlinePatterns) {
     t = t.replace(pattern, "").trim()
+  }
+
+  if (applyNorm) {
+    t = t.replace(/https?:\/\/[^\s<>"']+/gi, (raw) => {
+      const href = trimUrlToken(raw)
+      return normalizeUrlForCompare(href) === applyNorm ? "" : raw
+    })
   }
 
   const lines = t
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => {
-      if (!line) return true
+      if (!line) return false
       const bare = line.replace(/^[-*•]\s+/, "").trim()
-      if (!/^https?:\/\//i.test(bare)) return true
-      if (applyNorm && normalizeUrlForCompare(bare) === applyNorm) return false
+      if (applyNorm) {
+        if (/^https?:\/\//i.test(bare) && normalizeUrlForCompare(trimUrlToken(bare)) === applyNorm) {
+          return false
+        }
+        if (urlInTextMatchesApply(line, applyNorm)) return false
+      }
       return true
     })
 
-  t = lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()
+  t = lines.join("\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim()
   return t
 }
 
-function isOfficialLinksOnlySection(body: string, applyUrl?: string): boolean {
-  if (!applyUrl) return false
-  const applyNorm = normalizeUrlForCompare(applyUrl)
+function isMetaOnlyEligibility(body: string): boolean {
   const lines = body
     .split("\n")
-    .map((l) => l.replace(/^[-*•]\s+/, "").trim())
+    .map((l) => l.trim())
     .filter(Boolean)
   if (!lines.length) return true
-  return lines.every((line) => normalizeUrlForCompare(line) === applyNorm)
+  return lines.every(
+    (l) =>
+      /^Degree level:/i.test(l) ||
+      /^Field of study:/i.test(l) ||
+      /^Host\s*\/?\s*destination:/i.test(l) ||
+      /^Eligible regions:/i.test(l),
+  )
 }
 
-/** Sections ready for the detail UI (no duplicate apply URLs). */
+function isNotFundedOnlyFunding(body: string): boolean {
+  const lines = body
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+  if (!lines.length) return true
+  return lines.every((l) => /^Funding type:/i.test(l) || /not funded/i.test(l))
+}
+
+const ISO_DATE_LINE = /\b\d{4}-\d{2}-\d{2}\b/
+
+function isImportantDatesOnlySection(body: string): boolean {
+  const lines = body
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+  if (!lines.length) return true
+  return lines.every(
+    (l) =>
+      /^Application opens:/i.test(l) ||
+      /^Application closes:/i.test(l) ||
+      /^Deadline:/i.test(l) ||
+      /^Rolling intake/i.test(l) ||
+      /^Applications close/i.test(l) ||
+      /^Applications open/i.test(l) ||
+      (ISO_DATE_LINE.test(l) && l.length < 80),
+  )
+}
+
+const STUB_DESCRIPTION_PATTERNS = [
+  /page you requested could not be found/i,
+  /try refining your search/i,
+  /error\s*404|404 not found/i,
+  /Open toolbar Accessibility/i,
+  /Increase Text Decrease Text/i,
+  /Cookie Policy|Accept all cookies/i,
+  /Invest in yourself ! The cost of living and studying varies across the United States/i,
+  /Start your financial planning as early as possible/i,
+  /Information on ways to fund studying in the United States/i,
+  /^Finance Your Studies$/i,
+  /^Research Your Options$/i,
+  /^Complete Your Application$/i,
+  /^Apply for Your Student Visa$/i,
+  /^Prepare for Your Departure$/i,
+]
+
+/** True when raw API description is junk, placeholder, or too short for students. */
+export function isStubDescription(description?: string): boolean {
+  const text = String(description || "").trim()
+  if (text.length < 40) return true
+  if (STUB_DESCRIPTION_PATTERNS.some((re) => re.test(text))) return true
+  return false
+}
+
+/** Sections with enough real copy for the detail panel (after cleanup). */
+export function hasProductionReadyDescription(
+  description?: string,
+  applyUrl?: string,
+): boolean {
+  if (isStubDescription(description)) return false
+  const sections = prepareDescriptionSections(description, applyUrl)
+  const chars = sections.reduce((n, s) => n + s.body.trim().length, 0)
+  return chars >= 40
+}
+
+const BOILERPLATE_LINE_PATTERNS = [
+  /^Funding type:/i,
+  /^Degree level:/i,
+  /^Field of study:/i,
+  /^Host\s*\/?\s*destination:/i,
+  /^Eligible regions:/i,
+  /^Funding type:.*not funded/i,
+]
+
+function cleanDescriptionBody(text: string, applyUrl?: string): string {
+  let t = stripRedundantDescriptionUrls(text, applyUrl)
+  t = humanizeIsoDatesInText(t)
+  const lines = t
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return false
+      if (BOILERPLATE_LINE_PATTERNS.some((re) => re.test(line))) return false
+      return true
+    })
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()
+}
+
+function shouldDropDetailSection(heading: string, body: string, applyUrl?: string): boolean {
+  const h = heading.trim().toLowerCase()
+  if (!body.trim()) return true
+  if (applyUrl && (h === "official links" || h === "how to apply")) return true
+  if (h === "eligibility" && isMetaOnlyEligibility(body)) return true
+  if (h === "funding" && isNotFundedOnlyFunding(body)) return true
+  if ((h === "important dates" || h === "dates") && isImportantDatesOnlySection(body)) return true
+  return false
+}
+
+/** Sections ready for the detail UI (no duplicate apply URLs or card-meta noise). */
 export function prepareDescriptionSections(
   description?: string,
   applyUrl?: string,
@@ -241,21 +373,17 @@ export function prepareDescriptionSections(
     ? getApplicationUrl({ id: "", title: "", country: "", degreeLevel: "bachelor", applicationUrl: applyUrl })
     : undefined
 
-  return parseDescriptionSections(description)
+  const sections = parseDescriptionSections(description)
     .map((section) => ({
       heading: section.heading,
-      body: stripRedundantDescriptionUrls(section.body, apply),
+      body: cleanDescriptionBody(section.body, apply),
     }))
-    .filter((section) => {
-      if (!section.body.trim()) return false
-      if (section.heading.toLowerCase() === "official links" && isOfficialLinksOnlySection(section.body, apply)) {
-        return false
-      }
-      if (section.heading.toLowerCase() === "how to apply" && isOfficialLinksOnlySection(section.body, apply)) {
-        return false
-      }
-      return true
-    })
+    .filter((section) => !shouldDropDetailSection(section.heading, section.body, apply))
+
+  if (sections.length === 1 && sections[0].heading.toLowerCase() === "overview") {
+    return sections
+  }
+  return sections
 }
 
 export function degreeLevelLabel(degreeLevel?: string): string {

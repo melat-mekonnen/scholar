@@ -35,7 +35,7 @@ export function StudentPortalSidebar({
   )
 
   return (
-    <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex md:min-h-screen md:flex-col">
+    <aside className="hidden h-full w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 md:flex">
       <div className="flex min-h-0 flex-1 flex-col p-6">
         <div className="mb-8 flex items-center gap-3">
           <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />

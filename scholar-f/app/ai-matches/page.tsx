@@ -29,7 +29,12 @@ import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
-import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
+import {
+  formatScholarshipDeadlineLabel,
+  getApplicationUrl,
+  openScholarshipApplication,
+  type ScholarshipPublic,
+} from "@/lib/scholarship"
 
 type RecommendationItem = {
   scholarship: ScholarshipPublic
@@ -44,17 +49,6 @@ type RecommendationsResponse = {
   source?: string
   studentText?: string
   results?: RecommendationItem[]
-}
-
-function formatDate(date?: string) {
-  if (!date) return ""
-  const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return date
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
 }
 
 export default function AiMatchesPage() {
@@ -207,7 +201,9 @@ export default function AiMatchesPage() {
                   <CardContent className="space-y-3 pt-0">
                     <p className="text-sm text-slate-500">
                       {item.scholarship.country || "N/A"}
-                      {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
+                      {formatScholarshipDeadlineLabel(item.scholarship)
+                        ? ` · ${formatScholarshipDeadlineLabel(item.scholarship)}`
+                        : ""}
                     </p>
                     {Array.isArray(item.matchedInterests) && item.matchedInterests.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">

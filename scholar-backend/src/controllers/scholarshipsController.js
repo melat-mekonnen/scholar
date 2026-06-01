@@ -8,6 +8,28 @@ const {
   assertCanMutateScholarship,
   parseDeadline,
 } = require("../usecases/scholarships/scholarshipCrudRules");
+const { validateSearchInputs } = require("../usecases/scholarships/searchValidation");
+const { mergePublicSearchResults } = require("../utils/mergePublicSearchResults");
+const {
+  buildRegionFilterOptions,
+  buildFieldCategoryFilterOptions,
+  expandRegionsToCountries,
+  expandFieldCategoriesToFields,
+} = require("../utils/scholarshipBrowseFilters");
+
+let publicFilterMetaCache = null;
+let publicFilterMetaCacheAt = 0;
+const FILTER_META_TTL_MS = 60_000;
+
+async function getPublicFilterMeta() {
+  const now = Date.now();
+  if (publicFilterMetaCache && now - publicFilterMetaCacheAt < FILTER_META_TTL_MS) {
+    return publicFilterMetaCache;
+  }
+  publicFilterMetaCache = await repo.getPublicFilters();
+  publicFilterMetaCacheAt = now;
+  return publicFilterMetaCache;
+}
 
 const repo = new ScholarshipRepository();
 const programmeRepo = new StudyProgrammeRepository();
@@ -151,12 +173,15 @@ async function list(req, res, next) {
 
 async function getFilters(req, res, next) {
   try {
-    const filters = await repo.getPublicFilters();
+    const filters = await getPublicFilterMeta();
     return res.json({
-      countries: filters.countries || [],
+      regions: buildRegionFilterOptions(filters.countryCounts || []),
+      fieldCategories: buildFieldCategoryFilterOptions(filters.fieldCounts || []),
       degreeLevels: filters.degreeLevels || [],
-      fieldsOfStudy: filters.fieldsOfStudy || [],
       fundingTypes: filters.fundingTypes || [],
+      // Legacy flat lists (optional clients)
+      countries: filters.countries || [],
+      fieldsOfStudy: filters.fieldsOfStudy || [],
     });
   } catch (err) {
     return next(err);
@@ -183,10 +208,23 @@ async function search(req, res, next) {
     } = req.query;
 
     const lang = parseLang(req.query);
-    const countries = normalizeMulti(req.query.country);
+    const regionIds = normalizeMulti(req.query.region);
+    const fieldCategoryIds = normalizeMulti(req.query.field_category);
+    let countries = normalizeMulti(req.query.country);
+    let fieldsOfStudy = normalizeMulti(req.query.field_of_study);
     const degreeLevels = normalizeMulti(req.query.degree_level);
-    const fieldsOfStudy = normalizeMulti(req.query.field_of_study);
     const fundingTypes = normalizeMulti(req.query.funding_type);
+
+    const filterMeta = await getPublicFilterMeta();
+    if (regionIds.length) {
+      countries = expandRegionsToCountries(regionIds, filterMeta.countries || []);
+    }
+    if (fieldCategoryIds.length) {
+      fieldsOfStudy = expandFieldCategoriesToFields(
+        fieldCategoryIds,
+        filterMeta.fieldsOfStudy || [],
+      );
+    }
 
     const parsedPage = page ? Math.max(parseInt(page, 10), 1) : 1;
     const parsedLimit = limit ? Math.min(Math.max(parseInt(limit, 10), 1), 100) : 20;
@@ -194,6 +232,19 @@ async function search(req, res, next) {
     const bookmarkUserId = getBookmarkUserId(req);
 
     const isPrivileged = req.user && (req.user.role === "owner" || req.user.role === "admin");
+
+    validateSearchInputs({
+      sort,
+      degreeLevels,
+      fundingTypes,
+      regions: regionIds,
+      fieldCategories: fieldCategoryIds,
+      deadlineFrom,
+      deadlineTo,
+      status,
+      isPrivileged,
+    });
+
     const includeProgrammes = shouldIncludeProgrammes(req.query, degreeLevels);
 
     const scholarshipResult = await repo.searchPublic({
@@ -229,9 +280,14 @@ async function search(req, res, next) {
     }
 
     const scholarshipRows = scholarshipResult.results.map((r) => mapPublicScholarship(r, lang));
-    const merged = [...scholarshipRows, ...programmeResults]
-      .sort((a, b) => String(a.title).localeCompare(String(b.title)))
-      .slice(0, parsedLimit);
+    const merged =
+      includeProgrammes && programmeResults.length
+        ? mergePublicSearchResults(scholarshipRows, programmeResults, {
+            sort: sort || "relevance",
+            q,
+            limit: parsedLimit,
+          })
+        : scholarshipRows.slice(0, parsedLimit);
 
     return res.json({
       results: merged,

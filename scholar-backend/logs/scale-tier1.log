@@ -1,0 +1,59 @@
+Before: { visible: 195, verified_all: 249 } tiers: [ 1 ]
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [TLSSocket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 close listeners added to [Writable]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 close listeners added to [Writable]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [TLSSocket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [TLSSocket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [TLSSocket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:78452) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [TLSSocket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+Discovery stats: {
+  "hubs": 12,
+  "linksDiscovered": 273,
+  "fetched": 273,
+  "upsertCandidates": 23,
+  "skipped": {
+    "fetch_no_description": 47,
+    "duplicate_apply_url": 19,
+    "classifier_reject": 157,
+    "no_deadline_or_rolling": 13,
+    "deadline_expired": 14
+  },
+  "hubKeys": [
+    "daad_database",
+    "daad_ethiopia",
+    "educationusa",
+    "fulbright_foreign",
+    "erasmus_mundus_catalogue",
+    "turkiye_burslari",
+    "csc_china",
+    "study_in_korea",
+    "mext_japan",
+    "stipendium_hungaricum",
+    "study_in_italy",
+    "singa_singapore"
+  ]
+}
+Exported 273 discovered URLs to /Users/Kenan/Downloads/scholar/scholar-backend/data/tier1-discovered-urls.txt
+{
+  "source": "REGISTRY_SCALE",
+  "upserted": 23,
+  "verified": 0,
+  "needsReview": 23,
+  "dedupedByApplyUrl": 0,
+  "before": {
+    "visible": 195,
+    "verified_all": 249
+  },
+  "after": {
+    "visible": 195,
+    "verified_all": 249
+  },
+  "skipped": {
+    "fetch_no_description": 47,
+    "duplicate_apply_url": 19,
+    "classifier_reject": 157,
+    "no_deadline_or_rolling": 13,
+    "deadline_expired": 14
+  }
+}

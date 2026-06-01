@@ -9,6 +9,10 @@ const ALLOWED_SORT = new Set([
 const ALLOWED_DEGREE_LEVELS = new Set(["high_school", "bachelor", "master", "phd"]);
 const ALLOWED_FUNDING_TYPES = new Set(["fully_funded", "partially_funded", "self_funded"]);
 const ALLOWED_STATUS = new Set(["all", "draft", "pending", "verified", "rejected", "expired"]);
+const {
+  isAllowedRegionId,
+  isAllowedFieldCategoryId,
+} = require("../../utils/scholarshipBrowseFilters");
 
 function ensureDateLike(value, fieldName) {
   if (!value) return;
@@ -24,6 +28,8 @@ function validateSearchInputs({
   sort,
   degreeLevels,
   fundingTypes,
+  regions,
+  fieldCategories,
   deadlineFrom,
   deadlineTo,
   status,
@@ -46,6 +52,22 @@ function validateSearchInputs({
   for (const f of fundingTypes || []) {
     if (!ALLOWED_FUNDING_TYPES.has(String(f))) {
       const err = new Error("Invalid funding_type filter value");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  for (const r of regions || []) {
+    if (!isAllowedRegionId(String(r))) {
+      const err = new Error("Invalid region filter value");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  for (const c of fieldCategories || []) {
+    if (!isAllowedFieldCategoryId(String(c))) {
+      const err = new Error("Invalid field_category filter value");
       err.statusCode = 400;
       throw err;
     }

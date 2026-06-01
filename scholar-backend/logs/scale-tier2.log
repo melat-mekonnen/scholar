@@ -1,0 +1,66 @@
+Before: { visible: 217, verified_all: 271 } tiers: [ 2 ]
+[scale] hub start tier=2 key=mastercard_foundation maxLinks=60
+[scale] hub done key=mastercard_foundation links=3 candidates=0
+[scale] hub start tier=2 key=african_union_education maxLinks=60
+[scale] hub done key=african_union_education links=1 candidates=0
+[scale] hub start tier=2 key=rsif_paset maxLinks=60
+[scale] hub done key=rsif_paset links=1 candidates=0
+[scale] hub start tier=2 key=afdb maxLinks=60
+[scale] hub done key=afdb links=1 candidates=0
+[scale] hub start tier=2 key=amci_morocco maxLinks=60
+[scale] hub done key=amci_morocco links=1 candidates=0
+[scale] hub start tier=2 key=study_in_egypt maxLinks=60
+[scale] hub done key=study_in_egypt links=0 candidates=0
+[scale] hub start tier=2 key=alu_rwanda maxLinks=60
+[scale] hub done key=alu_rwanda links=1 candidates=0
+[scale] hub start tier=2 key=university_of_rwanda maxLinks=60
+[scale] hub done key=university_of_rwanda links=0 candidates=0
+[scale] hub start tier=2 key=uct_south_africa maxLinks=60
+[scale] hub done key=uct_south_africa links=1 candidates=0
+[scale] hub start tier=2 key=up_south_africa maxLinks=60
+[scale] hub done key=up_south_africa links=1 candidates=0
+[scale] hub start tier=2 key=stellenbosch maxLinks=60
+[scale] hub done key=stellenbosch links=1 candidates=0
+Discovery stats: {
+  "hubs": 11,
+  "linksDiscovered": 11,
+  "fetched": 11,
+  "upsertCandidates": 0,
+  "skipped": {
+    "classifier_reject": 2,
+    "fetch_no_description": 9
+  },
+  "hubKeys": [
+    "mastercard_foundation",
+    "african_union_education",
+    "rsif_paset",
+    "afdb",
+    "amci_morocco",
+    "study_in_egypt",
+    "alu_rwanda",
+    "university_of_rwanda",
+    "uct_south_africa",
+    "up_south_africa",
+    "stellenbosch"
+  ]
+}
+Exported 11 discovered URLs to data/tier2-discovered-urls.txt
+{
+  "source": "REGISTRY_SCALE",
+  "upserted": 0,
+  "verified": 0,
+  "needsReview": 0,
+  "dedupedByApplyUrl": 0,
+  "before": {
+    "visible": 217,
+    "verified_all": 271
+  },
+  "after": {
+    "visible": 217,
+    "verified_all": 271
+  },
+  "skipped": {
+    "classifier_reject": 2,
+    "fetch_no_description": 9
+  }
+}

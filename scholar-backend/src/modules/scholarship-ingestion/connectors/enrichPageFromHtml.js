@@ -4,6 +4,7 @@ const {
   isLowQualityTitle,
   mergeDescription,
 } = require("../descriptionQuality");
+const { resolveApplicationDates } = require("../../../utils/resolveApplicationDates");
 
 function decodeHtmlEntities(value) {
   return String(value || "")
@@ -217,6 +218,61 @@ function extractFundingHint(text) {
   return null;
 }
 
+function toAbsoluteUrl(href, baseUrl) {
+  try {
+    return new URL(href, baseUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
+const APPLY_LINK_SKIP = /\/(login|sign-?in|register|privacy|contact|about|news|blog|cookie)/i;
+const APPLY_LINK_TEXT =
+  /\b(apply\s+now|apply\s+online|start\s+(your\s+)?application|submit\s+application|application\s+form|apply\s+here|how\s+to\s+apply|online\s+application)\b/i;
+
+/**
+ * Prefer an on-page apply CTA link over the listing URL when present.
+ */
+function extractApplicationLinkFromHtml(html, pageUrl) {
+  const pageHost = (() => {
+    try {
+      return new URL(pageUrl).hostname.replace(/^www\./, "");
+    } catch {
+      return "";
+    }
+  })();
+
+  const candidates = [];
+  const re = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let m;
+  while ((m = re.exec(html))) {
+    const href = decodeHtmlEntities((m[1] || "").trim());
+    const text = stripTags(m[2]).slice(0, 120);
+    if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:")) {
+      continue;
+    }
+    const abs = toAbsoluteUrl(href, pageUrl);
+    if (!abs || APPLY_LINK_SKIP.test(abs)) continue;
+    if (!APPLY_LINK_TEXT.test(text) && !/\/apply|application|admissions\/apply/i.test(abs)) continue;
+    const host = (() => {
+      try {
+        return new URL(abs).hostname.replace(/^www\./, "");
+      } catch {
+        return "";
+      }
+    })();
+    const sameHost = host === pageHost;
+    candidates.push({ url: abs, sameHost, textLen: text.length });
+  }
+
+  if (!candidates.length) return pageUrl;
+  candidates.sort((a, b) => {
+    if (a.sameHost !== b.sameHost) return a.sameHost ? -1 : 1;
+    return b.textLen - a.textLen;
+  });
+  return candidates[0].url;
+}
+
 function is404PageHtml(html, titleRaw) {
   const title = String(titleRaw || "");
   if (/404|not found/i.test(title) && title.length < 80) return true;
@@ -291,19 +347,29 @@ function enrichRecordFromHtml(html, url) {
 
   const deadline = extractDeadlineFromHtml(html);
   const fundingType = extractFundingHint(`${description || ""} ${paragraphs.join(" ")}`);
+  const applicationUrl = extractApplicationLinkFromHtml(html, url);
+  const resolvedDates = resolveApplicationDates({
+    deadline,
+    description: bestDescription || description || "",
+    title: cleanedTitle || "",
+  });
 
   return {
     title: cleanedTitle && !isLowQualityTitle(cleanedTitle) ? cleanedTitle : null,
     description: descriptionFromSite ? bestDescription : bestDescription,
     descriptionFromSite,
-    deadline,
+    deadline: resolvedDates.deadline,
+    applicationStartDate: resolvedDates.applicationStartDate,
+    applicationEndDate: resolvedDates.applicationEndDate,
+    isRolling: resolvedDates.isRolling,
     fundingType,
-    applicationUrl: url,
+    applicationUrl,
   };
 }
 
 module.exports = {
   enrichRecordFromHtml,
+  extractApplicationLinkFromHtml,
   decodeHtmlEntities,
   cleanText,
 };

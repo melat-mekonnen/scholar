@@ -1,66 +1,59 @@
-### Scholar Backend (Express + Neon Postgres)
+# Scholar Backend
 
-Node.js + Express backend for your Next.js scholarship dashboard. Supports:
+Express API and Postgres data layer for **EthioScholar**. Handles authentication, student profiles, scholarships search and bookmarks, applications, community, documents, subscriptions, admin/owner/manager routes, and scholarship ingestion.
 
-- **Email/password auth**: `/auth/signup`, `/auth/login`, `/auth/me`
-- **Google OAuth2 auth**: `/auth/google`, `/auth/google/callback`
-- **Dashboard summary**: `/dashboard/summary` (auth required)
+For a project overview, Docker quick start, and monorepo layout, see the [root README](../README.md).
 
-### 1. Setup
-
-- **Install dependencies**:
+## Setup
 
 ```bash
-cd d:\scholar-backend
+cd scholar-backend
 npm install
 ```
 
-- **Create `.env`** based on `.env.example` and fill:
+Create `.env` from `.env.example` and configure:
 
-- **`PORT`** (e.g. `4000`)
-- **`DATABASE_URL`** (Neon Postgres connection string)
-- **`JWT_SECRET`**
-- **`FRONTEND_APP_URL`** (e.g. `http://localhost:3000`)
-- **`GOOGLE_CLIENT_ID`**, **`GOOGLE_CLIENT_SECRET`**
-- **`GOOGLE_REDIRECT_URI`** (e.g. `http://localhost:4000/auth/google/callback`)
+| Variable | Purpose |
+|----------|---------|
+| `PORT` | API port (default `4000`) |
+| `DATABASE_URL` | Postgres connection string (Neon or local) |
+| `JWT_SECRET` | Signing secret for session tokens |
+| `FRONTEND_APP_URL` | Next.js origin (e.g. `http://localhost:3000`) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | Google OAuth |
+| `AI_SERVICE_URL` | Optional; default `http://127.0.0.1:8010` for `scholar-ai` |
 
-- **Create tables** using `db/schema.sql` (single DDL file for this backend).
+Apply the schema from `db/schema.sql`.
 
-#### Clean local database (removes messy / duplicate tables)
+### Clean local database (dev only)
 
-If the database previously had another app (e.g. Prisma) **and** this app’s tables, you will see duplicate or unused relations. For **local development only**, reset `public` and reapply the canonical schema:
+If the database has leftover tables from another setup, reset `public` and reapply the canonical schema:
 
 ```bash
-set CONFIRM_DB_RESET=yes
-npm run db:reset
+CONFIRM_DB_RESET=yes npm run db:reset
 ```
 
-Then restart the API. **Never** set `CONFIRM_DB_RESET` against production or shared databases.
+**Never** run this against production or shared databases.
 
-#### Test users (one account per role — routing checks)
-
-After DB is ready, seed dev-only accounts (same password for all):
+### Test users (role routing)
 
 ```bash
 npm run seed:test-roles
 ```
 
-Sign in at the frontend with each email; you should land on:
+| Role | Landing path after sign-in |
+|------|----------------------------|
+| student | `/dashboard` |
+| manager | `/manager` |
+| owner | `/owner` |
+| admin | `/admin` |
 
-| Role    | Path after sign-in |
-|---------|--------------------|
-| student | `/dashboard`       |
-| manager | `/manager`         |
-| owner   | `/owner`           |
-| admin   | `/admin`           |
-
-With the API running, you can sanity-check login responses:
+With the API running:
 
 ```bash
 npm run verify:role-routing
 ```
 
-### 2. Run the server
+## Run
 
 ```bash
 npm run dev
@@ -68,29 +61,19 @@ npm run dev
 
 Server listens on `PORT` (default `4000`).
 
-### 3. HTTP API
+## Core HTTP API
 
-- **POST `/auth/signup`**
+- **POST `/auth/signup`** — `{ fullName, email, password }` → `{ user, token }`
+- **POST `/auth/login`** — same response shape
+- **GET `/auth/me`** — `Authorization: Bearer <token>`
+- **GET `/dashboard/summary`** — authenticated dashboard stats and recommendations
+- **GET `/auth/google`** — start Google OAuth
+- **GET `/auth/google/callback`** — redirects to `<FRONTEND_APP_URL>/auth/callback?token=<jwt>`
 
-Body:
+The frontend stores the token and routes by role.
 
-```json
-{ "fullName": "string", "email": "string", "password": "string" }
-```
+## Catalog and ingestion
 
-Returns:
+Scripts under `scripts/` support seeding, leaf-catalog assembly, registry-scale ingestion, URL verification, staging promotion, and exports (e.g. `npm run export:visible-csv`). Ingestion connectors and safety guards live in `src/modules/scholarship-ingestion/`.
 
-```json
-{ "user": { "id": "uuid", "fullName": "string", "email": "string" }, "token": "jwt-token-string" }
-```
-
-- **POST `/auth/login`** – same response shape.
-- **GET `/auth/me`** – requires `Authorization: Bearer <token>`.
-- **GET `/dashboard/summary`** – requires `Authorization: Bearer <token>`, returns stats, recommended scholarships, and recent activity.
-- **GET `/auth/google`** – starts Google OAuth.
-- **GET `/auth/google/callback`** – Google redirects here; backend creates/loads user and then redirects to:
-
-`<FRONTEND_APP_URL>/auth/callback?token=<jwt>`
-
-Your Next.js pages can read `token` from the query, store it (or set a cookie), and then `router.push("/dashboard")`.
-
+Enable ingestion via environment variables (`INGESTION_ENABLED`, per-source flags, `INGEST_PIPELINE_MODE`). Docker first-run uses `scripts/docker-first-run.js` via the Compose `setup` profile.

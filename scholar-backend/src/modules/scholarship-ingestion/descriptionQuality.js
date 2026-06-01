@@ -1,4 +1,9 @@
 const BOILERPLATE_PATTERNS = [
+  /Invest in yourself ! The cost of living and studying varies across the United States/i,
+  /Start your financial planning as early as possible\. Each year international students receive/i,
+  /Information on ways to fund studying in the United States/i,
+  /When looking into studying in the United States, evaluating your finances should be one of the first things you do/i,
+  /U\.S\. institutions offer a wide array of programs with a wide array of tuition and fees/i,
   /The Fulbright U\.S\. Student Program provides grants/i,
   /The 2027-20\d{2} Competition is now open/i,
   /Start an application\s*\./i,
@@ -28,8 +33,19 @@ const POLLUTED_DESCRIPTION_PATTERNS = [
   /Oops!\s*That page can't be found/i,
 ];
 
+const EDUCATIONUSA_NAV_TITLES = [
+  /^finance your studies$/i,
+  /^research your options$/i,
+  /^complete your application$/i,
+  /^apply for your student visa$/i,
+  /^prepare for your departure$/i,
+];
+
 const GENERIC_TITLE_PATTERNS = [
   /^scholarships?\s*archive/i,
+  /^intra-africa scholarships$/i,
+  /^erasmus mundus catalogue$/i,
+  ...EDUCATIONUSA_NAV_TITLES,
   /page\s+\d+\s+of\s+\d+/i,
   /^scholarships?\s*\|/i,
   /^federal government scholarship awards?$/i,
@@ -121,6 +137,30 @@ function isListingHubUrl(url) {
   if (last === "scholarships" || last === "bursaries" || last === "funding") return true;
   if (segments.length === 1 && (last === "scholarships" || last === "opportunities")) return true;
 
+  if (/\/your-5-steps-us-study\//i.test(pathname)) return true;
+  if (/\/find-financial-aid\/?$/i.test(pathname)) return true;
+  if (/\/erasmus-mundus-catalogue_en\/?$/i.test(pathname)) return true;
+  if (/\/intra-africa-scholarships-0_en\/?$/i.test(pathname)) return true;
+
+  return false;
+}
+
+function isEducationUsaNavigationRecord({ title, applicationUrl, sourceUrl } = {}) {
+  const titleHay = String(title || "").trim();
+  if (EDUCATIONUSA_NAV_TITLES.some((re) => re.test(titleHay))) return true;
+
+  for (const url of [applicationUrl, sourceUrl]) {
+    if (!url) continue;
+    try {
+      const { hostname, pathname } = new URL(url);
+      if (!hostname.includes("educationusa.state.gov")) continue;
+      if (/\/your-5-steps-us-study\//i.test(pathname)) return true;
+      if (/\/find-financial-aid\/?$/i.test(pathname)) return true;
+      if (!/\/scholarships\//i.test(pathname)) return true;
+    } catch {
+      continue;
+    }
+  }
   return false;
 }
 
@@ -188,6 +228,7 @@ module.exports = {
   isLowQualityTitle,
   isBareHomepageUrl,
   isListingHubUrl,
+  isEducationUsaNavigationRecord,
   hasConcatenatedProgrammeListings,
   shouldAcceptEnrichedDescription,
   mergeDescription,
