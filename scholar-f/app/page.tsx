@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Brain,
@@ -36,10 +36,9 @@ export default function HomePage() {
         <div className="relative z-10 w-full border-b border-transparent bg-white/95 shadow-md backdrop-blur dark:border-border dark:bg-card/95">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-2 md:px-8">
             <Link href="/" aria-label="EthioScholar Home" className="flex items-center">
-              <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-11 w-auto" />
+              <EthioScholarLogo className="h-11" />
             </Link>
             <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeToggle />
               <a
                 href="#about"
                 className="rounded-md px-2 py-1 text-sm font-semibold text-slate-700 hover:text-slate-900"
@@ -361,11 +360,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-5">
               <div className="flex items-center gap-2">
-                <img
-                  src="/ethioscholar-logo.svg"
-                  alt="EthioScholar"
-                  className="h-9 w-auto brightness-0 invert"
-                />
+                <EthioScholarLogo inverted className="h-9" />
               </div>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-emerald-100/85">
                 A modern platform to discover scholarships and track applications with confidence.
@@ -394,11 +389,6 @@ export default function HomePage() {
                   <li>
                     <Link className="transition-colors hover:text-white" href="/signup">
                       Sign up
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="transition-colors hover:text-white" href="/community">
-                      Community
                     </Link>
                   </li>
                 </ul>

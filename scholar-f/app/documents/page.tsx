@@ -52,10 +52,10 @@ export default function DocumentsPage() {
   }, [q])
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
+    <div className="flex min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-slate-100 text-slate-900 transition-colors duration-200 dark:bg-background dark:text-foreground">
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
         <header className="flex shrink-0 items-center justify-between border-b border-emerald-100/90 bg-white px-4 py-3 shadow-sm shadow-emerald-900/5 md:px-6 dark:border-border dark:bg-card dark:text-foreground dark:shadow-none transition-colors duration-200">
           <div>
             <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Document Resources</h1>
@@ -67,7 +67,7 @@ export default function DocumentsPage() {
           </div>
         </header>
 
-        <main className="relative min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="relative w-full min-w-0 overflow-x-hidden p-4 md:p-6">
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 

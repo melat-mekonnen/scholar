@@ -37,14 +37,14 @@ export function getScholarshipWorkspaceConfig(w: ScholarshipWorkspace) {
 
   return {
     workspace: w,
-    shellTitle: "Manager Panel",
+    shellTitle: "",
     shellSubtitle: "",
-    dashboardHeading: "University Representative Dashboard",
+    dashboardHeading: "Dashboard",
     dashboardTagline: "Track scholarship performance and application activity.",
     profileLinkLabel: "Your profile",
-    opsBackLabel: "Back to manager dashboard",
+    opsBackLabel: "Back to dashboard",
     documentPageTitle: "Document resources",
-    documentPageHeading: "Manager document resources",
+    documentPageHeading: "Document resources",
     newScholarshipTitle: "Create scholarship",
       /** Manager shell — aligned with student / admin portal emerald theme */
       shellClassName:

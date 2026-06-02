@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import {
-  emeraldCard,
   inlineHeaderRow,
   inputSurface,
   outlineControl,
@@ -28,7 +27,7 @@ import {
   textPrimary,
   textSubtle,
 } from "@/lib/theme"
-import { studentPortalCardClass } from "@/components/student-portal/student-portal-ui"
+import { studentPortalCardClass, studentPortalHeroCardClass } from "@/components/student-portal/student-portal-ui"
 
 type EligibilityMatch = {
   profile_field: string
@@ -316,48 +315,45 @@ export default function AiChatPage() {
       : undefined
 
   return (
-    <div className={`flex min-h-screen ${pageShell}`}>
+    <div className={cn("flex h-dvh max-h-dvh w-full max-w-[100vw] overflow-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden">
         <header className={cn(inlineHeaderRow)}>
-          <div>
-            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200 dark:text-emerald-200">{t("AI Chatbot")}</h1>
-            <p className={`text-xs ${textMuted}`}>
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">{t("AI Chatbot")}</h1>
+            <p className={cn("text-xs", textMuted)}>
               {quotaSubtitle ?? "Answers use your profile and verified scholarships, plus the AI reference dataset."}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className="relative flex min-h-0 flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-6">
-          <div className="pointer-events-none absolute -left-20 top-16 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-40 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
-
-          <div className={`px-5 py-4 sm:px-6 ${emeraldCard}`}>
+        <main className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden p-4 sm:gap-5 sm:p-6">
+          <div className={cn("w-full shrink-0", studentPortalHeroCardClass)}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
                   <MessageSquare className="h-5 w-5" />
                 </div>
-                <div>
-                  <h2 className={`text-base font-semibold ${textPrimary}`}>Scholarship assistant</h2>
-                  <p className={`mt-0.5 text-sm ${textMuted}`}>
+                <div className="min-w-0">
+                  <h2 className={cn("text-base font-semibold", textPrimary)}>Scholarship assistant</h2>
+                  <p className={cn("mt-0.5 text-sm", textMuted)}>
                     Ask about funding, countries, fields, eligibility, or deadlines in plain language.
                   </p>
                 </div>
               </div>
-              <Button asChild variant="outline" size="sm" className={`shrink-0 text-emerald-800 ${outlineControl}`}>
+              <Button asChild variant="outline" size="sm" className={cn("shrink-0", outlineControl)}>
                 <Link href="/ai-matches">{t("AI Matches")}</Link>
               </Button>
             </div>
           </div>
 
           {quotaExhausted ? (
-            <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+            <Card className="shrink-0 border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
               <CardContent className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-amber-900 dark:text-amber-100">
                   You have used all free AI chat messages for today. Upgrade to Pro for unlimited chat.
@@ -369,10 +365,13 @@ export default function AiChatPage() {
             </Card>
           ) : null}
 
-          <Card className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${studentPortalCardClass}`}>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+          <Card className={cn("flex min-h-0 flex-1 flex-col overflow-hidden gap-0 py-0", studentPortalCardClass)}>
+            <div className="h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
             <CardContent className="flex min-h-0 flex-1 flex-col gap-0 p-0">
-              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 sm:px-5">
+              <div
+                ref={scrollRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 sm:px-5 [-webkit-overflow-scrolling:touch]"
+              >
                 <div className="space-y-4 pb-3">
                   {messages.map((msg, i) => (
                     <div
@@ -402,7 +401,7 @@ export default function AiChatPage() {
                     </div>
                   ))}
                   {sending ? (
-                    <div className={`flex items-center gap-2.5 text-sm ${textSubtle}`}>
+                    <div className={cn("flex items-center gap-2.5 text-sm", textSubtle)}>
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-teal-700 ring-1 ring-emerald-100">
                         <Bot className="h-4 w-4 animate-pulse" />
                       </div>
@@ -422,7 +421,7 @@ export default function AiChatPage() {
                         key={prompt}
                         type="button"
                         onClick={() => void sendMessage(prompt)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium text-emerald-800 transition-colors ${outlineControl}`}
+                        className={cn("rounded-full px-3 py-1 text-xs font-medium text-emerald-800 transition-colors", outlineControl)}
                       >
                         {prompt}
                       </button>
@@ -435,7 +434,7 @@ export default function AiChatPage() {
                   onChange={(e) => setInput(e.target.value)}
                   rows={3}
                   disabled={sending || quotaExhausted}
-                  className={`resize-none focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60 ${inputSurface}`}
+                  className={cn("resize-none focus-visible:border-emerald-300 focus-visible:ring-emerald-200/60", inputSurface)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
@@ -444,7 +443,7 @@ export default function AiChatPage() {
                   }}
                 />
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <p className={`hidden text-xs sm:block ${textSubtle}`}>Enter to send · Shift+Enter for new line</p>
+                  <p className={cn("hidden text-xs sm:block", textSubtle)}>Enter to send · Shift+Enter for new line</p>
                   <Button
                     type="button"
                     className="ml-auto bg-emerald-600 text-white hover:bg-emerald-700"

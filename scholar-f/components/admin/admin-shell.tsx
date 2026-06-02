@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { headerShellAlt, mainScroll, pageShell, sidebarShell } from "@/lib/theme"
@@ -150,7 +151,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-screen md:flex-col", sidebarShell)}>
         <div className="flex min-h-0 flex-1 flex-col p-6">
           <div className="mb-8 flex items-center gap-3">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+            <EthioScholarLogo className="h-10" />
           </div>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Admin Portal</p>
 
@@ -181,7 +182,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <div className={cn("flex h-full min-h-0 flex-col border-r", sidebarShell)}>
                   <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
                     <div className="mb-8 flex items-center gap-3">
-                      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+                      <EthioScholarLogo className="h-10" />
                     </div>
                     <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Admin Portal</p>
                     <NavLinks pathname={pathname} unreadCount={unreadCount} onNavigate={() => setMobileOpen(false)} />

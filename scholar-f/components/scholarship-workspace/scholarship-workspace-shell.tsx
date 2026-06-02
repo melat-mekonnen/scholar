@@ -15,12 +15,13 @@ import {
 } from "lucide-react"
 
 import { ThemeToggle } from "@/components/theme-toggle"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { clearToken, logoutFromServer } from "@/lib/auth"
 import {
   getScholarshipWorkspaceConfig,
   type ScholarshipWorkspace,
 } from "@/lib/scholarship-workspace"
-import { navLinkActive, navLinkInactive, pageShell, sidebarShell, textMuted } from "@/lib/theme"
+import { navLinkActive, navLinkInactive, headerShell, pageShell, sidebarShell, textMuted } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 
 type NavItem = {
@@ -89,37 +90,39 @@ export function ScholarshipWorkspaceShell({
       : []),
   ]
 
+  const pageLabel =
+    navItems.find((item) => navIsActive(pathname, item.href, item.match))?.label ?? "Dashboard"
+
   return (
-    <div className={cn("min-h-screen", pageShell)}>
-      <div className="flex min-h-screen">
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
         <aside
           className={cn(
-            "hidden w-72 shrink-0 flex-col md:flex md:min-h-screen",
+            "hidden w-72 shrink-0 flex-col md:flex md:min-h-dvh md:self-stretch",
             sidebarShell,
           )}
         >
           <div className="border-b border-emerald-100/80 px-6 py-5 dark:border-border">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
-              <ThemeToggle variant="compact" />
+            <div className="mb-4 flex items-center gap-2">
+              <EthioScholarLogo className="h-10" />
+              {!isManager ? <ThemeToggle variant="compact" className="ml-auto" /> : null}
             </div>
             {isManager ? (
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700 dark:text-emerald-400">
-                Manager portal
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700 dark:text-emerald-400">
+                University Representative Portal
               </p>
             ) : isOwner ? (
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700 dark:text-emerald-400">
                 Owner portal
               </p>
             ) : null}
-            <div className="leading-tight">
-              <span className="block font-semibold text-slate-900 dark:text-foreground">
-                {isManager ? "University Representative" : cfg.shellTitle}
-              </span>
-              {cfg.shellSubtitle ? (
-                <span className={cn("text-xs", textMuted)}>{cfg.shellSubtitle}</span>
-              ) : null}
-            </div>
+            {!isManager ? (
+              <div className="leading-tight">
+                <span className="block font-semibold text-slate-900 dark:text-foreground">{cfg.shellTitle}</span>
+                {cfg.shellSubtitle ? (
+                  <span className={cn("text-xs", textMuted)}>{cfg.shellSubtitle}</span>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <nav className="flex flex-1 flex-col gap-0.5 p-4 text-sm">
@@ -160,16 +163,28 @@ export function ScholarshipWorkspaceShell({
           </div>
         </aside>
 
-        <div className="relative min-w-0 flex-1">
+        <div className="relative flex min-h-0 min-w-0 w-full flex-1 flex-col">
+          {isManager ? (
+            <header
+              className={cn(
+                "sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 px-4 py-3 md:px-5",
+                headerShell,
+              )}
+            >
+              <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-foreground">
+                {pageLabel}
+              </h1>
+              <ThemeToggle />
+            </header>
+          ) : null}
           {!isManager ? (
             <>
               <div className="pointer-events-none absolute -left-16 top-24 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
               <div className="pointer-events-none absolute -right-20 top-52 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
             </>
           ) : null}
-          <main className={mainClassName}>{children}</main>
+          <main className={cn("w-full min-w-0 flex-1 overflow-x-hidden", mainClassName)}>{children}</main>
         </div>
-      </div>
     </div>
   )
 }

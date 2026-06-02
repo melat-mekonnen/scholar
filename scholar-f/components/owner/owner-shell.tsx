@@ -24,6 +24,7 @@ import { apiFetchJson } from "@/lib/api"
 import { clearToken, logoutFromServer } from "@/lib/auth"
 import { getScholarshipWorkspaceConfig } from "@/lib/scholarship-workspace"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { headerShell, mainScroll, pageShell } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -219,11 +220,7 @@ function OwnerSidebarHeader({ compact }: { compact?: boolean }) {
   return (
     <div className={cn("border-b border-emerald-100/80 dark:border-border", compact ? "px-4 py-3" : "px-6 py-5")}>
       <div className={cn("flex items-center gap-3", compact ? "mb-3" : "mb-4")}>
-        <img
-          src="/ethioscholar-logo.svg"
-          alt="EthioScholar"
-          className={compact ? "h-8 w-auto" : "h-10 w-auto"}
-        />
+        <EthioScholarLogo className={compact ? "h-8" : "h-10"} />
       </div>
       <p
         className={cn(
@@ -330,9 +327,9 @@ export function OwnerShell({ children }: { children: ReactNode }) {
   const pageLabel = FLAT_NAV.find((n) => navItemActive(pathname, n))?.label ?? "Owner"
 
   return (
-    <div className={cn("flex min-h-screen", pageShell)}>
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <aside
-        className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-screen", cfg.shellClassName)}
+        className={cn("hidden w-72 shrink-0 flex-col md:flex md:min-h-dvh md:self-stretch", cfg.shellClassName)}
       >
         <OwnerSidebarPanel
           pathname={pathname}
@@ -342,7 +339,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
         />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
         <header className={cn("sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 md:px-5", headerShell)}>
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -388,7 +385,7 @@ export function OwnerShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div className={cn("flex-1 overflow-auto", mainScroll)}>{children}</div>
+        <div className={cn("w-full min-w-0 flex-1 overflow-x-hidden", mainScroll)}>{children}</div>
       </div>
     </div>
   )

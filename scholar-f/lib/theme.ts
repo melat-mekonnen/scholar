@@ -72,6 +72,10 @@ export const navLinkActive =
 export const elevatedCard =
   `group relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-card dark:text-card-foreground dark:shadow-none ${themeTransition} transition-all hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/25`
 
+/** Browse list row — no overflow clip (page handles scroll; avoids nested scroll on each card) */
+export const scholarshipListCard =
+  `group relative overflow-visible rounded-2xl border border-emerald-100/80 bg-white shadow-sm shadow-emerald-900/5 dark:border-border dark:bg-card dark:text-card-foreground dark:shadow-none ${themeTransition} transition-shadow hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/25`
+
 /** Filter sidebar / panel section labels */
 export const filterSectionLabel =
   "text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-emerald-400"

@@ -140,10 +140,10 @@ function SettingsPageContent() {
   }
 
   return (
-    <div className={cn("flex min-h-screen", pageShell)}>
+    <div className={cn("flex min-h-screen w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
         <header className={cn("flex items-center justify-between px-4 md:px-6", headerShell)}>
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -163,7 +163,7 @@ function SettingsPageContent() {
           </div>
         </header>
 
-        <main className="relative mx-auto w-full max-w-5xl flex-1 space-y-6 p-6">
+        <main className="relative mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-hidden p-6">
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
@@ -335,10 +335,10 @@ function SettingsPageContent() {
                   className="data-[state=checked]:bg-emerald-600"
                 />
               </div>
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-100/80 bg-emerald-50/30 px-4 py-3">
                 <div className="space-y-0.5">
                   <Label htmlFor="apply-followups">Application follow-up emails</Label>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-xs text-slate-500">
                     Email to confirm you applied after starting from a saved scholarship
                   </p>
                 </div>
@@ -346,6 +346,7 @@ function SettingsPageContent() {
                   id="apply-followups"
                   checked={prefs.applyFollowups}
                   onCheckedChange={(v) => updatePrefs({ applyFollowups: v })}
+                  className="data-[state=checked]:bg-emerald-600"
                 />
               </div>
             </CardContent>

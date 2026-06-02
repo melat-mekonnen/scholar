@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { cn } from "@/lib/utils"
 import { textMuted, textPrimary, themeTransition } from "@/lib/theme"
 
@@ -17,7 +18,7 @@ export function StudentPortalFooter({ className }: { className?: string }) {
       <div className="w-full px-6 py-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+            <EthioScholarLogo className="h-10" />
             <p className={`mt-3 max-w-md text-sm leading-relaxed ${textMuted}`}>
               A modern platform to discover scholarships and track applications with confidence.
             </p>

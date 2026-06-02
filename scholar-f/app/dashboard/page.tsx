@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { apiFetchJson } from "@/lib/api"
 import {
@@ -127,22 +128,20 @@ export default function DashboardPage() {
   const activities = summary?.recentActivity ?? []
 
   return (
-    <div className={`flex min-h-screen ${pageShell}`}>
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
         <header className={cn(inlineHeaderRow)}>
           <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Dashboard</h1>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="hidden text-emerald-800 sm:inline-flex dark:text-emerald-300">
-              <Link href="/settings#appearance">Theme</Link>
-            </Button>
+            <ThemeToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className="flex-1 space-y-8 p-6">
-          <div className={studentPortalHeroCardClass}>
+        <main className="w-full min-w-0 flex-1 space-y-6 overflow-x-hidden p-4 sm:space-y-8 sm:p-6">
+          <div className={cn("w-full", studentPortalHeroCardClass)}>
             <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
               <h2 className={`text-2xl font-semibold tracking-tight ${textPrimary}`}>
                 Welcome back{firstNameFromFullName(me?.fullName) ? `, ${firstNameFromFullName(me?.fullName)}` : ""}{" "}
@@ -154,7 +153,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {loading
               ? Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className={studentPortalCardClass}>
@@ -182,7 +181,7 @@ export default function DashboardPage() {
             <h3 className={`mb-4 text-xl font-semibold ${textPrimary}`}>Recommended Scholarships</h3>
 
             {loading && (
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))]">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className={studentPortalCardClass}>
                     <CardHeader>
@@ -219,7 +218,7 @@ export default function DashboardPage() {
             )}
 
             {!loading && recommended.length > 0 && (
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))]">
                 {recommended.map((s) => (
                   <Card
                     key={s.id}

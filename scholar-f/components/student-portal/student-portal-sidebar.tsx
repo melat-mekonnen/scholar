@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { navLinkActive, navLinkInactive } from "@/lib/theme"
 import { useStudentI18n } from "@/lib/student-i18n"
 import { getStudentSidebarLinks, isStudentSidebarActive } from "@/lib/student-portal-sidebar"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { StudentPortalSidebarLogout } from "@/components/student-portal/student-portal-sidebar-logout"
 
 type StudentPortalSidebarProps = {
@@ -39,7 +40,7 @@ export function StudentPortalSidebar({
     <aside className="hidden w-72 shrink-0 flex-col border-r border-emerald-100/90 bg-white shadow-sm shadow-emerald-900/5 transition-colors duration-200 ease-in-out dark:border-border dark:bg-card md:flex md:min-h-screen md:flex-col">
       <div className="flex min-h-0 flex-1 flex-col p-6">
         <div className="mb-8 flex items-center gap-3">
-          <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-10 w-auto" />
+          <EthioScholarLogo className="h-10" />
         </div>
         <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">
           {t("Student Portal")}

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
-
 import { apiFetchJson } from "@/lib/api"
 import {
   deleteCommunityMessage,
@@ -27,7 +26,7 @@ import { CommunityChat } from "@/components/student-portal/community-chat"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { emeraldCard, headerShell, mainScroll, pageShell } from "@/lib/theme"
+import { emeraldCard, inlineHeaderRow, pageShell } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 
 type MeResponse = {
@@ -481,8 +480,8 @@ export default function CommunityPage() {
   const canPost = me?.role === "student" || me?.role === "admin"
 
   return (
-    <div className={cn("flex h-screen flex-col overflow-hidden", pageShell)}>
-      <header className={cn("flex shrink-0 items-center justify-between gap-4 px-4 py-3 md:px-6", headerShell)}>
+    <div className={cn("flex h-dvh max-h-dvh w-full max-w-[100vw] flex-col overflow-hidden", pageShell)}>
+      <header className={cn(inlineHeaderRow)}>
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/dashboard"
@@ -514,12 +513,9 @@ export default function CommunityPage() {
         </div>
       </header>
 
-      <main className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden p-3 md:p-4", mainScroll)}>
-        <div className="pointer-events-none absolute -left-24 top-0 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 top-20 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
-
-        <div className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden", emeraldCard)}>
-          <div className="pointer-events-none h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
+      <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden p-3 md:p-4">
+        <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden gap-0 py-0", emeraldCard)}>
+          <div className="h-1 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
           <CommunityChat
                 channels={channels}
                 channelId={channelId}
@@ -560,8 +556,8 @@ export default function CommunityPage() {
                 onScrollToMessage={scrollToMessage}
                 onJumpToMessage={jumpToMessage}
                 onShareLink={(url, note) => void shareLink(url, note)}
-                bottomRef={bottomRef}
-              />
+            bottomRef={bottomRef}
+          />
         </div>
       </main>
     </div>

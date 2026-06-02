@@ -3,24 +3,12 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import {
-  Bookmark,
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-} from "lucide-react"
+import { Bookmark } from "lucide-react"
 
 import { fetchBookmarksPage } from "@/lib/bookmarks"
 import {
   getApplicationUrl,
   normalizeScholarship,
-  openScholarshipApplication,
   type ScholarshipPublic,
 } from "@/lib/scholarship"
 import { clearToken } from "@/lib/auth"
@@ -52,17 +40,20 @@ import { useToast } from "@/hooks/use-toast"
 import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
 import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
+import { studentPortalHeroCardClass } from "@/components/student-portal/student-portal-ui"
 import {
+  accentEmerald,
   emeraldCard,
-  headerShell,
-  heroBanner,
+  inlineHeaderRow,
   outlineControl,
   pageShell,
+  scholarshipListCard,
   summaryBar,
   textMuted,
   textPrimary,
   textSubtle,
 } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 
 type MeResponse = {
   id: string
@@ -120,6 +111,10 @@ export default function SavedScholarshipsPage() {
   }, [loadBookmarks])
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [page])
+
+  useEffect(() => {
     async function loadMe() {
       const { res, data } = await apiFetchJson<MeResponse>("/api/auth/me", { method: "GET" })
       if (res.ok && data) setMe(data)
@@ -136,12 +131,12 @@ export default function SavedScholarshipsPage() {
   }
 
   return (
-    <div className={`flex min-h-screen ${pageShell}`}>
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className={`flex shrink-0 items-center justify-between ${headerShell}`}>
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
+        <header className={cn(inlineHeaderRow)}>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">Saved Scholarships</h1>
             {me?.role ? (
               <Badge className="capitalize border-emerald-200 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/40 dark:text-emerald-200">
@@ -149,49 +144,45 @@ export default function SavedScholarshipsPage() {
               </Badge>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className="relative flex-1 space-y-6 p-6">
-          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
-
-          <div className={heroBanner}>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+        <main className="w-full min-w-0 flex-1 space-y-6 overflow-x-hidden p-4 sm:space-y-8 sm:p-6">
+          <div className={cn("w-full", studentPortalHeroCardClass)}>
             <div className="border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
-              <h2 className={`text-2xl font-semibold tracking-tight ${textPrimary}`}>Saved for later</h2>
-              <p className={`mt-2 text-sm leading-relaxed ${textMuted}`}>
+              <h2 className={cn("text-2xl font-semibold tracking-tight", textPrimary)}>Saved for later</h2>
+              <p className={cn("mt-2 text-sm leading-relaxed", textMuted)}>
                 Scholarships you bookmarked. Remove the bookmark to take them off this list.
               </p>
             </div>
           </div>
 
           {!loading && results.length > 0 ? (
-            <div className={summaryBar}>
-              <p className={`text-sm ${textMuted}`}>
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400">{total.toLocaleString()}</span> saved scholarship
+            <div className={cn("flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4", summaryBar)}>
+              <p className={cn("text-sm", textMuted)}>
+                <span className={accentEmerald}>{total.toLocaleString()}</span> saved scholarship
                 {total === 1 ? "" : "s"}
               </p>
-              <Button asChild variant="outline" size="sm" className={`text-emerald-800 dark:text-emerald-300 ${outlineControl}`}>
+              <Button asChild variant="outline" size="sm" className={cn("shrink-0", outlineControl)}>
                 <Link href="/scholarships">Browse more</Link>
               </Button>
             </div>
           ) : null}
 
-          {error && (
+          {error ? (
             <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900/50 dark:bg-red-950/40">
               {error}
             </p>
-          )}
+          ) : null}
 
           {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))]">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className={emeraldCard}>
-                  <CardContent className="space-y-3 p-6">
+                <Card key={i} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                  <CardContent className="space-y-3 px-4 py-4 sm:px-5 sm:py-5">
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
                     <Skeleton className="h-9 w-24" />
@@ -200,9 +191,12 @@ export default function SavedScholarshipsPage() {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <Empty className={`${emeraldCard} border-emerald-100/80`}>
+            <Empty className={cn(emeraldCard, "border-emerald-100/80")}>
               <EmptyHeader>
-                <EmptyMedia variant="icon" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                <EmptyMedia
+                  variant="icon"
+                  className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+                >
                   <Bookmark className="size-6" />
                 </EmptyMedia>
                 <EmptyTitle>No saved scholarships yet</EmptyTitle>
@@ -218,17 +212,20 @@ export default function SavedScholarshipsPage() {
             </Empty>
           ) : (
             <>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))]">
                 {results.map((s) => (
-                  <Card
-                    key={s.id}
-                    className={`group relative overflow-hidden ${emeraldCard} transition-all hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-black/30`}
-                  >
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
-                    <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
-                    <CardHeader className="space-y-3">
+                  <Card key={s.id} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                    <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+                    <CardHeader className="space-y-3 px-4 pb-2 pt-4 sm:px-5">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className={`text-base leading-snug ${textPrimary} transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300`}>{s.title}</CardTitle>
+                        <CardTitle
+                          className={cn(
+                            "text-base leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300",
+                            textPrimary,
+                          )}
+                        >
+                          {s.title}
+                        </CardTitle>
                         <ScholarshipBookmarkButton
                           scholarshipId={s.id}
                           isBookmarked
@@ -243,34 +240,42 @@ export default function SavedScholarshipsPage() {
                         />
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3 pt-0">
-                      <p className={`text-sm ${textSubtle}`}>
+                    <CardContent className="space-y-3 px-4 pb-5 pt-0 sm:px-5">
+                      <p className={cn("text-sm", textSubtle)}>
                         {s.country} · {formatDegreeLevel(s.degreeLevel)}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {typeof s.bookmarkCount === "number" && s.bookmarkCount > 0 && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300">{s.bookmarkCount} saved</Badge>
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300"
+                          >
+                            {s.bookmarkCount} saved
+                          </Badge>
                         )}
-                        {s.deadline && (
-                          <Badge variant="outline" className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300">Deadline: {s.deadline}</Badge>
-                        )}
+                        {s.deadline ? (
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-200 text-emerald-800 dark:border-emerald-800/50 dark:text-emerald-300"
+                          >
+                            Deadline: {s.deadline}
+                          </Badge>
+                        ) : null}
                       </div>
-                      <div className="flex flex-wrap gap-2 pt-1">
+                      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
                         <Button
                           size="sm"
                           variant="outline"
-                          className={`rounded-md text-emerald-800 dark:text-emerald-300 ${outlineControl}`}
+                          className={cn("h-10 w-full rounded-md sm:w-auto", outlineControl)}
                           onClick={() => setViewScholarship(s)}
                         >
                           View
                         </Button>
                         <Button
                           size="sm"
-                          className="rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                          className="h-10 w-full rounded-md bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
                           disabled={!getApplicationUrl(s)}
-                          onClick={async () => {
-                            await handleApplyWithReturnCheck(s)
-                          }}
+                          onClick={() => void handleApplyWithReturnCheck(s)}
                         >
                           {getApplicationUrl(s) ? "Apply" : "Apply (link unavailable)"}
                         </Button>
@@ -280,54 +285,54 @@ export default function SavedScholarshipsPage() {
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className={`${summaryBar} px-3 py-3`}>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setPage((p) => Math.max(1, p - 1))
-                        }}
-                      />
-                    </PaginationItem>
-                    {Array.from({ length: Math.min(totalPages, 7) }).map((_, idx) => {
-                      const p = idx + 1
-                      return (
-                        <PaginationItem key={p}>
-                          <PaginationLink
-                            href="#"
-                            isActive={p === page}
-                            className={
-                              p === page
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                                : "hover:bg-emerald-50 hover:text-emerald-700"
-                            }
-                            onClick={(e) => {
-                              e.preventDefault()
-                              setPage(p)
-                            }}
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    })}
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setPage((p) => Math.min(totalPages, p + 1))
-                        }}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              {totalPages > 1 ? (
+                <div className={cn("rounded-xl px-2 py-3 sm:px-3", summaryBar)}>
+                  <Pagination className="mx-0 w-full max-w-full justify-start">
+                    <PaginationContent className="flex-wrap gap-0.5">
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setPage((p) => Math.max(1, p - 1))
+                          }}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: Math.min(totalPages, 7) }).map((_, idx) => {
+                        const p = idx + 1
+                        return (
+                          <PaginationItem key={p}>
+                            <PaginationLink
+                              href="#"
+                              isActive={p === page}
+                              className={
+                                p === page
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 dark:hover:bg-emerald-950/70"
+                                  : "hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-accent dark:hover:text-emerald-200"
+                              }
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setPage(p)
+                              }}
+                            >
+                              {p}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      })}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setPage((p) => Math.min(totalPages, p + 1))
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
-              )}
+              ) : null}
             </>
           )}
         </main>
