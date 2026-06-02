@@ -1,9 +1,5 @@
-import { clearToken } from "@/lib/auth"
-import {
-  confirmTrackedApplication,
-  getMyApplications,
-  startTrackedApplication,
-} from "@/lib/applications"
+import { clearToken, getToken } from "@/lib/auth"
+import { getMyApplications, startTrackedApplication } from "@/lib/applications"
 import {
   openScholarshipApplication,
   type ScholarshipPublic,
@@ -22,44 +18,23 @@ type TrackAndApplyOptions = {
   onTracked?: (scholarshipId: string) => void
 }
 
-/** Start pending tracker, open official site, then confirm submitted on return (saved flow from main). */
+/**
+ * Opens the official application site without creating a tracker row.
+ * When the student returns to this tab, asks whether to add the scholarship to My Applications.
+ */
 export async function applyWithReturnConfirmation({
   scholarship,
   toast,
   onUnauthorized,
   onTracked,
 }: TrackAndApplyOptions) {
-  const tracked = await startTrackedApplication(scholarship.id)
-  if (tracked.res.status === 401 || tracked.res.status === 403) {
+  if (!getToken()) {
     onUnauthorized()
     return
   }
-  if (!tracked.res.ok) {
-    toast({
-      title: "Could not start tracking",
-      description:
-        tracked.errorMessage || "Failed to save this application in your tracker.",
-      variant: "destructive",
-    })
-    return
-  }
 
-  let applicationId = tracked.data?.id
-  const status = tracked.data?.status
-  const alreadySubmitted =
-    tracked.data?.alreadySubmitted === true ||
-    (status != null && status !== "pending")
-
-  if (!applicationId) {
-    const mine = await getMyApplications()
-    if (mine.res.ok && mine.data?.applications) {
-      const found = mine.data.applications.find((a) => a.scholarshipId === scholarship.id)
-      applicationId = found?.id
-    }
-  }
-
-  const ok = await openScholarshipApplication(scholarship)
-  if (!ok) {
+  const opened = await openScholarshipApplication(scholarship)
+  if (opened === "no_url") {
     toast({
       title: "Application link unavailable",
       description: "This scholarship does not have an official application URL yet.",
@@ -67,62 +42,78 @@ export async function applyWithReturnConfirmation({
     })
     return
   }
-
-  if (tracked.res.status === 201 || tracked.res.status === 200) {
-    onTracked?.(scholarship.id)
+  if (opened === "blocked") {
+    toast({
+      title: "Could not open application",
+      description: "Allow pop-ups for this site and try again.",
+      variant: "destructive",
+    })
+    return
   }
 
   toast({
     title: "Application opened",
-    description: "After you finish and come back, we will ask if you applied.",
+    description:
+      "When you return to EthioScholar, you can choose to add this scholarship to your application tracker.",
   })
 
   window.setTimeout(() => {
     const onFocus = async () => {
       window.removeEventListener("focus", onFocus)
-      const applied = window.confirm("Did you submit your application on the official site?")
-      if (!applied) {
-        toast({
-          title: "No problem",
-          description: "Your application stays pending in the tracker until you confirm.",
-        })
-        return
-      }
 
-      if (alreadySubmitted) {
-        toast({
-          title: "Already in My Applications",
-          description: "This scholarship is already saved in your application tracker.",
-        })
-        return
-      }
-
-      if (!applicationId) {
-        toast({
-          title: "Could not confirm",
-          description: "Application record was not found. Try Apply again.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const confirmed = await confirmTrackedApplication(applicationId)
-      if (confirmed.res.status === 401 || confirmed.res.status === 403) {
+      const mine = await getMyApplications()
+      if (mine.res.status === 401 || mine.res.status === 403) {
         onUnauthorized()
         return
       }
-      if (!confirmed.res.ok) {
+
+      const alreadyTracked =
+        mine.res.ok &&
+        (mine.data?.applications ?? []).some((a) => a.scholarshipId === scholarship.id)
+
+      if (alreadyTracked) {
         toast({
-          title: "Could not update status",
-          description: confirmed.errorMessage || "Try again from My Applications.",
+          title: "Already in application tracker",
+          description: "This scholarship is already in My Applications.",
+        })
+        onTracked?.(scholarship.id)
+        return
+      }
+
+      const label = scholarship.title?.trim() || "this scholarship"
+      const add = window.confirm(
+        `Do you want to add "${label}" to your application tracker?`,
+      )
+      if (!add) {
+        toast({
+          title: "Not added",
+          description: "You can add it later from My Applications when you are ready.",
+        })
+        return
+      }
+
+      const created = await startTrackedApplication(scholarship.id)
+      if (created.res.status === 401 || created.res.status === 403) {
+        onUnauthorized()
+        return
+      }
+      if (!created.res.ok) {
+        toast({
+          title: "Could not add to tracker",
+          description:
+            created.errorMessage || "Try again from My Applications.",
           variant: "destructive",
         })
         return
       }
 
+      onTracked?.(scholarship.id)
       toast({
-        title: "Added to My Applications",
-        description: "Saved as submitted in your application tracker.",
+        title: "Added to application tracker",
+        description:
+          created.data?.existing === true
+            ? "This scholarship is already in My Applications."
+            : "Find it under My Applications to update status as you progress.",
       })
     }
     window.addEventListener("focus", onFocus, { once: true })

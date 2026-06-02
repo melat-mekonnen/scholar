@@ -4,23 +4,22 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { clearToken } from "@/lib/auth"
-import { createApplication } from "@/lib/applications"
+import { getToken } from "@/lib/auth"
 import { getApplicationUrl, type ScholarshipPublic } from "@/lib/scholarship"
+import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
 import { cn } from "@/lib/utils"
 
 type Props = {
   scholarship: ScholarshipPublic
   className?: string
   size?: "default" | "sm" | "lg" | "icon"
-  /** Called when the application is saved to the tracker (201 or 409). */
+  /** Called when the scholarship is added to the application tracker. */
   onTracked?: (scholarshipId: string) => void
   unavailableLabel?: string
 }
 
 /**
- * Opens the official application URL via a real anchor (same as the detail dialog).
- * Tracks the application in the background without blocking navigation.
+ * Opens the official application URL, then asks on return whether to add to My Applications.
  */
 export function ScholarshipApplyButton({
   scholarship,
@@ -33,28 +32,16 @@ export function ScholarshipApplyButton({
   const { toast } = useToast()
   const applyUrl = getApplicationUrl(scholarship)
 
-  async function trackApplication() {
-    const created = await createApplication(scholarship.id)
-    if (created.res.status === 401 || created.res.status === 403) {
-      clearToken()
-      router.replace("/signin")
+  async function handleApply() {
+    if (!getToken()) {
+      router.push("/signin")
       return
     }
-    if (!created.res.ok && created.res.status !== 409) {
-      toast({
-        title: "Could not track application",
-        description: created.errorMessage || "Failed to save this application in your tracker.",
-        variant: "destructive",
-      })
-      return
-    }
-    onTracked?.(scholarship.id)
-    toast({
-      title: "Application started",
-      description:
-        created.res.status === 409
-          ? "Already in your application tracker."
-          : "Saved to your application tracker.",
+    await applyWithReturnConfirmation({
+      scholarship,
+      toast,
+      onUnauthorized: () => unauthorizedHandler(router),
+      onTracked,
     })
   }
 
@@ -67,17 +54,15 @@ export function ScholarshipApplyButton({
   }
 
   return (
-    <Button size={size} className={cn(className)} asChild>
-      <a
-        href={applyUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => {
-          void trackApplication()
-        }}
-      >
-        Apply
-      </a>
+    <Button
+      type="button"
+      size={size}
+      className={cn(className)}
+      onClick={() => {
+        void handleApply()
+      }}
+    >
+      Apply
     </Button>
   )
 }

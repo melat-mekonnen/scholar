@@ -1,9 +1,13 @@
 "use client"
 
 import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useRouter } from "next/navigation"
 import { Building2, ExternalLink, GraduationCap, Loader2, MapPin } from "lucide-react"
 
 import { apiFetchJson } from "@/lib/api"
+import { getToken } from "@/lib/auth"
+import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
+import { useToast } from "@/hooks/use-toast"
 import {
   mergeScholarshipDetail,
   normalizeScholarship,
@@ -43,6 +47,8 @@ export function ScholarshipDetailDialog({
   summary,
   footerStartExtra,
 }: Props) {
+  const router = useRouter()
+  const { toast } = useToast()
   const { lang, t } = useStudentI18n()
   const [detail, setDetail] = useState<ScholarshipPublic | null>(null)
   const [loading, setLoading] = useState(false)
@@ -194,16 +200,28 @@ export function ScholarshipDetailDialog({
 
           {merged && (
             <Button
+              type="button"
               size="default"
               className="w-full shrink-0 bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
-              asChild={Boolean(applyUrl)}
               disabled={!applyUrl}
+              onClick={() => {
+                if (!merged) return
+                if (!getToken()) {
+                  router.push("/signin")
+                  return
+                }
+                void applyWithReturnConfirmation({
+                  scholarship: merged,
+                  toast,
+                  onUnauthorized: () => unauthorizedHandler(router),
+                })
+              }}
             >
               {applyUrl ? (
-                <a href={applyUrl} target="_blank" rel="noopener noreferrer">
+                <>
                   <ExternalLink className="mr-2 h-4 w-4 shrink-0" />
                   {t("Apply on official site")}
-                </a>
+                </>
               ) : (
                 <span>Apply (link unavailable)</span>
               )}
