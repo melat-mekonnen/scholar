@@ -219,9 +219,9 @@ export default function ScholarshipsPage() {
         setFilters(data)
       } else {
         setFilters({
-          regions: [],
-          fieldCategories: [],
+          countries: [],
           degreeLevels: ["high_school", "bachelor", "master", "phd"],
+          fieldsOfStudy: [],
           fundingTypes: [],
         })
       }
