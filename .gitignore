@@ -1,5 +1,33 @@
+# Secrets and local env
 .env
+.env.*
+!.env.example
+!.env.docker.example
+!.env.staging.example
+scholar-backend/.env
+scholar-f/.env
+scholar-f/.env.local
+scholar-ml/.env
+
+# Local documentation (not published to GitHub)
+docs/
+
+# Database dumps (never commit)
+*.dump
+scholar-local.dump
+scholar-local.sql
+
+# scholar-ai (Python)
 scholar-ai/.venv/
 scholar-ai/**/__pycache__/
 scholar-ai/**/*.pyc
+
+# scholar-f (Next.js)
 scholar-f/tsconfig.tsbuildinfo
+scholar-f/.next/
+
+# Dependencies
+node_modules/
+
+# Generated export artifacts
+scholar-backend/exports/*.md

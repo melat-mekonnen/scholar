@@ -44,6 +44,7 @@ function SubscriptionPageContent() {
       heroDescription="Choose Free for daily limits or Pro for unlimited scholarship chat. Pay securely with Stripe or Chapa."
       role={me?.role}
       maxWidthClass="max-w-6xl"
+      showFooter={false}
     >
       <SubscriptionPlans
         subscription={billing.subscription}

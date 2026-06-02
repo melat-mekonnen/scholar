@@ -89,8 +89,7 @@ export default function OwnerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-background dark:text-foreground transition-colors duration-200">
-      <div className="relative mx-auto max-w-6xl px-4 py-8">
+    <div className="relative mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden px-4 py-8">
         <div className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
@@ -190,7 +189,6 @@ export default function OwnerDashboardPage() {
             </Card>
           </div>
         )}
-      </div>
     </div>
   )
 }

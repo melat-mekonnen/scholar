@@ -34,7 +34,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://127.0.0.1:4000/health',(r)=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+          "require('http').get('http://127.0.0.1:4000/health?deep=1',(r)=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
         ]
       interval: 5s
       timeout: 5s
@@ -76,6 +76,12 @@ services:
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o-mini}
       AI_DESCRIPTION_REFINE_ENABLED: ${AI_DESCRIPTION_REFINE_ENABLED:-false}
       AI_TRANSLATION_ENABLED: ${AI_TRANSLATION_ENABLED:-false}
+      UPLOADS_ROOT: /app/uploads
+      BACKGROUND_JOBS_ENABLED: ${BACKGROUND_JOBS_ENABLED:-true}
+      DEADLINE_REMINDER_ENABLED: ${DEADLINE_REMINDER_ENABLED:-false}
+      APPLY_FOLLOWUP_ENABLED: ${APPLY_FOLLOWUP_ENABLED:-false}
+    volumes:
+      - api_uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -127,3 +133,4 @@ services:
 
 volumes:
   db_data:
+  api_uploads:

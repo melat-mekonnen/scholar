@@ -10,6 +10,7 @@ type StudentPortalLayoutProps = {
   role?: string
   children: React.ReactNode
   maxWidthClass?: string
+  showFooter?: boolean
 }
 
 export function StudentPortalLayout({
@@ -20,6 +21,7 @@ export function StudentPortalLayout({
   role,
   children,
   maxWidthClass = "max-w-5xl",
+  showFooter = true,
 }: StudentPortalLayoutProps) {
   const hero: StudentPortalHero = { title: heroTitle, description: heroDescription }
 
@@ -30,6 +32,7 @@ export function StudentPortalLayout({
       role={role}
       hero={hero}
       mainClassName={`w-full space-y-8 p-6 ${maxWidthClass}`}
+      showFooter={showFooter}
     >
       {children}
     </StudentPortalShell>

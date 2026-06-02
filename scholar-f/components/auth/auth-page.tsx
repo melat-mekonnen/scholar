@@ -3,10 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Twitter, Linkedin, Facebook, Instagram } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { apiFetchJson, API_BASE_URL } from "@/lib/api"
 import { getPostAuthPath } from "@/lib/redirect-by-role"
 import { setToken } from "@/lib/auth"
+import { checkPassword, formatPasswordErrors } from "@/lib/password-policy"
+import { PasswordStrengthHint } from "@/components/auth/password-strength-hint"
+import { EthioScholarLogo } from "@/components/ethioscholar-logo"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -83,8 +86,11 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
 
     if (!signUpData.password) {
       newErrors.password = "Password is required"
-    } else if (signUpData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
+    } else {
+      const passwordCheck = checkPassword(signUpData.password)
+      if (passwordCheck.errors.length > 0) {
+        newErrors.password = formatPasswordErrors(passwordCheck.errors)
+      }
     }
 
     if (!signUpData.confirmPassword) {
@@ -363,6 +369,7 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
                 </button>
               </div>
               {signUpErrors.password && <FieldError>{signUpErrors.password}</FieldError>}
+              <PasswordStrengthHint password={signUpData.password} />
             </Field>
 
             <Field>
@@ -465,7 +472,7 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
       <div className="pointer-events-none absolute bottom-20 left-12 h-14 w-14 rotate-12 rounded-md bg-white/10" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-white/10" />
 
-      <img src="/ethioscholar-logo.svg" alt="EthioScholar" className="h-9 w-auto brightness-0 invert" />
+      <EthioScholarLogo inverted className="h-9" />
       <div className="mt-16">
         <h2 className="text-2xl font-bold leading-tight">{title}</h2>
         <p className="mt-4 max-w-xs text-white/90">{text}</p>
@@ -482,7 +489,7 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
   )
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 pb-0 dark:bg-background transition-colors duration-200">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 dark:bg-background transition-colors duration-200">
       <Card className="w-full max-w-3xl overflow-hidden border-0 bg-white shadow-2xl dark:bg-card dark:text-card-foreground dark:border-border transition-colors duration-200">
         <div
           className={`hidden w-[200%] transition-transform duration-700 ease-in-out md:flex ${
@@ -541,108 +548,6 @@ export default function AuthPage({ initialMode }: AuthPageProps) {
           )}
         </div>
       </Card>
-
-      <footer className="mt-10 w-full border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-14">
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/ethioscholar-logo.svg"
-                  alt="EthioScholar"
-                  className="h-10 w-auto"
-                />
-              </div>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600">
-                A modern platform to discover scholarships and track applications with confidence.
-              </p>
-            </div>
-
-            <div className="grid gap-10 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-2 lg:justify-self-center lg:-translate-x-6">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Quick links</p>
-                <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                  <li>
-                    <Link className="hover:text-slate-900" href="/#top">
-                      Home
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="hover:text-slate-900" href="/#about">
-                      About
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="hover:text-slate-900" href="/signin">
-                      Login
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="hover:text-slate-900" href="/signup">
-                      Sign up
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="hover:text-slate-900" href="/community">
-                      Community
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-slate-600">
-                  <a
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
-                    href="#"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="X (Twitter)"
-                  >
-                    <Twitter className="h-5 w-5" />
-                  </a>
-                  <a
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
-                    href="#"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin className="h-5 w-5" />
-                  </a>
-                  <a
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
-                    href="#"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Facebook"
-                  >
-                    <Facebook className="h-5 w-5" />
-                  </a>
-                  <a
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
-                    href="#"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Instagram"
-                  >
-                    <Instagram className="h-5 w-5" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 md:flex-row">
-            <p>© 2026 EthioScholar. All rights reserved.</p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
-                Built for global opportunities
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }

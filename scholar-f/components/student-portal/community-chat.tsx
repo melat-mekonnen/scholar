@@ -270,11 +270,11 @@ export function CommunityChat({
   const SelectedIcon = selectedMeta?.icon ?? MessageCircle
 
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden">
+    <div className="flex h-full min-h-0 w-full flex-1 overflow-hidden">
       {/* Channel sidebar */}
       <aside
         className={cn(
-          "flex w-full shrink-0 flex-col border-r border-emerald-100/80 bg-slate-50/80 transition-colors duration-200 dark:border-border dark:bg-card md:w-[min(100%,360px)]",
+          "flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-r border-emerald-100/80 bg-slate-50/80 transition-colors duration-200 dark:border-border dark:bg-card md:w-[min(100%,360px)]",
           mobileShowChat && channelId ? "hidden md:flex" : "flex",
         )}
       >
@@ -301,7 +301,7 @@ export function CommunityChat({
           </div>
         </div>
 
-        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-y-contain p-2 [-webkit-overflow-scrolling:touch]">
           {loadingChannels &&
             Array.from({ length: 4 }).map((_, i) => (
               <li key={i} className="px-1 py-1">
@@ -386,7 +386,7 @@ export function CommunityChat({
       {/* Conversation */}
       <section
         className={cn(
-          "flex min-w-0 flex-1 flex-col bg-gradient-to-b from-slate-50 via-white to-emerald-50/20 dark:from-background dark:via-background dark:to-emerald-950/15",
+          "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-slate-50 via-white to-emerald-50/20 dark:from-background dark:via-background dark:to-emerald-950/15",
           !mobileShowChat && !channelId ? "hidden md:flex" : "flex",
           !channelId && "md:flex",
         )}
@@ -419,7 +419,7 @@ export function CommunityChat({
             </div>
           </div>
         ) : (
-          <>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <header className="flex shrink-0 items-center gap-3 border-b border-emerald-100/80 bg-white/95 px-3 py-3 backdrop-blur-sm dark:border-border dark:bg-card/95 md:px-5">
               <Button
                 type="button"
@@ -545,7 +545,7 @@ export function CommunityChat({
               </div>
             ) : null}
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-4 md:px-6 [-webkit-overflow-scrolling:touch]">
               {pinnedMessage ? (
                 <button
                   type="button"
@@ -885,7 +885,7 @@ export function CommunityChat({
                 {COMMUNITY_MAX_FILE_MB} MB each
               </p>
             </div>
-          </>
+          </div>
         )}
       </section>
     </div>

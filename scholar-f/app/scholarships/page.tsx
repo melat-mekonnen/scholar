@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -29,7 +29,7 @@ import { ScholarshipDetailDialog } from "@/components/scholarship-detail-dialog"
 import { useStudentI18n } from "@/lib/student-i18n"
 import {
   accentEmerald,
-  elevatedCard,
+  scholarshipListCard,
   emeraldCard,
   emeraldFilterBadge,
   filterSectionLabel,
@@ -174,8 +174,6 @@ export default function ScholarshipsPage() {
   const [total, setTotal] = useState(0)
   const [viewScholarship, setViewScholarship] = useState<ScholarshipPublic | null>(null)
   const [appliedScholarshipIds, setAppliedScholarshipIds] = useState<Set<string>>(new Set())
-  const contentScrollRef = useRef<HTMLDivElement>(null)
-  const resultsScrollRef = useRef<HTMLElement>(null)
   const [applicationFilter, setApplicationFilter] = useState<ApplicationFilter>("all")
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
@@ -221,9 +219,9 @@ export default function ScholarshipsPage() {
         setFilters(data)
       } else {
         setFilters({
-          countries: [],
+          regions: [],
+          fieldCategories: [],
           degreeLevels: ["high_school", "bachelor", "master", "phd"],
-          fieldsOfStudy: [],
           fundingTypes: [],
         })
       }
@@ -289,9 +287,7 @@ export default function ScholarshipsPage() {
   }, [params, urlSynced])
 
   useEffect(() => {
-    const useSplitLayout = window.matchMedia("(min-width: 1024px)").matches
-    const scrollEl = useSplitLayout ? resultsScrollRef.current : contentScrollRef.current
-    scrollEl?.scrollTo({ top: 0, behavior: "smooth" })
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }, [page, sort])
 
   useEffect(() => {
@@ -449,10 +445,10 @@ export default function ScholarshipsPage() {
   }
 
   return (
-    <div className={cn("flex h-dvh max-h-dvh overflow-hidden", pageShell)}>
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
         <header className={cn("flex shrink-0 items-center justify-between gap-3 sm:px-6", inlineHeaderRow)}>
           <h1 className="min-w-0 truncate text-base font-semibold text-emerald-950 dark:text-foreground sm:text-lg">
             Browse Scholarships
@@ -464,12 +460,12 @@ export default function ScholarshipsPage() {
           </div>
         </header>
 
-        <main className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden p-4 sm:p-6", mainScroll)}>
+        <main className={cn("relative w-full min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6", mainScroll)}>
           <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
 
-          <div className="relative shrink-0 space-y-4 sm:space-y-5">
-          <div className={cn("relative overflow-hidden px-4 py-5 sm:px-6 sm:py-7", heroBanner)}>
+          <div className="relative space-y-4 sm:space-y-5">
+          <div className={cn("relative px-4 py-5 sm:px-6 sm:py-7", heroBanner)}>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
             <div className="border-l-4 border-emerald-500 pl-3 dark:border-emerald-400 sm:pl-4">
               <h2 className={cn("text-xl font-semibold tracking-tight sm:text-2xl", textPrimary)}>
@@ -482,87 +478,93 @@ export default function ScholarshipsPage() {
           </div>
 
         <div className={cn("p-3 sm:p-4", summaryBar)}>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative w-full min-w-0 lg:max-w-xl">
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
-            <Input
-              value={qInput}
-              onChange={(e) => {
-                setPage(1)
-                setQInput(e.target.value)
-              }}
-              placeholder="Search scholarships…"
-              className={cn("h-11 rounded-xl pl-9 text-base shadow-sm focus-visible:ring-emerald-500 sm:text-sm", inputSurface)}
-            />
+          <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-5">
+            <div className="relative min-w-0 w-full flex-1 lg:max-w-xl">
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
+              <Input
+                value={qInput}
+                onChange={(e) => {
+                  setPage(1)
+                  setQInput(e.target.value)
+                }}
+                placeholder="Search scholarships…"
+                className={cn(
+                  "h-11 rounded-xl pl-9 text-base shadow-sm focus-visible:ring-emerald-500 sm:text-sm",
+                  inputSurface,
+                )}
+              />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="hidden lg:block">
-                <Select
-                  value={sort}
-                  onValueChange={(v) => {
-                    setPage(1)
-                    setSort(v as SortOption)
-                  }}
-                >
-                  <SelectTrigger className={cn("h-11 w-56 rounded-xl focus:ring-emerald-500 shadow-sm", inputSurface)}>
-                    <SelectValue placeholder="Sort" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="deadline_asc">Deadline (soonest)</SelectItem>
-                    <SelectItem value="deadline_desc">Deadline (latest)</SelectItem>
-                    <SelectItem value="funding_amount">Funding amount</SelectItem>
-                    <SelectItem value="recent">Recently added</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("h-11 flex-1 rounded-xl shadow-sm sm:flex-none lg:hidden", outlineControl)}
-                  >
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="flex w-full max-w-sm flex-col gap-0 border-l border-emerald-100 bg-background p-0 dark:border-border sm:max-w-md"
-                >
-                  <SheetHeader className="shrink-0 border-b border-emerald-100 bg-emerald-50/50 px-4 py-4 text-left dark:border-border dark:bg-card">
-                    <SheetTitle className="text-emerald-950 dark:text-foreground">Filters</SheetTitle>
-                  </SheetHeader>
-                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-8">
-                    <FilterPanel compact />
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Button
-                variant="outline"
-                onClick={clearAll}
-                className={cn("hidden h-11 rounded-xl shadow-sm lg:inline-flex", outlineEmeraldButton)}
+            <div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:ml-auto lg:w-auto lg:justify-end lg:gap-2">
+              <Select
+                value={sort}
+                onValueChange={(v) => {
+                  setPage(1)
+                  setSort(v as SortOption)
+                }}
               >
-                <X className="h-4 w-4 mr-2" />
-                Reset
-              </Button>
+                <SelectTrigger
+                  className={cn(
+                    "h-11 w-full rounded-xl shadow-sm focus:ring-emerald-500 sm:w-52 lg:w-56",
+                    inputSurface,
+                  )}
+                >
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Relevance</SelectItem>
+                  <SelectItem value="deadline_asc">Deadline (soonest)</SelectItem>
+                  <SelectItem value="deadline_desc">Deadline (latest)</SelectItem>
+                  <SelectItem value="funding_amount">Funding amount</SelectItem>
+                  <SelectItem value="recent">Recently added</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="flex gap-2 sm:shrink-0">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn("h-11 flex-1 rounded-xl shadow-sm sm:flex-none lg:hidden", outlineControl)}
+                    >
+                      <Filter className="mr-2 h-4 w-4" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="flex w-full max-w-sm flex-col gap-0 border-l border-emerald-100 bg-background p-0 dark:border-border sm:max-w-md"
+                  >
+                    <SheetHeader className="shrink-0 border-b border-emerald-100 bg-emerald-50/50 px-4 py-4 text-left dark:border-border dark:bg-card">
+                      <SheetTitle className="text-emerald-950 dark:text-foreground">Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-8">
+                      <FilterPanel compact />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={clearAll}
+                  className="h-11 min-w-[5.75rem] shrink-0 rounded-xl border-emerald-300 bg-white px-4 font-medium text-emerald-900 shadow-sm hover:bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-100 dark:hover:bg-emerald-950/60"
+                >
+                  <X className="mr-2 h-4 w-4 shrink-0" />
+                  Reset
+                </Button>
+              </div>
             </div>
           </div>
         </div>
           </div>
 
-        <div
-          ref={contentScrollRef}
-          className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden overscroll-y-contain pb-6 lg:mt-5 lg:grid lg:grid-cols-[minmax(0,272px)_minmax(0,1fr)] lg:gap-6 lg:overflow-hidden"
-        >
-          {/* Desktop filters — independent scroll */}
-          <aside className="hidden min-h-0 min-w-0 lg:flex lg:flex-col">
-            <Card className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden shadow-emerald-900/5 dark:shadow-none", emeraldCard)}>
-              <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-              <CardHeader className="shrink-0 pb-3">
+        <div className="mt-4 grid w-full min-w-0 grid-cols-1 gap-4 pb-8 lg:mt-5 lg:grid-cols-[minmax(0,272px)_minmax(0,1fr)] lg:items-start lg:gap-6">
+          {/* Desktop filters — sticky; scrolls with page (no nested scroll on cards) */}
+          <aside className="hidden min-w-0 lg:sticky lg:top-4 lg:block lg:self-start">
+            <Card className={cn("gap-0 py-0 shadow-emerald-900/5 dark:shadow-none", emeraldCard)}>
+              <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500" />
+              <CardHeader className="px-4 pb-2 pt-4">
                 <CardTitle className={cn("flex items-center gap-2 text-base", textPrimary)}>
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border">
                     <Filter className="h-4 w-4" />
@@ -570,23 +572,19 @@ export default function ScholarshipsPage() {
                   Filters
                 </CardTitle>
               </CardHeader>
-              <CardContent className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]">
+              <CardContent className="px-4 pb-4 pt-0">
                 <FilterPanel />
               </CardContent>
             </Card>
           </aside>
 
-          {/* Results — independent scroll on desktop */}
-          <section
-            ref={resultsScrollRef}
-            className="min-h-0 min-w-0 space-y-4 overflow-y-auto overscroll-y-contain lg:pr-1 [-webkit-overflow-scrolling:touch]"
-          >
+          <section className="min-w-0 w-full space-y-4">
             {error && (
               <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900 dark:bg-red-950/40">
                 {error}
               </p>
             )}
-            <div className={cn("flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4", summaryBar)}>
+            <div className={cn("px-3 py-3 sm:px-4", summaryBar)}>
               <p className={cn("text-sm", textMuted)}>
                 {loading ? (
                   "Loading..."
@@ -601,26 +599,6 @@ export default function ScholarshipsPage() {
                   </>
                 )}
               </p>
-              <div className="w-full lg:hidden">
-                <Select
-                  value={sort}
-                  onValueChange={(v) => {
-                    setPage(1)
-                    setSort(v as SortOption)
-                  }}
-                >
-                  <SelectTrigger className={cn("h-10 w-full rounded-xl shadow-sm focus:ring-emerald-500 sm:w-48", inputSurface)}>
-                    <SelectValue placeholder="Sort" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="deadline_asc">Deadline (soonest)</SelectItem>
-                    <SelectItem value="deadline_desc">Deadline (latest)</SelectItem>
-                    <SelectItem value="funding_amount">Funding amount</SelectItem>
-                    <SelectItem value="recent">Recently added</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             {(region || fieldCategory || degreeLevel || fundingType) && (
               <div className="flex flex-wrap gap-2">
@@ -703,7 +681,7 @@ export default function ScholarshipsPage() {
               </div>
             )}
 
-            <div className="-mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 sm:flex-wrap sm:overflow-visible">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={applicationFilter === "all" ? "default" : "outline"}
                 size="sm"
@@ -731,10 +709,10 @@ export default function ScholarshipsPage() {
             </div>
 
             {loading ? (
-              <div className="grid gap-4">
+              <div className="grid w-full gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className={emeraldCard}>
-                    <CardContent className="p-6 space-y-3">
+                  <Card key={i} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                    <CardContent className="space-y-3 px-4 py-4 sm:px-5 sm:py-5">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
                       <div className="flex gap-2">
@@ -763,12 +741,11 @@ export default function ScholarshipsPage() {
                 </EmptyContent>
               </Empty>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid w-full gap-4">
                 {visibleResults.map((s) => (
-                  <Card key={s.id} className={elevatedCard}>
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
-                    <div className="pointer-events-none absolute -right-14 -top-14 h-28 w-28 rounded-full bg-emerald-100/40 blur-2xl" />
-                    <CardContent className="space-y-3 p-4 sm:p-6">
+                  <Card key={s.id} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                    <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+                    <CardContent className="space-y-3 px-4 py-4 sm:px-5 sm:py-5">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0 flex-1">
                           <p className={cn("text-base font-semibold leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300", textPrimary)}>
@@ -849,8 +826,8 @@ export default function ScholarshipsPage() {
 
             {!loading && totalPages > 1 && (
               <div className={cn("rounded-xl px-2 py-3 sm:px-3", summaryBar)}>
-                <Pagination className="mx-0 w-full justify-start overflow-x-auto overscroll-x-contain">
-                  <PaginationContent className="flex-nowrap gap-0.5 sm:flex-wrap">
+                <Pagination className="mx-0 w-full max-w-full justify-start">
+                  <PaginationContent className="flex-wrap gap-0.5">
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"

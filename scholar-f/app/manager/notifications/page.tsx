@@ -6,7 +6,7 @@ export default function ManagerNotificationsPage() {
     <ScholarshipWorkspaceShell workspace="manager">
       <NotificationsPage
         expectedRole="manager"
-        title="Manager notifications"
+        title="Notifications"
         backHref="/manager"
         showBackLink={false}
         embeddedInWorkspaceShell

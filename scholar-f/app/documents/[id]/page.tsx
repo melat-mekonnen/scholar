@@ -98,6 +98,7 @@ export default function DocumentDetailPage() {
     <StudentPortalFrame
       header={<StudentPortalTopHeader title="Document Resources" />}
       mainClassName="min-h-0 flex-1 space-y-8 p-4 md:p-8"
+      showFooter={false}
     >
       <nav className="text-sm text-slate-500">
         <Link href="/documents" className="hover:text-blue-700">

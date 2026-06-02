@@ -21,7 +21,7 @@ Public listings emphasize **verified** records with transparent application URLs
 | [`scholar-ai/`](scholar-ai/) | Optional Python service for TF‑IDF scholarship recommendations |
 | [`scholar-ml/`](scholar-ml/) | Optional RAG chatbot service (local LLM + FAISS; not required for core app) |
 
-Supporting files at the repo root include Docker Compose definitions (`.env.docker.example`, `docker-compose.yml`, `docker-up.sh`) and planning docs such as `SUBSCRIPTION_PLAN.md`.
+Supporting files at the repo root include Docker Compose definitions (`.env.docker.example`, `docker-compose.yml`, `docker-up.sh`).
 
 ## Quick start (Docker)
 
@@ -72,6 +72,8 @@ pnpm dev
 App default: **http://localhost:3000**
 
 If the API is not on the same origin, set `NEXT_PUBLIC_API_BASE_URL` (e.g. `http://localhost:4000`).
+
+Pre-launch: run `npm run verify:launch` from `scholar-backend`.
 
 ### 3. AI recommendations (optional)
 

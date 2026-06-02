@@ -190,7 +190,7 @@ export default function AdminDashboardPage() {
             </Card>
 
             <Card className="group relative overflow-hidden rounded-2xl border-emerald-100/80 bg-white shadow-sm dark:border-border dark:bg-card dark:text-foreground transition-colors duration-200 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 opacity-90" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
               <CardContent className="pt-6">
                 <p className="text-sm font-medium text-slate-500">Pending Approvals</p>
                 <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{totals?.scholarships.pending ?? 0}</p>

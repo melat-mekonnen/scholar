@@ -1,24 +1,13 @@
 "use client"
 
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Users,
-  Bookmark,
-  Sparkles,
-  MessageSquare,
-  UserCircle2,
-  Settings,
-  FolderOpen,
-} from "lucide-react"
-
-import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
-import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
-
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Sparkles } from "lucide-react"
+
+import { ProfileAvatarLink } from "@/components/student-portal/profile-avatar-link"
+import { StudentPortalInlineAside } from "@/components/student-portal/student-portal-inline-aside"
+import { studentPortalHeroCardClass } from "@/components/student-portal/student-portal-ui"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,14 +18,13 @@ import { apiFetchJson } from "@/lib/api"
 import { useStudentI18n } from "@/lib/student-i18n"
 import {
   accentEmerald,
-  elevatedCard,
   emeraldCard,
   emeraldFilterBadge,
-  headerShell,
-  heroBanner,
-  mainScroll,
+  inlineHeaderRow,
+  outlineControl,
   outlineEmeraldButton,
   pageShell,
+  scholarshipListCard,
   summaryBar,
   textMuted,
   textPrimary,
@@ -46,7 +34,7 @@ import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { StudentLanguageToggle } from "@/components/student-language-toggle"
 import { applyWithReturnConfirmation, unauthorizedHandler } from "@/lib/track-and-apply"
-import { getApplicationUrl, openScholarshipApplication, type ScholarshipPublic } from "@/lib/scholarship"
+import { getApplicationUrl, type ScholarshipPublic } from "@/lib/scholarship"
 
 type RecommendationItem = {
   scholarship: ScholarshipPublic
@@ -123,34 +111,32 @@ export default function AiMatchesPage() {
   }, [router])
 
   return (
-    <div className={cn("flex min-h-screen", pageShell)}>
+    <div className={cn("flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden", pageShell)}>
       <StudentPortalInlineAside />
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className={cn("flex items-center justify-between px-4 py-3 md:px-6", headerShell)}>
-          <div>
-            <h1 className="text-lg font-semibold text-emerald-950 dark:text-foreground">{t("AI Matches")}</h1>
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
+        <header className={cn(inlineHeaderRow)}>
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-emerald-950 dark:text-emerald-200">{t("AI Matches")}</h1>
             <p className={cn("text-xs", textMuted)}>
-              Ranked from whatever is in your profile now — add more details anytime for stronger matches.
+              Ranked from your profile — add more details anytime for stronger matches.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <ThemeToggle />
             <StudentLanguageToggle />
             <ProfileAvatarLink />
           </div>
         </header>
 
-        <main className={cn("relative flex-1 space-y-6 p-6", mainScroll)}>
-          <div className="pointer-events-none absolute -left-20 top-20 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-56 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
-
-          <div className={cn("px-6 py-7", heroBanner)}>
+        <main className="w-full min-w-0 flex-1 space-y-6 overflow-x-hidden p-4 sm:space-y-8 sm:p-6">
+          <div className={cn("w-full", studentPortalHeroCardClass)}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
+              <div className="min-w-0 border-l-4 border-emerald-500 pl-4 dark:border-emerald-400">
                 <h2 className={cn("text-2xl font-semibold tracking-tight", textPrimary)}>Personalized matches</h2>
                 <p className={cn("mt-2 text-sm leading-relaxed", textMuted)}>
-                  
+                  Scholarships scored against your field, degree, country, GPA, and interests using our recommendation
+                  engine.
                 </p>
               </div>
               <Button asChild variant="outline" className={cn("shrink-0", outlineEmeraldButton)}>
@@ -160,26 +146,28 @@ export default function AiMatchesPage() {
           </div>
 
           {!loading && items.length > 0 ? (
-            <div className={summaryBar}>
+            <div className={cn("flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4", summaryBar)}>
               <p className={cn("text-sm", textMuted)}>
                 <span className={accentEmerald}>{items.length}</span> recommendation
                 {items.length === 1 ? "" : "s"}
               </p>
-              <Button asChild variant="outline" size="sm" className={outlineEmeraldButton}>
+              <Button asChild variant="outline" size="sm" className={cn("shrink-0", outlineEmeraldButton)}>
                 <Link href="/scholarships">{t("Browse Scholarships")}</Link>
               </Button>
             </div>
           ) : null}
 
           {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900 dark:bg-red-950/40">{error}</p>
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-destructive dark:border-red-900 dark:bg-red-950/40">
+              {error}
+            </p>
           ) : null}
 
           {loading ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))]">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className={emeraldCard}>
-                  <CardContent className="space-y-3 p-6">
+                <Card key={i} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                  <CardContent className="space-y-3 px-4 py-4 sm:px-5 sm:py-5">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                     <Skeleton className="h-9 w-24" />
@@ -188,7 +176,8 @@ export default function AiMatchesPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <Card className={emeraldCard}>
+            <Card className={cn(emeraldCard, "gap-0 py-0")}>
+              <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
               <CardContent className="space-y-4 p-6 text-center sm:text-left">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-teal-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-border sm:mx-0">
                   <Sparkles className="h-6 w-6" />
@@ -207,13 +196,18 @@ export default function AiMatchesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))]">
               {items.map((item, index) => (
-                <Card key={`${item.scholarship.id}-${index}`} className={elevatedCard}>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
-                  <CardHeader className="pb-2">
+                <Card key={`${item.scholarship.id}-${index}`} className={cn(scholarshipListCard, "gap-0 py-0")}>
+                  <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500 opacity-90" />
+                  <CardHeader className="px-4 pb-2 pt-4 sm:px-5">
                     <div className="flex items-start justify-between gap-3">
-                      <CardTitle className={cn("line-clamp-2 text-base leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300", textPrimary)}>
+                      <CardTitle
+                        className={cn(
+                          "line-clamp-2 text-base leading-snug transition-colors group-hover:text-emerald-800 dark:group-hover:text-emerald-300",
+                          textPrimary,
+                        )}
+                      >
                         {item.scholarship.title}
                       </CardTitle>
                       <Badge className="shrink-0 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-200 dark:ring-emerald-800/50 dark:hover:bg-emerald-950/70">
@@ -221,7 +215,7 @@ export default function AiMatchesPage() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3 pt-0">
+                  <CardContent className="space-y-3 px-4 pb-5 pt-0 sm:px-5">
                     <p className={cn("text-sm", textSubtle)}>
                       {item.scholarship.country || "N/A"}
                       {item.scholarship.deadline ? ` · ${formatDate(item.scholarship.deadline)}` : ""}
@@ -239,18 +233,13 @@ export default function AiMatchesPage() {
                         ))}
                       </div>
                     ) : null}
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className={outlineEmeraldButton}
-                        asChild
-                      >
+                    <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
+                      <Button size="sm" variant="outline" className={cn("h-10 w-full rounded-md sm:w-auto", outlineControl)} asChild>
                         <Link href={`/scholarships?q=${encodeURIComponent(item.scholarship.title)}`}>{t("View")}</Link>
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-emerald-600 text-white hover:bg-emerald-700"
+                        className="h-10 w-full rounded-md bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
                         disabled={!getApplicationUrl(item.scholarship)}
                         onClick={() =>
                           void applyWithReturnConfirmation({
