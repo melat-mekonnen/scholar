@@ -1,5 +1,5 @@
 const { getAdminDashboard, getAdminStatistics } = require("../usecases/admin/getAdminDashboard");
-const { listUsers } = require("../usecases/users/userUsecases");
+const { listUsers, createUserByAdmin } = require("../usecases/users/userUsecases");
 const { AdminAuditLogRepository } = require("../repositories/AdminAuditLogRepository");
 const { logAdminAction } = require("../services/adminAudit");
 const {
@@ -44,6 +44,19 @@ async function listUsersForAdmin(req, res, next) {
     const { page, pageSize, search, role } = req.query;
     const result = await listUsers(req.user, { page, pageSize, search, role });
     return res.json(result);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function createUser(req, res, next) {
+  try {
+    const user = await createUserByAdmin(req.user, req.body || {});
+    await logAdminAction(req.user, "user.create", "user", user.id, {
+      role: user.role,
+      email: user.email,
+    });
+    return res.status(201).json(user);
   } catch (err) {
     return next(err);
   }
@@ -208,6 +221,7 @@ module.exports = {
   getDashboard,
   getStatistics,
   listUsersForAdmin,
+  createUser,
   getAuditLogs,
   listScholarships,
   getPendingScholarships,

@@ -27,11 +27,21 @@ class UserRepository {
   }
 
   async createLocalUser({ fullName, email, passwordHash }) {
+    return this.createLocalUserWithRole({
+      fullName,
+      email,
+      passwordHash,
+      role: "student",
+      isActive: true,
+    });
+  }
+
+  async createLocalUserWithRole({ fullName, email, passwordHash, role, isActive = true }) {
     const result = await query(
       `INSERT INTO users (full_name, email, password_hash, auth_provider, role, is_active)
-       VALUES ($1, $2, $3, 'local', 'student', TRUE)
-       RETURNING id, full_name, email, google_id, auth_provider, role, is_active`,
-      [fullName, email.toLowerCase(), passwordHash]
+       VALUES ($1, $2, $3, 'local', $4, $5)
+       RETURNING id, full_name, email, google_id, auth_provider, role, is_active, created_at`,
+      [fullName, email.toLowerCase(), passwordHash, role, Boolean(isActive)]
     );
     return result.rows[0];
   }

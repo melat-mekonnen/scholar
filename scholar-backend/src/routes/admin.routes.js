@@ -11,6 +11,7 @@ router.use(authMiddleware);
 router.get("/dashboard", requireAdmin, adminController.getDashboard);
 router.get("/statistics", requireAdmin, adminController.getStatistics);
 router.get("/users", requireAdmin, adminController.listUsersForAdmin);
+router.post("/users", requireAdmin, adminController.createUser);
 router.get("/audit-logs", requireAdmin, adminController.getAuditLogs);
 router.get("/scholarships", requireAdminOrOwner, adminController.listScholarships);
 router.get("/scholarships/pending", requireAdminOrOwner, adminController.getPendingScholarships);

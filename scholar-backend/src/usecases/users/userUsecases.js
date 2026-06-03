@@ -1,4 +1,6 @@
+const bcrypt = require("bcryptjs");
 const { UserRepository } = require("../../repositories/UserRepository");
+const { validatePassword } = require("../../utils/passwordPolicy");
 
 const userRepo = new UserRepository();
 
@@ -230,6 +232,48 @@ async function updateUserRole(currentUser, targetId, role) {
   throw err;
 }
 
+async function createUserByAdmin(currentUser, payload) {
+  ensureAdminUser(currentUser);
+
+  const fullName = String(payload?.fullName ?? payload?.full_name ?? "").trim();
+  const email = String(payload?.email ?? "").trim().toLowerCase();
+  const password = String(payload?.password ?? "");
+  const role = String(payload?.role ?? "student").trim();
+  const isActive =
+    payload?.isActive !== undefined
+      ? Boolean(payload.isActive)
+      : payload?.is_active !== undefined
+        ? Boolean(payload.is_active)
+        : true;
+
+  if (!fullName || fullName.length < 2) {
+    const err = new Error("Full name is required");
+    err.statusCode = 400;
+    throw err;
+  }
+  assertValidEmail(email);
+  validatePassword(password);
+  validateRole(role);
+
+  const existing = await userRepo.findByEmail(email);
+  if (existing) {
+    const err = new Error("Email is already registered");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const created = await userRepo.createLocalUserWithRole({
+    fullName,
+    email,
+    passwordHash,
+    role,
+    isActive,
+  });
+
+  return formatUserRow(created);
+}
+
 module.exports = {
   listUsers,
   getUserById,
@@ -237,4 +281,5 @@ module.exports = {
   deleteUserById,
   setUserActivation,
   updateUserRole,
+  createUserByAdmin,
 };
