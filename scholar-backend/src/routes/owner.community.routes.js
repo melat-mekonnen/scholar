@@ -1,11 +1,11 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/authMiddleware");
-const { requireOwner } = require("../middleware/requireOwner");
+const { requireAdminOrOwner } = require("../middleware/requireAdminOrOwner");
 const ownerCommunityController = require("../controllers/ownerCommunityController");
 
 const router = express.Router();
 
-router.use(authMiddleware, requireOwner);
+router.use(authMiddleware, requireAdminOrOwner);
 router.get("/channels", ownerCommunityController.listChannels);
 router.post("/channels", ownerCommunityController.createChannel);
 router.put("/channels/:id", ownerCommunityController.updateChannel);

@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Menu,
+  MessageSquareWarning,
   PlusCircle,
   ShieldCheck,
   Users,
@@ -35,6 +36,7 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/admin/audit-logs", label: "Audit logs", icon: ListChecks },
   { href: "/admin/documents", label: "Documents", icon: FileText },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
+  { href: "/admin/community", label: "Community", icon: MessageSquareWarning },
 ]
 
 type NotificationsResponse = { notifications: Array<{ isRead: boolean }> }

@@ -61,7 +61,7 @@ const env = {
   ingestDedupMode: optional("INGEST_DEDUP_MODE", "merge").toLowerCase(),
   chatFreeDailyLimit: Math.max(
     1,
-    parseInt(optional("CHAT_FREE_DAILY_LIMIT", "3"), 10) || 3
+    parseInt(optional("CHAT_FREE_DAILY_LIMIT", "10"), 10) || 10
   ),
   chatQuotaBypassRoles: optional("CHAT_QUOTA_BYPASS_ROLES", "admin,owner")
     .split(",")
